@@ -1,0 +1,56 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Project.json",
+  "steps": [
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Content\\UI\\CityHudAlt.ui",
+      "action": "ui-open"
+    },
+    {
+      "target": "cityPanel",
+      "action": "ui-select"
+    },
+    {
+      "value": 16,
+      "action": "ui-field",
+      "name": "UIRect0"
+    },
+    {
+      "target": "buildHouse",
+      "action": "ui-select"
+    },
+    {
+      "value": 130,
+      "action": "ui-field",
+      "name": "UIRect2"
+    },
+    {
+      "target": "HarborLabel",
+      "action": "ui-select"
+    },
+    {
+      "value": 16,
+      "action": "ui-field",
+      "name": "UIRect0"
+    },
+    {
+      "scope": "ui",
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\hud-layout-corrected\\preview-1280x720.png",
+      "action": "ui-action",
+      "name": "UISave"
+    },
+    {
+      "index": 2,
+      "action": "ui-field",
+      "name": "UIPreviewSize"
+    },
+    {
+      "scope": "ui",
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\hud-layout-corrected\\preview-800x600.png",
+      "action": "ui-action",
+      "name": "UISave"
+    },
+    {
+      "action": "ui-close"
+    }
+  ]
+}

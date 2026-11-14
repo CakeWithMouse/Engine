@@ -1,0 +1,38 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[VfsRead] Dynamic mount '/_ext_15786374065427283418' -> 'E:/Engine/Engine/build/playtests/20261114-r7/calm-city/CalmCityUpgraded/Content/Materials/TransparencyProbe' (path 'E:/Engine/Engine/build/playtests/20261114-r7/calm-city/CalmCityUpgraded/Content/Materials/TransparencyProbe/RedGlass.hlsl' outside registered mounts)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 320x240
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 320x240
+frame-dump E:\Engine\Engine\build\playtests\20261114-r7\calm-city\results\transparency-sort-deferred-front.bmp written=1 size=320x240
+frame-dump E:\Engine\Engine\build\playtests\20261114-r7\calm-city\results\transparency-sort-deferred-back.bmp written=1 size=320x240
+frame-dump E:\Engine\Engine\build\playtests\20261114-r7\calm-city\results\transparency-sort-deferred-orbit-resize.bmp written=1 size=480x320
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "drawCalls": 84,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\results\\transparency-sort-deferred-front.bmp",
+            "lod": [
+            ]
+        },
+        {
+            "drawCalls": 84,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\results\\transparency-sort-deferred-back.bmp",
+            "lod": [
+            ]
+        },
+        {
+            "drawCalls": 84,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\results\\transparency-sort-deferred-orbit-resize.bmp",
+            "lod": [
+            ]
+        }
+    ],
+    "ok": true
+}

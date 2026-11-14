@@ -1,0 +1,74 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/EngineStore/2026.11.07.6/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/EngineStore/2026.11.07.6/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 320x256
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 320x256
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\gpu\transparency\frame-00.bmp written=1 size=320x256
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\gpu\transparency\frame-01.bmp written=1 size=640x360
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\gpu\transparency\frame-02.bmp written=1 size=320x256
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\gpu\transparency\frame-03.bmp written=1 size=320x256
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "drawCalls": 183,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\gpu\\transparency\\frame-00.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        2,
+                        2,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 133,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\gpu\\transparency\\frame-01.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        2,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 133,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\gpu\\transparency\\frame-02.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        2,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 183,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\gpu\\transparency\\frame-03.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        2,
+                        2,
+                        0
+                    ]
+                }
+            ]
+        }
+    ],
+    "ok": true
+}

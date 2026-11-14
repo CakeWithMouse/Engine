@@ -1,0 +1,9 @@
+{
+  "tag": "play3d-near-postfix-2",
+  "baseline_max_corr": 0.0,
+  "active_windows": 15,
+  "active_mean_corr": 0.02207301786145725,
+  "active_mean_rms": 0.017923044825824925,
+  "active_peak_corr": 0.026033156693258244,
+  "tail_max_rms": 0.0
+}

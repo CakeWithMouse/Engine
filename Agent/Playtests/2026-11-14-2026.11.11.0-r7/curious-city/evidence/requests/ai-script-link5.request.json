@@ -1,0 +1,96 @@
+{
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Project.json",
+  "machine": "/Game/AI/CityGate2.fsm",
+  "steps": [
+    {
+      "action": "select",
+      "target": "CityGuard"
+    },
+    {
+      "action": "play"
+    },
+    {
+      "dt": 0.05,
+      "action": "frames",
+      "count": 20
+    },
+    {
+      "down": true,
+      "action": "key",
+      "key": 69
+    },
+    {
+      "dt": 0.05,
+      "action": "frames",
+      "count": 2
+    },
+    {
+      "down": false,
+      "action": "key",
+      "key": 69
+    },
+    {
+      "dt": 0.05,
+      "action": "frames",
+      "count": 20
+    },
+    {
+      "action": "select",
+      "target": "CityGuard"
+    },
+    {
+      "action": "scroll",
+      "name": "AiMachineLive",
+      "scope": "main"
+    },
+    {
+      "action": "scroll",
+      "name": "AiMachineLive",
+      "scope": "main"
+    },
+    {
+      "action": "scroll",
+      "name": "AiMachineLive",
+      "scope": "main"
+    },
+    {
+      "action": "scroll",
+      "name": "AiMachineLive",
+      "scope": "main"
+    },
+    {
+      "action": "scroll",
+      "name": "AiMachineLive",
+      "scope": "main"
+    },
+    {
+      "action": "scroll",
+      "name": "AiMachineLive",
+      "scope": "main"
+    },
+    {
+      "action": "scroll",
+      "name": "AiMachineLive",
+      "scope": "main"
+    },
+    {
+      "action": "scroll",
+      "name": "AiMachineLive",
+      "scope": "main"
+    },
+    {
+      "action": "scroll",
+      "name": "AiMachineLive",
+      "scope": "main"
+    },
+    {
+      "image": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/ai-script-live-cityguard2.png",
+      "action": "scroll",
+      "name": "AiMachineLive",
+      "scope": "main"
+    },
+    {
+      "action": "stop"
+    }
+  ]
+}

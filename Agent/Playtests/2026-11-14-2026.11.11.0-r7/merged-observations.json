@@ -1,0 +1,647 @@
+[
+  {
+    "feature_id": "model-import",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "skeletal",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "instances",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "lod",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "material-params",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "material-editor",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "material-blends",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "light-point",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "shadows",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "material-graph",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "material-slots",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "material-slot-edit",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "material-slot-persist",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "imported-shadows",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "imported-uv",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "material-graph-current",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "render-modes",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "render-resize",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "diagnostics",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "savegame-scene",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "savegame-derived",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "completed-frame",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "lod-panel",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "point-shadow-cubes",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "shadow-cascade-fit",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "audio-play2d",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "audio-play3d",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "audio-stream",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "point-shadow-lod-transition",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "transparency-camera-sorting",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "transparency-intersections",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "transparency-animated-lod-resize",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "ai-card-memory",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "ai-graph-edit",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "ai-runtime-debug",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "ai-file-reload",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "create-nocode",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "enable-cpp",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "build-activate",
+    "role": "calm-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "ai-card-memory",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "ai-graph-edit",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "ai-validation",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "ai-script-link",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "model-import",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "import-scale-dialog-presets",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "import-scale-sidecar",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "import-scale-reimport-move",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "scene-create-delete",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "scene-transform",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "scene-select",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "scene-hierarchy",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "scene-codec",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "scene-clone",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "input",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "compatibility",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "skeletal",
+    "role": "curious-city",
+    "status": "partial"
+  },
+  {
+    "feature_id": "lod",
+    "role": "curious-city",
+    "status": "partial"
+  },
+  {
+    "feature_id": "material-blends",
+    "role": "curious-city",
+    "status": "partial"
+  },
+  {
+    "feature_id": "shadows",
+    "role": "curious-city",
+    "status": "partial"
+  },
+  {
+    "feature_id": "material-slot-persist",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "material-slots",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "material-graph-current",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "material-graph",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "material-editor",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "time",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "camera-perspective",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "trace-world",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "trace-filter",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "trace-debug",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "hud-project",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "hud-elements",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "hud-layout",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "instances",
+    "role": "curious-city",
+    "status": "partial"
+  },
+  {
+    "feature_id": "material-params",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "light-point",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "material-slot-edit",
+    "role": "curious-city",
+    "status": "passed"
+  },
+  {
+    "feature_id": "imported-shadows",
+    "role": "curious-city",
+    "status": "partial"
+  },
+  {
+    "feature_id": "imported-uv",
+    "role": "curious-city",
+    "status": "partial"
+  },
+  {
+    "feature_id": "scene-create-delete",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "scene-hierarchy",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "scene-transform",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "scene-codec",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "scene-clone",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "scene-select",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "time",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "input",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "camera-perspective",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "trace-world",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "trace-filter",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "trace-debug",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "hud-project",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "hud-elements",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "hud-layout",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "compatibility",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "render-modes",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "render-resize",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "diagnostics",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "savegame-scene",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "savegame-derived",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "completed-frame",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "lod-panel",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "point-shadow-cubes",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "shadow-cascade-fit",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "audio-play2d",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "audio-play3d",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "audio-stream",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "point-shadow-lod-transition",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "transparency-camera-sorting",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "transparency-intersections",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "transparency-animated-lod-resize",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "ai-validation",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "ai-runtime-debug",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "ai-script-link",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "ai-file-reload",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "skeletal",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "instances",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "lod",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "material-blends",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "shadows",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "imported-shadows",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "imported-uv",
+    "role": "tired-bomber",
+    "status": "passed"
+  },
+  {
+    "feature_id": "create-nocode",
+    "role": "ai-trash",
+    "status": "passed"
+  },
+  {
+    "feature_id": "enable-cpp",
+    "role": "ai-trash",
+    "status": "passed"
+  },
+  {
+    "feature_id": "compatibility",
+    "role": "ai-trash",
+    "status": "passed"
+  },
+  {
+    "feature_id": "build-activate",
+    "role": "ai-trash",
+    "status": "passed"
+  },
+  {
+    "feature_id": "input",
+    "role": "ai-trash",
+    "status": "passed"
+  },
+  {
+    "feature_id": "savegame-scene",
+    "role": "ai-trash",
+    "status": "passed"
+  },
+  {
+    "feature_id": "ai-graph-edit",
+    "role": "ai-trash",
+    "status": "passed"
+  },
+  {
+    "feature_id": "ai-runtime-debug",
+    "role": "ai-trash",
+    "status": "passed"
+  }
+]

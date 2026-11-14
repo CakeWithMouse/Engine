@@ -47,8 +47,8 @@ public:
     bool RemoveUserPreset(const QString& name);
 
     QString AiPrompt() const;
-    // Текст ответа: JSON графа, можно внутри блока ```json. false: не граф с выходом материала.
-    bool PasteFromAi(const QString& text);
+    // JSON, можно внутри блока ```json. Проверяет выход и ошибки компилятора до изменения графа/истории.
+    bool PasteFromAi(const QString& text, QString* error = nullptr);
 
     static QStringList PresetNames();
 

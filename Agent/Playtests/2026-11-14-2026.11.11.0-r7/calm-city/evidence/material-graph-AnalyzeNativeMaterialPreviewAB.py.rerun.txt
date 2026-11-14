@@ -1,0 +1,1 @@
+PASS: native preview BMP dimensions match nativePreviewSize; Teal and Amber pixels differ.

@@ -1,0 +1,7 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  ImportSettingsDialog.cpp
+  UiTestRunner.cpp
+  UiTests.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\UiTests.exe
+

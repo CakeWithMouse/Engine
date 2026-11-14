@@ -1,0 +1,196 @@
+{
+  "persona": "curious-city",
+  "runtimeVersion": "2026.11.07.6",
+  "moduleApi": 5,
+  "editApi": 6,
+  "head": "d74aebbc0f450a7cc791255423a37d5df89cfb54",
+  "source": {
+    "archive": "CuriousCity-r6-source.zip",
+    "archiveEntries": 98,
+    "containsSdkOrIntermediate": false,
+    "oldR5SourceModified": false,
+    "oldProject": "Engine/build/playtests/20261107-r5/curious-city/final-city",
+    "freshProject": "Engine/build/playtests/20261114-r6/curious-city/fresh-city",
+    "upgradedCopy": "Engine/build/playtests/20261114-r6/curious-city/upgraded-city"
+  },
+  "features": [
+    {
+      "id": "project-fresh-create-enable-check",
+      "status": "passed-check",
+      "action": "Created a fresh .6 project with the matching launcher, copied the Curious City r5 Source/Content into its generated folders, and ran --check-project.",
+      "expected": "Fresh project keeps generated metadata, has no duplicate Source/Content nesting, and passes project validation.",
+      "actual": "Project.json and generated Source/Content layout present; --check-project exit 0. Build logs retain the LNK1101 sandbox attempt and later successful elevated scaffold build.",
+      "evidence": [
+        "evidence/fresh-check.stdout.log",
+        "evidence/fresh-enable-LNK1101.log",
+        "evidence/fresh-enable-elevated-success.log"
+      ]
+    },
+    {
+      "id": "project-r5-upgrade-and-current-sdk-build",
+      "status": "passed",
+      "action": "Upgraded the real r5 final-city project into a new r6 folder, built with Game/build/x64/Release/Runtime/SDK/ProjectTools.ps1, then checked the copy.",
+      "expected": "Original stays unchanged; new copy pins .6, retains custom house type and scene, builds against current SDK, and validates.",
+      "actual": "--upgrade-project exit 0; new lock is .6; custom source/scene retained; current SDK build validated and activated; --check-project exit 0.",
+      "evidence": [
+        "evidence/upgrade.stdout.log",
+        "evidence/upgraded-city-final-CodeBuild.log",
+        "evidence/upgraded-city-full-build.log",
+        "evidence/fresh-check.stdout.log"
+      ]
+    },
+    {
+      "id": "city-economy-savegame-final",
+      "status": "passed-runtime",
+      "action": "Ran a 130-frame project.input request on the migrated project after current SDK build, with CURIOUS_CITY_SAVE_ROOT inside the playtest directory.",
+      "expected": "Save 400/1 house; after income add a second house; load restores 400/1; income continues.",
+      "actual": "exit 0. Log: save 400/1, second build 300/2, load restored 400/1, later income reached 410/1. Save file is under private SaveGameHudFinal.",
+      "visualStatus": "unverified",
+      "evidence": [
+        "evidence/city-final.log",
+        "evidence/city-final.result.json",
+        "Engine/build/playtests/20261114-r6/curious-city/SaveGameHudFinal/curious-city-r2/default/city.save.json"
+      ]
+    },
+    {
+      "id": "city-hud-placement-and-save-load-final",
+      "status": "passed-runtime",
+      "action": "project.input clicks ground at (500,400), Build at (70,120), Save at (145,120), Build again, then Load at (250,120); advances 30 frames after load.",
+      "expected": "Two purchases deduct 200; save; a third house is temporary; load restores two houses and saved balance.",
+      "actual": "exit 0. Callbacks logged for ground placement, build, save, build, load. House count rises to 3 then returns to 2; SaveGame log restores balance 300 / houses 2.",
+      "visualStatus": "runtime inputs and state observed; desktop game frame unverified",
+      "evidence": [
+        "evidence/city-ui-final.log",
+        "evidence/city-ui-final.result.json",
+        "evidence/city-ui-save-load.request.json"
+      ]
+    },
+    {
+      "id": "hud-clarity-followup",
+      "status": "passed-build-and-runtime",
+      "action": "In the isolated upgraded project, localized Balance/Income/Homes, added a ground-click placement hint, named the three actions in Russian, and widened the panel/buttons; rebuilt and reran the economy and HUD save/load requests.",
+      "expected": "A Russian-speaking player can see currency, per-second income, house count, placement instruction, and clear button actions without changing game architecture.",
+      "actual": "Current SDK build activated; 130-frame cycle and HUD Save/Load cycle passed after the edit.",
+      "evidence": [
+        "CuriousCity-r6-source.zip",
+        "evidence/upgraded-city-final-CodeBuild.log",
+        "evidence/city-final.log",
+        "evidence/city-ui-final.log"
+      ]
+    },
+    {
+      "id": "import-scale-001-sidecar-reimport-move",
+      "status": "passed-editor-commandlet",
+      "action": "Current EngineCommandlets project.import imported Hero..v2.obj at 0.01, used the same source for reimport, and moved it to /Game/Models/Moved/.",
+      "expected": "Legal doubled-dot filename is accepted; sidecar and all newly placed objects retain 0.01 through reimport and move.",
+      "actual": "exit 0, accepted=true, no dialogs, sidecar scale 0.01; spawned/reimported/moved object scales all 0.01. 800x500 editor image shows three objects and Inspector Scale 0.010.",
+      "visualStatus": "inspector/layout observed; hidden viewport is black",
+      "evidence": [
+        "evidence/project-import-current-scale001.request.json",
+        "evidence/project-import-current-scale001.result.json",
+        "evidence/current-import-layout-001.png"
+      ]
+    },
+    {
+      "id": "import-scale-01-sidecar-spawn",
+      "status": "passed-editor-commandlet",
+      "action": "Current EngineCommandlets project.import imported MarketHouse.obj at scale 0.1.",
+      "expected": "Sidecar records 0.1 and UseAsset places the model at uniform scale 0.1.",
+      "actual": "exit 0, accepted=true, sidecar scale 0.1 and one new Engine.Model at scale 0.1; 1280x720 layout snapshot saved.",
+      "visualStatus": "UI snapshot; viewport pixels unverified",
+      "evidence": [
+        "evidence/project-import-scale01.request.json",
+        "evidence/project-import-scale01.result.json",
+        "evidence/editor-layout-scale01.png"
+      ]
+    },
+    {
+      "id": "point-shadows-two-slots-zero-intensity-lod",
+      "status": "passed-gpu-frames",
+      "action": "Custom six-frame render.point-shadows request with three point lights, crowd LODs at distances 12/20, and camera distances 6/14/24.",
+      "expected": "At most two active shadow slots; zero-intensity lights own no slot; camera selects LOD0/1/2; returning to original frame is stable.",
+      "actual": "exit 0; base slots [0,1,-1], zero-intensity first [-1,0,1], zero-intensity third [0,1,-1]; LOD levels [1,0,0], [0,1,0], [0,0,1] at 6/14/24; returned first-face hash equals baseline.",
+      "visualStatus": "six D3D BMPs captured; slot/LOD/frame hashes observed",
+      "evidence": [
+        "evidence/point-city.request.json",
+        "evidence/point-city.result.json",
+        "evidence/point-city-00.bmp",
+        "evidence/point-city-01-zero-a.bmp",
+        "evidence/point-city-02-zero-c.bmp",
+        "evidence/point-city-03-lod1.bmp",
+        "evidence/point-city-04-lod2.bmp",
+        "evidence/point-city-05-return.bmp"
+      ]
+    },
+    {
+      "id": "transparent-intersections-and-resize",
+      "status": "passed-render-observed",
+      "action": "Rendered two intersecting translucent planes and self-cross geometry at four camera angles, then rendered a 640x360 frame.",
+      "expected": "Color overlap changes with camera angle; materials remain visible through intersecting surfaces; resized render succeeds.",
+      "actual": "Both commands exit 0; four orbit BMPs show red/blue translucent overlap from changed angles; resize output is 640x360 (691254-byte BMP). External HLSL produced a nonfatal dynamic-mount warning.",
+      "visualStatus": "D3D images captured and inspected; no independent pixel oracle",
+      "evidence": [
+        "evidence/transparency-intersections.request.json",
+        "evidence/transparency-intersections.result.json",
+        "evidence/transparency-front.bmp",
+        "evidence/transparency-side.bmp",
+        "evidence/transparency-orbit.bmp",
+        "evidence/transparency-back.bmp",
+        "evidence/transparency-resize.request.json",
+        "evidence/transparency-resize.result.json",
+        "evidence/transparency-resize-640x360.bmp",
+        "evidence/transparency-vfs-warning.log"
+      ]
+    },
+    {
+      "id": "material-graph-warmstone",
+      "status": "passed-graph-partial-preview",
+      "action": "Enabled and saved a WarmStone graph; selected preset 1, applied, undid, redid, then reverted.",
+      "expected": "Graph edits apply and enter history; undo/redo switch graph/HLSL; revert returns to the saved baseline.",
+      "actual": "exit 0; all seven steps accepted; graph/HLSL hashes change at preset/apply, undo returns the saved hash, redo restores the preset hash, revert leaves dirty=false and saved HLSL. nativePreviewWindow=true. Qt PNG renders graph; native D3D preview pane is black/not captured.",
+      "visualStatus": "graph visible; preview pixels not verified",
+      "evidence": [
+        "evidence/material-graph.request.json",
+        "evidence/material-graph.result.json",
+        "evidence/material-graph.png"
+      ]
+    },
+    {
+      "id": "animated-point-shadows-skeletal-time-loop",
+      "status": "passed-gpu-frames",
+      "action": "Custom render.point-shadows request with caster=skeletal, sceneLighting=true, Deferred, and animation times 0, 0.5, 1, 0 at a fixed camera/light.",
+      "expected": "Animation changes shadow-map hashes at 0.5; t=1 and the final return match the t=0 pose; receiver probe responds to the moving shadow.",
+      "actual": "exit 0 on RTX 4070 Laptop GPU. t=0, t=1, and return share all six face hashes. t=0.5 changes two face hashes; probe at the origin changes occlusion state.",
+      "visualStatus": "four D3D frames captured; t=0 and t=0.5 images inspected",
+      "evidence": [
+        "evidence/animated-point-shadow-skeletal.request.json",
+        "evidence/animated-point-shadow-skeletal.result.json",
+        "evidence/animated-point-shadow-skeletal-t0.bmp",
+        "evidence/animated-point-shadow-skeletal-t05.bmp",
+        "evidence/animated-point-shadow-skeletal-return.bmp"
+      ]
+    },
+    {
+      "id": "animated-transparency-skeletal-crowd-lod-orbit-resize",
+      "status": "passed-gpu-frames",
+      "action": "Custom Deferred render.transparency request with overlapping skeletal and crowd cross geometry; five frames at times 0, 0.5, 1, 0.5, 0; camera orbit/near/far positions; viewport 320x256 and 640x360; crowd LOD thresholds 160/80 pixels.",
+      "expected": "Both animated transparent types render during camera motion; crowd LOD changes at distance; resizing succeeds; the same starting frame returns the same image hash.",
+      "actual": "exit 0 on RTX 4070 Laptop GPU. lod levels change from [2,0,0] at the initial view to [0,2,2] at the far view. BMP sizes are 320x256/640x360 as requested; final time-0 return hash equals initial image hash.",
+      "visualStatus": "five D3D frames captured; intersections and far LOD image inspected",
+      "evidence": [
+        "evidence/animated-transparency-skeletal-crowd.request.json",
+        "evidence/animated-transparency-skeletal-crowd.result.json",
+        "evidence/animated-transparency-skeletal-crowd-t0.bmp",
+        "evidence/animated-transparency-skeletal-crowd-t1-far.bmp",
+        "evidence/animated-transparency-skeletal-crowd-resize.bmp",
+        "evidence/animated-transparency-skeletal-crowd-return.bmp",
+        "evidence/animated-transparency-skeletal-crowd.stderr.log"
+      ]
+    }
+  ],
+  "environment": {
+    "build": "Sandbox and first elevated attempts reported LNK1101 incorrect MSPDB140.DLL; later isolated retry validated/activated. No engine source change by this persona.",
+    "commandletWarning": "Transparency commandlet logged a dynamic VFS mount warning for external HLSL while returning valid images and ok=true.",
+    "usage": "Coordinator observed shared weekly counter around 7% at start and 8% during the run; this agent has no separate account counter."
+  }
+}

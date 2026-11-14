@@ -1,0 +1,101 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 480x320
+[Info] Overlay: early return (empty lines and billboards)
+FontAtlas: 161 glyphs at 14 px in a 512x128 atlas.
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 480x320
+frame-dump E:/Engine/Engine/build/playtests/20261114-r7/calm-city/results/render-diagnostics-mode0.bmp written=1 size=480x320
+{
+    "frames": [
+        {
+            "distanceCulled": 0,
+            "drawCalls": 1,
+            "drawn": 2,
+            "frameIndex": 1,
+            "frustumCulled": 1,
+            "hidden": 0,
+            "instancesSubmitted": 2,
+            "lines": [
+                "RENDER / LOD    F7 hide | F8 next",
+                "Frame 1 | CPU submission counters",
+                "Draws 1  instances 2  dispatch 0",
+                "Indices 72 (all passes)",
+                "Component 1/1  Diagnostics instances",
+                "Color visible 2 / 3",
+                "Hidden 0  distance 0  frustum 1",
+                "Camera distance 8.0..12.8",
+                "Draw limit 18.0 | LOD by screen pixels",
+                "LOD0 mesh: 2 | next < 30.0 px",
+                "LOD1 mesh: 0 | next < 12.0 px",
+                "LOD2 mesh: 0",
+                "Buckets may overlap during LOD fade",
+                "Color selection only; shadows counted separately"
+            ],
+            "maxDistance": 12.806248664855957,
+            "minDistance": 8,
+            "perLod": [
+                2,
+                0,
+                0
+            ],
+            "prepared": true,
+            "previousValid": false,
+            "screenSize": true,
+            "thresholds": [
+                30,
+                12
+            ],
+            "total": 3,
+            "valid": true
+        },
+        {
+            "distanceCulled": 3,
+            "drawCalls": 0,
+            "drawn": 0,
+            "frameIndex": 2,
+            "frustumCulled": 0,
+            "hidden": 0,
+            "instancesSubmitted": 0,
+            "lines": [
+                "RENDER / LOD    F7 hide | F8 next",
+                "Frame 2 | CPU submission counters",
+                "Draws 0  instances 0  dispatch 0",
+                "Indices 0 (all passes)",
+                "Component 1/1  Diagnostics instances",
+                "Color visible 0 / 3",
+                "Hidden 0  distance 3  frustum 0",
+                "Camera distance 24.0..26.0",
+                "Draw limit 18.0 | LOD by screen pixels",
+                "LOD0 mesh: 0 | next < 30.0 px",
+                "LOD1 mesh: 0 | next < 12.0 px",
+                "LOD2 mesh: 0",
+                "Buckets may overlap during LOD fade",
+                "Color selection only; shadows counted separately"
+            ],
+            "maxDistance": 26,
+            "minDistance": 24,
+            "perLod": [
+                0,
+                0,
+                0
+            ],
+            "prepared": true,
+            "previousValid": true,
+            "screenSize": true,
+            "thresholds": [
+                30,
+                12
+            ],
+            "total": 3,
+            "valid": true
+        }
+    ],
+    "ok": true
+}

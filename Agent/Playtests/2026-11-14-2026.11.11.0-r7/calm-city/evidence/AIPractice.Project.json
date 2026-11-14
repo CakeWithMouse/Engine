@@ -1,0 +1,6 @@
+{
+  "content": "Content",
+  "module": "Game.dll",
+  "name": "Calm City AI Practice",
+  "startupScene": "Content/Scenes/Main.scene.json"
+}

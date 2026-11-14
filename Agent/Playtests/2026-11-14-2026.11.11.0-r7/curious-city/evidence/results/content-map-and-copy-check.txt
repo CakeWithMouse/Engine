@@ -1,0 +1,7 @@
+R7 content-map / restored-source check
+r6 source: E:\Engine\Engine\build\playtests\20261114-r6\curious-city\upgraded-city
+r7 project: E:\Engine\Engine\build\playtests\20261114-r7\curious-city\upgraded-city\Project.json
+Project.json content = Content; startupScene = Content/Scenes/Main.scene.json.
+Actual runtime: EngineModuleVfs::Resolve("/Game") = r7 upgraded-city\Content.
+Actual runtime resolved ProjectHud.txt, UI/CityHud.ui, Config/city-settings.txt under that exact Content root, and city-settings value district=harbor.
+The r7 private copy has no Content\Content. The r6 source still has Content\Content; it was not altered. Hashes of the direct top-level ProjectHud.txt, UI/CityHud.ui and Config/city-settings.txt are equal between r6 and r7. Project.json and Main.scene.json differ because r7 is the upgraded copy and the Main scene was edited for this test.

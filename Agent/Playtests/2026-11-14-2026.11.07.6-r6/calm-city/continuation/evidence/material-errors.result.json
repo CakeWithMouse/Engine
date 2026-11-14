@@ -1,0 +1,4 @@
+{
+    "error": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation\\CityApiProbe\\Content\\Materials\\BadMaterial\\Bad.hlsl(1,87): error X3000: syntax error: unexpected token ';'\nE:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation\\CityApiProbe\\Content\\Materials\\BadMaterial\\Bad.hlsl(1,68-89): error X3004: undeclared identifier 'UnexpectedFunction'\n",
+    "ok": false
+}

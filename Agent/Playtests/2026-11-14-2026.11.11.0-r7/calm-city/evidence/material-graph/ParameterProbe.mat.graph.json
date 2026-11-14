@@ -1,0 +1,55 @@
+{
+    "connections": [
+        {
+            "fromNode": 2,
+            "fromPin": "RGB",
+            "toNode": 1,
+            "toPin": "Albedo"
+        },
+        {
+            "fromNode": 3,
+            "fromPin": "Value",
+            "toNode": 1,
+            "toPin": "Specular"
+        }
+    ],
+    "nodes": [
+        {
+            "id": 1,
+            "properties": {
+            },
+            "title": "Output",
+            "type": "MaterialOutput",
+            "x": 520,
+            "y": 100
+        },
+        {
+            "id": 2,
+            "properties": {
+                "color": [
+                    0.03999389708042145,
+                    0.8200045824050903,
+                    0.6800030469894409,
+                    1
+                ],
+                "name": "CalmTeal"
+            },
+            "title": "CalmTeal",
+            "type": "ColorParam",
+            "x": 160,
+            "y": 120
+        },
+        {
+            "id": 3,
+            "properties": {
+                "name": "Gloss",
+                "value": 0.25
+            },
+            "title": "Gloss",
+            "type": "ScalarParam",
+            "x": 160,
+            "y": 300
+        }
+    ],
+    "version": 1
+}

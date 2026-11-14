@@ -1,0 +1,10 @@
+vfs_read path=/Game/Config/city-settings.txt value=district=harbor
+skeletal_material_api slots=1 source_id=0 original= set_slot=1 invalid_slot=0 set_override=1 override=/Game/Materials/Hologram.mat clear_override=1 restored=/Game/Materials/Hologram.mat meshes=1 vertices=3 bounds_min=-1.5,-1.5,-0 bounds_max=1.5,1.5,-0
+event=scene_ready balance=500 houses=0
+event=hud_reference_rebound balance=500 houses=0
+completed_frame valid=false before_first_render
+completed_frame valid=true index=1 draw_calls=51 visible=2 culled=0
+completed_frame valid=true index=2 draw_calls=51 visible=2 culled=0
+completed_frame valid=true index=3 draw_calls=51 visible=2 culled=0
+completed_frame valid=true index=4 draw_calls=51 visible=2 culled=0
+completed_frame valid=true index=5 draw_calls=51 visible=2 culled=0

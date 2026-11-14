@@ -22,6 +22,24 @@ inline void RunMaterialGraphTests()
 {
     using namespace EditorCore;
 
+    // D3D11 reserves t0-t5 and t32: the 122nd unique texture must not alias t127.
+    {
+        MaterialGraphModel model;
+        model.AddNode(QStringLiteral("MaterialOutput"), QStringLiteral("Output"), {});
+        for (int i = 0; i < 121; ++i)
+            model.AddNode(QStringLiteral("Texture2D"), QStringLiteral("Map%1").arg(i), {},
+                {{QStringLiteral("textureName"), QStringLiteral("Map%1").arg(i)}, {QStringLiteral("slot"), 2147483647}});
+        const auto full = HlslGraphCompiler::Compile(model);
+        CheckMatGraph(full.problems.isEmpty(), "121 unique texture registers are available");
+        CheckMatGraph(full.hlsl.count(QStringLiteral("register(t127)")) == 1 &&
+                      !full.hlsl.contains(QStringLiteral("register(t32)")), "Texture registers wrap without reserved slots");
+        const int overflow = model.AddNode(QStringLiteral("Texture2D"), QStringLiteral("Overflow"), {},
+            {{QStringLiteral("textureName"), QStringLiteral("Overflow")}, {QStringLiteral("slot"), 2147483647}});
+        const auto rejected = HlslGraphCompiler::Compile(model);
+        CheckMatGraph(rejected.problems.contains(overflow), "Texture exhaustion identifies the offending node");
+        CheckMatGraph(rejected.hlsl.isEmpty(), "Texture exhaustion never emits aliased registers");
+    }
+
     // 1. Default setup and HLSL compilation
     {
         MaterialGraphModel model;

@@ -1,0 +1,164 @@
+[
+  {
+    "feature_id": "r5-source-isolated-copy",
+    "action": "SHA256 исходного архива и содержимое; распаковка в выделенный каталог r6.",
+    "expected": "Получить исходники старого проекта отдельно, без SDK/Intermediate и без изменения исходника.",
+    "actual": "Архив SHA256 8D213E6C819A7CEDC159CC0D164B62EBBA79D26044250147391FA90CADC1B633; распакован в Engine/build/playtests/20261114-r6/calm-city/ImportedSource. Содержит Source, Content и project/build metadata.",
+    "status": "passed",
+    "evidence": "diary.md; REBUILD.md; Engine/build/playtests/20261114-r6/calm-city/ImportedSource",
+    "classification": "preparation only"
+  },
+  {
+    "feature_id": "cascade-motion-code-review",
+    "action": "Read-only review Game.cpp:2404-2538 and InstancedMeshShadows.cpp:80-120.",
+    "expected": "Каскады стабилизированы в мировом пространстве; инстансные casters собираются отдельно с LOD bias.",
+    "actual": "Код соответствует ожидаемому пути, явного дефекта не найдено. Перемещение камеры/видимость границ в кадре не проверялись.",
+    "status": "partial",
+    "evidence": "Engine/Source/MainGame/BaseGameClass/Game.cpp:2404-2538; Engine/Source/Components/SpecificComponents/InstancedMeshShadows.cpp:80-120; diary.md",
+    "classification": "code-review-only"
+  },
+  {
+    "feature_id": "point-shadow-slot-lod-code-review",
+    "action": "Read-only review Game.cpp:2249-2390 and InstancedMeshShadows.cpp:121-171.",
+    "expected": "Только активные полезные лампы занимают ограниченные слоты; caster ограничивается нужными cube faces и выбранным LOD.",
+    "actual": "Код соответствует описанию. Приоритет при превышении лимита и LOD/slot фактическим кадром пока не проверялись.",
+    "status": "partial",
+    "evidence": "Engine/Source/MainGame/BaseGameClass/Game.cpp:2249-2390; Engine/Source/Components/SpecificComponents/InstancedMeshShadows.cpp:121-171; diary.md",
+    "classification": "code-review-only"
+  },
+  {
+    "feature_id": "material-negative-scale-handedness-code-review",
+    "action": "Read-only review MaterialTemplate.hlsl:103-113 and MaterialCommon.hlsli:80-94.",
+    "expected": "Reflection меняет tangent frame handedness; normal-map bitangent сохраняет ориентацию после отрицательного масштаба.",
+    "actual": "Одиночный объект и instance path умножают Tangent.w на знак determinant; прежняя r5 кодовая гипотеза закрыта по текущему коду. Pixel test не проводился.",
+    "status": "partial",
+    "evidence": "Engine/Content/Shaders/Material/MaterialTemplate.hlsl:103-113; Engine/Content/Shaders/Material/MaterialCommon.hlsli:80-94; diary.md",
+    "classification": "code-review-only"
+  },
+  {
+    "feature_id": "transparency-intersections-code-review",
+    "action": "Read-only review Game.cpp:4617-4860, ENGINE-VERSIONS.md current section.",
+    "expected": "До 16 ближайших глубин на pixel композитятся по слоям, дальний остаток обрабатывается fallback-ом; несовместимые custom materials используют сортировку.",
+    "actual": "Пайплайн реализации соответствует описанию. Пересекающиеся материалы на GPU кадре не запускались.",
+    "status": "partial",
+    "evidence": "Engine/Source/MainGame/BaseGameClass/Game.cpp:4617-4860; Engine/docs/ENGINE-VERSIONS.md; diary.md",
+    "classification": "code-review-only"
+  },
+  {
+    "classification": "fresh project path",
+    "action": "EngineLauncher --create-project FreshCalmCity, затем --enable-code с private EngineStore.",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261114-r6/calm-city/create.stdout.txt; enable.exitcode.txt; FreshCalmCity/CodeBuild.log",
+    "actual": "Обе операции завершились exit 0; кодовый шаблон собран. Отдельная настоящая игровая копия создана upgrade ниже.",
+    "expected": "Свежий C++ project создаётся и получает активный игровой module.",
+    "feature_id": "fresh-cli-create-enable"
+  },
+  {
+    "classification": "runtime observed",
+    "action": "Upgrade прежнего CalmCityFinal в r6 копию; сборка, 180 game frames, --check-project.",
+    "status": "passed",
+    "evidence": "REBUILD.md; evidence/final-sdk-build.exitcode.txt; evidence/final-project-build.log; evidence/final-save-load-new-process.bmp; evidence/SaveGameSelfTest.log; evidence/check.exitcode.txt",
+    "actual": "Upgrade/build/gameplay/check exit 0. Engine lock 2026.11.07.6; ModuleLoaded, GameSceneLoaded, GameUpdates=180; кадр сохранён и просмотрен.",
+    "expected": "Сохранённый городской проект открывается в новой версии с игровой логикой.",
+    "feature_id": "old-project-upgrade-build-runtime"
+  },
+  {
+    "classification": "not-engine-defect",
+    "action": "Попытка upgrade архивного source-only r5 zip без Binaries.",
+    "status": "expected-input-missing",
+    "evidence": "Engine/build/playtests/20261114-r6/calm-city/upgrade-runtime.stderr.txt",
+    "actual": "Launcher отказал; Runtime: LaunchError Cannot hash game DLL. Позднее upgrade реального сохранённого CalmCityFinal прошёл.",
+    "expected": "Диагностировать ограничения source-only источника.",
+    "feature_id": "source-only-archive-upgrade-attempt"
+  },
+  {
+    "classification": "cross-process observed",
+    "action": "CALM_SAVE_TEST save и load в отдельных EngineRuntime процессах.",
+    "status": "passed",
+    "evidence": "evidence/final-save.exitcode.txt; evidence/final-load.exitcode.txt; evidence/SaveGameSelfTest.log; evidence/final-save-load-new-process.bmp",
+    "actual": "Оба exit 0; SaveGameSelfTest.log: loadedX=5.6 continuedX=5.35 PASS. In-process save/load также PASS.",
+    "expected": "Новая сессия восстановит маршрут и продолжит движение от сохранённой позиции.",
+    "feature_id": "savegame-new-process"
+  },
+  {
+    "classification": "small gameplay improvement",
+    "action": "В своей копии изменено начальное значение CarMover speed 2.5 -> 1.8, затем rebuilt и запущено.",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261114-r6/calm-city/CalmCityUpgraded/Source/CarMover.h; CodeBuild.log; CalmCityUpgraded/SaveData/calm-city-lod.bmp",
+    "actual": "Build и 180-frame gameplay прошли; runtime показал и сохранил игровой кадр.",
+    "expected": "Машина медленнее пересекает небольшой городской маршрут, сцена читается спокойнее.",
+    "feature_id": "calm-car-speed-tuning"
+  },
+  {
+    "classification": "custom parameterized GPU experience",
+    "action": "Собственный render.transparency JSON: 3 пересекающиеся translucent surfaces, 4 камеры, Deferred.",
+    "status": "passed-limited-visual",
+    "evidence": "evidence/transparency-request.json; evidence/transparency-result.json; evidence/transparency-camera-1.bmp",
+    "actual": "Exit 0, RTX 4070 Laptop GPU, 4 output frames, 117 draws/frame; пересечения наблюдались на BMP. Полного пиксельного oracle не было.",
+    "expected": "Поверхности остаются видимыми через пересечения при изменении камеры.",
+    "feature_id": "transparency-camera-intersections"
+  },
+  {
+    "classification": "custom parameterized GPU experience",
+    "action": "Собственный render.point-shadows JSON: crowd LOD, три источника при лимите двух, интенсивность первого переключается 0.",
+    "status": "passed-limited",
+    "evidence": "evidence/point-shadows-request.json; evidence/point-shadows-result.json; evidence/point-shadow-slot-reuse.bmp",
+    "actual": "Exit 0, 3 кадра RTX 4070. Slots 0,1,-1 -> -1,0,1 -> 0,1,-1. LOD per frame [1,0,0], [1,0,0], [0,1,0]; карты двух активных ламп и BMP получены.",
+    "expected": "Нулевой по интенсивности свет освобождает слот; назначение двух слотов и выбранный crowd LOD обновляются.",
+    "feature_id": "point-shadow-zero-intensity-slot-and-lod"
+  },
+  {
+    "classification": "commandlet UI workflow",
+    "action": "project.import в двух собственных scratch projects: default и scale=0.5.",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261114-r6/calm-city/ImportChecks/Default-result.json; CustomScale-result.json; соответствующие .importsettings.json",
+    "actual": "Обе команды exit 0, accepted=true, sidecarExists=true; sidecar scales 1.0 и 0.5, объект scales [1,1,1] и [0.5,0.5,0.5].",
+    "expected": "Создаётся import settings sidecar и размещаемый объект получает соответствующий scale.",
+    "feature_id": "project-import-settings-scale"
+  },
+  {
+    "classification": "code-review-only",
+    "action": "Текущий determinant fix проверен по shader code; отдельный кадр с normal map не создавался.",
+    "status": "not-tested",
+    "evidence": "diary.md; Engine/Content/Shaders/Material/MaterialTemplate.hlsl:103-113",
+    "actual": "Кодовой review-only, пиксельный GPU integration в этом проходе отсутствует.",
+    "expected": "Подтвердить визуально handedness при negative scale и нормаль при nonuniform scale.",
+    "feature_id": "normal-map-negative-scale-pixel"
+  },
+  {
+    "classification": "GPU motion sequence, quantified",
+    "evidence": "evidence/cascade-matrices.csv; evidence/cascade-analysis.json; evidence/cascade-frame-000.bmp; evidence/cascade-frame-120.bmp",
+    "action": "Battle camera orbit: --units 1000 --camera 120 --no-point-light, 121 GPU frames; AnalyzeShadowCameraSequence.py --check.",
+    "expected": "При камере в движении нет каскадного scale pop и дробного дрейфа теневой сетки выше .002 texel.",
+    "status": "passed",
+    "actual": "Exit 0. 3 cascades × 121 frames; scaleChanges 0 во всех; maxFractionalTexelDrift 5.12e-7, 2.36e-7, 5.94e-8; pass. Это побочный технический опыт на Battle, не игровая городская сцена.",
+    "feature_id": "cascade-camera-motion-gpu-sequence"
+  },
+  {
+    "classification": "diagnosis; no defect",
+    "evidence": "evidence/Material_1.mat; evidence/final-save-load-new-process.bmp; evidence/r5-save-load-baseline.bmp; Engine/Content/Shaders/Material/MaterialTemplate.hlsl",
+    "action": "Диагностика magenta Suzanne на новом кадре, проверка Material_1.mat и сравнение с r5 save-load baseline.",
+    "expected": "Отделить ошибку ресурса/шейдера от целевого цвета материала.",
+    "status": "expected-asset-appearance",
+    "actual": "Material_1.mat намеренно имеет sourceMaterial Second material magenta, Tint [1,0,1,1], BaseMap null. Shader/material error отсутствует; прежний r5 BMP показывает тот же вид.",
+    "feature_id": "magenta-imported-material-baseline"
+  },
+  {
+    "evidence": "evidence/final-sdk-build.exitcode.txt; evidence/final-project-build.log; evidence/CodeBuild.log",
+    "classification": "current SDK build",
+    "action": "ProjectTools.ps1 -Action Build for CalmCityUpgraded using current Game/build/x64/Release/Runtime SDK; independent Intermediate.",
+    "expected": "The carried project module rebuilds with final shared Engine.lib.",
+    "feature_id": "final-sdk-project-rebuild",
+    "status": "passed",
+    "actual": "Exit 0, generated/validated Game.dll; no Engine source changed."
+  },
+  {
+    "evidence": "evidence/final-save.exitcode.txt; evidence/final-load.exitcode.txt; evidence/SaveGameSelfTest.log; evidence/final-save-load-new-process.bmp",
+    "classification": "current Runtime cross-process observation",
+    "action": "Final current Runtime save and load processes, each 180 frames.",
+    "expected": "Fresh process restores saved car position and continues route.",
+    "feature_id": "final-runtime-savegame-cross-process",
+    "status": "passed",
+    "actual": "Both exit 0. Save/load same process and new process PASS: loadedX=5.6 continuedX=5.35."
+  }
+]

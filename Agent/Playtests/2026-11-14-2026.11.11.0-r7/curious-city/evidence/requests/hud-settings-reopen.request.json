@@ -1,0 +1,10 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Project.json",
+  "steps": [
+    {
+      "dialogImage": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\frames\\hud-settings-reopen.png",
+      "cancel": true,
+      "action": "hud-settings"
+    }
+  ]
+}

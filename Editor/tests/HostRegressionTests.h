@@ -2,9 +2,6 @@
 #include "SceneCommandHandler.h"
 #include "AssetCommandHandler.h"
 #include <QFile>
-#include <QDir>
-#include <QFileInfo>
-#include <QTemporaryDir>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -179,12 +176,6 @@ inline int Run() {
             return EngineSceneOk;
         };
 
-        QTemporaryDir tempDir;
-        check(tempDir.isValid(), "Temporary directory created for batch import test");
-        const QString projectDir = tempDir.path();
-        const QString contentDir = projectDir + QStringLiteral("/Content");
-        QDir(projectDir).mkpath(QStringLiteral("Content/Models/Batch"));
-
         struct FileSpec {
             QString src;
             float scale;
@@ -195,7 +186,7 @@ inline int Run() {
             { QStringLiteral("C:/Sources/Hero.glb"), 1.0f }
         };
 
-        std::vector<QString> sidecarPaths;
+        std::vector<QString> completedPaths;
 
         for (const auto& item : batch)
         {
@@ -215,38 +206,15 @@ inline int Run() {
             check(std::abs(completedCmd.importScale - item.scale) < 1e-5f, "completedCmd preserves importScale");
             check(completedCmd.path.startsWith(QStringLiteral("/Game/Models/Batch/")), "completedCmd has virtual path");
 
-            // OnCommandFinished sidecar write: resolve path and write sidecar JSON
-            const QString virtRel = completedCmd.path.mid(6);
-            const QString diskAsset = contentDir + QStringLiteral("/") + virtRel;
-            const QString sidecarPath = diskAsset + QStringLiteral(".importsettings.json");
-
-            QJsonObject root;
-            root[QStringLiteral("version")] = 1;
-            root[QStringLiteral("scale")] = static_cast<double>(completedCmd.importScale);
-            QFile f(sidecarPath);
-            check(f.open(QIODevice::WriteOnly), "Can write sidecar file at host level");
-            f.write(QJsonDocument(root).toJson(QJsonDocument::Compact));
-            f.close();
-
-            sidecarPaths.push_back(sidecarPath);
+            completedPaths.push_back(completedCmd.path);
         }
 
-        check(sidecarPaths.size() == 3, "3 sidecars created");
-        check(sidecarPaths[0] != sidecarPaths[1] && sidecarPaths[1] != sidecarPaths[2],
-              "All 3 sidecar paths are distinct");
-
-        for (size_t i = 0; i < batch.size(); ++i)
-        {
-            QFile f(sidecarPaths[i]);
-            check(f.exists(), "Sidecar file exists on disk");
-            check(f.open(QIODevice::ReadOnly), "Sidecar can be opened");
-            auto doc = QJsonDocument::fromJson(f.readAll());
-            check(doc.isObject(), "Sidecar is valid JSON");
-            auto obj = doc.object();
-            check(obj[QStringLiteral("version")].toInt() == 1, "Sidecar version is 1");
-            const float scale = static_cast<float>(obj[QStringLiteral("scale")].toDouble());
-            check(std::abs(scale - batch[i].scale) < 1e-5f, "Sidecar scale matches completedCmd.importScale");
-        }
+        check(completedPaths.size() == 3, "3 model completions returned");
+        check(completedPaths[0] != completedPaths[1] && completedPaths[1] != completedPaths[2] &&
+              completedPaths[0] != completedPaths[2], "All model completion paths are distinct");
+        // Sidecar persistence belongs to the real MainWindow completion path.
+        // ImportSettingsCommandletTests exercises it together with placement,
+        // reimport and move, rather than writing the expected JSON in this test.
     }
 
     // Test AssetCommandHandler with Engine.Asset.Import extension vs legacy fallback

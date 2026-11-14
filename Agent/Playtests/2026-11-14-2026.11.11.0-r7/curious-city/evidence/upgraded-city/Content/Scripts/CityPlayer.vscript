@@ -1,0 +1,213 @@
+{
+  "format": "ITMOEngine.Graph",
+  "version": 1,
+  "schema": "code",
+  "schemaVersion": 1,
+  "variables": [],
+  "nodes": [
+    {
+      "id": 1,
+      "type": "Event.KeyPressed",
+      "title": "",
+      "x": 0,
+      "y": 0,
+      "properties": {
+        "key": "E"
+      }
+    },
+    {
+      "id": 2,
+      "type": "Action.CallEvent",
+      "title": "",
+      "x": 260,
+      "y": 0,
+      "properties": {
+        "event": "MakeNoise"
+      }
+    },
+    {
+      "id": 3,
+      "type": "Event.Custom",
+      "title": "",
+      "x": 0,
+      "y": 160,
+      "properties": {
+        "event": "MakeNoise"
+      }
+    },
+    {
+      "id": 4,
+      "type": "Object.Find",
+      "title": "",
+      "x": 0,
+      "y": 320,
+      "properties": {
+        "inputs": {
+          "Name": "CityGuard"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "Object.GetPosition",
+      "title": "",
+      "x": 0,
+      "y": 440,
+      "properties": {}
+    },
+    {
+      "id": 6,
+      "type": "Ai.SetMemory",
+      "title": "",
+      "x": 300,
+      "y": 160,
+      "properties": {
+        "memory": "NoiseAt"
+      }
+    },
+    {
+      "id": 7,
+      "type": "Ai.SendEvent",
+      "title": "",
+      "x": 560,
+      "y": 160,
+      "properties": {
+        "event": "Noise"
+      }
+    },
+    {
+      "id": 8,
+      "type": "Action.Print",
+      "title": "",
+      "x": 820,
+      "y": 160,
+      "properties": {
+        "inputs": {
+          "Text": "Шум! Охранник идёт проверить."
+        }
+      }
+    },
+    {
+      "id": 9,
+      "type": "Event.Custom",
+      "title": "",
+      "x": 0,
+      "y": 620,
+      "properties": {
+        "event": "OnCaught"
+      }
+    },
+    {
+      "id": 10,
+      "type": "Action.Print",
+      "title": "",
+      "x": 260,
+      "y": 620,
+      "properties": {
+        "inputs": {
+          "Text": "Охранник поймал вас — обратно к южному краю."
+        }
+      }
+    },
+    {
+      "id": 11,
+      "type": "Action.SetPosition",
+      "title": "",
+      "x": 520,
+      "y": 620,
+      "properties": {
+        "inputs": {
+          "Position": [
+            0,
+            0.9,
+            10
+          ]
+        }
+      }
+    },
+    {
+      "id": 12,
+      "type": "Event.Custom",
+      "title": "",
+      "x": 0,
+      "y": 800,
+      "properties": {
+        "event": "FromAI"
+      }
+    },
+    {
+      "id": 13,
+      "type": "Action.Print",
+      "title": "",
+      "x": 260,
+      "y": 800,
+      "properties": {
+        "inputs": {
+          "Text": "CityGuard responded to Noise"
+        }
+      }
+    }
+  ],
+  "connections": [
+    {
+      "fromNode": 1,
+      "fromPin": "then",
+      "toNode": 2,
+      "toPin": "exec"
+    },
+    {
+      "fromNode": 3,
+      "fromPin": "then",
+      "toNode": 6,
+      "toPin": "exec"
+    },
+    {
+      "fromNode": 4,
+      "fromPin": "Object",
+      "toNode": 6,
+      "toPin": "Target"
+    },
+    {
+      "fromNode": 5,
+      "fromPin": "Position",
+      "toNode": 6,
+      "toPin": "Value"
+    },
+    {
+      "fromNode": 6,
+      "fromPin": "then",
+      "toNode": 7,
+      "toPin": "exec"
+    },
+    {
+      "fromNode": 4,
+      "fromPin": "Object",
+      "toNode": 7,
+      "toPin": "Target"
+    },
+    {
+      "fromNode": 7,
+      "fromPin": "then",
+      "toNode": 8,
+      "toPin": "exec"
+    },
+    {
+      "fromNode": 9,
+      "fromPin": "then",
+      "toNode": 10,
+      "toPin": "exec"
+    },
+    {
+      "fromNode": 10,
+      "fromPin": "then",
+      "toNode": 11,
+      "toPin": "exec"
+    },
+    {
+      "fromNode": 12,
+      "fromPin": "then",
+      "toNode": 13,
+      "toPin": "exec"
+    }
+  ]
+}

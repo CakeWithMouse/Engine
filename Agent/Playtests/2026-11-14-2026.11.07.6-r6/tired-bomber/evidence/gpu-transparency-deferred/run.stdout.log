@@ -1,0 +1,76 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 320x256
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 320x256
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\gpu-final\transparency-deferred\frame-00.bmp written=1 size=320x256
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\gpu-final\transparency-deferred\frame-01.bmp written=1 size=640x360
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\gpu-final\transparency-deferred\frame-02.bmp written=1 size=320x256
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\gpu-final\transparency-deferred\frame-03.bmp written=1 size=320x256
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "drawCalls": 184,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\gpu-final\\transparency-deferred\\frame-00.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        2,
+                        2,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 134,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\gpu-final\\transparency-deferred\\frame-01.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        2,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 134,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\gpu-final\\transparency-deferred\\frame-02.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        2,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 184,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\gpu-final\\transparency-deferred\\frame-03.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        2,
+                        2,
+                        0
+                    ]
+                }
+            ]
+        }
+    ],
+    "ok": true
+}

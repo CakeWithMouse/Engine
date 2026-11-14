@@ -1,0 +1,61 @@
+{
+  "validation": "Source archive structure, forbidden-artifact exclusion and CRC. Fresh build/run evidence is linked separately in each role REBUILD.md.",
+  "archives": [
+    {
+      "role": "calm-city",
+      "path": "calm-city\\calm-city-r7-source.zip",
+      "bytes": 727268,
+      "entries": 116,
+      "sha256": "d8f564be9baf1c0e0e562484ae0be482916d8983b54eec945bc8ce86542108df",
+      "crc": "passed"
+    },
+    {
+      "role": "curious-city",
+      "path": "curious-city\\source\\curious-city-r7-source-only-final.zip",
+      "bytes": 790203,
+      "entries": 119,
+      "sha256": "f3eb6f293f0b7bdad93ad1e95564d75750d97a6f25450a951389c0f5ae620e0c",
+      "crc": "passed"
+    },
+    {
+      "role": "curious-city",
+      "path": "curious-city\\source\\curious-city-r7-source-only.zip",
+      "bytes": 711761,
+      "entries": 114,
+      "sha256": "7f687f262f710720f3269a03d076766e68624234f2c2910b7501758a105875c9",
+      "crc": "passed"
+    },
+    {
+      "role": "curious-city",
+      "path": "curious-city\\evidence\\source-archive-final\\curious-city-r7-source-only-final.zip",
+      "bytes": 790203,
+      "entries": 119,
+      "sha256": "f3eb6f293f0b7bdad93ad1e95564d75750d97a6f25450a951389c0f5ae620e0c",
+      "crc": "passed"
+    },
+    {
+      "role": "tired-bomber",
+      "path": "tired-bomber\\tired-bomber-r7-source.zip",
+      "bytes": 484536,
+      "entries": 54,
+      "sha256": "7ab224c99b34b9a14a07b841751b9b83a9b64982ca5c7e7eeec073264cea35e2",
+      "crc": "passed"
+    },
+    {
+      "role": "ai-trash",
+      "path": "ai-trash\\ai-trash-r7-source.zip",
+      "bytes": 110029,
+      "entries": 46,
+      "sha256": "8ac62d2f619fe83a1d8430611d19c1ba27167f16400e3b6f107d79a256cecbc1",
+      "crc": "passed"
+    },
+    {
+      "role": "ai-trash",
+      "path": "ai-trash\\evidence\\ai-trash-r7-source-before-hud-fix.zip",
+      "bytes": 107573,
+      "entries": 46,
+      "sha256": "dc2f36ef616cd1a73f4a17982b21737d636d71499b1ab6413c8aafc64bdd382a",
+      "crc": "passed"
+    }
+  ]
+}

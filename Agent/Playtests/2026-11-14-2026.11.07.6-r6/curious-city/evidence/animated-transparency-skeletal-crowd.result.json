@@ -1,0 +1,76 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "drawCalls": 134,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\animated-features\\skeletal-crowd-refine-t0.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        2,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 134,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\animated-features\\skeletal-crowd-refine-t05.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        2,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 184,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\animated-features\\skeletal-crowd-refine-t1-far.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        0,
+                        2,
+                        2
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 134,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\animated-features\\skeletal-crowd-refine-t05-orbit.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        2,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 134,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\animated-features\\skeletal-crowd-refine-return.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        2,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        }
+    ],
+    "ok": true
+}

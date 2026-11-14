@@ -1,0 +1,552 @@
+[
+  {
+    "role": "calm-city",
+    "feature_id": "model-blend",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "texture-import",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "mesh-tools",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "material-assign",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "material-errors",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "light-sun",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "sky",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "material-graph-write-failure",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "material-slot-edit",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "imported-uv",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "mesh-tangents",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "tangent-degenerate",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "tangent-gpu",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "tangent-world-reflection",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "tangent-savegame",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "material-register-numeric-validation",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "session",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "character",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "controller",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "camera-orthographic",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "trace-screen",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "particles",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "particle-collision",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "hud-events",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "game-settings",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "vfs",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "export",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "sdk-examples",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "audio-decode",
+    "status": "passed"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "audio-play2d",
+    "status": "partial"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "audio-play3d",
+    "status": "partial"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "audio-stream",
+    "status": "partial"
+  },
+  {
+    "role": "calm-city",
+    "feature_id": "subsystem",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "class-wizard",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "failed-build-rollback",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "hot-reload",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "scene-primitives",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "scene-hierarchy",
+    "status": "partial"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "scene-object",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "scene-clone",
+    "status": "partial"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "scene-save-load",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "scene-startup",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "scene-new-save-as",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "scene-undo",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "scene-groups",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "scene-select",
+    "status": "partial"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "scene-recovery",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "import-scale-dialog-presets",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "scene-properties",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "material-assign",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "scene-snapping",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "material-slot-edit",
+    "status": "partial"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "material-graph-write-failure",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "model-blend",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "texture-import",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "mesh-tangents",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "tangent-degenerate",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "tangent-gpu",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "tangent-world-reflection",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "tangent-savegame",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "imported-uv",
+    "status": "partial"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "hud-editor",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "render-host",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "host-services",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "mesh-tools",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "material-errors",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "light-sun",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "sky",
+    "status": "passed"
+  },
+  {
+    "role": "curious-city",
+    "feature_id": "material-register-numeric-validation",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "session",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "camera-orthographic",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "scene-properties",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "game-settings",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "scene-snapping",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "scene-hierarchy",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "class-wizard",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "failed-build-rollback",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "hot-reload",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "scene-primitives",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "scene-object",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "scene-clone",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "scene-save-load",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "scene-startup",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "scene-new-save-as",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "scene-undo",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "scene-groups",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "scene-select",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "scene-recovery",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "hud-editor",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "render-host",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "host-services",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "import-scale-dialog-presets",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "subsystem",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "character",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "controller",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "trace-screen",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "particles",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "particle-collision",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "hud-events",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "vfs",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "export",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "sdk-examples",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "audio-decode",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "audio-play2d",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "audio-play3d",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "audio-stream",
+    "status": "passed"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "scene-create-delete",
+    "status": "partial"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "trace-filter",
+    "status": "partial"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "model-import",
+    "status": "partial"
+  },
+  {
+    "role": "tired-bomber",
+    "feature_id": "trace-world",
+    "status": "partial"
+  }
+]

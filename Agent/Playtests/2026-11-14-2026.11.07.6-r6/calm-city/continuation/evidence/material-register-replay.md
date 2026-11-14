@@ -1,0 +1,3 @@
+# Material-register capacity replay
+
+The original `material-registers.request.json` contains 122 Texture2D nodes with int32-max slot properties. Before the fix this was accepted and generated duplicate t127 declarations. After the fix the same 122-node request is rejected with the 121-slot capacity message and the previously valid graph is unchanged. `material-register-121.request.json` covers 121 such values and a second 121-node graph with unique t6..t127 except reserved t32; outputs show 121 unique bindings. `material-register-boundary121.request.json` separately confirms an explicit slot value of 121 is accepted.

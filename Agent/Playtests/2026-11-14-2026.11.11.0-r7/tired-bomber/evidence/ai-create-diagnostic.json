@@ -1,0 +1,5 @@
+{
+  "exit": 1,
+  "stdout": "",
+  "stderr": "EngineLauncher: rename: Access is denied.: \"C:\\Users\\serge\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9da21f53-0896-45a1-8aa7-5c2001278f91}\\PainEngine/Engines\\2026.11.11.0\\Release.install-10760\", \"C:\\Users\\serge\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{9da21f53-0896-45a1-8aa7-5c2001278f91}\\PainEngine/Engines\\2026.11.11.0\\Release\"\n"
+}

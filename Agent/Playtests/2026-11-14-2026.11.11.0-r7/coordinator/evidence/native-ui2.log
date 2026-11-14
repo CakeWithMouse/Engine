@@ -1,0 +1,472 @@
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: FOUND (version 3)
+[ToolBarFacts] initial tb geom=0,0 100x36, margins=(0,0,0,0), layoutMargins=(6,6,6,6), PM_ToolBarFrameWidth=6, PM_ItemMargin=0, PM_ItemSpacing=4
+[ToolBarFacts] configured tb height=36, btn height=28, topMargin=4, bottomMargin=4
+[Info] SettingsService: Set 'view/grid'
+[Info] SettingsService: Set 'view/gizmo'
+[Info] SettingsService: Set 'view/icons'
+[Info] SettingsService: Set 'view/overlays'
+[Info] SettingsService: Set 'viewport/antialiasing'
+[Info] QtHost::SetAntialiasing: mode = 1, serviceVersion = 3, handler = 00007FFFF93BE8D0
+EditorStart
+UI test
+E:\Engine\Engine\build\playtests\20261114-r7\native-ui2\Project.json
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=0 | snapObjs=4 | lines=138 (grid=138, gizmo=0, dir=0) | bbs=2 | tris=0
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+EditorSceneViewportAttach ok
+[Info] Camera: ok
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=4 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=2 | tris=0
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=138, billboardCount=2, backbuffer 713x423
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 713x423
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=4 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=2 | tris=0
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=5 | lines=143 (grid=140, gizmo=3, dir=0) | bbs=2 | tris=36
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=6 | lines=143 (grid=140, gizmo=3, dir=0) | bbs=2 | tris=36
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 121: AntialiasingMode = 1 (FXAA), bb = 713x423
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=6 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=2 | tris=0
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=6 | lines=143 (grid=140, gizmo=3, dir=0) | bbs=2 | tris=36
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 241: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/playtests/20261114-r7/native-ui2'
+[Info] FileService: deleted 'E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/del_col0.bmp'
+[Info] DeleteAsset: successfully deleted file 'E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/del_col0.bmp'
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 361: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/playtests/20261114-r7/native-ui2'
+[Info] FileService: deleted 'E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/del_col1.bmp'
+[Info] DeleteAsset: successfully deleted file 'E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/del_col1.bmp'
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 481: AntialiasingMode = 1 (FXAA), bb = 713x423
+Material 'E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Tint.hlsl' failed to compile:
+E:\Engine\Engine\build\playtests\20261114-r7\native-ui2\Content\Materials\Tint.hlsl(13,24-30): error X3004: undeclared identifier 'Missing'
+
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Tint.hlsl
+Material 'E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Tint.hlsl' failed to compile:
+E:\Engine\Engine\build\playtests\20261114-r7\native-ui2\Content\Materials\Tint.hlsl(13,24-30): error X3004: undeclared identifier 'Missing'
+
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Tint.hlsl
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 601: AntialiasingMode = 1 (FXAA), bb = 713x423
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Tint.hlsl
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Tint.hlsl
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 721: AntialiasingMode = 1 (FXAA), bb = 713x423
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 467x299
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 841: AntialiasingMode = 0 (Off), bb = 467x299
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 467x299
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 961: AntialiasingMode = 0 (Off), bb = 467x299
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 467x299
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1081: AntialiasingMode = 0 (Off), bb = 467x299
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/outside.bmp (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/outside.bmp (4x4)
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 1201: AntialiasingMode = 1 (FXAA), bb = 713x423
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/outside-red.bmp (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/outside-red.bmp (4x4)
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 1321: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 1441: AntialiasingMode = 1 (FXAA), bb = 713x423
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/outside.bmp (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/outside.bmp (4x4)
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 1561: AntialiasingMode = 1 (FXAA), bb = 713x423
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Paint.hlsl
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Paint.hlsl
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/outside-red.bmp (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/outside-red.bmp (4x4)
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 1681: AntialiasingMode = 1 (FXAA), bb = 713x423
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Paint.hlsl
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Paint.hlsl
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Paint.hlsl
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Paint.hlsl
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 1801: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 1921: AntialiasingMode = 1 (FXAA), bb = 713x423
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/outside.bmp (4x4)
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 2041: AntialiasingMode = 1 (FXAA), bb = 713x423
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 2161: AntialiasingMode = 1 (FXAA), bb = 713x423
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/outside.bmp (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/outside.bmp (4x4)
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 2281: AntialiasingMode = 1 (FXAA), bb = 713x423
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 2401: AntialiasingMode = 1 (FXAA), bb = 713x423
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/flat-normal.png (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/flat-normal.png (4x4)
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 2521: AntialiasingMode = 1 (FXAA), bb = 713x423
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/tilt-normal.png (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/tilt-normal.png (4x4)
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 2641: AntialiasingMode = 1 (FXAA), bb = 713x423
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 2761: AntialiasingMode = 1 (FXAA), bb = 713x423
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/flat-normal.png (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/flat-normal.png (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/tilt-normal.png (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/tilt-normal.png (4x4)
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 2881: AntialiasingMode = 1 (FXAA), bb = 713x423
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/tilt-normal.png (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/tilt-normal.png (4x4)
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 3001: AntialiasingMode = 1 (FXAA), bb = 713x423
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/flat-normal.png (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/flat-normal.png (4x4)
+Material 'E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl' failed to compile:
+E:\Engine\Engine\build\playtests\20261114-r7\native-ui2\Content\Materials\Graphy.hlsl(12,11-20): error X3003: redefinition of 'TimeParams'
+
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+Material 'E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl' failed to compile:
+E:\Engine\Engine\build\playtests\20261114-r7\native-ui2\Content\Materials\Graphy.hlsl(12,11-20): error X3003: redefinition of 'TimeParams'
+
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 3121: AntialiasingMode = 1 (FXAA), bb = 713x423
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+Recovery: unsaved scene checkpoint committed
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 3241: AntialiasingMode = 1 (FXAA), bb = 713x423
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 3361: AntialiasingMode = 1 (FXAA), bb = 713x423
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 3481: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 3601: AntialiasingMode = 1 (FXAA), bb = 713x423
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/outside.bmp (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/tilt-normal.png (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/flat-normal.png (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/outside.bmp (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/tilt-normal.png (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/flat-normal.png (4x4)
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 3721: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 3841: AntialiasingMode = 1 (FXAA), bb = 713x423
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/outside.bmp (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/tilt-normal.png (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/flat-normal.png (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/outside.bmp (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/tilt-normal.png (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/flat-normal.png (4x4)
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 3961: AntialiasingMode = 1 (FXAA), bb = 713x423
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/outside.bmp (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/tilt-normal.png (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/flat-normal.png (4x4)
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 543x299
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 4081: AntialiasingMode = 0 (Off), bb = 543x299
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 241x299
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 4201: AntialiasingMode = 0 (Off), bb = 241x299
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Materials/Graphy.hlsl
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/outside.bmp (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/tilt-normal.png (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/flat-normal.png (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/outside.bmp (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/tilt-normal.png (4x4)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/native-ui2/Content/Textures/flat-normal.png (4x4)
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 4321: AntialiasingMode = 1 (FXAA), bb = 713x423
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=6 | lines=143 (grid=140, gizmo=3, dir=0) | bbs=2 | tris=36
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 4441: AntialiasingMode = 1 (FXAA), bb = 713x423
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 4561: AntialiasingMode = 1 (FXAA), bb = 713x423
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 4681: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 4801: AntialiasingMode = 1 (FXAA), bb = 713x423
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 4921: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 5041: AntialiasingMode = 1 (FXAA), bb = 713x423
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Script] /Game/Scripts/Script.vscript: pressed
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=7 | lines=143 (grid=140, gizmo=3, dir=0) | bbs=3 | tris=36
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=3, backbuffer 713x423
+[Info] Frame 5161: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=3, backbuffer 713x423
+[Info] Frame 5281: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=3, backbuffer 713x423
+[Info] Frame 5401: AntialiasingMode = 1 (FXAA), bb = 713x423
+Recovery: unsaved scene checkpoint committed
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=3, backbuffer 713x423
+[Info] Frame 5521: AntialiasingMode = 1 (FXAA), bb = 713x423
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=6 | lines=143 (grid=140, gizmo=3, dir=0) | bbs=2 | tris=36
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 5641: AntialiasingMode = 1 (FXAA), bb = 713x423
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Script] /Game/Scripts/Script.vscript: pressed
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 5761: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 5881: AntialiasingMode = 1 (FXAA), bb = 713x423
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Script] /Game/Scripts/Script.vscript: node 8 (Math.Divide): division by zero; the script of this object is stopped until the next Play
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[Скрипт] /Game/Scripts/Script.vscript · Сфера · нода 8: деление на ноль
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 6001: AntialiasingMode = 1 (FXAA), bb = 713x423
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Recovery: unsaved scene checkpoint committed
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 6121: AntialiasingMode = 1 (FXAA), bb = 713x423
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 467x299
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 6241: AntialiasingMode = 0 (Off), bb = 467x299
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 6361: AntialiasingMode = 1 (FXAA), bb = 713x423
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Invalidated all 2 cached shader(s)
+Reloaded 1 material(s)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 6481: AntialiasingMode = 1 (FXAA), bb = 713x423
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=6 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=2 | tris=0
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=6 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=2 | tris=0
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=6 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=2 | tris=0
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 6601: AntialiasingMode = 1 (FXAA), bb = 713x423
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=6 | lines=143 (grid=140, gizmo=3, dir=0) | bbs=2 | tris=36
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 6721: AntialiasingMode = 1 (FXAA), bb = 713x423
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=7 | lines=287 (grid=140, gizmo=3, dir=0) | bbs=3 | tris=36
+[Info] SetPointLight ok id=7 castShadows=0
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=7 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=3 | tris=0
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=3, backbuffer 713x423
+[Info] Frame 6841: AntialiasingMode = 1 (FXAA), bb = 713x423
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=7 | lines=287 (grid=140, gizmo=3, dir=0) | bbs=3 | tris=36
+[Info] SetPointLight ok id=7 castShadows=0
+[Info] SetPointLight ok id=7 castShadows=0
+[Info] SetPointLight ok id=7 castShadows=0
+[Info] Overlay: entered, pipelineReady=1, lineCount=287, billboardCount=3, backbuffer 713x423
+[Info] Frame 6961: AntialiasingMode = 1 (FXAA), bb = 713x423
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=7 | lines=287 (grid=140, gizmo=3, dir=0) | bbs=3 | tris=36
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=8 | lines=287 (grid=140, gizmo=3, dir=0) | bbs=4 | tris=36
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=7 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=3 | tris=0
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=3, backbuffer 713x423
+[Info] Frame 7081: AntialiasingMode = 1 (FXAA), bb = 713x423
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=7 | lines=287 (grid=140, gizmo=3, dir=0) | bbs=3 | tris=36
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=6 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=2 | tris=0
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 7201: AntialiasingMode = 1 (FXAA), bb = 713x423
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=7 | lines=143 (grid=140, gizmo=3, dir=0) | bbs=2 | tris=36
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+[Info] SettingsService: Set 'layout/62613da144ba/state'
+[Info] SettingsService: Set 'layout/62613da144ba/geometry'
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=2, backbuffer 713x423
+[Info] Frame 7321: AntialiasingMode = 1 (FXAA), bb = 713x423
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=8 | lines=143 (grid=140, gizmo=3, dir=0) | bbs=3 | tris=36
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=3, backbuffer 713x423
+[Info] Frame 7441: AntialiasingMode = 1 (FXAA), bb = 713x423
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=8 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=3 | tris=0
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=3, backbuffer 713x423
+[Info] Frame 7561: AntialiasingMode = 1 (FXAA), bb = 713x423
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=8 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=3 | tris=0
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=3, backbuffer 713x423
+[Info] Frame 7681: AntialiasingMode = 1 (FXAA), bb = 713x423
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=9 | lines=144 (grid=140, gizmo=3, dir=1) | bbs=4 | tris=36
+[Info] Overlay: entered, pipelineReady=1, lineCount=144, billboardCount=4, backbuffer 713x423
+[Info] Frame 7801: AntialiasingMode = 1 (FXAA), bb = 713x423
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[Info] Overlay: entered, pipelineReady=1, lineCount=144, billboardCount=4, backbuffer 713x423
+[Info] Frame 7921: AntialiasingMode = 1 (FXAA), bb = 713x423
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=8 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=3 | tris=0
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=9 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=4 | tris=0
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=4, backbuffer 713x423
+[Info] Frame 8041: AntialiasingMode = 1 (FXAA), bb = 713x423
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=10 | lines=143 (grid=140, gizmo=3, dir=0) | bbs=5 | tris=36
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=10 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=5 | tris=0
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 713x423
+[Info] Frame 8161: AntialiasingMode = 1 (FXAA), bb = 713x423
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=10 | lines=143 (grid=140, gizmo=3, dir=0) | bbs=5 | tris=36
+[Info] SettingsService: Set 'layout/62613da144ba/state'
+[Info] SettingsService: Set 'layout/62613da144ba/geometry'
+EditorRequestExit
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=0 | snapObjs=10 | lines=138 (grid=138, gizmo=0, dir=0) | bbs=5 | tris=0
+EditorUpdates=6359
+EditorStop
+EditorUiTests: 7170 checks passed
+[Info] Viewport overlay service: NOT FOUND (version 0)

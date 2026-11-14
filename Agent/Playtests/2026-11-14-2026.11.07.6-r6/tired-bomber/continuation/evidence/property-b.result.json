@@ -1,0 +1,85 @@
+{
+    "data": {
+        "farClip": 10000,
+        "fov": 42,
+        "nearClip": 0.10000000149011612,
+        "orthoHeight": 10,
+        "orthographic": false,
+        "version": 1,
+        "viewPlane": 0
+    },
+    "error": "",
+    "ok": true,
+    "schema": {
+        "fields": [
+            {
+                "label": "Проекция",
+                "options": [
+                    {
+                        "label": "Перспектива",
+                        "value": false
+                    },
+                    {
+                        "label": "Ортографическая (2D)",
+                        "value": true
+                    }
+                ],
+                "path": "/orthographic",
+                "type": "enum"
+            },
+            {
+                "label": "Угол обзора (градусы)",
+                "max": 179,
+                "min": 1,
+                "path": "/fov",
+                "type": "number"
+            },
+            {
+                "label": "Ближняя граница",
+                "max": 100000,
+                "min": 0.001,
+                "path": "/nearClip",
+                "type": "number"
+            },
+            {
+                "label": "Дальняя граница",
+                "max": 1000000,
+                "min": 0.002,
+                "path": "/farClip",
+                "type": "number"
+            },
+            {
+                "label": "Высота 2D-вида",
+                "max": 1000000,
+                "min": 0.001,
+                "path": "/orthoHeight",
+                "type": "number"
+            },
+            {
+                "label": "Плоскость просмотра",
+                "options": [
+                    {
+                        "label": "По повороту камеры",
+                        "value": 0
+                    },
+                    {
+                        "label": "XY — спереди",
+                        "value": 1
+                    },
+                    {
+                        "label": "XZ — сверху",
+                        "value": 2
+                    },
+                    {
+                        "label": "YZ — сбоку",
+                        "value": 3
+                    }
+                ],
+                "path": "/viewPlane",
+                "type": "enum"
+            }
+        ],
+        "version": 1
+    },
+    "status": 0
+}

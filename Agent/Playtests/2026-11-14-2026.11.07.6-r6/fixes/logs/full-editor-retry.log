@@ -1,0 +1,18 @@
+PASS CoreTests
+PASS HostTests
+PASS UiTests
+PASS EngineTests
+PASS HudTests
+PASS EditorReloadTests
+PASS Create-standard
+PASS UI-standard
+PASS Create-authoring
+PASS UI-authoring
+PASS Create-workflow
+PASS UI-workflow
+PASS UI-recovery
+PASS Create-layout
+PASS UI-layout
+PASS Create-reload
+PASS UI-reload
+Regression checks passed (Release). Logs: E:\Engine\Engine\build\editor-regression\Release-62e201bdddbb411faecd482897af00ee

@@ -1,0 +1,1 @@
+PASS: imported skeletal animation produced at least 3 point-shadow map states.

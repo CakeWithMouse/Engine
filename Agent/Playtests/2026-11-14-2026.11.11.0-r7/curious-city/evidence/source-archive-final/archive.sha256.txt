@@ -1,0 +1,6 @@
+file=curious-city-r7-source-only-final.zip
+entries=119
+sha256=F3EB6F293F0B7BDAD93AD1E95564D75750D97A6F25450A951389C0F5AE620E0C
+fresh_extract=E:/Engine/Engine/build/playtests/20261114-r7/curious-city/final-source-archive-verify
+build_dll=7d634a7354a94a46918cc5bb3a92ab9c/Game.dll
+result=clean Main scene; CityHud.ui; purchase/save/load passed

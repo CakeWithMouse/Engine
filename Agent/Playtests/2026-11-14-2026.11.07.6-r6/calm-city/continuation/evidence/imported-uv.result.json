@@ -1,0 +1,74 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "basis": [
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ]
+            ],
+            "center": [
+                2,
+                2,
+                57
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation/mesh-imported/imported-uv-top.bmp",
+            "restored": false,
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "sha256": "01fb5ee557e0d5aef863d83b67a5dad39df6efc9534c17d06c78726f0c8f7b22",
+            "transientMaterialRebound": false
+        }
+    ],
+    "ok": true,
+    "originalBasis": [
+        [
+            1,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            1
+        ]
+    ]
+}

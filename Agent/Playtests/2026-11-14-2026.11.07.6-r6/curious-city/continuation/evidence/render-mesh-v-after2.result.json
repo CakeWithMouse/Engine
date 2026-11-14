@@ -1,0 +1,200 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "basis": [
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ]
+            ],
+            "center": [
+                128,
+                128,
+                0
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-v-base-after2.bmp",
+            "restored": false,
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "sha256": "b7508f132f3ab64f9b4928382854aa7364a65375ef91659794c42295af31c4f5",
+            "transientMaterialRebound": false
+        },
+        {
+            "basis": [
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ]
+            ],
+            "center": [
+                127,
+                127,
+                0
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-v-negx-after2.bmp",
+            "restored": false,
+            "scale": [
+                -1,
+                1,
+                1
+            ],
+            "sha256": "a89af5b1870171a2a5595e9f670c90e090909ccec1cba73f52168079ba4e61f3",
+            "transientMaterialRebound": false
+        },
+        {
+            "basis": [
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ]
+            ],
+            "center": [
+                128,
+                127,
+                255
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-v-negz-after2.bmp",
+            "restored": false,
+            "scale": [
+                1,
+                1,
+                -1
+            ],
+            "sha256": "4613f87d894549f889b9955f6af7a9bd96d9fa02f6e7e54928f1383eb03b9959",
+            "transientMaterialRebound": false
+        },
+        {
+            "basis": [
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ]
+            ],
+            "center": [
+                127,
+                127,
+                0
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-v-save-after2.bmp",
+            "restored": true,
+            "scale": [
+                -1,
+                1,
+                1
+            ],
+            "sha256": "a89af5b1870171a2a5595e9f670c90e090909ccec1cba73f52168079ba4e61f3",
+            "transientMaterialRebound": true
+        }
+    ],
+    "ok": true,
+    "originalBasis": [
+        [
+            1,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            1
+        ]
+    ]
+}

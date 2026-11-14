@@ -1,0 +1,42 @@
+{
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/calm-city/AIPlayground/Project.json",
+  "steps": [
+    {
+      "action": "select",
+      "target": "Calm Sentinel"
+    },
+    {
+      "milliseconds": 1200,
+      "action": "wait"
+    },
+    {
+      "name": "AiMemory_Home",
+      "scope": "main",
+      "value": "2, 0, 1",
+      "action": "field"
+    },
+    {
+      "action": "select",
+      "target": "Игрок"
+    },
+    {
+      "action": "select",
+      "target": "Calm Sentinel"
+    },
+    {
+      "milliseconds": 500,
+      "action": "wait"
+    },
+    {
+      "action": "scroll",
+      "name": "AiMemory_Home"
+    },
+    {
+      "image": "E:/Engine/Engine/build/playtests/20261114-r7/calm-city/results/ai-memory-card.png",
+      "scope": "main",
+      "milliseconds": 300,
+      "action": "wait"
+    }
+  ],
+  "machine": "/Game/AI/CalmRoutine.fsm"
+}

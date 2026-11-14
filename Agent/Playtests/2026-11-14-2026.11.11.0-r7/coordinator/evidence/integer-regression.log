@@ -1,0 +1,1 @@
+{"passed": 13, "result": "Fractional and huge integer inputs are rejected before int conversion."}

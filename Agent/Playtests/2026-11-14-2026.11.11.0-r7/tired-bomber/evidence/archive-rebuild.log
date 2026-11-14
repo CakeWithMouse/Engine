@@ -1,0 +1,13 @@
+﻿
+  ComponentGenerator: 13 component(s), Project
+  BomberTarget.cpp
+  Module.cpp
+  ProjectComponent.cpp
+  ProjectGame.cpp
+  R3WizardProbe.cpp
+  RenderHostProbe.cpp
+  RotatingCube.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+     Создается библиотека E:\Engine\Engine\build\playtests\20261114-r7\tired-bomber\BomberArchiveCheck\Binaries\Release\8ecb9cf35110423fa2fe099ae2f5839d\Game.lib и объект E:\Engine\Engine\build\playtests\20261114-r7\tired-bomber\BomberArchiveCheck\Binaries\Release\8ecb9cf35110423fa2fe099ae2f5839d\Game.exp
+  Game.vcxproj -> E:\Engine\Engine\build\playtests\20261114-r7\tired-bomber\BomberArchiveCheck\Binaries\Release\8ecb9cf35110423fa2fe099ae2f5839d\Game.dll

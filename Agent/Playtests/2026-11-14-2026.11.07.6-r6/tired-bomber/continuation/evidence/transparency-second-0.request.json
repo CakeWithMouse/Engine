@@ -1,0 +1,137 @@
+{
+  "orthographic": false,
+  "frames": [
+    {
+      "height": 300,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "width": 420,
+      "time": 0.2,
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\transparency-second-0-a.bmp",
+      "camera": [
+        0.5,
+        2,
+        -7
+      ]
+    },
+    {
+      "height": 320,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "width": 540,
+      "time": 0.6,
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\transparency-second-0-b.bmp",
+      "camera": [
+        -3,
+        1.2,
+        -6.5
+      ]
+    }
+  ],
+  "rendering": 0,
+  "height": 300,
+  "width": 420,
+  "groups": [
+    {
+      "layers": [
+        {
+          "position": [
+            0,
+            0,
+            0.4
+          ],
+          "alpha": 0.55,
+          "color": [
+            0.95,
+            0.12,
+            0.15
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "position": [
+            0,
+            0,
+            -0.4
+          ],
+          "alpha": 0.4,
+          "color": [
+            0.1,
+            0.85,
+            0.25
+          ],
+          "rotation": [
+            0,
+            35,
+            0
+          ]
+        }
+      ],
+      "kind": "skeletal",
+      "material": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\gpu\\transparency\\Layer.mat",
+      "height": 3,
+      "width": 5,
+      "geometry": "cross"
+    },
+    {
+      "lodScreenHeights": [
+        160
+      ],
+      "geometry": "cross",
+      "layers": [
+        {
+          "position": [
+            0,
+            0,
+            -0.1
+          ],
+          "alpha": 0.3,
+          "color": [
+            0.1,
+            0.35,
+            1
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "position": [
+            0,
+            0,
+            0.1
+          ],
+          "alpha": 0.35,
+          "color": [
+            0.9,
+            0.8,
+            0.1
+          ],
+          "rotation": [
+            0,
+            -25,
+            0
+          ]
+        }
+      ],
+      "height": 3,
+      "lods": 2,
+      "fade": 0.25,
+      "material": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\gpu\\transparency\\Layer.mat",
+      "kind": "crowd",
+      "width": 5
+    }
+  ]
+}

@@ -1,2 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Playtest evidence is hashed byte-for-byte; preserve recorded line endings.
+Agent/Playtests/2026-11-14-2026.11.07.6-r6/** -text
+Agent/Playtests/2026-11-14-2026.11.11.0-r7/** -text

@@ -1,0 +1,18 @@
+{
+  "direction": [
+    0,
+    0,
+    -1
+  ],
+  "width": 640,
+  "y": 360,
+  "fov": 60,
+  "orthographic": false,
+  "x": 480,
+  "origin": [
+    0,
+    0,
+    5
+  ],
+  "height": 480
+}

@@ -1,0 +1,39 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Project.json",
+  "nativeViewport": true,
+  "steps": [
+    {
+      "action": "frames",
+      "count": 1
+    },
+    {
+      "action": "play"
+    },
+    {
+      "action": "frames",
+      "count": 4
+    },
+    {
+      "width": 960,
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\hud-layout-native-play\\play-960x720.png",
+      "scope": "main",
+      "action": "resize-window",
+      "height": 720
+    },
+    {
+      "action": "frames",
+      "count": 2
+    },
+    {
+      "width": 1280,
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\hud-layout-native-play\\play-1280x720.png",
+      "scope": "main",
+      "action": "resize-window",
+      "height": 720
+    },
+    {
+      "action": "frames",
+      "count": 2
+    }
+  ]
+}

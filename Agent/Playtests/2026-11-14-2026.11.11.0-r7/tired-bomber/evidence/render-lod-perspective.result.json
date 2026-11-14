@@ -1,0 +1,128 @@
+{
+    "frames": [
+        {
+            "distanceCulled": 0,
+            "drawCalls": 1,
+            "drawn": 1,
+            "frameIndex": 1,
+            "frustumCulled": 0,
+            "hidden": 0,
+            "instancesSubmitted": 1,
+            "lines": [
+                "RENDER / LOD    F7 hide | F8 next",
+                "Frame 1 | CPU submission counters",
+                "Draws 1  instances 1  dispatch 0",
+                "Indices 36 (all passes)",
+                "Component 1/1  Diagnostics instances",
+                "Color visible 1 / 1",
+                "Hidden 0  distance 0  frustum 0",
+                "Camera distance 5.0..5.0",
+                "Draw limit 100.0 | LOD by screen pixels",
+                "LOD0 mesh: 1 | next < 150.0 px",
+                "LOD1 mesh: 0 | next < 50.0 px",
+                "LOD2 mesh: 0",
+                "Buckets may overlap during LOD fade",
+                "Color selection only; shadows counted separately"
+            ],
+            "maxDistance": 5,
+            "minDistance": 5,
+            "perLod": [
+                1,
+                0,
+                0
+            ],
+            "prepared": true,
+            "previousValid": false,
+            "screenSize": true,
+            "thresholds": [
+                150,
+                50
+            ],
+            "total": 1,
+            "valid": true
+        },
+        {
+            "distanceCulled": 0,
+            "drawCalls": 1,
+            "drawn": 1,
+            "frameIndex": 2,
+            "frustumCulled": 0,
+            "hidden": 0,
+            "instancesSubmitted": 1,
+            "lines": [
+                "RENDER / LOD    F7 hide | F8 next",
+                "Frame 2 | CPU submission counters",
+                "Draws 1  instances 1  dispatch 0",
+                "Indices 36 (all passes)",
+                "Component 1/1  Diagnostics instances",
+                "Color visible 1 / 1",
+                "Hidden 0  distance 0  frustum 0",
+                "Camera distance 15.0..15.0",
+                "Draw limit 100.0 | LOD by screen pixels",
+                "LOD0 mesh: 0 | next < 150.0 px",
+                "LOD1 mesh: 1 | next < 50.0 px",
+                "LOD2 mesh: 0",
+                "Buckets may overlap during LOD fade",
+                "Color selection only; shadows counted separately"
+            ],
+            "maxDistance": 15,
+            "minDistance": 15,
+            "perLod": [
+                0,
+                1,
+                0
+            ],
+            "prepared": true,
+            "previousValid": true,
+            "screenSize": true,
+            "thresholds": [
+                150,
+                50
+            ],
+            "total": 1,
+            "valid": true
+        },
+        {
+            "distanceCulled": 0,
+            "drawCalls": 1,
+            "drawn": 1,
+            "frameIndex": 3,
+            "frustumCulled": 0,
+            "hidden": 0,
+            "instancesSubmitted": 1,
+            "lines": [
+                "RENDER / LOD    F7 hide | F8 next",
+                "Frame 3 | CPU submission counters",
+                "Draws 1  instances 1  dispatch 0",
+                "Indices 36 (all passes)",
+                "Component 1/1  Diagnostics instances",
+                "Color visible 1 / 1",
+                "Hidden 0  distance 0  frustum 0",
+                "Camera distance 40.0..40.0",
+                "Draw limit 100.0 | LOD by screen pixels",
+                "LOD0 mesh: 0 | next < 150.0 px",
+                "LOD1 mesh: 0 | next < 50.0 px",
+                "LOD2 mesh: 1",
+                "Buckets may overlap during LOD fade",
+                "Color selection only; shadows counted separately"
+            ],
+            "maxDistance": 40,
+            "minDistance": 40,
+            "perLod": [
+                0,
+                0,
+                1
+            ],
+            "prepared": true,
+            "previousValid": true,
+            "screenSize": true,
+            "thresholds": [
+                150,
+                50
+            ],
+            "total": 1,
+            "valid": true
+        }
+    ],
+    "ok": true
+}

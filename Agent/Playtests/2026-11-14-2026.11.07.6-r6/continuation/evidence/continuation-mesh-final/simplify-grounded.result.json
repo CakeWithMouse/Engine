@@ -1,0 +1,31 @@
+{
+    "error": 0.013782911002635956,
+    "ok": true,
+    "reduced": {
+        "degenerateTriangles": 0,
+        "hasTexCoords": true,
+        "missingNormals": 0,
+        "problems": [
+        ],
+        "triangles": 380,
+        "usable": true,
+        "vertices": 228,
+        "warnings": [
+        ]
+    },
+    "silhouetteDrift": 0,
+    "source": {
+        "degenerateTriangles": 0,
+        "hasTexCoords": true,
+        "missingNormals": 0,
+        "problems": [
+        ],
+        "triangles": 1088,
+        "usable": true,
+        "vertices": 627,
+        "warnings": [
+        ]
+    },
+    "targetTriangles": 380,
+    "usedSloppy": false
+}

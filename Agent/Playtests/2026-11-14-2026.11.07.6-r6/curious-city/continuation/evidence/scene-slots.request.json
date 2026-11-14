@@ -1,0 +1,32 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Project.json",
+  "steps": [
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Content\\Scenes\\MaterialSlotsBefore.scene.json",
+      "action": "load"
+    },
+    {
+      "target": "TwinMaterialSuzanne",
+      "path": "/materialSlots/1",
+      "action": "property",
+      "value": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat"
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "action": "redo"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Content\\Scenes\\SlotEditContinuation.scene.json",
+      "action": "save"
+    },
+    {
+      "action": "new"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Content\\Scenes\\SlotEditContinuation.scene.json",
+      "action": "load"
+    }
+  ]
+}

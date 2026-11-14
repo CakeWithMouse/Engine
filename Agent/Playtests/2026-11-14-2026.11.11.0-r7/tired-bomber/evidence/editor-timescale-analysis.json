@@ -1,0 +1,46 @@
+{
+  "hostFrames": [
+    30,
+    30,
+    30
+  ],
+  "pauseStageHostFrames": 30,
+  "results": [
+    {
+      "accumulatedAtFrame60": 0,
+      "accumulatedAtFrame30": 0,
+      "scale": 0,
+      "playerZ": [
+        5,
+        5,
+        5,
+        5,
+        5
+      ]
+    },
+    {
+      "accumulatedAtFrame60": 0.48,
+      "accumulatedAtFrame30": 0.24,
+      "scale": 0.5,
+      "playerZ": [
+        5,
+        3.8000011444,
+        3.8000011444,
+        3.8000011444,
+        2.6000022888
+      ]
+    },
+    {
+      "accumulatedAtFrame60": 1.92,
+      "accumulatedAtFrame30": 0.96,
+      "scale": 2,
+      "playerZ": [
+        5,
+        0.200000003,
+        0.200000003,
+        0.200000003,
+        -4.6000003815
+      ]
+    }
+  ]
+}

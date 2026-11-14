@@ -1,0 +1,68 @@
+{
+  "width": 640,
+  "height": 480,
+  "camera": [
+    7,
+    8,
+    -13
+  ],
+  "target": [
+    0,
+    0,
+    0
+  ],
+  "globalShadows": true,
+  "sceneLighting": false,
+  "radius": 25,
+  "intensity": 2.8,
+  "caster": "skeletal",
+  "model": "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\tired-bomber\\evidence\\imported-shadow-cesium-man.glb",
+  "scale": 1.15,
+  "frames": [
+    {
+      "position": [
+        0,
+        1.15,
+        0
+      ],
+      "time": 0.35,
+      "light": [
+        -3,
+        5,
+        -3
+      ],
+      "shadows": true,
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\final-b-graphics\\imported-shadow-on.bmp"
+    },
+    {
+      "position": [
+        0,
+        1.15,
+        0
+      ],
+      "time": 0.35,
+      "light": [
+        -3,
+        5,
+        -3
+      ],
+      "shadows": false,
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\final-b-graphics\\imported-shadow-off.bmp"
+    },
+    {
+      "position": [
+        0,
+        1.15,
+        0
+      ],
+      "time": 0.35,
+      "light": [
+        -3,
+        5,
+        -3
+      ],
+      "shadows": true,
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\final-b-graphics\\imported-shadow-return.bmp"
+    }
+  ]
+}

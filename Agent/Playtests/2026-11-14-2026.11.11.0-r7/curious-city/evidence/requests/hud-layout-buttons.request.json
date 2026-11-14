@@ -1,0 +1,56 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Project.json",
+  "steps": [
+    {
+      "action": "ui-open",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Content\\UI\\CityHudAlt.ui"
+    },
+    {
+      "action": "ui-select",
+      "target": "saveCity"
+    },
+    {
+      "name": "UIRect0",
+      "action": "ui-field",
+      "value": 136
+    },
+    {
+      "action": "ui-select",
+      "target": "loadCity"
+    },
+    {
+      "name": "UIRect0",
+      "action": "ui-field",
+      "value": 222
+    },
+    {
+      "action": "ui-action",
+      "name": "UISave"
+    },
+    {
+      "name": "UIPreviewSize",
+      "action": "ui-field",
+      "index": 0
+    },
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\hud-layout-buttons\\preview-1280x720.png",
+      "name": "UISave",
+      "scope": "ui",
+      "action": "ui-action"
+    },
+    {
+      "name": "UIPreviewSize",
+      "action": "ui-field",
+      "index": 2
+    },
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\hud-layout-buttons\\preview-800x600.png",
+      "name": "UISave",
+      "scope": "ui",
+      "action": "ui-action"
+    },
+    {
+      "action": "ui-close"
+    }
+  ]
+}

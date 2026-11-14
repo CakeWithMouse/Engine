@@ -1,0 +1,106 @@
+{
+  "name": "Scene",
+  "objects": [
+    {
+      "id": 1,
+      "inheritParentScale": true,
+      "name": "NorthHome",
+      "parent": 0,
+      "transform": {
+        "position": [
+          4.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "CuriousCity.House"
+    },
+    {
+      "id": 2,
+      "inheritParentScale": true,
+      "name": "SouthHome",
+      "parent": 1,
+      "transform": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "CuriousCity.House"
+    },
+    {
+      "id": 3,
+      "inheritParentScale": true,
+      "name": "NorthHome 2",
+      "parent": 0,
+      "transform": {
+        "position": [
+          5.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "CuriousCity.House"
+    },
+    {
+      "id": 4,
+      "inheritParentScale": true,
+      "name": "SouthHome 2",
+      "parent": 3,
+      "transform": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "CuriousCity.House"
+    }
+  ],
+  "version": 3
+}

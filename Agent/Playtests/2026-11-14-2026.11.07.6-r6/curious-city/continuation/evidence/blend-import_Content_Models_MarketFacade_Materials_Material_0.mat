@@ -1,0 +1,16 @@
+{
+  "params": {
+    "Tint": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "shader": "Imported.hlsl",
+  "sourceMaterial": "MarketFacadeMaterial",
+  "textures": {
+    "BaseMap": "../Textures/BaseColor_0.png"
+  },
+  "version": 1
+}

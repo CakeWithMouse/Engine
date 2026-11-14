@@ -1,0 +1,10 @@
+vfs_read path=/Game/Config/city-settings.txt value=district=harbor
+event=scene_ready balance=500 houses=0
+event=hud_reference_rebound balance=500 houses=0
+event=build_ui_click
+event=house_add_deferred_accepted_and_charged balance=400 houses=1
+vfs_read path=/Game/Config/city-settings.txt value=district=harbor
+event=scene_ready balance=500 houses=0
+event=hud_reference_rebound balance=500 houses=0
+event=build_ui_click
+event=house_add_deferred_accepted_and_charged balance=400 houses=1

@@ -1,0 +1,21 @@
+{
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/ai-editor-smoke/Project.json",
+  "machine": "/Game/AI/Guard.fsm",
+  "steps": [
+    {
+      "action": "check",
+      "image": "E:/Engine/Engine/build/playtests/20261114-r7/ai-window-smoke.png"
+    },
+    {
+      "action": "play"
+    },
+    {
+      "count": 80,
+      "dt": 0.025,
+      "action": "frames"
+    },
+    {
+      "action": "stop"
+    }
+  ]
+}

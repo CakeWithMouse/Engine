@@ -1,0 +1,32 @@
+{
+  "cameraMinusZ": {
+    "expected": [
+      128,
+      64,
+      32
+    ],
+    "actual": [
+      127,
+      64,
+      38
+    ],
+    "maxChannelError": 6,
+    "near": "red"
+  },
+  "cameraPlusZ": {
+    "expected": [
+      32,
+      64,
+      128
+    ],
+    "actual": [
+      32,
+      64,
+      133
+    ],
+    "maxChannelError": 5,
+    "near": "blue"
+  },
+  "tolerance": 8,
+  "method": "Read center pixel from 24-bit BMP. Independent source-over oracle for alpha 0.5 RGB red/green/blue over black; camera reversal changes nearest color."
+}

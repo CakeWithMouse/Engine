@@ -1,0 +1,29 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\fresh-city\\Project.json",
+  "material": "/Game/Materials/WarmStone.mat",
+  "steps": [
+    {
+      "action": "enable"
+    },
+    {
+      "action": "save"
+    },
+    {
+      "action": "preset",
+      "index": 1
+    },
+    {
+      "action": "apply"
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "action": "redo"
+    },
+    {
+      "action": "revert"
+    }
+  ],
+  "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\material-graph.png"
+}

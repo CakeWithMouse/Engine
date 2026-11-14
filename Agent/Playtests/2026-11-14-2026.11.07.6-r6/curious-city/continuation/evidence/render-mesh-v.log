@@ -1,0 +1,213 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r6/curious-city/continuation/city-copy/Content/Materials/NormalProbeV.bmp (1x1)
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 320x240
+[Info] Overlay: early return (empty lines and billboards)
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\curious-city\continuation\tangent-v-base.bmp written=1 size=320x240
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 320x240
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\curious-city\continuation\tangent-v-negx.bmp written=1 size=320x240
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\curious-city\continuation\tangent-v-negz.bmp written=1 size=320x240
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\curious-city\continuation\tangent-v-save.bmp written=1 size=320x240
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "basis": [
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ]
+            ],
+            "center": [
+                128,
+                128,
+                0
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-v-base.bmp",
+            "restored": false,
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "sha256": "b7508f132f3ab64f9b4928382854aa7364a65375ef91659794c42295af31c4f5",
+            "transientMaterialRebound": false
+        },
+        {
+            "basis": [
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ]
+            ],
+            "center": [
+                127,
+                127,
+                255
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-v-negx.bmp",
+            "restored": false,
+            "scale": [
+                -1,
+                1,
+                1
+            ],
+            "sha256": "fd28cc42c61ae20189959b7c1da35841edb3c90b279bab959298d0ac3ebdc215",
+            "transientMaterialRebound": false
+        },
+        {
+            "basis": [
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ]
+            ],
+            "center": [
+                128,
+                127,
+                0
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-v-negz.bmp",
+            "restored": false,
+            "scale": [
+                1,
+                1,
+                -1
+            ],
+            "sha256": "d71480f31cab37eb67cbc23bf2ca7f038cc23ba0f2c2128a3d99469f475399a1",
+            "transientMaterialRebound": false
+        },
+        {
+            "basis": [
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ]
+            ],
+            "center": [
+                127,
+                127,
+                255
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-v-save.bmp",
+            "restored": true,
+            "scale": [
+                -1,
+                1,
+                1
+            ],
+            "sha256": "fd28cc42c61ae20189959b7c1da35841edb3c90b279bab959298d0ac3ebdc215",
+            "transientMaterialRebound": true
+        }
+    ],
+    "ok": true,
+    "originalBasis": [
+        [
+            1,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            1
+        ]
+    ]
+}

@@ -1,0 +1,4912 @@
+{
+    "before": {
+        "camera": {
+            "height": 480,
+            "position": [
+                0,
+                0,
+                5
+            ],
+            "projection": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "view": [
+                -1,
+                0,
+                -4.371138828673793e-08,
+                0,
+                0,
+                1,
+                0,
+                0,
+                4.371138828673793e-08,
+                0,
+                -1,
+                0,
+                2.18556948539117e-07,
+                0,
+                -5,
+                1
+            ],
+            "width": 640
+        },
+        "canRedo": false,
+        "canUndo": false,
+        "checkCount": 1,
+        "coordinateSpaceLocal": false,
+        "detail": "",
+        "file": {
+            "connections": [
+                {
+                    "fromNode": 1,
+                    "fromPin": "out",
+                    "properties": {
+                        "trigger": "completed"
+                    },
+                    "toNode": 2,
+                    "toPin": "in"
+                },
+                {
+                    "fromNode": 2,
+                    "fromPin": "out",
+                    "properties": {
+                        "trigger": "completed"
+                    },
+                    "toNode": 1,
+                    "toPin": "in"
+                }
+            ],
+            "format": "ITMOEngine.Graph",
+            "nodes": [
+                {
+                    "id": 1,
+                    "properties": {
+                        "name": "WalkToBin",
+                        "tasks": [
+                            {
+                                "radius": 0.4,
+                                "target": "BinSide",
+                                "type": "Ai.MoveTo"
+                            }
+                        ]
+                    },
+                    "title": "Walk to bin",
+                    "type": "Fsm.State",
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "id": 2,
+                    "properties": {
+                        "name": "ReturnToStart",
+                        "tasks": [
+                            {
+                                "radius": 0.4,
+                                "target": "StartSide",
+                                "type": "Ai.MoveTo"
+                            }
+                        ]
+                    },
+                    "title": "Return to start",
+                    "type": "Fsm.State",
+                    "x": 320,
+                    "y": 0
+                }
+            ],
+            "schema": "ai.fsm",
+            "schemaVersion": 1,
+            "settings": {
+                "thinkInterval": 0.05
+            },
+            "variables": [
+                {
+                    "name": "BinSide",
+                    "type": "vec3",
+                    "value": [
+                        -2,
+                        0.5,
+                        3
+                    ]
+                },
+                {
+                    "name": "StartSide",
+                    "type": "vec3",
+                    "value": [
+                        -4,
+                        0.5,
+                        3
+                    ]
+                }
+            ],
+            "version": 1
+        },
+        "fileSha256": "026d3b55ca4c9c531f49ffd6266419a6fd5aa7cf15039adc4af6e7bd9adba9c7",
+        "graph": {
+            "connections": [
+                {
+                    "fromNode": 1,
+                    "fromPin": "out",
+                    "properties": {
+                        "trigger": "completed"
+                    },
+                    "toNode": 2,
+                    "toPin": "in"
+                },
+                {
+                    "fromNode": 2,
+                    "fromPin": "out",
+                    "properties": {
+                        "trigger": "completed"
+                    },
+                    "toNode": 1,
+                    "toPin": "in"
+                }
+            ],
+            "format": "ITMOEngine.Graph",
+            "nodes": [
+                {
+                    "id": 1,
+                    "properties": {
+                        "name": "WalkToBin",
+                        "tasks": [
+                            {
+                                "radius": 0.4,
+                                "target": "BinSide",
+                                "type": "Ai.MoveTo"
+                            }
+                        ]
+                    },
+                    "title": "Walk to bin",
+                    "type": "Fsm.State",
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "id": 2,
+                    "properties": {
+                        "name": "ReturnToStart",
+                        "tasks": [
+                            {
+                                "radius": 0.4,
+                                "target": "StartSide",
+                                "type": "Ai.MoveTo"
+                            }
+                        ]
+                    },
+                    "title": "Return to start",
+                    "type": "Fsm.State",
+                    "x": 320,
+                    "y": 0
+                }
+            ],
+            "schema": "ai.fsm",
+            "schemaVersion": 1,
+            "settings": {
+                "thinkInterval": 0.05
+            },
+            "variables": [
+                {
+                    "name": "BinSide",
+                    "type": "vec3",
+                    "value": [
+                        -2,
+                        0.5,
+                        3
+                    ]
+                },
+                {
+                    "name": "StartSide",
+                    "type": "vec3",
+                    "value": [
+                        -4,
+                        0.5,
+                        3
+                    ]
+                }
+            ],
+            "version": 1
+        },
+        "hudChoice": "UI/Hud.ui",
+        "hudDescriptorExists": true,
+        "live": [
+        ],
+        "machine": "/Game/AI/TrashSorter.fsm",
+        "objects": [
+            {
+                "id": 1,
+                "material": "",
+                "name": "Ground",
+                "parent": 0,
+                "position": [
+                    0,
+                    -0.5,
+                    0
+                ],
+                "projectData": {
+                },
+                "rotation": [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "scale": [
+                    20,
+                    1,
+                    20
+                ],
+                "type": "Primitive.Plane"
+            },
+            {
+                "id": 2,
+                "material": "",
+                "name": "Warm Light",
+                "parent": 0,
+                "position": [
+                    0,
+                    5,
+                    -1
+                ],
+                "projectData": {
+                },
+                "rotation": [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "scale": [
+                    1,
+                    1,
+                    1
+                ],
+                "type": "Light.Point"
+            },
+            {
+                "id": 3,
+                "material": "",
+                "name": "Cool Light",
+                "parent": 0,
+                "position": [
+                    3,
+                    4,
+                    6
+                ],
+                "projectData": {
+                },
+                "rotation": [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "scale": [
+                    1,
+                    1,
+                    1
+                ],
+                "type": "Light.Point"
+            },
+            {
+                "id": 4,
+                "material": "",
+                "name": "Throw lane",
+                "parent": 0,
+                "position": [
+                    0,
+                    0.03999999910593033,
+                    -0.5
+                ],
+                "projectData": {
+                },
+                "rotation": [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "scale": [
+                    4.800000190734863,
+                    0.07999999821186066,
+                    14
+                ],
+                "type": "Trash.ThrowLane"
+            },
+            {
+                "id": 5,
+                "material": "",
+                "name": "Bucket base",
+                "parent": 0,
+                "position": [
+                    0,
+                    0.11999999731779099,
+                    5.199999809265137
+                ],
+                "projectData": {
+                },
+                "rotation": [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "scale": [
+                    2.5999999046325684,
+                    0.4000000059604645,
+                    2.5999999046325684
+                ],
+                "type": "Trash.BucketBase"
+            },
+            {
+                "id": 6,
+                "material": "",
+                "name": "Bucket left wall",
+                "parent": 0,
+                "position": [
+                    -1.25,
+                    0.75,
+                    5.199999809265137
+                ],
+                "projectData": {
+                },
+                "rotation": [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "scale": [
+                    0.18000000715255737,
+                    1.5,
+                    2.700000047683716
+                ],
+                "type": "Trash.BucketWall"
+            },
+            {
+                "id": 7,
+                "material": "",
+                "name": "Bucket right wall",
+                "parent": 0,
+                "position": [
+                    1.25,
+                    0.75,
+                    5.199999809265137
+                ],
+                "projectData": {
+                },
+                "rotation": [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "scale": [
+                    0.18000000715255737,
+                    1.5,
+                    2.700000047683716
+                ],
+                "type": "Trash.BucketWall"
+            },
+            {
+                "id": 8,
+                "material": "",
+                "name": "Bucket front wall",
+                "parent": 0,
+                "position": [
+                    0,
+                    0.75,
+                    3.950000047683716
+                ],
+                "projectData": {
+                },
+                "rotation": [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "scale": [
+                    2.700000047683716,
+                    1.5,
+                    0.18000000715255737
+                ],
+                "type": "Trash.BucketWall"
+            },
+            {
+                "id": 9,
+                "material": "",
+                "name": "Bucket back wall",
+                "parent": 0,
+                "position": [
+                    0,
+                    0.75,
+                    6.449999809265137
+                ],
+                "projectData": {
+                },
+                "rotation": [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "scale": [
+                    2.700000047683716,
+                    1.5,
+                    0.18000000715255737
+                ],
+                "type": "Trash.BucketWall"
+            },
+            {
+                "id": 10,
+                "material": "",
+                "name": "Sky",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "projectData": {
+                },
+                "rotation": [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "scale": [
+                    1,
+                    1,
+                    1
+                ],
+                "type": "Environment.Sky"
+            },
+            {
+                "id": 11,
+                "material": "",
+                "name": "Throw ledger",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "projectData": {
+                    "hits": 0,
+                    "misses": 0,
+                    "round": 1,
+                    "throws": 0,
+                    "version": 3
+                },
+                "rotation": [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "scale": [
+                    1,
+                    1,
+                    1
+                ],
+                "type": "ThrowLedger"
+            },
+            {
+                "id": 12,
+                "material": "",
+                "name": "Trash sorter",
+                "parent": 0,
+                "position": [
+                    -4,
+                    0.5,
+                    3
+                ],
+                "projectData": {
+                    "camera": 0,
+                    "cameraDistance": 5,
+                    "cameraHeight": 2,
+                    "farClip": 10000,
+                    "fieldOfView": 120,
+                    "fov": 60,
+                    "hearingRadius": 0,
+                    "lookSensitivity": 0.004999999888241291,
+                    "machineMemory": "",
+                    "moveSpeed": 2.5,
+                    "nearClip": 0.10000000149011612,
+                    "orthoHeight": 10,
+                    "orthographic": false,
+                    "playerControlled": false,
+                    "sightRadius": 0,
+                    "standardControl": true,
+                    "stateMachine": "/Game/AI/TrashSorter.fsm",
+                    "team": 0,
+                    "version": 1,
+                    "viewPlane": 0
+                },
+                "rotation": [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "scale": [
+                    1,
+                    1,
+                    1
+                ],
+                "type": "Gameplay.AiCharacter"
+            }
+        ],
+        "playState": 0,
+        "problems": {
+        },
+        "readOnly": false,
+        "ready": true,
+        "sceneCanRedo": false,
+        "sceneCanUndo": false,
+        "selected": 0,
+        "selectedIds": [
+        ],
+        "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+        "viewportSize": [
+            611,
+            443
+        ],
+        "warnings": {
+        }
+    },
+    "dialogs": [
+    ],
+    "observation": "Actual themed Qt graph/card and runtime AI extension; widget image excludes D3D viewport.",
+    "ok": true,
+    "steps": [
+        {
+            "action": "dialog-state",
+            "error": "",
+            "snapshot": {
+                "camera": {
+                    "height": 480,
+                    "position": [
+                        0,
+                        0,
+                        5
+                    ],
+                    "projection": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "view": [
+                        -1,
+                        0,
+                        -4.371138828673793e-08,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        4.371138828673793e-08,
+                        0,
+                        -1,
+                        0,
+                        2.18556948539117e-07,
+                        0,
+                        -5,
+                        1
+                    ],
+                    "width": 640
+                },
+                "canRedo": false,
+                "canUndo": true,
+                "checkCount": 1,
+                "coordinateSpaceLocal": false,
+                "detail": "",
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        },
+                        {
+                            "fromNode": 2,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 1,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "WalkToBin",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "BinSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "Walk to bin",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "ReturnToStart",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "StartSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "Return to start",
+                            "type": "Fsm.State",
+                            "x": 320,
+                            "y": 0
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "thinkInterval": 0.05
+                    },
+                    "variables": [
+                        {
+                            "name": "BinSide",
+                            "type": "vec3",
+                            "value": [
+                                -2,
+                                0.5,
+                                3
+                            ]
+                        },
+                        {
+                            "name": "StartSide",
+                            "type": "vec3",
+                            "value": [
+                                -4,
+                                0.5,
+                                3
+                            ]
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "026d3b55ca4c9c531f49ffd6266419a6fd5aa7cf15039adc4af6e7bd9adba9c7",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        },
+                        {
+                            "fromNode": 2,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 1,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "WalkAlongBin",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "BinSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "WalkAlongBin",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "ReturnToStart",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "StartSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "Return to start",
+                            "type": "Fsm.State",
+                            "x": 320,
+                            "y": 0
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "thinkInterval": 0.05
+                    },
+                    "variables": [
+                        {
+                            "name": "BinSide",
+                            "type": "vec3",
+                            "value": [
+                                -2,
+                                0.5,
+                                3
+                            ]
+                        },
+                        {
+                            "name": "StartSide",
+                            "type": "vec3",
+                            "value": [
+                                -4,
+                                0.5,
+                                3
+                            ]
+                        }
+                    ],
+                    "version": 1
+                },
+                "hudChoice": "UI/Hud.ui",
+                "hudDescriptorExists": true,
+                "live": [
+                ],
+                "machine": "/Game/AI/TrashSorter.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            5,
+                            -1
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            3,
+                            4,
+                            6
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Throw lane",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.03999999910593033,
+                            -0.5
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            4.800000190734863,
+                            0.07999999821186066,
+                            14
+                        ],
+                        "type": "Trash.ThrowLane"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "Bucket base",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.11999999731779099,
+                            5.199999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.5999999046325684,
+                            0.4000000059604645,
+                            2.5999999046325684
+                        ],
+                        "type": "Trash.BucketBase"
+                    },
+                    {
+                        "id": 6,
+                        "material": "",
+                        "name": "Bucket left wall",
+                        "parent": 0,
+                        "position": [
+                            -1.25,
+                            0.75,
+                            5.199999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            0.18000000715255737,
+                            1.5,
+                            2.700000047683716
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 7,
+                        "material": "",
+                        "name": "Bucket right wall",
+                        "parent": 0,
+                        "position": [
+                            1.25,
+                            0.75,
+                            5.199999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            0.18000000715255737,
+                            1.5,
+                            2.700000047683716
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 8,
+                        "material": "",
+                        "name": "Bucket front wall",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.75,
+                            3.950000047683716
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.700000047683716,
+                            1.5,
+                            0.18000000715255737
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 9,
+                        "material": "",
+                        "name": "Bucket back wall",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.75,
+                            6.449999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.700000047683716,
+                            1.5,
+                            0.18000000715255737
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 10,
+                        "material": "",
+                        "name": "Sky",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Environment.Sky"
+                    },
+                    {
+                        "id": 11,
+                        "material": "",
+                        "name": "Throw ledger",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "hits": 0,
+                            "misses": 0,
+                            "round": 1,
+                            "throws": 0,
+                            "version": 3
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "ThrowLedger"
+                    },
+                    {
+                        "id": 12,
+                        "material": "",
+                        "name": "Trash sorter",
+                        "parent": 0,
+                        "position": [
+                            -4,
+                            0.5,
+                            3
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "",
+                            "moveSpeed": 2.5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/TrashSorter.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "sceneCanRedo": false,
+                "sceneCanUndo": false,
+                "selected": 0,
+                "selectedIds": [
+                ],
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "viewportSize": [
+                    611,
+                    443
+                ],
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "action": "dialog-link",
+            "error": "",
+            "snapshot": {
+                "camera": {
+                    "height": 480,
+                    "position": [
+                        0,
+                        0,
+                        5
+                    ],
+                    "projection": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "view": [
+                        -1,
+                        0,
+                        -4.371138828673793e-08,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        4.371138828673793e-08,
+                        0,
+                        -1,
+                        0,
+                        2.18556948539117e-07,
+                        0,
+                        -5,
+                        1
+                    ],
+                    "width": 640
+                },
+                "canRedo": false,
+                "canUndo": true,
+                "checkCount": 1,
+                "coordinateSpaceLocal": false,
+                "detail": "",
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        },
+                        {
+                            "fromNode": 2,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 1,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "WalkToBin",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "BinSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "Walk to bin",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "ReturnToStart",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "StartSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "Return to start",
+                            "type": "Fsm.State",
+                            "x": 320,
+                            "y": 0
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "thinkInterval": 0.05
+                    },
+                    "variables": [
+                        {
+                            "name": "BinSide",
+                            "type": "vec3",
+                            "value": [
+                                -2,
+                                0.5,
+                                3
+                            ]
+                        },
+                        {
+                            "name": "StartSide",
+                            "type": "vec3",
+                            "value": [
+                                -4,
+                                0.5,
+                                3
+                            ]
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "026d3b55ca4c9c531f49ffd6266419a6fd5aa7cf15039adc4af6e7bd9adba9c7",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        },
+                        {
+                            "fromNode": 2,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.04,
+                                "priority": 2,
+                                "trigger": "completed"
+                            },
+                            "toNode": 1,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "WalkAlongBin",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "BinSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "WalkAlongBin",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "ReturnToStart",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "StartSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "Return to start",
+                            "type": "Fsm.State",
+                            "x": 320,
+                            "y": 0
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "thinkInterval": 0.05
+                    },
+                    "variables": [
+                        {
+                            "name": "BinSide",
+                            "type": "vec3",
+                            "value": [
+                                -2,
+                                0.5,
+                                3
+                            ]
+                        },
+                        {
+                            "name": "StartSide",
+                            "type": "vec3",
+                            "value": [
+                                -4,
+                                0.5,
+                                3
+                            ]
+                        }
+                    ],
+                    "version": 1
+                },
+                "hudChoice": "UI/Hud.ui",
+                "hudDescriptorExists": true,
+                "live": [
+                ],
+                "machine": "/Game/AI/TrashSorter.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            5,
+                            -1
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            3,
+                            4,
+                            6
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Throw lane",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.03999999910593033,
+                            -0.5
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            4.800000190734863,
+                            0.07999999821186066,
+                            14
+                        ],
+                        "type": "Trash.ThrowLane"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "Bucket base",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.11999999731779099,
+                            5.199999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.5999999046325684,
+                            0.4000000059604645,
+                            2.5999999046325684
+                        ],
+                        "type": "Trash.BucketBase"
+                    },
+                    {
+                        "id": 6,
+                        "material": "",
+                        "name": "Bucket left wall",
+                        "parent": 0,
+                        "position": [
+                            -1.25,
+                            0.75,
+                            5.199999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            0.18000000715255737,
+                            1.5,
+                            2.700000047683716
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 7,
+                        "material": "",
+                        "name": "Bucket right wall",
+                        "parent": 0,
+                        "position": [
+                            1.25,
+                            0.75,
+                            5.199999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            0.18000000715255737,
+                            1.5,
+                            2.700000047683716
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 8,
+                        "material": "",
+                        "name": "Bucket front wall",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.75,
+                            3.950000047683716
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.700000047683716,
+                            1.5,
+                            0.18000000715255737
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 9,
+                        "material": "",
+                        "name": "Bucket back wall",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.75,
+                            6.449999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.700000047683716,
+                            1.5,
+                            0.18000000715255737
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 10,
+                        "material": "",
+                        "name": "Sky",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Environment.Sky"
+                    },
+                    {
+                        "id": 11,
+                        "material": "",
+                        "name": "Throw ledger",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "hits": 0,
+                            "misses": 0,
+                            "round": 1,
+                            "throws": 0,
+                            "version": 3
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "ThrowLedger"
+                    },
+                    {
+                        "id": 12,
+                        "material": "",
+                        "name": "Trash sorter",
+                        "parent": 0,
+                        "position": [
+                            -4,
+                            0.5,
+                            3
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "",
+                            "moveSpeed": 2.5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/TrashSorter.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "sceneCanRedo": false,
+                "sceneCanUndo": false,
+                "selected": 0,
+                "selectedIds": [
+                ],
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "viewportSize": [
+                    611,
+                    443
+                ],
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "action": "save",
+            "error": "",
+            "snapshot": {
+                "camera": {
+                    "height": 480,
+                    "position": [
+                        0,
+                        0,
+                        5
+                    ],
+                    "projection": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "view": [
+                        -1,
+                        0,
+                        -4.371138828673793e-08,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        4.371138828673793e-08,
+                        0,
+                        -1,
+                        0,
+                        2.18556948539117e-07,
+                        0,
+                        -5,
+                        1
+                    ],
+                    "width": 640
+                },
+                "canRedo": false,
+                "canUndo": true,
+                "checkCount": 2,
+                "coordinateSpaceLocal": false,
+                "detail": "",
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        },
+                        {
+                            "fromNode": 2,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.04,
+                                "priority": 2,
+                                "trigger": "completed"
+                            },
+                            "toNode": 1,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "WalkAlongBin",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "BinSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "WalkAlongBin",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "ReturnToStart",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "StartSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "Return to start",
+                            "type": "Fsm.State",
+                            "x": 320,
+                            "y": 0
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "thinkInterval": 0.05
+                    },
+                    "variables": [
+                        {
+                            "name": "BinSide",
+                            "type": "vec3",
+                            "value": [
+                                -2,
+                                0.5,
+                                3
+                            ]
+                        },
+                        {
+                            "name": "StartSide",
+                            "type": "vec3",
+                            "value": [
+                                -4,
+                                0.5,
+                                3
+                            ]
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "2f924b5980ea44969d7c9206ce55e05ecc81678acdc44332fd19c8b34ab1ff88",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        },
+                        {
+                            "fromNode": 2,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.04,
+                                "priority": 2,
+                                "trigger": "completed"
+                            },
+                            "toNode": 1,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "WalkAlongBin",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "BinSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "WalkAlongBin",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "ReturnToStart",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "StartSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "Return to start",
+                            "type": "Fsm.State",
+                            "x": 320,
+                            "y": 0
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "thinkInterval": 0.05
+                    },
+                    "variables": [
+                        {
+                            "name": "BinSide",
+                            "type": "vec3",
+                            "value": [
+                                -2,
+                                0.5,
+                                3
+                            ]
+                        },
+                        {
+                            "name": "StartSide",
+                            "type": "vec3",
+                            "value": [
+                                -4,
+                                0.5,
+                                3
+                            ]
+                        }
+                    ],
+                    "version": 1
+                },
+                "hudChoice": "UI/Hud.ui",
+                "hudDescriptorExists": true,
+                "live": [
+                ],
+                "machine": "/Game/AI/TrashSorter.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            5,
+                            -1
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            3,
+                            4,
+                            6
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Throw lane",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.03999999910593033,
+                            -0.5
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            4.800000190734863,
+                            0.07999999821186066,
+                            14
+                        ],
+                        "type": "Trash.ThrowLane"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "Bucket base",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.11999999731779099,
+                            5.199999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.5999999046325684,
+                            0.4000000059604645,
+                            2.5999999046325684
+                        ],
+                        "type": "Trash.BucketBase"
+                    },
+                    {
+                        "id": 6,
+                        "material": "",
+                        "name": "Bucket left wall",
+                        "parent": 0,
+                        "position": [
+                            -1.25,
+                            0.75,
+                            5.199999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            0.18000000715255737,
+                            1.5,
+                            2.700000047683716
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 7,
+                        "material": "",
+                        "name": "Bucket right wall",
+                        "parent": 0,
+                        "position": [
+                            1.25,
+                            0.75,
+                            5.199999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            0.18000000715255737,
+                            1.5,
+                            2.700000047683716
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 8,
+                        "material": "",
+                        "name": "Bucket front wall",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.75,
+                            3.950000047683716
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.700000047683716,
+                            1.5,
+                            0.18000000715255737
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 9,
+                        "material": "",
+                        "name": "Bucket back wall",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.75,
+                            6.449999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.700000047683716,
+                            1.5,
+                            0.18000000715255737
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 10,
+                        "material": "",
+                        "name": "Sky",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Environment.Sky"
+                    },
+                    {
+                        "id": 11,
+                        "material": "",
+                        "name": "Throw ledger",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "hits": 0,
+                            "misses": 0,
+                            "round": 1,
+                            "throws": 0,
+                            "version": 3
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "ThrowLedger"
+                    },
+                    {
+                        "id": 12,
+                        "material": "",
+                        "name": "Trash sorter",
+                        "parent": 0,
+                        "position": [
+                            -4,
+                            0.5,
+                            3
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "",
+                            "moveSpeed": 2.5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/TrashSorter.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "sceneCanRedo": false,
+                "sceneCanUndo": false,
+                "selected": 0,
+                "selectedIds": [
+                ],
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "viewportSize": [
+                    611,
+                    443
+                ],
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "action": "reopen",
+            "error": "",
+            "snapshot": {
+                "camera": {
+                    "height": 480,
+                    "position": [
+                        0,
+                        0,
+                        5
+                    ],
+                    "projection": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "view": [
+                        -1,
+                        0,
+                        -4.371138828673793e-08,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        4.371138828673793e-08,
+                        0,
+                        -1,
+                        0,
+                        2.18556948539117e-07,
+                        0,
+                        -5,
+                        1
+                    ],
+                    "width": 640
+                },
+                "canRedo": false,
+                "canUndo": false,
+                "checkCount": 1,
+                "coordinateSpaceLocal": false,
+                "detail": "",
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        },
+                        {
+                            "fromNode": 2,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.04,
+                                "priority": 2,
+                                "trigger": "completed"
+                            },
+                            "toNode": 1,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "WalkAlongBin",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "BinSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "WalkAlongBin",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "ReturnToStart",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "StartSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "Return to start",
+                            "type": "Fsm.State",
+                            "x": 320,
+                            "y": 0
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "thinkInterval": 0.05
+                    },
+                    "variables": [
+                        {
+                            "name": "BinSide",
+                            "type": "vec3",
+                            "value": [
+                                -2,
+                                0.5,
+                                3
+                            ]
+                        },
+                        {
+                            "name": "StartSide",
+                            "type": "vec3",
+                            "value": [
+                                -4,
+                                0.5,
+                                3
+                            ]
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "2f924b5980ea44969d7c9206ce55e05ecc81678acdc44332fd19c8b34ab1ff88",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        },
+                        {
+                            "fromNode": 2,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.04,
+                                "priority": 2,
+                                "trigger": "completed"
+                            },
+                            "toNode": 1,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "WalkAlongBin",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "BinSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "WalkAlongBin",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "ReturnToStart",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "StartSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "Return to start",
+                            "type": "Fsm.State",
+                            "x": 320,
+                            "y": 0
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "thinkInterval": 0.05
+                    },
+                    "variables": [
+                        {
+                            "name": "BinSide",
+                            "type": "vec3",
+                            "value": [
+                                -2,
+                                0.5,
+                                3
+                            ]
+                        },
+                        {
+                            "name": "StartSide",
+                            "type": "vec3",
+                            "value": [
+                                -4,
+                                0.5,
+                                3
+                            ]
+                        }
+                    ],
+                    "version": 1
+                },
+                "hudChoice": "UI/Hud.ui",
+                "hudDescriptorExists": true,
+                "live": [
+                ],
+                "machine": "/Game/AI/TrashSorter.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            5,
+                            -1
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            3,
+                            4,
+                            6
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Throw lane",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.03999999910593033,
+                            -0.5
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            4.800000190734863,
+                            0.07999999821186066,
+                            14
+                        ],
+                        "type": "Trash.ThrowLane"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "Bucket base",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.11999999731779099,
+                            5.199999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.5999999046325684,
+                            0.4000000059604645,
+                            2.5999999046325684
+                        ],
+                        "type": "Trash.BucketBase"
+                    },
+                    {
+                        "id": 6,
+                        "material": "",
+                        "name": "Bucket left wall",
+                        "parent": 0,
+                        "position": [
+                            -1.25,
+                            0.75,
+                            5.199999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            0.18000000715255737,
+                            1.5,
+                            2.700000047683716
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 7,
+                        "material": "",
+                        "name": "Bucket right wall",
+                        "parent": 0,
+                        "position": [
+                            1.25,
+                            0.75,
+                            5.199999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            0.18000000715255737,
+                            1.5,
+                            2.700000047683716
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 8,
+                        "material": "",
+                        "name": "Bucket front wall",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.75,
+                            3.950000047683716
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.700000047683716,
+                            1.5,
+                            0.18000000715255737
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 9,
+                        "material": "",
+                        "name": "Bucket back wall",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.75,
+                            6.449999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.700000047683716,
+                            1.5,
+                            0.18000000715255737
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 10,
+                        "material": "",
+                        "name": "Sky",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Environment.Sky"
+                    },
+                    {
+                        "id": 11,
+                        "material": "",
+                        "name": "Throw ledger",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "hits": 0,
+                            "misses": 0,
+                            "round": 1,
+                            "throws": 0,
+                            "version": 3
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "ThrowLedger"
+                    },
+                    {
+                        "id": 12,
+                        "material": "",
+                        "name": "Trash sorter",
+                        "parent": 0,
+                        "position": [
+                            -4,
+                            0.5,
+                            3
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "",
+                            "moveSpeed": 2.5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/TrashSorter.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "sceneCanRedo": false,
+                "sceneCanUndo": false,
+                "selected": 0,
+                "selectedIds": [
+                ],
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "viewportSize": [
+                    611,
+                    443
+                ],
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "action": "play",
+            "controlStatus": 0,
+            "error": "",
+            "snapshot": {
+                "camera": {
+                    "height": 443,
+                    "position": [
+                        9,
+                        7,
+                        -11
+                    ],
+                    "projection": [
+                        1.3080084323883057,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.804047703742981,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.000400185585022,
+                        1,
+                        0,
+                        0,
+                        -0.1000400185585022,
+                        0
+                    ],
+                    "view": [
+                        0.7660444974899292,
+                        -0.2511572539806366,
+                        -0.5916890501976013,
+                        0,
+                        7.450580596923828e-08,
+                        0.9205048680305481,
+                        -0.3907312750816345,
+                        0,
+                        0.6427875757217407,
+                        0.29931750893592834,
+                        0.7051476836204529,
+                        0,
+                        0.17626237869262695,
+                        -0.8906261920928955,
+                        15.816944122314453,
+                        1
+                    ],
+                    "width": 611
+                },
+                "canRedo": false,
+                "canUndo": false,
+                "checkCount": 1,
+                "coordinateSpaceLocal": false,
+                "detail": "",
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        },
+                        {
+                            "fromNode": 2,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.04,
+                                "priority": 2,
+                                "trigger": "completed"
+                            },
+                            "toNode": 1,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "WalkAlongBin",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "BinSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "WalkAlongBin",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "ReturnToStart",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "StartSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "Return to start",
+                            "type": "Fsm.State",
+                            "x": 320,
+                            "y": 0
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "thinkInterval": 0.05
+                    },
+                    "variables": [
+                        {
+                            "name": "BinSide",
+                            "type": "vec3",
+                            "value": [
+                                -2,
+                                0.5,
+                                3
+                            ]
+                        },
+                        {
+                            "name": "StartSide",
+                            "type": "vec3",
+                            "value": [
+                                -4,
+                                0.5,
+                                3
+                            ]
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "2f924b5980ea44969d7c9206ce55e05ecc81678acdc44332fd19c8b34ab1ff88",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        },
+                        {
+                            "fromNode": 2,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.04,
+                                "priority": 2,
+                                "trigger": "completed"
+                            },
+                            "toNode": 1,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "WalkAlongBin",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "BinSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "WalkAlongBin",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "ReturnToStart",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "StartSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "Return to start",
+                            "type": "Fsm.State",
+                            "x": 320,
+                            "y": 0
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "thinkInterval": 0.05
+                    },
+                    "variables": [
+                        {
+                            "name": "BinSide",
+                            "type": "vec3",
+                            "value": [
+                                -2,
+                                0.5,
+                                3
+                            ]
+                        },
+                        {
+                            "name": "StartSide",
+                            "type": "vec3",
+                            "value": [
+                                -4,
+                                0.5,
+                                3
+                            ]
+                        }
+                    ],
+                    "version": 1
+                },
+                "hudChoice": "UI/Hud.ui",
+                "hudDescriptorExists": true,
+                "live": [
+                    {
+                        "activePath": "",
+                        "history": [
+                        ],
+                        "id": 12,
+                        "machine": "/Game/AI/TrashSorter.fsm",
+                        "memory": [
+                            {
+                                "key": "BinSide",
+                                "text": "(-2, 0.5, 3)",
+                                "type": "vec3"
+                            },
+                            {
+                                "key": "StartSide",
+                                "text": "(-4, 0.5, 3)",
+                                "type": "vec3"
+                            }
+                        ],
+                        "name": "Trash sorter",
+                        "running": true,
+                        "states": [
+                        ]
+                    }
+                ],
+                "machine": "/Game/AI/TrashSorter.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            5,
+                            -1
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            3,
+                            4,
+                            6
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Throw lane",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.03999999910593033,
+                            -0.5
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            4.800000190734863,
+                            0.07999999821186066,
+                            14
+                        ],
+                        "type": "Trash.ThrowLane"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "Bucket base",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.11999999731779099,
+                            5.199999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.5999999046325684,
+                            0.4000000059604645,
+                            2.5999999046325684
+                        ],
+                        "type": "Trash.BucketBase"
+                    },
+                    {
+                        "id": 6,
+                        "material": "",
+                        "name": "Bucket left wall",
+                        "parent": 0,
+                        "position": [
+                            -1.25,
+                            0.75,
+                            5.199999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            0.18000000715255737,
+                            1.5,
+                            2.700000047683716
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 7,
+                        "material": "",
+                        "name": "Bucket right wall",
+                        "parent": 0,
+                        "position": [
+                            1.25,
+                            0.75,
+                            5.199999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            0.18000000715255737,
+                            1.5,
+                            2.700000047683716
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 8,
+                        "material": "",
+                        "name": "Bucket front wall",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.75,
+                            3.950000047683716
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.700000047683716,
+                            1.5,
+                            0.18000000715255737
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 9,
+                        "material": "",
+                        "name": "Bucket back wall",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.75,
+                            6.449999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.700000047683716,
+                            1.5,
+                            0.18000000715255737
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 10,
+                        "material": "",
+                        "name": "Sky",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Environment.Sky"
+                    },
+                    {
+                        "id": 11,
+                        "material": "",
+                        "name": "Throw ledger",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "hits": 0,
+                            "misses": 0,
+                            "round": 1,
+                            "throws": 0,
+                            "version": 3
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "ThrowLedger"
+                    },
+                    {
+                        "id": 12,
+                        "material": "",
+                        "name": "Trash sorter",
+                        "parent": 0,
+                        "position": [
+                            -4,
+                            0.5,
+                            3
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "",
+                            "moveSpeed": 2.5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/TrashSorter.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    },
+                    {
+                        "id": 13,
+                        "material": "",
+                        "name": "Trash sun",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "color": [
+                                1,
+                                0.9700000286102295,
+                                0.9200000166893005
+                            ],
+                            "enabled": true,
+                            "intensity": 1,
+                            "shadowDistance": 150,
+                            "shadows": true,
+                            "version": 1
+                        },
+                        "rotation": [
+                            -0.4460148811340332,
+                            -0.2295752912759781,
+                            -0.11950933188199997,
+                            0.8567866683006287
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Directional"
+                    },
+                    {
+                        "id": 14,
+                        "material": "",
+                        "name": "Trash view",
+                        "parent": 0,
+                        "position": [
+                            9,
+                            7,
+                            -11
+                        ],
+                        "projectData": {
+                            "farClip": 250,
+                            "fov": 58,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "rotation": [
+                            -0.06818784773349762,
+                            0.9208279848098755,
+                            0.18734456598758698,
+                            0.3351539969444275
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.Camera"
+                    },
+                    {
+                        "id": 15,
+                        "material": "",
+                        "name": "Trash camera rig",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -100,
+                            0
+                        ],
+                        "projectData": {
+                            "camera": 14,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fov": 60,
+                            "lookSensitivity": 0.004999999888241291,
+                            "moveSpeed": 5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": true,
+                            "standardControl": false,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            0.10000000149011612,
+                            0.10000000149011612,
+                            0.10000000149011612
+                        ],
+                        "type": "Gameplay.Player"
+                    }
+                ],
+                "playState": 1,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "sceneCanRedo": false,
+                "sceneCanUndo": false,
+                "selected": 1,
+                "selectedIds": [
+                    1
+                ],
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "viewportSize": [
+                    611,
+                    443
+                ],
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "action": "frames",
+            "error": "",
+            "snapshot": {
+                "camera": {
+                    "height": 443,
+                    "position": [
+                        9,
+                        7,
+                        -11
+                    ],
+                    "projection": [
+                        1.3080084323883057,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.804047703742981,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.000400185585022,
+                        1,
+                        0,
+                        0,
+                        -0.1000400185585022,
+                        0
+                    ],
+                    "view": [
+                        0.7660444974899292,
+                        -0.2511572539806366,
+                        -0.5916890501976013,
+                        0,
+                        7.450580596923828e-08,
+                        0.9205048680305481,
+                        -0.3907312750816345,
+                        0,
+                        0.6427875757217407,
+                        0.29931750893592834,
+                        0.7051476836204529,
+                        0,
+                        0.17626237869262695,
+                        -0.8906261920928955,
+                        15.816944122314453,
+                        1
+                    ],
+                    "width": 611
+                },
+                "canRedo": false,
+                "canUndo": false,
+                "checkCount": 1,
+                "coordinateSpaceLocal": false,
+                "detail": "",
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        },
+                        {
+                            "fromNode": 2,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.04,
+                                "priority": 2,
+                                "trigger": "completed"
+                            },
+                            "toNode": 1,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "WalkAlongBin",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "BinSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "WalkAlongBin",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "ReturnToStart",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "StartSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "Return to start",
+                            "type": "Fsm.State",
+                            "x": 320,
+                            "y": 0
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "thinkInterval": 0.05
+                    },
+                    "variables": [
+                        {
+                            "name": "BinSide",
+                            "type": "vec3",
+                            "value": [
+                                -2,
+                                0.5,
+                                3
+                            ]
+                        },
+                        {
+                            "name": "StartSide",
+                            "type": "vec3",
+                            "value": [
+                                -4,
+                                0.5,
+                                3
+                            ]
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "2f924b5980ea44969d7c9206ce55e05ecc81678acdc44332fd19c8b34ab1ff88",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        },
+                        {
+                            "fromNode": 2,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.04,
+                                "priority": 2,
+                                "trigger": "completed"
+                            },
+                            "toNode": 1,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "WalkAlongBin",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "BinSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "WalkAlongBin",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "ReturnToStart",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "StartSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "Return to start",
+                            "type": "Fsm.State",
+                            "x": 320,
+                            "y": 0
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "thinkInterval": 0.05
+                    },
+                    "variables": [
+                        {
+                            "name": "BinSide",
+                            "type": "vec3",
+                            "value": [
+                                -2,
+                                0.5,
+                                3
+                            ]
+                        },
+                        {
+                            "name": "StartSide",
+                            "type": "vec3",
+                            "value": [
+                                -4,
+                                0.5,
+                                3
+                            ]
+                        }
+                    ],
+                    "version": 1
+                },
+                "hudChoice": "UI/Hud.ui",
+                "hudDescriptorExists": true,
+                "live": [
+                    {
+                        "activePath": "WalkAlongBin",
+                        "history": [
+                            "  0.02  -> WalkAlongBin   start",
+                            "  0.92  WalkAlongBin -> ReturnToStart   task succeeded",
+                            "  1.67  -> WalkAlongBin   completed without a transition, selecting from the root"
+                        ],
+                        "id": 12,
+                        "machine": "/Game/AI/TrashSorter.fsm",
+                        "memory": [
+                            {
+                                "key": "BinSide",
+                                "text": "(-2, 0.5, 3)",
+                                "type": "vec3"
+                            },
+                            {
+                                "key": "StartSide",
+                                "text": "(-4, 0.5, 3)",
+                                "type": "vec3"
+                            }
+                        ],
+                        "name": "Trash sorter",
+                        "running": true,
+                        "states": [
+                            {
+                                "name": "WalkAlongBin",
+                                "node": 1,
+                                "path": "WalkAlongBin"
+                            }
+                        ]
+                    }
+                ],
+                "machine": "/Game/AI/TrashSorter.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            5,
+                            -1
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            3,
+                            4,
+                            6
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Throw lane",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.03999999910593033,
+                            -0.5
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            4.800000190734863,
+                            0.07999999821186066,
+                            14
+                        ],
+                        "type": "Trash.ThrowLane"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "Bucket base",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.11999999731779099,
+                            5.199999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.5999999046325684,
+                            0.4000000059604645,
+                            2.5999999046325684
+                        ],
+                        "type": "Trash.BucketBase"
+                    },
+                    {
+                        "id": 6,
+                        "material": "",
+                        "name": "Bucket left wall",
+                        "parent": 0,
+                        "position": [
+                            -1.25,
+                            0.75,
+                            5.199999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            0.18000000715255737,
+                            1.5,
+                            2.700000047683716
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 7,
+                        "material": "",
+                        "name": "Bucket right wall",
+                        "parent": 0,
+                        "position": [
+                            1.25,
+                            0.75,
+                            5.199999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            0.18000000715255737,
+                            1.5,
+                            2.700000047683716
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 8,
+                        "material": "",
+                        "name": "Bucket front wall",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.75,
+                            3.950000047683716
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.700000047683716,
+                            1.5,
+                            0.18000000715255737
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 9,
+                        "material": "",
+                        "name": "Bucket back wall",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.75,
+                            6.449999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.700000047683716,
+                            1.5,
+                            0.18000000715255737
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 10,
+                        "material": "",
+                        "name": "Sky",
+                        "parent": 0,
+                        "position": [
+                            9,
+                            7,
+                            -11
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Environment.Sky"
+                    },
+                    {
+                        "id": 11,
+                        "material": "",
+                        "name": "Throw ledger",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "hits": 0,
+                            "misses": 0,
+                            "round": 1,
+                            "throws": 0,
+                            "version": 3
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "ThrowLedger"
+                    },
+                    {
+                        "id": 12,
+                        "material": "",
+                        "name": "Trash sorter",
+                        "parent": 0,
+                        "position": [
+                            -2.8225011825561523,
+                            0.5,
+                            3
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "",
+                            "moveSpeed": 2.5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/TrashSorter.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "rotation": [
+                            0,
+                            0.5789185762405396,
+                            0,
+                            0.8153853416442871
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    },
+                    {
+                        "id": 13,
+                        "material": "",
+                        "name": "Trash sun",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "color": [
+                                1,
+                                0.9700000286102295,
+                                0.9200000166893005
+                            ],
+                            "enabled": true,
+                            "intensity": 1,
+                            "shadowDistance": 150,
+                            "shadows": true,
+                            "version": 1
+                        },
+                        "rotation": [
+                            -0.4460148811340332,
+                            -0.2295752912759781,
+                            -0.11950933188199997,
+                            0.8567866683006287
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Directional"
+                    },
+                    {
+                        "id": 14,
+                        "material": "",
+                        "name": "Trash view",
+                        "parent": 0,
+                        "position": [
+                            9,
+                            7,
+                            -11
+                        ],
+                        "projectData": {
+                            "farClip": 250,
+                            "fov": 58,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "rotation": [
+                            -0.06818784773349762,
+                            0.9208279848098755,
+                            0.18734456598758698,
+                            0.3351539969444275
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.Camera"
+                    },
+                    {
+                        "id": 15,
+                        "material": "",
+                        "name": "Trash camera rig",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -100,
+                            0
+                        ],
+                        "projectData": {
+                            "camera": 14,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fov": 60,
+                            "lookSensitivity": 0.004999999888241291,
+                            "moveSpeed": 5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": true,
+                            "standardControl": false,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            0.10000000149011612,
+                            0.10000000149011612,
+                            0.10000000149011612
+                        ],
+                        "type": "Gameplay.Player"
+                    }
+                ],
+                "playState": 1,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "sceneCanRedo": false,
+                "sceneCanUndo": false,
+                "selected": 1,
+                "selectedIds": [
+                    1
+                ],
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "viewportSize": [
+                    611,
+                    443
+                ],
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "action": "stop",
+            "controlStatus": 0,
+            "error": "",
+            "snapshot": {
+                "camera": {
+                    "height": 443,
+                    "position": [
+                        0,
+                        0,
+                        5
+                    ],
+                    "projection": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "view": [
+                        -1,
+                        0,
+                        -4.371138828673793e-08,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        4.371138828673793e-08,
+                        0,
+                        -1,
+                        0,
+                        2.18556948539117e-07,
+                        0,
+                        -5,
+                        1
+                    ],
+                    "width": 611
+                },
+                "canRedo": false,
+                "canUndo": false,
+                "checkCount": 1,
+                "coordinateSpaceLocal": false,
+                "detail": "",
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        },
+                        {
+                            "fromNode": 2,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.04,
+                                "priority": 2,
+                                "trigger": "completed"
+                            },
+                            "toNode": 1,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "WalkAlongBin",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "BinSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "WalkAlongBin",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "ReturnToStart",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "StartSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "Return to start",
+                            "type": "Fsm.State",
+                            "x": 320,
+                            "y": 0
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "thinkInterval": 0.05
+                    },
+                    "variables": [
+                        {
+                            "name": "BinSide",
+                            "type": "vec3",
+                            "value": [
+                                -2,
+                                0.5,
+                                3
+                            ]
+                        },
+                        {
+                            "name": "StartSide",
+                            "type": "vec3",
+                            "value": [
+                                -4,
+                                0.5,
+                                3
+                            ]
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "2f924b5980ea44969d7c9206ce55e05ecc81678acdc44332fd19c8b34ab1ff88",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        },
+                        {
+                            "fromNode": 2,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.04,
+                                "priority": 2,
+                                "trigger": "completed"
+                            },
+                            "toNode": 1,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "WalkAlongBin",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "BinSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "WalkAlongBin",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "ReturnToStart",
+                                "tasks": [
+                                    {
+                                        "radius": 0.4,
+                                        "target": "StartSide",
+                                        "type": "Ai.MoveTo"
+                                    }
+                                ]
+                            },
+                            "title": "Return to start",
+                            "type": "Fsm.State",
+                            "x": 320,
+                            "y": 0
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "thinkInterval": 0.05
+                    },
+                    "variables": [
+                        {
+                            "name": "BinSide",
+                            "type": "vec3",
+                            "value": [
+                                -2,
+                                0.5,
+                                3
+                            ]
+                        },
+                        {
+                            "name": "StartSide",
+                            "type": "vec3",
+                            "value": [
+                                -4,
+                                0.5,
+                                3
+                            ]
+                        }
+                    ],
+                    "version": 1
+                },
+                "hudChoice": "UI/Hud.ui",
+                "hudDescriptorExists": true,
+                "live": [
+                ],
+                "machine": "/Game/AI/TrashSorter.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            5,
+                            -1
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            3,
+                            4,
+                            6
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Throw lane",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.03999999910593033,
+                            -0.5
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            4.800000190734863,
+                            0.07999999821186066,
+                            14
+                        ],
+                        "type": "Trash.ThrowLane"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "Bucket base",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.11999999731779099,
+                            5.199999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.5999999046325684,
+                            0.4000000059604645,
+                            2.5999999046325684
+                        ],
+                        "type": "Trash.BucketBase"
+                    },
+                    {
+                        "id": 6,
+                        "material": "",
+                        "name": "Bucket left wall",
+                        "parent": 0,
+                        "position": [
+                            -1.25,
+                            0.75,
+                            5.199999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            0.18000000715255737,
+                            1.5,
+                            2.700000047683716
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 7,
+                        "material": "",
+                        "name": "Bucket right wall",
+                        "parent": 0,
+                        "position": [
+                            1.25,
+                            0.75,
+                            5.199999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            0.18000000715255737,
+                            1.5,
+                            2.700000047683716
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 8,
+                        "material": "",
+                        "name": "Bucket front wall",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.75,
+                            3.950000047683716
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.700000047683716,
+                            1.5,
+                            0.18000000715255737
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 9,
+                        "material": "",
+                        "name": "Bucket back wall",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0.75,
+                            6.449999809265137
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.700000047683716,
+                            1.5,
+                            0.18000000715255737
+                        ],
+                        "type": "Trash.BucketWall"
+                    },
+                    {
+                        "id": 10,
+                        "material": "",
+                        "name": "Sky",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Environment.Sky"
+                    },
+                    {
+                        "id": 11,
+                        "material": "",
+                        "name": "Throw ledger",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "hits": 0,
+                            "misses": 0,
+                            "round": 1,
+                            "throws": 0,
+                            "version": 3
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "ThrowLedger"
+                    },
+                    {
+                        "id": 12,
+                        "material": "",
+                        "name": "Trash sorter",
+                        "parent": 0,
+                        "position": [
+                            -4,
+                            0.5,
+                            3
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "",
+                            "moveSpeed": 2.5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/TrashSorter.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "sceneCanRedo": false,
+                "sceneCanUndo": false,
+                "selected": 2,
+                "selectedIds": [
+                    2
+                ],
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "viewportSize": [
+                    611,
+                    443
+                ],
+                "warnings": {
+                }
+            },
+            "status": 0
+        }
+    ]
+}

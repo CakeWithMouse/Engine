@@ -6,6 +6,7 @@
 #include <Engine/Render/MeshPrimitives.h>
 #include <Engine/Render/Material.h>
 #include <QCryptographicHash>
+#include <cmath>
 #include <cstring>
 
 // A parameterized, real-renderer commandlet. No game DLL or interactive editor is required.
@@ -17,6 +18,16 @@ inline float Number(const QJsonObject& in, const char* key, float fallback) {
     if (!in.contains(key)) return fallback;
     Check(in[key].isDouble() && std::isfinite(float(in[key].toDouble())), "finite numeric field required");
     return float(in[key].toDouble());
+}
+inline int Integer(const QJsonObject& in, const char* key, int fallback, int minimum, int maximum) {
+    Check(minimum<=maximum && fallback>=minimum && fallback<=maximum,"invalid integer bounds or fallback");
+    if (!in.contains(key)) return fallback;
+    Check(in[key].isDouble(),"integer field must be a JSON number");
+    const double value=in[key].toDouble();
+    Check(std::isfinite(value) && value==std::trunc(value) &&
+          value>=static_cast<double>(minimum) && value<=static_cast<double>(maximum),
+          "integer field must be whole, finite, and within supported range");
+    return static_cast<int>(value);
 }
 inline glm::vec3 Vec(const QJsonValue& value, glm::vec3 fallback) {
     if (value.isUndefined()) return fallback;
@@ -124,8 +135,7 @@ inline QJsonObject ReadDepth(Game& game, const QJsonArray& probes) {
 }
 
 inline QJsonObject Run(const QJsonObject& in) {
-    const int width=int(Number(in,"width",640)),height=int(Number(in,"height",480));
-    Check(width>=100&&width<=1920&&height>=100&&height<=1080,"viewport must be 100..1920 by 100..1080");
+    const int width=Integer(in,"width",640,100,1920),height=Integer(in,"height",480,100,1080);
     const auto runtime=std::filesystem::path(QCoreApplication::applicationDirPath().toStdWString());
     EnginePaths::SetContentRoot(runtime/"EngineContent");
     HWND window=CreateWindowExW(0,L"STATIC",L"Point shadow diagnostics",WS_OVERLAPPEDWINDOW,0,0,width,height,nullptr,nullptr,GetModuleHandleW(nullptr),nullptr);
@@ -134,7 +144,7 @@ inline QJsonObject Run(const QJsonObject& in) {
     Game game; Check(game.InitializeViewport(window,width,height),"D3D viewport unavailable");
     game.SetSimulationEnabled(false); game.GetSettings().SetVSync(false);
     game.SetDeferredDebugOverlay(false);
-    const int rendering=int(Number(in,"rendering",0)); Check(rendering==0||rendering==1,"rendering must be 0 or 1");
+    const int rendering=Integer(in,"rendering",0,0,1);
     game.GetSettings().SetRenderingType(static_cast<RenderType>(rendering));
     // Explicit scene lighting with no sun reproduces a point-lit indoor/night scene.
     game.SetSceneLightingEnabled(in["sceneLighting"].toBool(false));

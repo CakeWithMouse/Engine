@@ -1,0 +1,33 @@
+{
+  "width": 320,
+  "materialAsset": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation\\CityApiProbe\\Content\\Materials\\BadMaterial\\Bad.mat",
+  "camera": [
+    4,
+    3,
+    -5
+  ],
+  "rendering": 0,
+  "height": 240,
+  "caster": "mesh",
+  "target": [
+    0,
+    0,
+    0
+  ],
+  "frames": [
+    {
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation/material-errors.bad.bmp",
+      "time": 0,
+      "light": [
+        2,
+        3,
+        -1
+      ]
+    }
+  ]
+}

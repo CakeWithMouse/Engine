@@ -1,0 +1,127 @@
+[
+  {
+    "role": "calm-city",
+    "oldProject": "E:\\Engine\\Engine\\build\\playtests\\20261107-r5\\calm-city\\CalmCityFinal",
+    "newProject": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\CalmCityUpgraded",
+    "oldLock": {
+      "engineConfiguration": "Release",
+      "engineVersion": "2026.11.07.0",
+      "format": 1,
+      "templateId": "custom"
+    },
+    "newLock": {
+      "engineConfiguration": "Release",
+      "engineVersion": "2026.11.07.6",
+      "format": 1,
+      "templateId": "custom"
+    },
+    "oldModuleSha256": "078d73ff7b16ec7d8ca76a7bdd43cdf2b68a63510ebdbaa30c7204da823e64c3",
+    "newModuleSha256": "1e90cd248d9c6bc3b110ab0c9de8b8f15036582a811764c30e374a27fb00e904",
+    "oldSourceFiles": 15,
+    "newSourceFiles": 15,
+    "changedSource": [
+      "Source/CarMover.h"
+    ],
+    "upgradeReport": {
+      "engineVersion": "2026.11.07.6",
+      "originalPreserved": true,
+      "sourceModuleSHA256": "078D73FF7B16EC7D8CA76A7BDD43CDF2B68A63510EBDBAA30C7204DA823E64C3",
+      "sourceProject": "E:\\Engine\\Engine\\build\\playtests\\20261107-r5\\calm-city\\CalmCityFinal\\Project.json",
+      "standardModuleUpdated": false
+    }
+  },
+  {
+    "role": "curious-city",
+    "oldProject": "E:\\Engine\\Engine\\build\\playtests\\20261107-r5\\curious-city\\final-city",
+    "newProject": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\upgraded-city",
+    "oldLock": {
+      "engineConfiguration": "Release",
+      "engineVersion": "2026.11.07.0",
+      "format": 1,
+      "templateId": "custom"
+    },
+    "newLock": {
+      "engineConfiguration": "Release",
+      "engineVersion": "2026.11.07.6",
+      "format": 1,
+      "templateId": "custom"
+    },
+    "oldModuleSha256": "d55e9f9eb58beade6e2022718df0ed81835e788818e4c3fda44b9c7d00820498",
+    "newModuleSha256": "8c51ce94e004638664dba643c05e1648ed41adefa7ee99d63e6f9fd21ebd996c",
+    "oldSourceFiles": 15,
+    "newSourceFiles": 15,
+    "changedSource": [
+      "Source/CityEconomySubsystem.cpp"
+    ],
+    "upgradeReport": {
+      "engineVersion": "2026.11.07.6",
+      "originalPreserved": true,
+      "sourceModuleSHA256": "D55E9F9EB58BEADE6E2022718DF0ED81835E788818E4C3FDA44B9C7D00820498",
+      "sourceProject": "E:\\Engine\\Engine\\build\\playtests\\20261107-r5\\curious-city\\final-city\\Project.json",
+      "standardModuleUpdated": false
+    }
+  },
+  {
+    "role": "tired-bomber",
+    "oldProject": "E:\\Engine\\Engine\\build\\playtests\\20261107-r5\\tired-bomber\\BomberFinalR5",
+    "newProject": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\BomberUpgrade",
+    "oldLock": {
+      "engineConfiguration": "Release",
+      "engineVersion": "2026.11.07.0",
+      "format": 1,
+      "templateId": "custom"
+    },
+    "newLock": {
+      "engineConfiguration": "Release",
+      "engineVersion": "2026.11.07.6",
+      "format": 1,
+      "templateId": "custom"
+    },
+    "oldModuleSha256": "54ce3f7bed0ad7578082ed996fe7993e61902a7849eec48fc892fc4be129248f",
+    "newModuleSha256": "3ce24859fd2202672ef2fec2f2ab149cf224d67070cb1bb06d60feb7739c1bf2",
+    "oldSourceFiles": 13,
+    "newSourceFiles": 13,
+    "changedSource": [
+      "Source/ProjectGame.cpp",
+      "Source/ProjectGame.h"
+    ],
+    "upgradeReport": {
+      "engineVersion": "2026.11.07.6",
+      "originalPreserved": true,
+      "sourceModuleSHA256": "54CE3F7BED0AD7578082ED996FE7993E61902A7849EEC48FC892FC4BE129248F",
+      "sourceProject": "E:\\Engine\\Engine\\build\\playtests\\20261107-r5\\tired-bomber\\BomberFinalR5\\Project.json",
+      "standardModuleUpdated": false
+    }
+  },
+  {
+    "role": "ai-trash",
+    "oldProject": "E:\\Engine\\Engine\\build\\playtests\\20261107-r5\\ai-trash\\TrashGame",
+    "newProject": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\ai-trash\\TrashGameUpgraded",
+    "oldLock": {
+      "engineConfiguration": "Release",
+      "engineVersion": "2026.11.07.0",
+      "format": 1,
+      "templateId": "SceneProject"
+    },
+    "newLock": {
+      "engineConfiguration": "Release",
+      "engineVersion": "2026.11.07.6",
+      "format": 1,
+      "templateId": "custom"
+    },
+    "oldModuleSha256": "de4a89b669b78761a77faecf01f62c3329c3b167cd9d8cadc682882c76291bd1",
+    "newModuleSha256": "7bdfd76b14c2c519a44825a09d3132e59256357075f9f74e39aa1e544c0f2da8",
+    "oldSourceFiles": 18,
+    "newSourceFiles": 18,
+    "changedSource": [
+      "Source/ProjectGame.cpp"
+    ],
+    "upgradeReport": {
+      "engineVersion": "2026.11.07.6",
+      "originalPreserved": true,
+      "sourceModuleSHA256": "DE4A89B669B78761A77FAECF01F62C3329C3B167CD9D8CADC682882C76291BD1",
+      "sourceProject": "E:\\Engine\\Engine\\build\\playtests\\20261107-r5\\ai-trash\\TrashGame\\Project.json",
+      "standardModuleUpdated": false
+    }
+  }
+]

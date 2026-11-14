@@ -1,0 +1,20 @@
+{
+    "arguments": [
+        "-Name",
+        "WizardProbe",
+        "-Kind",
+        "Object",
+        "-BaseHeader",
+        "Engine/Components/ProjectObject.h"
+    ],
+    "console": "",
+    "dialogs": [
+    ],
+    "generated": {
+    },
+    "ok": true,
+    "replaced": false,
+    "windowEnabled": true,
+    "wizardAccepted": false,
+    "wizardError": "Файлы этого класса уже существуют. Выберите другое имя."
+}

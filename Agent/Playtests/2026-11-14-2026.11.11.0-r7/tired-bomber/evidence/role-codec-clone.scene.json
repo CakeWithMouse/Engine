@@ -1,0 +1,116 @@
+{
+  "name": "Scene",
+  "objects": [
+    {
+      "id": 1,
+      "inheritParentScale": true,
+      "name": "RoleCodec.Owner",
+      "parent": 0,
+      "projectData": {
+        "score": 84.5,
+        "target": 2,
+        "version": 2
+      },
+      "transform": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "BomberReferenceProbe"
+    },
+    {
+      "id": 2,
+      "inheritParentScale": true,
+      "name": "RoleCodec.Target",
+      "parent": 0,
+      "transform": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "Primitive.Cube"
+    },
+    {
+      "id": 3,
+      "inheritParentScale": true,
+      "name": "RoleCodec.Owner 2",
+      "parent": 0,
+      "projectData": {
+        "score": 84.5,
+        "target": 4,
+        "version": 2
+      },
+      "transform": {
+        "position": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "BomberReferenceProbe"
+    },
+    {
+      "id": 4,
+      "inheritParentScale": true,
+      "name": "RoleCodec.Target 2",
+      "parent": 0,
+      "transform": {
+        "position": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "Primitive.Cube"
+    }
+  ],
+  "version": 3
+}

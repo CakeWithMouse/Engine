@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "shader": "NativePreviewAmber.hlsl",
+  "render": {
+    "blend": "opaque",
+    "lighting": "unlit",
+    "castShadows": false,
+    "twoSided": true
+  },
+  "params": {
+    "NativePreviewAmber": [
+      1.0,
+      0.36,
+      0.035,
+      1.0
+    ],
+    "Gloss": 0.25
+  }
+}

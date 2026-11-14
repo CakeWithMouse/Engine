@@ -1,0 +1,495 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "caster": "mesh",
+    "frames": [
+        {
+            "count": 2,
+            "cubes": [
+                {
+                    "faces": [
+                        {
+                            "face": 0,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        },
+                        {
+                            "face": 1,
+                            "occupied": 19456,
+                            "sha256": "8d74bbeebfea3f8e44e784bbd33abaa381e84a9e8df161c1e06c9712382259d3"
+                        },
+                        {
+                            "face": 2,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        },
+                        {
+                            "face": 3,
+                            "occupied": 1048576,
+                            "sha256": "8ae9649b93c03c8ec04a2fb714a7042f42ea53e9ad034473d46e2385bf777101"
+                        },
+                        {
+                            "face": 4,
+                            "occupied": 19456,
+                            "sha256": "9ab000aaa969e3f873259b0bc86f3afc74753813ccd197ae050ea50ed49b0465"
+                        },
+                        {
+                            "face": 5,
+                            "occupied": 19456,
+                            "sha256": "9ab000aaa969e3f873259b0bc86f3afc74753813ccd197ae050ea50ed49b0465"
+                        }
+                    ],
+                    "light": [
+                        -2,
+                        5,
+                        0,
+                        10
+                    ],
+                    "probes": [
+                        {
+                            "depth": 0.9473684430122375,
+                            "face": 3,
+                            "occluded": true,
+                            "position": [
+                                0,
+                                0,
+                                0
+                            ],
+                            "stored": 0.913893461227417
+                        },
+                        {
+                            "depth": 0.9473684430122375,
+                            "face": 3,
+                            "occluded": true,
+                            "position": [
+                                1,
+                                0,
+                                0
+                            ],
+                            "stored": 0.9022914171218872
+                        }
+                    ],
+                    "slot": 0
+                },
+                {
+                    "faces": [
+                        {
+                            "face": 0,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        },
+                        {
+                            "face": 1,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        },
+                        {
+                            "face": 2,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        },
+                        {
+                            "face": 3,
+                            "occupied": 1048576,
+                            "sha256": "3752d9b9b28d48d7f1e0610943b16d41e6c92ead70dffe795a6368e17bcb40c7"
+                        },
+                        {
+                            "face": 4,
+                            "occupied": 19456,
+                            "sha256": "e2586c22ea516a0381fc5fa5de3cc1dfb529e4b12a65006ed07c08c1aac3a7d0"
+                        },
+                        {
+                            "face": 5,
+                            "occupied": 19456,
+                            "sha256": "e2586c22ea516a0381fc5fa5de3cc1dfb529e4b12a65006ed07c08c1aac3a7d0"
+                        }
+                    ],
+                    "light": [
+                        2,
+                        5,
+                        0,
+                        12
+                    ],
+                    "probes": [
+                        {
+                            "depth": 0.939130425453186,
+                            "face": 3,
+                            "occluded": true,
+                            "position": [
+                                0,
+                                0,
+                                0
+                            ],
+                            "stored": 0.9059468507766724
+                        },
+                        {
+                            "depth": 0.939130425453186,
+                            "face": 3,
+                            "occluded": false,
+                            "position": [
+                                1,
+                                0,
+                                0
+                            ],
+                            "stored": 0.9391661882400513
+                        }
+                    ],
+                    "slot": 1
+                }
+            ],
+            "directionalShadows": true,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 1,
+                    "occupied": 19456,
+                    "sha256": "8d74bbeebfea3f8e44e784bbd33abaa381e84a9e8df161c1e06c9712382259d3"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "8ae9649b93c03c8ec04a2fb714a7042f42ea53e9ad034473d46e2385bf777101"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "9ab000aaa969e3f873259b0bc86f3afc74753813ccd197ae050ea50ed49b0465"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "9ab000aaa969e3f873259b0bc86f3afc74753813ccd197ae050ea50ed49b0465"
+                }
+            ],
+            "image": "E:/Engine/Engine/build/playtests/20261114-r7/calm-city/results/point-three-lights.bmp",
+            "light": [
+                -2,
+                5,
+                0,
+                10
+            ],
+            "lights": [
+                {
+                    "enabled": true,
+                    "index": 0,
+                    "intensity": 3,
+                    "position": [
+                        -2,
+                        5,
+                        0
+                    ],
+                    "radius": 10,
+                    "slot": 0
+                },
+                {
+                    "enabled": true,
+                    "index": 1,
+                    "intensity": 2,
+                    "position": [
+                        2,
+                        5,
+                        0
+                    ],
+                    "radius": 12,
+                    "slot": 1
+                },
+                {
+                    "enabled": true,
+                    "index": 2,
+                    "intensity": 1,
+                    "position": [
+                        0,
+                        5,
+                        3
+                    ],
+                    "radius": 8,
+                    "slot": -1
+                }
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.9473684430122375,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "stored": 0.913893461227417
+                },
+                {
+                    "depth": 0.9473684430122375,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        1,
+                        0,
+                        0
+                    ],
+                    "stored": 0.9022914171218872
+                }
+            ],
+            "slot": 0,
+            "time": 0
+        },
+        {
+            "count": 2,
+            "cubes": [
+                {
+                    "faces": [
+                        {
+                            "face": 0,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        },
+                        {
+                            "face": 1,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        },
+                        {
+                            "face": 2,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        },
+                        {
+                            "face": 3,
+                            "occupied": 1048576,
+                            "sha256": "3752d9b9b28d48d7f1e0610943b16d41e6c92ead70dffe795a6368e17bcb40c7"
+                        },
+                        {
+                            "face": 4,
+                            "occupied": 19456,
+                            "sha256": "e2586c22ea516a0381fc5fa5de3cc1dfb529e4b12a65006ed07c08c1aac3a7d0"
+                        },
+                        {
+                            "face": 5,
+                            "occupied": 19456,
+                            "sha256": "e2586c22ea516a0381fc5fa5de3cc1dfb529e4b12a65006ed07c08c1aac3a7d0"
+                        }
+                    ],
+                    "light": [
+                        2,
+                        5,
+                        0,
+                        12
+                    ],
+                    "probes": [
+                        {
+                            "depth": 0.939130425453186,
+                            "face": 3,
+                            "occluded": true,
+                            "position": [
+                                0,
+                                0,
+                                0
+                            ],
+                            "stored": 0.9059468507766724
+                        },
+                        {
+                            "depth": 0.939130425453186,
+                            "face": 3,
+                            "occluded": false,
+                            "position": [
+                                1,
+                                0,
+                                0
+                            ],
+                            "stored": 0.9391661882400513
+                        }
+                    ],
+                    "slot": 0
+                },
+                {
+                    "faces": [
+                        {
+                            "face": 0,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        },
+                        {
+                            "face": 1,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        },
+                        {
+                            "face": 2,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        },
+                        {
+                            "face": 3,
+                            "occupied": 1048576,
+                            "sha256": "74aacaf8330f4545be018e718906dd3cedbdf1c7f8562eb80352218ade4f79d6"
+                        },
+                        {
+                            "face": 4,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        },
+                        {
+                            "face": 5,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        }
+                    ],
+                    "light": [
+                        0,
+                        5,
+                        3,
+                        8
+                    ],
+                    "probes": [
+                        {
+                            "depth": 0.9600000381469727,
+                            "face": 3,
+                            "occluded": true,
+                            "position": [
+                                0,
+                                0,
+                                0
+                            ],
+                            "stored": 0.9394111037254333
+                        },
+                        {
+                            "depth": 0.9600000381469727,
+                            "face": 3,
+                            "occluded": false,
+                            "position": [
+                                1,
+                                0,
+                                0
+                            ],
+                            "stored": 0.9600358009338379
+                        }
+                    ],
+                    "slot": 1
+                }
+            ],
+            "directionalShadows": true,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 1,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "3752d9b9b28d48d7f1e0610943b16d41e6c92ead70dffe795a6368e17bcb40c7"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "e2586c22ea516a0381fc5fa5de3cc1dfb529e4b12a65006ed07c08c1aac3a7d0"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "e2586c22ea516a0381fc5fa5de3cc1dfb529e4b12a65006ed07c08c1aac3a7d0"
+                }
+            ],
+            "image": "E:/Engine/Engine/build/playtests/20261114-r7/calm-city/results/point-zero-intensity.bmp",
+            "light": [
+                2,
+                5,
+                0,
+                12
+            ],
+            "lights": [
+                {
+                    "enabled": true,
+                    "index": 0,
+                    "intensity": 0,
+                    "position": [
+                        -2,
+                        5,
+                        0
+                    ],
+                    "radius": 10,
+                    "slot": -1
+                },
+                {
+                    "enabled": true,
+                    "index": 1,
+                    "intensity": 2,
+                    "position": [
+                        2,
+                        5,
+                        0
+                    ],
+                    "radius": 12,
+                    "slot": 0
+                },
+                {
+                    "enabled": true,
+                    "index": 2,
+                    "intensity": 1,
+                    "position": [
+                        0,
+                        5,
+                        3
+                    ],
+                    "radius": 8,
+                    "slot": 1
+                }
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.939130425453186,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "stored": 0.9059468507766724
+                },
+                {
+                    "depth": 0.939130425453186,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        1,
+                        0,
+                        0
+                    ],
+                    "stored": 0.9391661882400513
+                }
+            ],
+            "slot": 0,
+            "time": 0.25
+        }
+    ],
+    "ok": true
+}

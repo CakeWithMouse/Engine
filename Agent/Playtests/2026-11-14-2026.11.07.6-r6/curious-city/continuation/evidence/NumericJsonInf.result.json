@@ -1,0 +1,4 @@
+{
+    "error": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Content\\Materials\\NumericProbe\\NumericJsonInf.mat: invalid JSON: [json.exception.out_of_range.406] number overflow parsing '1e999'",
+    "ok": false
+}

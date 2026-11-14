@@ -1,0 +1,148 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Tank LOD0: 2160 triangles
+Tank LOD1: 240 triangles
+Tank LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Apc LOD0: 3024 triangles
+Apc LOD1: 336 triangles
+Apc LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Truck LOD0: 2592 triangles
+Truck LOD1: 288 triangles
+Truck LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Artillery LOD0: 2160 triangles
+Artillery LOD1: 240 triangles
+Artillery LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Baked shadow map: 4 static components at 4096 px.
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-000.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-001.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-002.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-003.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-004.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-005.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-006.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-007.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-008.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-009.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-010.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-011.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-012.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-013.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-014.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-015.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-016.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-017.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-018.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-019.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-020.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-021.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-022.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-023.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-024.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-025.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-026.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-027.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-028.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-029.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-030.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-031.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-032.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-033.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-034.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-035.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-036.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-037.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-038.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-039.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-040.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-041.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-042.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-043.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-044.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-045.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-046.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-047.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-048.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-049.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-050.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-051.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-052.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-053.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-054.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-055.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-056.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-057.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-058.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-059.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-060.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-061.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-062.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-063.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-064.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-065.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-066.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-067.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-068.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-069.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-070.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-071.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-072.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-073.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-074.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-075.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-076.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-077.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-078.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-079.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-080.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-081.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-082.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-083.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-084.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-085.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-086.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-087.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-088.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-089.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-090.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-091.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-092.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-093.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-094.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-095.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-096.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-097.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-098.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-099.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-100.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-101.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-102.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-103.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-104.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-105.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-106.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-107.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-108.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-109.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-110.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-111.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-112.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-113.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-114.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-115.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-116.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-117.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-118.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-119.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261114-r6/ai-trash/GpuChecks/cascade-dolly/frame-120.bmp written=1 size=1000x500
+battle-measurement units=1000 types=4 scenery=300 mode=deferred shading=materials shadows=on anim=off sprites=on frames=172 frame_ms=2.98 fps=335.6 gpu_ms=2.03 draws=29.0 instances=2756 visible=762 vertices=76200 lod0=3 lod1=729 lod2=133 sprite=0 culled=238 gpu=NVIDIA GeForce RTX 4070 Laptop GPU

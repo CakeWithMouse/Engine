@@ -1,0 +1,22 @@
+{
+  "project": "Engine/build/playtests/20261114-r7/tired-bomber/BomberUpgradedR7/Project.json",
+  "runtime": "E:\\Engine\\Game\\build\\x64\\Release\\Runtime\\EngineRuntime.exe",
+  "SDK": "DBD52453B2E385A031A86185363AAEA6F652A5BAA5A684B2D226075733989C44",
+  "saveRun": {
+    "args": "--mode game --frames 120",
+    "environment": {
+      "TB_SAVE_FRAME": "20",
+      "TB_HIERARCHY_PROBE": "1"
+    },
+    "observed": "save request accepted and completion Saved"
+  },
+  "loadRun": {
+    "args": "--mode game --frames 120",
+    "environment": {
+      "TB_HIERARCHY_VERIFY": "1",
+      "TB_LOAD_SLOT": "round-1",
+      "TB_SAVE_FRAME": "40"
+    },
+    "observed": "load completion Loaded; parent=16 child=17 childParent=16 customProjectComponent=true, importedModel=/Game/Models/blend-suzanne-multiple/blend-suzanne-multiple.glb, world=(10,2,0), error=2.38419e-7; frame40 elapsed=0.966666, save completion Saved"
+  }
+}

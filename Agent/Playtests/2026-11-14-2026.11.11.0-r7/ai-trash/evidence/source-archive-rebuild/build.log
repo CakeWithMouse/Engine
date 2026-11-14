@@ -1,0 +1,21 @@
+Using v143, MSVC 14.44.35207, Windows SDK 10.0.26100.0.
+MSBuild: C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe
+
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator: 9 component(s), Project
+  BucketParts.cpp
+  ImportedTrashProjectile.cpp
+  Module.cpp
+  ProjectComponent.cpp
+  ProjectGame.cpp
+  RotatingCube.cpp
+  ThrowLane.cpp
+  ThrowLedger.cpp
+  TrashProjectile.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+     Создается библиотека E:\Engine\Engine\build\playtests\20261114-r7\ai-trash\ArchiveRebuildCheck\TrashGameUpgraded\Binaries\Release\6912c48001434c93878bc39c1ee07f56\Game.lib и объект E:\Engine\Engine\build\playtests\20261114-r7\ai-trash\ArchiveRebuildCheck\TrashGameUpgraded\Binaries\Release\6912c48001434c93878bc39c1ee07f56\Game.exp
+  Game.vcxproj -> E:\Engine\Engine\build\playtests\20261114-r7\ai-trash\ArchiveRebuildCheck\TrashGameUpgraded\Binaries\Release\6912c48001434c93878bc39c1ee07f56\Game.dll
+
+Full build log: E:\Engine\Engine\build\playtests\20261114-r7\ai-trash\ArchiveRebuildCheck\TrashGameUpgraded\Binaries\Release\6912c48001434c93878bc39c1ee07f56\build.log
+Build validated and activated. Use Hot Reload in the editor, or reopen the project.

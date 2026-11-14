@@ -1,0 +1,246 @@
+[
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "model-import",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "tired-bomber: Supported model import creates content asset and scene instance at chosen scale."
+  },
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "skeletal",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem."
+  },
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "instances",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem."
+  },
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "lod",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem."
+  },
+  {
+    "previous_evidence": "",
+    "previous_status": "not-tested",
+    "feature_id": "material-params",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem."
+  },
+  {
+    "previous_evidence": "",
+    "previous_status": "not-tested",
+    "feature_id": "material-editor",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem."
+  },
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "material-blends",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem."
+  },
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "light-point",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem."
+  },
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "shadows",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem."
+  },
+  {
+    "previous_evidence": "",
+    "previous_status": "not-tested",
+    "feature_id": "material-graph",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem."
+  },
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "material-slots",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem."
+  },
+  {
+    "previous_evidence": "calm-city/continuation/evidence.json",
+    "previous_status": "passed",
+    "feature_id": "material-slot-edit",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "calm-city: Edit an imported material slot, undo/redo, save and reopen the scene. | curious-city: Use SDK and Inspector to change a material slot and verify Undo/Redo."
+  },
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "material-slot-persist",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem."
+  },
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "imported-shadows",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem."
+  },
+  {
+    "previous_evidence": "calm-city/continuation/evidence.json",
+    "previous_status": "passed",
+    "feature_id": "imported-uv",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "calm-city: Render an imported UV chart/material from an overhead view and observe its texture. | curious-city: Import a UV-mapped textured model, assign its BaseMap, and inspect the texture mapped on the placed object."
+  },
+  {
+    "previous_evidence": "",
+    "previous_status": "not-tested",
+    "feature_id": "material-graph-current",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Own material enable/save/preset/apply/revert; saved graph restored; preview pixels unverified."
+  },
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "render-modes",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem."
+  },
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "render-resize",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem."
+  },
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "diagnostics",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem."
+  },
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "savegame-scene",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem."
+  },
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "savegame-derived",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem."
+  },
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "completed-frame",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem."
+  },
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "lod-panel",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem."
+  },
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "point-shadow-cubes",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem."
+  },
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "shadow-cascade-fit",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem."
+  },
+  {
+    "previous_evidence": "calm-city/continuation/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "audio-play2d",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "calm-city: Confirm runtime 2D playback starts and can be heard. | tired-bomber: Valid sound handle and accepted playback request."
+  },
+  {
+    "previous_evidence": "calm-city/continuation/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "audio-play3d",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "calm-city: Confirm runtime 3D playback starts with an emitter at a nonzero position and can be heard. | tired-bomber: 3D playback request accepted for a positioned emitter."
+  },
+  {
+    "previous_evidence": "calm-city/continuation/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "audio-stream",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "calm-city: Exercise stream lifecycle including multiple updates and stop; verify audible output. | tired-bomber: Stream handle is valid and can be stopped."
+  },
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "point-shadow-lod-transition",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Camera distance changes selected LOD and returning restores shadow data; full fade matrix is coordinator coverage."
+  },
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "transparency-camera-sorting",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Own camera sequences preserve overlapping surfaces; no persona-independent pixel oracle."
+  },
+  {
+    "previous_evidence": "calm-city/evidence.json",
+    "previous_status": "partial",
+    "feature_id": "transparency-intersections",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Own cross geometry and orbit frames; exact 16-layer edge cases covered by coordinator."
+  },
+  {
+    "previous_evidence": "",
+    "previous_status": "not-tested",
+    "feature_id": "transparency-animated-lod-resize",
+    "r7_gap": "Replace partial with a concrete own scenario and observable result; if visual/audio is required, keep visual/listening status separate.",
+    "previous_criterion": "Own skeletal/crowd camera/resize frames; exact crossfade oracle is coordinator coverage."
+  },
+  {
+    "previous_status": "not-tested",
+    "feature_id": "ai-card-memory",
+    "r7_gap": "Freshly create/assign FSM; set one actor-only memory override; reset; Undo/Redo; clone actor; save scene and reopen with target memory/state intact."
+  },
+  {
+    "previous_status": "not-tested",
+    "feature_id": "ai-graph-edit",
+    "r7_gap": "Use actual editor windows to create/edit states, transitions, variables/settings; exercise history and saved/reopened graph."
+  },
+  {
+    "previous_status": "not-tested",
+    "feature_id": "ai-runtime-debug",
+    "r7_gap": "During visible Play, observe active path, transitions, memory and correlate at least two state changes with actor movement/behavior over time."
+  },
+  {
+    "previous_status": "not-tested",
+    "feature_id": "ai-file-reload",
+    "r7_gap": "Save/reopen FSM; provoke write refusal and recover/retry; edit file externally, re-Play, verify changed behavior."
+  }
+]

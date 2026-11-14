@@ -1,0 +1,27 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "depthCollision": true,
+    "frames": [
+        {
+            "dispatches": 30,
+            "drawCalls": 2,
+            "elapsed": 0.30059999227523804,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation\\particles-collision-on\\frame-018.bmp",
+            "instances": 129,
+            "sha256": "3c19b0645c0aed5b9b57a73720dd8305b092e2d25cfe7ea9dbcc854b3082ab37",
+            "steps": 18
+        },
+        {
+            "dispatches": 30,
+            "drawCalls": 2,
+            "elapsed": 0.9017999768257141,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation\\particles-collision-on\\frame-054.bmp",
+            "instances": 129,
+            "sha256": "7213d00b502638f10cc39043a88f253a5510fcd274c43d5e481300cd0c57c038",
+            "steps": 54
+        }
+    ],
+    "measurement": "Real GPU simulation and image readback; no particle-state readback or inferred collision counter.",
+    "ok": true,
+    "surface": true
+}

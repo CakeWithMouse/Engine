@@ -38,6 +38,7 @@ EngineAuthoringApi SceneEditSession::GetAuthoringApi() noexcept {
                 return Report(error,size,[&] {
                     auto* object=s.edit_->GetScene().FindComponent(id);if(!object)throw std::runtime_error("Object not found");
                     auto schema=Schema(*object);Json field;
+                    if(schema.empty())throw std::runtime_error("Property is not editable");
                     for(const auto& item:schema.at("fields"))if(item.at("path")==pointer){field=item;break;}
                     if(field.is_null()||field.value("readOnly",false)||std::string(pointer)=="/version")throw std::runtime_error("Property is not editable");
                     const auto value=Json::parse(text);const auto type=field.at("type").get<std::string>();

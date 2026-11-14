@@ -1,0 +1,179 @@
+{
+    "frames": 8,
+    "ok": true,
+    "steps": [
+        {
+            "kind": "control",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "/Game/Materials/BrokenCity.mat",
+                    "name": "TwinMaterialSuzanne",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Materials/BrokenCity.mat",
+                            "1": "/Game/Materials/BrokenCity.mat"
+                        },
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "CityControls",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "CuriousCity.Interaction"
+                }
+            ]
+        },
+        {
+            "kind": "focus",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "/Game/Materials/BrokenCity.mat",
+                    "name": "TwinMaterialSuzanne",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Materials/BrokenCity.mat",
+                            "1": "/Game/Materials/BrokenCity.mat"
+                        },
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "CityControls",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "CuriousCity.Interaction"
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "/Game/Materials/BrokenCity.mat",
+                    "name": "TwinMaterialSuzanne",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Materials/BrokenCity.mat",
+                            "1": "/Game/Materials/BrokenCity.mat"
+                        },
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "CityControls",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "CuriousCity.Interaction"
+                }
+            ]
+        },
+        {
+            "kind": "control",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "/Game/Materials/BrokenCity.mat",
+                    "name": "TwinMaterialSuzanne",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Materials/BrokenCity.mat",
+                            "1": "/Game/Materials/BrokenCity.mat"
+                        },
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Engine.Model"
+                }
+            ]
+        }
+    ]
+}

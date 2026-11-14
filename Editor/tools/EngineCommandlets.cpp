@@ -1,6 +1,13 @@
 #define NOMINMAX
+// Engine public types contain ordinary names such as SmartObject::slots;
+// parse those headers before Qt introduces its signals/slots macros.
+#include <Engine/Project/StandardTypes.h>
 #include "EditorStyles.h"
 #include "EditorTheme.h"
+#include "CommandRegistry.h"
+#include "CodeClassDialog.h"
+#include "ImportSettingsDialog.h"
+#include "ModelImportSidecar.h"
 #include "GizmoMath.h"
 #include "MainWindow.h"
 #include "MaterialEditorWindow.h"
@@ -57,6 +64,9 @@
 #include <stdexcept>
 #include "PointShadowDiagnostics.h"
 #include "TransparencyDiagnostics.h"
+#include "ParticleDiagnostics.h"
+#include "MeshDiagnostics.h"
+#include "AiEditorDiagnostics.h"
 
 namespace {
 std::wstring crashDumpPath;
@@ -95,6 +105,7 @@ glm::vec3 Vector(const QJsonValue &value, glm::vec3 fallback) {
 }
 QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
   namespace fs = std::filesystem;
+  EditorTheme::Apply(*static_cast<QApplication*>(QCoreApplication::instance()));
   const auto project = QFileInfo(in["project"].toString()).absoluteFilePath();
   QFile file(project);
   Require(file.open(QIODevice::ReadOnly), "cannot read project");
@@ -129,6 +140,7 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
   struct Context {
     GameEditModule *module;
     EngineEditorReloadApi reload{};
+    EditorQtHost* host = nullptr;
   } context{&module};
   context.reload = {
       1, &context,
@@ -138,9 +150,12 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
         auto &m = *static_cast<Context *>(p)->module;
         auto status = m.Reload(fs::u8path(path), fs::u8path(checkpoint), h, w,
                                height, error, cap);
-        if (status == EngineSceneOk)
+        if (status == EngineSceneOk) {
           *out = {m.Api(), m.ProjectDataApi(), m.SelectionApi(),
-                  m.ViewportInputApi()};
+                  m.ViewportInputApi(), m.AudioPreviewApi()};
+          if (auto* host = static_cast<Context*>(p)->host)
+            host->SetAssetImportApi(m.AssetImportApi());
+        }
         return status;
       }};
   EngineModuleHost callbacks{ENGINE_MODULE_VERSION,
@@ -167,27 +182,47 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
       return &c.module->AuthoringApi();
     if (id == EnginePointLightV2Service)
       return &c.module->PointLightV2Api();
+    if (id == EngineAiMachineService)
+      return &c.module->AiMachineApi();
+    if (id == EngineScriptService)
+      return &c.module->ScriptApi();
+    if (id == EngineGraphTraceService)
+      return &c.module->GraphTraceApi();
     return nullptr;
   };
   struct CommandCapture : IEditorUiListener {
     uint32_t status = EngineSceneOk;
     QString error;
+    EditorMainWindow* window = nullptr;
+    QString importedAsset;
+    uint32_t importStatus = UINT32_MAX;
     void OnLogMessage(const QString &) override {}
-    void OnCommandFinished(const EditorCommand &, uint32_t value,
+    void OnCommandFinished(const EditorCommand &command, uint32_t value,
                            const QString &detail) override {
       status = value;
       error = detail;
+      if (command.type == EditorCommand::ImportModel) {
+        importedAsset = command.path;
+        importStatus = value;
+      }
+      if (window) window->OnCommandFinished(command, value, detail);
     }
   } capture;
   EditorQtHost host(callbacks, [](IEditorHost *, std::atomic<bool> *ready) {
     ready->store(true);
   });
   host.SetUiListener(&capture);
+  context.host = &host;
   host.SetModuleApi(module.Api());
   host.SetProjectDataApi(module.ProjectDataApi());
   host.SetSelectionApi(module.SelectionApi());
   host.SetViewportInputApi(module.ViewportInputApi());
+  host.SetAiMachineApi(module.AiMachineApi());
+  host.SetScriptApi(module.ScriptApi());
+  host.SetAssetImportApi(module.AssetImportApi());
+  host.SetAudioPreviewApi(module.AudioPreviewApi());
   Require(host.Start(), "host initialization failed");
+  if (in["recovery"].toBool()) host.InitializeRecovery();
   EditorCommand attach;
   attach.type = EditorCommand::ViewportAttach;
   attach.hwnd = hwnd;
@@ -212,7 +247,11 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
                           {"id", double(o->id)},
                           {"parent", double(o->parentId)},
                           {"type", o->typeName},
+                          {"rotation",QJsonArray{o->transform.rotation[0],o->transform.rotation[1],o->transform.rotation[2],o->transform.rotation[3]}},
                           {"material",o->materialAsset},
+                          {"scale", QJsonArray{o->transform.scale[0],
+                                               o->transform.scale[1],
+                                               o->transform.scale[2]}},
                           {"position", QJsonArray{o->transform.position[0],
                                                   o->transform.position[1],
                                                   o->transform.position[2]}}});
@@ -229,7 +268,155 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
     return out;
   };
   QJsonObject result;
-  if (command == "project.scene") {
+  if (command == "ai.editor" || command == "editor.scene") {
+    auto request=in;request["nativeViewport"]=(command=="editor.scene");
+    result = AiEditorDiagnostics::Run(request, host, module, capture, objects);
+  } else if (command == "project.import") {
+    // Exercise the same command and completion callback as the editor. This is
+    // intentionally separate from asset.import, which tests the runtime API.
+    EditorMainWindow window(&host);
+    capture.window = &window;
+    host.SetUiListener(&capture);
+    struct ListenerGuard {
+      EditorQtHost& host;
+      CommandCapture& capture;
+      ~ListenerGuard() { capture.window = nullptr; host.SetUiListener(nullptr); }
+    } listenerGuard{host, capture};
+    QStringList dialogs;
+    QTimer dismiss;
+    QObject::connect(&dismiss, &QTimer::timeout, [&] {
+      for (auto* widget : QApplication::topLevelWidgets())
+        if (auto* box = qobject_cast<QMessageBox*>(widget)) {
+          dialogs << box->text();
+          box->accept();
+        }
+    });
+    dismiss.start(10);
+    const auto source = in["source"].toString();
+    Require(QFileInfo(source).isAbsolute() && QFileInfo(source).isFile(),
+            "source must be an existing absolute model file");
+    QVariantMap parameters{{"kind", 0}, {"source", source}};
+    if (in.contains("scale")) parameters["scale"] = in["scale"].toVariant();
+    if (in.contains("options")) parameters["options"] = in["options"].toVariant();
+    QTimer importDialogDriver;
+    QString dialogError;
+    if (in.contains("dialog")) {
+      Require(!in.contains("scale"), "dialog and explicit scale are mutually exclusive");
+      const auto options = in["dialog"].toObject();
+      const auto action = options["action"].toString("accept");
+      Require(action == "accept" || action == "cancel", "dialog action must be accept or cancel");
+      const auto presets = options["presets"].toArray();
+      for (const auto preset : presets)
+        Require(QStringList{"Preset1", "Preset01", "Preset001"}.contains(preset.toString()),
+                "unknown import preset");
+      if (options.contains("value"))
+        Require(options["value"].isDouble(), "dialog value must be numeric");
+      const auto dialogImage = options["image"].toString();
+      Require(dialogImage.isEmpty() || !QFileInfo::exists(dialogImage), "dialog image already exists");
+      parameters["showDialog"] = true;
+      QObject::connect(&importDialogDriver, &QTimer::timeout, [&result, &dialogError, &importDialogDriver, options, presets, action, dialogImage] {
+        for (auto* widget : QApplication::topLevelWidgets()) {
+          if (widget->objectName() != "ImportSettingsDialog" || !widget->isVisible()) continue;
+          importDialogDriver.stop();
+          auto* dialog = static_cast<ImportSettingsDialog*>(widget);
+          auto* spin = dialog->findChild<QDoubleSpinBox*>("ImportScaleSpin");
+          if(options.contains("useFileUnitScale"))
+            dialog->findChild<QCheckBox*>("UseFileUnitScaleCheck")->setChecked(options["useFileUnitScale"].toBool());
+          QJsonArray observed;
+          for (const auto preset : presets) {
+            dialog->findChild<QPushButton*>(preset.toString())->click();
+            observed.append(QJsonObject{{"preset", preset}, {"scale", spin->value()}});
+          }
+          if (options.contains("value")) spin->setValue(options["value"].toDouble());
+          spin->setFocus();
+          QApplication::processEvents();
+          result["dialog"] = QJsonObject{{"presets", observed}, {"scale", spin->value()},
+              {"action", action}, {"spinFocused", spin->hasFocus()}};
+          if (!dialogImage.isEmpty() && !dialog->grab().save(dialogImage)) dialogError = "dialog image save failed";
+          dialog->findChild<QPushButton*>(action == "accept" ? "ImportOkBtn" : "ImportCancelBtn")->click();
+          return;
+        }
+      });
+      importDialogDriver.start(10);
+    }
+    result["before"] = objects();
+    result["accepted"] = CommandRegistry::Instance().Execute("Assets.Import", parameters);
+    Require(dialogError.isEmpty(), dialogError.toUtf8().constData());
+    auto pump = [&] {
+      for (int i = 0; i < 6; ++i) {
+        host.Update(.016);
+        QApplication::processEvents();
+        QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+      }
+    };
+    pump();
+    if (result["accepted"].toBool()) {
+      Require(capture.importStatus == EngineSceneOk,
+              capture.error.isEmpty() ? "import did not complete" : capture.error.toUtf8().constData());
+      const auto asset = capture.importedAsset;
+      Require(asset.startsWith("/Game/"), "import did not return a project asset");
+      auto absolute = QDir(content).absoluteFilePath(asset.mid(6));
+      result["asset"] = asset;
+      window.UseAsset(absolute);
+      pump();
+      result["spawned"] = objects();
+      if (in.contains("reimportSource")) {
+        window.UpdateAsset(absolute, false, in["reimportSource"].toString());
+        pump();
+        Require(capture.status == EngineSceneOk, "reimport failed");
+        window.UseAsset(absolute);
+        pump();
+        result["afterReimport"] = objects();
+      }
+      if (in.contains("moveTo")) {
+        const auto destination = in["moveTo"].toString();
+        Require(destination.startsWith("/Game/"), "moveTo must be a /Game path");
+        window.UpdateAsset(absolute, true, destination);
+        pump();
+        Require(capture.status == EngineSceneOk, "asset move failed");
+        absolute = QDir(content).absoluteFilePath(destination.mid(6));
+        window.UseAsset(absolute);
+        pump();
+        result["afterMove"] = objects();
+      }
+      QFile sidecar(EditorCore::ImportSettingsFile::SidecarPathForAsset(absolute));
+      result["sidecarExists"] = sidecar.exists();
+      if (sidecar.open(QIODevice::ReadOnly))
+        result["sidecar"] = QJsonDocument::fromJson(sidecar.readAll()).object();
+    }
+    result["after"] = objects();
+    result["dialogs"] = QJsonArray::fromStringList(dialogs);
+    if (in.contains("image")) {
+      const auto image = in["image"].toString();
+      Require(!QFileInfo::exists(image), "image already exists");
+      window.resize(in["width"].toInt(1000), in["height"].toInt(650));
+      window.show();
+      QApplication::processEvents();
+      Require(window.grab().save(image), "editor layout capture failed");
+      result["image"] = image;
+    }
+  } else if (command == "project.scene") {
+    // Optional real editor window for actions whose state lives in the UI.
+    std::unique_ptr<EditorMainWindow> window;
+    QStringList dialogs;
+    QTimer dismiss;
+    QObject::connect(&dismiss, &QTimer::timeout, [&] {
+      for (auto* widget : QApplication::topLevelWidgets())
+        if (auto* box = qobject_cast<QMessageBox*>(widget); box && box->isVisible()) {
+          dialogs << box->text();
+          box->accept();
+        }
+    });
+    if (in["editorWindow"].toBool()) {
+      window = std::make_unique<EditorMainWindow>(&host);
+      capture.window = window.get();
+      host.SetUiListener(&capture);
+      dismiss.start(10);
+    }
+    struct SceneListenerGuard {
+      CommandCapture& capture;
+      ~SceneListenerGuard() { capture.window = nullptr; }
+    } sceneListenerGuard{capture};
     const auto steps = in["steps"].toArray();
     Require(!steps.empty() && steps.size() <= 100,
             "1..100 scene steps required");
@@ -298,6 +485,30 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
         cmd.type = EditorCommand::Undo;
       else if (action == "redo")
         cmd.type = EditorCommand::Redo;
+      else if (action == "write-recovery") {
+        Require(in["recovery"].toBool(), "recovery:true required");
+        cmd.type = EditorCommand::WriteRecovery;
+      } else if (action == "recover") {
+        Require(in["recovery"].toBool(), "recovery:true required");
+        const auto candidates = RecoveryStore::Candidates(project);
+        Require(!candidates.empty(), "no abandoned recovery candidate");
+        const auto record = candidates.front();
+        cmd.type = EditorCommand::LoadScene;
+        cmd.name = "recovery";
+        cmd.path = QFileInfo(record).dir().filePath(RecoveryStore::Read(record)["snapshot"].toString());
+      } else if (action == "startup") {
+        Require(window != nullptr, "startup requires editorWindow:true");
+        QAction* startup = nullptr;
+        for (auto* item : window->findChildren<QAction*>())
+          if (item->text() == QStringLiteral("Сделать стартовой сценой") || item->text() == "Set Startup Scene") startup = item;
+        Require(startup != nullptr, "startup action unavailable");
+        startup->trigger();
+        host.Update(0);
+        QApplication::processEvents();
+        results.append(QJsonObject{{"action", action}, {"status", int(capture.status)},
+            {"objects", objects()}, {"manifest", RecoveryStore::Read(project)}});
+        continue;
+      }
       else
         throw std::runtime_error("unknown project.scene action");
       capture.status = EngineSceneFailure;
@@ -317,7 +528,28 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
                                  {"canRedo", snapshot.canRedo}});
     }
     result["steps"] = results;
+    result["dialogs"] = QJsonArray::fromStringList(dialogs);
+    result["recoveryCandidates"] = QJsonArray::fromStringList(RecoveryStore::Candidates(project));
+    if (in["recovery"].toBool()) {
+      QJsonArray records;
+      QDir recovery(root.filePath(".painengine/Recovery"));
+      for (const auto& name : recovery.entryList({"*.json"}, QDir::Files)) {
+        if (name.endsWith(".scene.json")) continue;
+        auto record = RecoveryStore::Read(recovery.filePath(name));
+        record["recordPath"] = recovery.filePath(name);
+        records.append(record);
+      }
+      result["recoveryRecords"] = records;
+    }
   } else if (command == "material.graph") {
+    if (in["previewOnly"].toBool()) {
+      // Keep the project scene/device alive but suppress its rendering. Native
+      // material previews have independent viewports and continue to render.
+      // This makes the existing per-Game D3D screenshot hook unambiguous.
+      Require(module.Api().resizeViewport(module.Api().context, 0, 0) == EngineSceneOk,
+              "cannot minimize project viewport for preview capture");
+      result["projectViewportMinimized"] = true;
+    }
     EditorTheme::Apply(
         *static_cast<QApplication *>(QCoreApplication::instance()));
     const auto material = in["material"].toString();
@@ -371,6 +603,10 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
     Require(preview && IsWindow(reinterpret_cast<HWND>(preview->winId())),
             "material preview requires a real native HWND");
     result["nativePreviewWindow"] = true;
+    RECT previewRect{};
+    Require(GetClientRect(reinterpret_cast<HWND>(preview->winId()), &previewRect),
+            "cannot read native preview dimensions");
+    result["nativePreviewSize"] = QJsonArray{int(previewRect.right-previewRect.left),int(previewRect.bottom-previewRect.top)};
     QJsonArray results;
     const auto steps = in["steps"].toArray();
     Require(!steps.empty() && steps.size() <= 100,
@@ -397,6 +633,7 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
         }
       } lockGuard{lock};
       bool accepted = true;
+      QString operationError;
       if (action == "enable")
         editor->EnableGraph();
       else if (action == "disable")
@@ -428,7 +665,7 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
                   "invalid preset index");
           graph->LoadPreset(index);
         } else if (action == "ai")
-          accepted = graph->PasteFromAi(step["text"].toString());
+          accepted = graph->PasteFromAi(step["text"].toString(), &operationError);
         else if (action == "undo")
           graph->Undo();
         else if (action == "redo")
@@ -444,6 +681,7 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
       pump();
       QJsonObject state{{"action", action},
                         {"accepted", accepted},
+                        {"error", operationError},
                         {"hasGraph", editor->HasGraph()},
                         {"dirty", editor->HasUnsavedChanges()}};
       if (editor->HasGraph())
@@ -466,6 +704,7 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
     Require(!steps.empty() && steps.size() <= 100,
             "steps must contain 1..100 input/control/frame operations");
     int totalFrames = 0;
+    int viewportWidth = 640, viewportHeight = 480;
     QJsonArray results;
     for (const auto value : steps) {
       Require(value.isObject(), "step must be an object");
@@ -489,6 +728,18 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
                 "bounded frame count required");
         for (int i = 0; i < count; ++i)
           tick();
+      } else if (kind == "resize") {
+        viewportWidth = PointShadowDiagnostics::Integer(step,"width",640,64,1920);
+        viewportHeight = PointShadowDiagnostics::Integer(step,"height",480,64,1080);
+        RECT bounds{0,0,viewportWidth,viewportHeight};
+        Require(AdjustWindowRectEx(&bounds, DWORD(GetWindowLongPtrW(hwnd,GWL_STYLE)), FALSE,
+                                  DWORD(GetWindowLongPtrW(hwnd,GWL_EXSTYLE))), "viewport bounds failed");
+        Require(SetWindowPos(hwnd,nullptr,0,0,bounds.right-bounds.left,bounds.bottom-bounds.top,
+                             SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE), "viewport window resize failed");
+        EditorCommand resize;resize.type=EditorCommand::ViewportResize;
+        resize.w=viewportWidth;resize.h=viewportHeight;
+        host.PostCommand(resize);host.Update(0);
+        Require(capture.status==EngineSceneOk,"viewport resize failed");
       } else if (kind == "key" || kind == "focus") {
         EditorCommand input;
         input.type =
@@ -518,12 +769,20 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
         auto cursor = module.ViewportCursorApi();
         Require(cursor.set, "cursor API unavailable");
         Require(cursor.set(cursor.context, float(step["x"].toDouble()),
-                           float(step["y"].toDouble()), 640, 480,
+                           float(step["y"].toDouble()), viewportWidth, viewportHeight,
                            step["valid"].toBool(true) ? 1 : 0) == EngineSceneOk,
                 "cursor update failed");
       } else
         throw std::runtime_error("unknown project.input step");
-      results.append(QJsonObject{{"kind", kind}, {"objects", objects()}});
+      QJsonObject state{{"kind",kind},{"objects",objects()},
+                        {"viewportRequested",QJsonArray{viewportWidth,viewportHeight}}};
+      EngineCameraInfo camera{};
+      if(host.GetCamera(camera)) {
+        QJsonArray projection;for(float v:camera.projMatrix)projection.append(v);
+        state["camera"]=QJsonObject{{"width",int(camera.width)},{"height",int(camera.height)},
+                                   {"projection",projection}};
+      }
+      results.append(state);
     }
     result["steps"] = results;
     result["frames"] = totalFrames;
@@ -602,9 +861,39 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
     dismiss.start(20);
     QAction *build = nullptr;
     for (auto *a : window.findChildren<QAction *>())
-      if (a->shortcut() == QKeySequence("Ctrl+Alt+R"))
+      if ((command == "project.class-wizard" &&
+           (a->text() == QStringLiteral("Добавить C++ класс…") || a->text() == "Add C++ Class…")) ||
+          (command != "project.class-wizard" && a->shortcut() == QKeySequence("Ctrl+Alt+R")))
         build = a;
-    Require(build, "build action missing");
+    Require(build, "requested code action missing");
+    QTimer classDriver;
+    if (command == "project.class-wizard") {
+      QObject::connect(&classDriver, &QTimer::timeout, [&] {
+        for (auto* widget : QApplication::topLevelWidgets()) {
+          auto* dialog = dynamic_cast<CodeClassDialog*>(widget);
+          if (!dialog || !dialog->isVisible()) continue;
+          classDriver.stop();
+          auto* kind = dialog->findChild<QComboBox*>("ClassKind");
+          const auto requestedKind = in["kind"].toString("Object");
+          if (kind->findText(requestedKind) < 0) {
+            result["wizardError"] = "unknown class kind";
+            dialog->reject();
+            return;
+          }
+          kind->setCurrentText(requestedKind);
+          dialog->findChild<QLineEdit*>("ClassName")->setText(in["name"].toString());
+          if (in.contains("base")) dialog->findChild<QLineEdit*>("ClassBase")->setText(in["base"].toString());
+          if (in.contains("header")) dialog->findChild<QLineEdit*>("ClassBaseHeader")->setText(in["header"].toString());
+          auto* ok = dialog->findChild<QDialogButtonBox*>()->button(QDialogButtonBox::Ok);
+          result["wizardAccepted"] = ok->isEnabled();
+          result["wizardError"] = dialog->findChild<QLabel*>("ClassError")->text();
+          result["arguments"] = QJsonArray::fromStringList(dialog->Arguments());
+          if (ok->isEnabled()) ok->click(); else dialog->reject();
+          return;
+        }
+      });
+      classDriver.start(10);
+    }
     const auto old = module.Api().context;
     build->trigger();
     Require(window.isEnabled(), "build disabled entire main window");
@@ -630,6 +919,19 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
     Require(console, "console missing");
     result["console"] = console->toPlainText();
     result["buildSucceeded"] = dialogs.isEmpty();
+    if (command == "project.class-wizard") {
+      const auto name = in["name"].toString().trimmed();
+      QJsonObject generated;
+      if (result["wizardAccepted"].toBool()) {
+        for (const auto suffix : {".h", ".cpp"}) {
+          QFile source(root.filePath("Source/" + name + suffix));
+          Require(source.open(QIODevice::ReadOnly), "wizard accepted but generator did not create source");
+          generated[suffix] = QString::fromUtf8(source.readAll());
+        }
+      }
+      result["generated"] = generated;
+      result.remove("buildSucceeded");
+    }
     host.SetUiListener(nullptr);
   }
   host.SetModuleApi({});
@@ -637,6 +939,40 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
   return result;
 }
 QJsonObject Run(const QString &command, const QJsonObject &in) {
+  if (command == "render.particles") return ParticleDiagnostics::Run(in);
+  if (command == "render.mesh") return MeshDiagnostics::Run(in);
+  if (command == "mesh.simplify") return MeshDiagnostics::Simplify(in);
+  if (command == "ui.class-wizard") {
+    EditorTheme::Apply(*static_cast<QApplication*>(QCoreApplication::instance()));
+    const auto projectRoot = in["projectRoot"].toString();
+    Require(QDir(projectRoot).isAbsolute() && QDir(projectRoot).exists(), "existing absolute projectRoot required");
+    CodeClassDialog dialog(projectRoot);
+    dialog.show();
+    QJsonArray results;
+    const auto steps = in["steps"].toArray();
+    Require(!steps.empty() && steps.size() <= 64, "1..64 wizard steps required");
+    for (const auto value : steps) {
+      const auto step = value.toObject();
+      if (step.contains("kind")) {
+        auto* kind = dialog.findChild<QComboBox*>("ClassKind");
+        Require(kind->findText(step["kind"].toString()) >= 0, "unknown class kind");
+        kind->setCurrentText(step["kind"].toString());
+      }
+      for (const auto& pair : {std::pair<const char*,const char*>{"name", "ClassName"}, {"base", "ClassBase"}, {"header", "ClassBaseHeader"}})
+        if (step.contains(pair.first)) dialog.findChild<QLineEdit*>(pair.second)->setText(step[pair.first].toString());
+      dialog.findChild<QLineEdit*>("ClassName")->setFocus();
+      QApplication::processEvents();
+      auto* ok = dialog.findChild<QDialogButtonBox*>()->button(QDialogButtonBox::Ok);
+      results.append(QJsonObject{{"accepted", ok->isEnabled()},
+          {"error", dialog.findChild<QLabel*>("ClassError")->text()},
+          {"arguments", QJsonArray::fromStringList(dialog.Arguments())}});
+    }
+    if (in.contains("image")) {
+      const auto path = in["image"].toString();
+      Require(!QFileInfo::exists(path) && dialog.grab().save(path), "wizard image save failed");
+    }
+    return {{"steps", results}};
+  }
   if (command == "render.point-shadows") return PointShadowDiagnostics::Run(in);
   if (command == "render.transparency") return TransparencyDiagnostics::Run(in);
   if (command == "render.diagnostics") {
@@ -835,10 +1171,22 @@ QJsonObject Run(const QString &command, const QJsonObject &in) {
                           runtime / "EngineContent", content);
     const auto api = module.Api();
     char error[2048]{}, path[4096]{};
+    const auto kind=in["kind"].toString("model");
+    Require(kind=="model" || kind=="texture" || kind=="audio", "asset kind must be model, texture or audio");
+    const uint32_t assetKind=kind=="model" ? 0u : kind=="texture" ? 1u : 2u;
     const auto status =
-        api.importAsset(api.context, source.toUtf8().constData(), 0, path,
+        api.importAsset(api.context, source.toUtf8().constData(), assetKind, path,
                         sizeof(path), error, sizeof(error));
     Require(status == EngineSceneOk, error);
+    if(assetKind!=0) {
+      const auto asset=QString::fromUtf8(path);
+      Require(asset.startsWith("/Game/"),"import returned invalid asset path");
+      QFile imported(QString::fromStdWString((content/fs::u8path(std::string(path).substr(6))).wstring()));
+      Require(imported.open(QIODevice::ReadOnly),"imported asset cannot be read");
+      const auto bytes=imported.readAll();
+      return {{"asset",asset},{"kind",kind},{"placed",false},{"bytes",bytes.size()},
+          {"sha256",QString::fromLatin1(QCryptographicHash::hash(bytes,QCryptographicHash::Sha256).toHex())}};
+    }
     uint64_t object = 0;
     Require(api.createModel(api.context, path, "Imported", nullptr, &object,
                             error, sizeof(error)) == EngineSceneOk,
@@ -965,9 +1313,9 @@ QJsonObject Run(const QString &command, const QJsonObject &in) {
             {"minimum", Array(minimum)},
             {"maximum", Array(maximum)}};
   }
-  if (command == "project.build" || command == "project.reload-input" ||
+  if (command == "project.build" || command == "project.class-wizard" || command == "project.reload-input" ||
       command == "project.input" || command == "material.graph" ||
-      command == "project.scene")
+      command == "project.scene" || command == "project.import" || command == "ai.editor" || command == "editor.scene")
     return ProjectCommand(command, in);
   if (command == "scene.property") {
     SceneEditSession session(SceneProject::GetComponentTypes());
@@ -1264,7 +1612,7 @@ int main(int argc, char **argv) {
   SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
   // Native material preview needs a real child HWND. Keep that window hidden;
   // other commandlets use offscreen Qt and their own explicit D3D HWND.
-  qputenv("QT_QPA_PLATFORM", argc > 1 && std::string(argv[1]) == "material.graph"
+  qputenv("QT_QPA_PLATFORM", argc > 1 && (std::string(argv[1]) == "material.graph" || std::string(argv[1]) == "editor.scene")
                                 ? "windows" : "offscreen");
   QApplication app(argc, argv);
   qInstallMessageHandler(Messages);
@@ -1288,11 +1636,11 @@ int main(int argc, char **argv) {
     return 0;
   }
   if (args.size() == 2 && args[1] == "--list") {
-    std::puts("ui.style\nui.inspector\nui.edit-text\ninput.rebind\ntrace."
+    std::puts("ui.style\nui.inspector\nui.edit-text\nui.class-wizard\ninput.rebind\ntrace."
               "raycast\ngizmo.snap\ngizmo.center\ncamera.screen-ray\nscene."
-              "property\nsession.lifecycle\nproject.build\nproject.reload-"
-              "input\nproject.input\nproject.scene\nrender."
-              "diagnostics\nrender.point-shadows\nrender.transparency\nmaterial.graph\nmesh.primitive\nmesh.tangents\ngame."
+              "property\nsession.lifecycle\nproject.build\nproject.class-wizard\nproject.reload-"
+              "input\nproject.input\nproject.scene\nproject.import\nrender."
+              "diagnostics\nrender.point-shadows\nrender.transparency\nrender.particles\nrender.mesh\nmaterial.graph\nai.editor\neditor.scene\nmesh.primitive\nmesh.tangents\nmesh.simplify\ngame."
               "settings\nasset.import\nsavegame.save\nsavegame.load\nsavegame."
               "validate\nsavegame.list\nsavegame.delete");
     return 0;

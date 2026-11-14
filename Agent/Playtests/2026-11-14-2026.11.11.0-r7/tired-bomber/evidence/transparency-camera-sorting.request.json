@@ -1,0 +1,82 @@
+{
+  "width": 320,
+  "height": 256,
+  "orthographic": true,
+  "groups": [
+    {
+      "height": 4,
+      "width": 8,
+      "layers": [
+        {
+          "position": [
+            0,
+            0,
+            -1
+          ],
+          "color": [
+            1,
+            0,
+            0
+          ],
+          "alpha": 0.5
+        },
+        {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "color": [
+            0,
+            1,
+            0
+          ],
+          "alpha": 0.5
+        },
+        {
+          "position": [
+            0,
+            0,
+            1
+          ],
+          "color": [
+            0,
+            0,
+            1
+          ],
+          "alpha": 0.5
+        }
+      ],
+      "material": "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\tired-bomber\\evidence\\Layer.mat",
+      "kind": "mesh"
+    }
+  ],
+  "frames": [
+    {
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "image": "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\tired-bomber\\evidence\\sort-replay.bmp",
+      "camera": [
+        0,
+        0,
+        -8
+      ]
+    },
+    {
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "image": "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\tired-bomber\\evidence\\sort-replay-2.bmp",
+      "camera": [
+        0,
+        0,
+        8
+      ]
+    }
+  ]
+}

@@ -1,0 +1,153 @@
+{
+  "materialBlends": {
+    "expectedOpaqueRGB": [
+      217,
+      31,
+      20
+    ],
+    "opaqueRGB": [
+      217.0,
+      31.0,
+      20.0
+    ],
+    "expectedSourceOverRGB": [
+      119,
+      41,
+      131
+    ],
+    "sourceOverForwardRGB": [
+      119.0,
+      41.0,
+      131.0
+    ],
+    "sourceOverDeferredRGB": [
+      119.0,
+      41.0,
+      131.0
+    ],
+    "maskedHoleRGB": [
+      0.0,
+      0.0,
+      51.0
+    ],
+    "maskedCoveredRGB": [
+      31.0,
+      209.0,
+      46.0
+    ],
+    "backgroundRGB": [
+      0.0,
+      0.0,
+      51.0
+    ],
+    "translucentOnlyRGB": [
+      10.0,
+      25.0,
+      147.0
+    ],
+    "deferredMaskedHoleRGB": [
+      0.0,
+      0.0,
+      51.0
+    ],
+    "deferredMaskedCoveredRGB": [
+      31.0,
+      209.0,
+      46.0
+    ]
+  },
+  "shadows": {
+    "baseLightShadowOnVsOff": {
+      "pixels": 1183,
+      "bbox": [
+        320,
+        228,
+        396,
+        249
+      ],
+      "darkened": 1183,
+      "brightened": 0,
+      "meanDeltaRGB": [
+        -163.82,
+        -154.43,
+        -124.21
+      ]
+    },
+    "movedLightShadowOnVsOff": {
+      "pixels": 564,
+      "bbox": [
+        281,
+        209,
+        330,
+        240
+      ],
+      "darkened": 564,
+      "brightened": 0,
+      "meanDeltaRGB": [
+        -161.71,
+        -153.08,
+        -126.14
+      ]
+    },
+    "baseShadowCentroid": [
+      359.3,
+      238.58
+    ],
+    "movedShadowCentroid": [
+      301.41,
+      225.34
+    ],
+    "maskIntersection": 0,
+    "maskUnion": 1747,
+    "returnFrameDifferentPixels": 0
+  },
+  "importedShadows": {
+    "fixedImportedCesiumManPointLightShadowOnVsOff": {
+      "pixels": 739,
+      "bbox": [
+        316,
+        182,
+        446,
+        237
+      ],
+      "darkened": 739,
+      "brightened": 0,
+      "meanDeltaRGB": [
+        -149.77,
+        -141.29,
+        -118.08
+      ]
+    },
+    "returnFrameDifferentPixels": 0,
+    "casterCastShadowsToggle": "not exercised; frames toggle PointLightComponent shadow enable"
+  },
+  "importedUv": {
+    "frameSize": [
+      1000,
+      500
+    ],
+    "quadrants": {
+      "upperLeftGreen": [
+        19.78,
+        212.96,
+        37.75
+      ],
+      "upperRightRed": [
+        217.81,
+        21.31,
+        17.22
+      ],
+      "lowerLeftYellow": [
+        229.69,
+        204.47,
+        17.98
+      ],
+      "lowerRightBlue": [
+        21.2,
+        34.58,
+        200.98
+      ]
+    }
+  },
+  "assertions": "all passed"
+}

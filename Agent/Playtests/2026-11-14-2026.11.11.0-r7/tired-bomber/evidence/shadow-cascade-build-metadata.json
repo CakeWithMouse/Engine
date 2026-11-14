@@ -1,0 +1,9 @@
+{
+  "engineVersion": "2026.11.11.0",
+  "runtime": "E:/Engine/Game/build/x64/Release/Runtime",
+  "engineLibSha256": "87F34A76ABF802F85264E20AF0897C85BE3B18C32D77E12DBDD91CAAE18B6527",
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberUpgradedR7/Project.json",
+  "module": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\BomberUpgradedR7\\Binaries\\Release\\c5be9d3c10b44c048ad3827bb7ffade6\\Game.dll",
+  "moduleSha256": "D432B9D9F4ECFD88741A53DD89EAB983A806D4888DB2FFB4931CCA2575211AE9",
+  "buildLog": "sdk-cascade-final2-build.log"
+}

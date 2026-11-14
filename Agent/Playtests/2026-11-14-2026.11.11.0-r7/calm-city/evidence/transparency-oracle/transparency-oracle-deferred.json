@@ -1,0 +1,24 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "drawCalls": 84,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\results\\transparency-oracle-front-deferred.bmp",
+            "lod": [
+            ]
+        },
+        {
+            "drawCalls": 84,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\results\\transparency-oracle-back-deferred.bmp",
+            "lod": [
+            ]
+        },
+        {
+            "drawCalls": 84,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\results\\transparency-oracle-orbit-resize-deferred.bmp",
+            "lod": [
+            ]
+        }
+    ],
+    "ok": true
+}

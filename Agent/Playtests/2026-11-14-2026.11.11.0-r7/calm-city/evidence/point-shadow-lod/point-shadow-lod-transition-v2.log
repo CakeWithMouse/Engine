@@ -1,0 +1,535 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+[VfsRead] Dynamic mount '/_ext_9331985043810948721' -> 'E:/Engine/Engine/build/playtests/20261114-r7/calm-city/CalmCityUpgraded/Content/Materials' (path 'E:/Engine/Engine/build/playtests/20261114-r7/calm-city/CalmCityUpgraded/Content/Materials/ParameterProbe.hlsl' outside registered mounts)
+Material E:\Engine\Engine\build\playtests\20261114-r7\calm-city\CalmCityUpgraded\Content\Materials\ParameterProbe.mat: params.Tint is not declared by the shader
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 320x240
+[Info] Overlay: early return (empty lines and billboards)
+frame-dump E:\Engine\Engine\build\playtests\20261114-r7\calm-city\results\point-lod-near-v2.bmp written=1 size=320x240
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 320x240
+frame-dump E:\Engine\Engine\build\playtests\20261114-r7\calm-city\results\point-lod-far-v2.bmp written=1 size=320x240
+frame-dump E:\Engine\Engine\build\playtests\20261114-r7\calm-city\results\point-lod-return-v2.bmp written=1 size=320x240
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "caster": "crowd",
+    "frames": [
+        {
+            "count": 1,
+            "cubes": [
+                {
+                    "faces": [
+                        {
+                            "face": 0,
+                            "occupied": 6446,
+                            "sha256": "9da197cb26290c68dd294f8e32c17586e73b6f54edf5f1ec19a2d635736eddc8"
+                        },
+                        {
+                            "face": 1,
+                            "occupied": 12300,
+                            "sha256": "adcf45361cef157e28b1bcc87bf775583926e74dc8ebb71a22c51e8cb11f9055"
+                        },
+                        {
+                            "face": 2,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        },
+                        {
+                            "face": 3,
+                            "occupied": 1048576,
+                            "sha256": "358a4b0eea491d1a7e0e5fe734d6c64bf1985267f505f899d5968b2b5485a9c2"
+                        },
+                        {
+                            "face": 4,
+                            "occupied": 19456,
+                            "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                        },
+                        {
+                            "face": 5,
+                            "occupied": 19456,
+                            "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                        }
+                    ],
+                    "light": [
+                        0,
+                        4,
+                        0,
+                        30
+                    ],
+                    "probes": [
+                        {
+                            "depth": 0.8898305296897888,
+                            "face": 3,
+                            "occluded": false,
+                            "position": [
+                                0,
+                                0,
+                                0
+                            ],
+                            "stored": 0.889866292476654
+                        },
+                        {
+                            "depth": 0.8716707229614258,
+                            "face": 3,
+                            "occluded": false,
+                            "position": [
+                                0,
+                                0.5,
+                                0
+                            ],
+                            "stored": 0.889866292476654
+                        }
+                    ],
+                    "slot": 0
+                }
+            ],
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 6446,
+                    "sha256": "9da197cb26290c68dd294f8e32c17586e73b6f54edf5f1ec19a2d635736eddc8"
+                },
+                {
+                    "face": 1,
+                    "occupied": 12300,
+                    "sha256": "adcf45361cef157e28b1bcc87bf775583926e74dc8ebb71a22c51e8cb11f9055"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "358a4b0eea491d1a7e0e5fe734d6c64bf1985267f505f899d5968b2b5485a9c2"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\results\\point-lod-near-v2.bmp",
+            "light": [
+                0,
+                4,
+                0,
+                30
+            ],
+            "lights": [
+                {
+                    "enabled": true,
+                    "index": 0,
+                    "intensity": 2,
+                    "position": [
+                        0,
+                        4,
+                        0
+                    ],
+                    "radius": 30,
+                    "slot": 0
+                }
+            ],
+            "lod": {
+                "distance": 4.4721360206604,
+                "drawn": 1,
+                "fade": 0,
+                "perLod": [
+                    1,
+                    0,
+                    0
+                ],
+                "screenSize": true
+            },
+            "material": {
+                "castsShadow": false,
+                "errors": "",
+                "gbuffer": false
+            },
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "stored": 0.889866292476654
+                },
+                {
+                    "depth": 0.8716707229614258,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        0,
+                        0.5,
+                        0
+                    ],
+                    "stored": 0.889866292476654
+                }
+            ],
+            "slot": 0,
+            "time": 0
+        },
+        {
+            "count": 1,
+            "cubes": [
+                {
+                    "faces": [
+                        {
+                            "face": 0,
+                            "occupied": 6446,
+                            "sha256": "9da197cb26290c68dd294f8e32c17586e73b6f54edf5f1ec19a2d635736eddc8"
+                        },
+                        {
+                            "face": 1,
+                            "occupied": 12300,
+                            "sha256": "adcf45361cef157e28b1bcc87bf775583926e74dc8ebb71a22c51e8cb11f9055"
+                        },
+                        {
+                            "face": 2,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        },
+                        {
+                            "face": 3,
+                            "occupied": 1048576,
+                            "sha256": "358a4b0eea491d1a7e0e5fe734d6c64bf1985267f505f899d5968b2b5485a9c2"
+                        },
+                        {
+                            "face": 4,
+                            "occupied": 19456,
+                            "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                        },
+                        {
+                            "face": 5,
+                            "occupied": 19456,
+                            "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                        }
+                    ],
+                    "light": [
+                        0,
+                        4,
+                        0,
+                        30
+                    ],
+                    "probes": [
+                        {
+                            "depth": 0.8898305296897888,
+                            "face": 3,
+                            "occluded": false,
+                            "position": [
+                                0,
+                                0,
+                                0
+                            ],
+                            "stored": 0.889866292476654
+                        },
+                        {
+                            "depth": 0.8716707229614258,
+                            "face": 3,
+                            "occluded": false,
+                            "position": [
+                                0,
+                                0.5,
+                                0
+                            ],
+                            "stored": 0.889866292476654
+                        }
+                    ],
+                    "slot": 0
+                }
+            ],
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 6446,
+                    "sha256": "9da197cb26290c68dd294f8e32c17586e73b6f54edf5f1ec19a2d635736eddc8"
+                },
+                {
+                    "face": 1,
+                    "occupied": 12300,
+                    "sha256": "adcf45361cef157e28b1bcc87bf775583926e74dc8ebb71a22c51e8cb11f9055"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "358a4b0eea491d1a7e0e5fe734d6c64bf1985267f505f899d5968b2b5485a9c2"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\results\\point-lod-far-v2.bmp",
+            "light": [
+                0,
+                4,
+                0,
+                30
+            ],
+            "lights": [
+                {
+                    "enabled": true,
+                    "index": 0,
+                    "intensity": 2,
+                    "position": [
+                        0,
+                        4,
+                        0
+                    ],
+                    "radius": 30,
+                    "slot": 0
+                }
+            ],
+            "lod": {
+                "distance": 16.492422103881836,
+                "drawn": 1,
+                "fade": 0,
+                "perLod": [
+                    0,
+                    1,
+                    0
+                ],
+                "screenSize": true
+            },
+            "material": {
+                "castsShadow": false,
+                "errors": "",
+                "gbuffer": false
+            },
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "stored": 0.889866292476654
+                },
+                {
+                    "depth": 0.8716707229614258,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        0,
+                        0.5,
+                        0
+                    ],
+                    "stored": 0.889866292476654
+                }
+            ],
+            "slot": 0,
+            "time": 0
+        },
+        {
+            "count": 1,
+            "cubes": [
+                {
+                    "faces": [
+                        {
+                            "face": 0,
+                            "occupied": 6446,
+                            "sha256": "9da197cb26290c68dd294f8e32c17586e73b6f54edf5f1ec19a2d635736eddc8"
+                        },
+                        {
+                            "face": 1,
+                            "occupied": 12300,
+                            "sha256": "adcf45361cef157e28b1bcc87bf775583926e74dc8ebb71a22c51e8cb11f9055"
+                        },
+                        {
+                            "face": 2,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        },
+                        {
+                            "face": 3,
+                            "occupied": 1048576,
+                            "sha256": "358a4b0eea491d1a7e0e5fe734d6c64bf1985267f505f899d5968b2b5485a9c2"
+                        },
+                        {
+                            "face": 4,
+                            "occupied": 19456,
+                            "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                        },
+                        {
+                            "face": 5,
+                            "occupied": 19456,
+                            "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                        }
+                    ],
+                    "light": [
+                        0,
+                        4,
+                        0,
+                        30
+                    ],
+                    "probes": [
+                        {
+                            "depth": 0.8898305296897888,
+                            "face": 3,
+                            "occluded": false,
+                            "position": [
+                                0,
+                                0,
+                                0
+                            ],
+                            "stored": 0.889866292476654
+                        },
+                        {
+                            "depth": 0.8716707229614258,
+                            "face": 3,
+                            "occluded": false,
+                            "position": [
+                                0,
+                                0.5,
+                                0
+                            ],
+                            "stored": 0.889866292476654
+                        }
+                    ],
+                    "slot": 0
+                }
+            ],
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 6446,
+                    "sha256": "9da197cb26290c68dd294f8e32c17586e73b6f54edf5f1ec19a2d635736eddc8"
+                },
+                {
+                    "face": 1,
+                    "occupied": 12300,
+                    "sha256": "adcf45361cef157e28b1bcc87bf775583926e74dc8ebb71a22c51e8cb11f9055"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "358a4b0eea491d1a7e0e5fe734d6c64bf1985267f505f899d5968b2b5485a9c2"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\results\\point-lod-return-v2.bmp",
+            "light": [
+                0,
+                4,
+                0,
+                30
+            ],
+            "lights": [
+                {
+                    "enabled": true,
+                    "index": 0,
+                    "intensity": 2,
+                    "position": [
+                        0,
+                        4,
+                        0
+                    ],
+                    "radius": 30,
+                    "slot": 0
+                }
+            ],
+            "lod": {
+                "distance": 4.4721360206604,
+                "drawn": 1,
+                "fade": 0,
+                "perLod": [
+                    1,
+                    0,
+                    0
+                ],
+                "screenSize": true
+            },
+            "material": {
+                "castsShadow": false,
+                "errors": "",
+                "gbuffer": false
+            },
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "stored": 0.889866292476654
+                },
+                {
+                    "depth": 0.8716707229614258,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        0,
+                        0.5,
+                        0
+                    ],
+                    "stored": 0.889866292476654
+                }
+            ],
+            "slot": 0,
+            "time": 0
+        }
+    ],
+    "ok": true
+}

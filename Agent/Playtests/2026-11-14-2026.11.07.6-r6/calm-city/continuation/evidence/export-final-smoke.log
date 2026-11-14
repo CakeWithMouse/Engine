@@ -1,0 +1,47 @@
+Project: City API Probe
+Mode: game
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/build/playtests/20261114-r6/calm-city/continuation/CityProbeExportFinal.staging-5948/Runtime/EngineContent'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/playtests/20261114-r6/calm-city/continuation/CityProbeExportFinal.staging-5948/Game/Content'
+ModuleLoaded
+[VfsRead] Bind host VFS service v1
+GameCreate
+[VfsService] first read via module: /Game/Models/blend-suzanne-multiple/blend-suzanne-multiple.glb
+GameSceneLoaded
+GameStart
+City API Probe
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261114-r6/calm-city/continuation/CityProbeExportFinal.staging-5948/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261114-r6/calm-city/continuation/CityProbeExportFinal.staging-5948/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+GameUpdate
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261114-r6/calm-city/continuation/CityProbeExportFinal.staging-5948/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261114-r6/calm-city/continuation/CityProbeExportFinal.staging-5948/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:\Engine\Engine\build\playtests\20261114-r6\calm-city\continuation\CityProbeExportFinal.staging-5948\Runtime\EngineContent\Shaders\BasicSky.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:\Engine\Engine\build\playtests\20261114-r6\calm-city\continuation\CityProbeExportFinal.staging-5948\Runtime\EngineContent\Shaders\BasicSky.hlsl [VARIANT_DEFAULT]
+Material E:/Engine/Engine/build/playtests/20261114-r6/calm-city/continuation/CityProbeExportFinal.staging-5948/Game/Content/Materials/WarmStone.mat: params.Tint is not declared by the shader
+Material E:/Engine/Engine/build/playtests/20261114-r6/calm-city/continuation/CityProbeExportFinal.staging-5948/Game/Content/Materials/WarmStone.mat: params.Gloss is not declared by the shader
+[Info] FXAA pipeline and shaders compiled successfully
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261114-r6/calm-city/continuation/CityProbeExportFinal.staging-5948/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261114-r6/calm-city/continuation/CityProbeExportFinal.staging-5948/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+FontAtlas: 161 glyphs at 14 px in a 512x128 atlas.
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+frame-dump C:\Users\serge\AppData\Local\Packages\openai.codex_2p2nqsd0c76g0\AC\#!sandbox.{89991c77-794e-4919-88f4-5ae6c7eef1d4}\Temp\PainEngine-CalmCityContinuation\SaveData\lighting-default.bmp written=1 size=1000x500
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdates=3
+GameStop
+GameDestroy
+[VfsRead] Unbind
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped

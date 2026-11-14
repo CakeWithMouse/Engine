@@ -1,0 +1,8 @@
+light_probe name=Warm intensity=2 radius=10 color=1,0.65,0.35
+light_probe name=Cool intensity=2 radius=10 color=0.3,0.55,1
+trace_filter_debug all=Hit default=Miss channel2=Hit ignoreGround=Miss debugLines=5 clearedLines=0
+world_transform child=Cube local=0,0,0 world=0,0,0
+vfs_mount_game=E:\Engine\Engine\build\playtests\20261114-r7\curious-city\camera-settings-40\Content hud_descriptor=E:\Engine\Engine\build\playtests\20261114-r7\curious-city\camera-settings-40\Content\ProjectHud.txt hud_ui=E:\Engine\Engine\build\playtests\20261114-r7\curious-city\camera-settings-40\Content\UI/CityHudAlt.ui hud_ui_exists=1 city_config=E:\Engine\Engine\build\playtests\20261114-r7\curious-city\camera-settings-40\Content\Config\city-settings.txt city_config_exists=1
+vfs_read path=/Game/Config/city-settings.txt value=district=harbor
+event=scene_ready balance=500 houses=0
+event=hud_reference_rebound balance=500 houses=0

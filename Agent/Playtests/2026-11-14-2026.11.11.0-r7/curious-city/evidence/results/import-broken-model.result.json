@@ -1,0 +1,4 @@
+{
+    "error": "Cannot load model '/Game/Models/BrokenAsset/BrokenAsset.obj': Model contains no triangles",
+    "ok": false
+}

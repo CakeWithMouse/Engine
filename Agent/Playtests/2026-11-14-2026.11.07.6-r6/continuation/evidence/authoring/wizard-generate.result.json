@@ -1,0 +1,23 @@
+{
+    "arguments": [
+        "-Name",
+        "WizardProbe",
+        "-Kind",
+        "Object",
+        "-BaseHeader",
+        "Engine/Components/ProjectObject.h"
+    ],
+    "console": "[04:31:44.499] C++: AddClass -Name WizardProbe -Kind Object -BaseHeader Engine/Components/ProjectObject.h",
+    "dialogs": [
+        "Созданы .h и .cpp в Source. Соберите проект, чтобы класс появился в редакторе."
+    ],
+    "generated": {
+        ".cpp": "#include \"WizardProbe.h\"\n",
+        ".h": "#pragma once\n#include <Engine/Components/ComponentAnnotations.h>\n#include \"Engine/Components/ProjectObject.h\"\nENGINE_OBJECT(\"WizardProbe\")\nclass WizardProbe\n{\npublic:\n    WizardProbe() = default;\n\n};\n"
+    },
+    "ok": true,
+    "replaced": false,
+    "windowEnabled": true,
+    "wizardAccepted": true,
+    "wizardError": ""
+}

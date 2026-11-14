@@ -1,0 +1,192 @@
+Project: Tired Bomber R5
+Mode: game
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Game/build/x64/Release/Runtime/EngineContent'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Content'
+ModuleLoaded
+[VfsRead] Bind host VFS service v1
+GameCreate
+[VfsService] first read via module: /Game/Models/blend-suzanne-multiple/blend-suzanne-multiple.glb
+GameSceneLoaded
+GameStart
+Tired Bomber R5
+[TiredBomber] subsystem initialized
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[TiredBomber] settings vsync=0 aa=1 mode=0 adapter=NVIDIA GeForce RTX 4070 Laptop GPU
+[MaterialSlotsProbe] target slots=2 sourceID=0 path=/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat sourceID=1 path=/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat
+[MaterialSlotsProbe] changed=1 unknownIdRejected=1 overrideSet=1 overrideCleared=1 slotRestored=1
+[TiredBomber] mesh check usable=0 triangles=12 configured=1 lowLOD=12 sphere=224 sphereLOD=130 error=0
+asset-check procedural cube (default unit profile): 12 triangles, 24 vertices, size 1.00 x 1.00 x 1.00 m, pivot y -0.50, uv yes, NOT USABLE
+  problem: Pivot is not on the ground: the lowest point is at y = -0.50 m. Move the model so that its tracks or wheels touch y = 0.
+[TiredBomber] trace filter channel=1 -> ground
+[TiredBomber] trace filter channel=2 -> unit
+[TiredBomber] trace ignore channel=2 before=7 ignored=7 after=0 status=Miss
+[TiredBomber] scene ready: 4 moving units, orthographic XZ camera, W/A/S/D controller, B drops a bomb
+[TiredBomber] subsystem scene ready: Main
+GameUpdate
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+auto-lod mesh LOD1: 12 -> 12 triangles (target 6, error 0, silhouette drift 0%)
+auto-lod mesh LOD2: 12 -> 12 triangles (target 3, error 0, silhouette drift 0%)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+auto-lod mesh LOD1: 12 -> 12 triangles (target 6, error 0, silhouette drift 0%)
+auto-lod mesh LOD2: 12 -> 12 triangles (target 3, error 0, silhouette drift 0%)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Content/Models/blend-uv/Textures/BaseColor_0.png (64x64)
+[TiredBomber] GetSubsystem after startup=available
+[TiredBomber] marker instances drawn=0 total=13 LODs=3 lod0=0 lod1=0 lod2=0
+Material E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Content/Models/blend-suzanne-multiple/Materials/Material_0.mat: params.Tint is not declared by the shader
+Material E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Content/Models/blend-suzanne-multiple/Materials/Material_0.mat: textures.BaseMap is not declared by the shader
+Material E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Content/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat: params.Tint is not declared by the shader
+Material E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Content/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat: textures.BaseMap is not declared by the shader
+[Info] FXAA pipeline and shaders compiled successfully
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+FontAtlas: 161 glyphs at 14 px in a 512x128 atlas.
+frame-dump E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Content/tired-bomber-frame.bmp written=1 size=1000x500
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[TiredBomber] marker instances drawn=11 total=13 LODs=3 lod0=0 lod1=0 lod2=11
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[GraphicsFollowup] timeScale set to 0; rendering/callbacks remain active
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[InstanceFollowup] stage=baseline frame=6 completed=5 valid=1 sceneInstances=121 visibleObjects=10
+[InstanceFollowup] component=Bomber.Markers.LOD drawn=11/13 hidden=1 distanceCulled=0 perLOD=0,0,11, apiDrawn=11 instance2=-4.8,0.2,-6 visible0=0 visible4=1
+frame-dump E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Content/instances-followup-baseline.bmp written=1 size=1000x500
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[InstanceFollowup] moved index2 to (3,0.2,-2)
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[InstanceFollowup] stage=moved-one frame=15 completed=14 valid=1 sceneInstances=121 visibleObjects=10
+[InstanceFollowup] component=Bomber.Markers.LOD drawn=11/13 hidden=1 distanceCulled=0 perLOD=0,0,11, apiDrawn=11 instance2=3,0.2,-2 visible0=0 visible4=1
+frame-dump E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Content/instances-followup-moved-one.bmp written=1 size=1000x500
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[InstanceFollowup] hid index4
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[TiredBomber] marker instances drawn=10 total=13 LODs=3 lod0=0 lod1=0 lod2=10
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[InstanceFollowup] stage=moved-and-hidden frame=24 completed=23 valid=1 sceneInstances=118 visibleObjects=10
+[InstanceFollowup] component=Bomber.Markers.LOD drawn=10/13 hidden=2 distanceCulled=0 perLOD=0,0,10, apiDrawn=10 instance2=3,0.2,-2 visible0=0 visible4=0
+frame-dump E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Content/instances-followup-moved-and-hidden.bmp written=1 size=1000x500
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[InstanceFollowup] restored index4 and index2 baseline
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[TiredBomber] marker instances drawn=11 total=13 LODs=3 lod0=0 lod1=0 lod2=11
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[InstanceFollowup] stage=restored frame=34 completed=33 valid=1 sceneInstances=121 visibleObjects=10
+[InstanceFollowup] component=Bomber.Markers.LOD drawn=11/13 hidden=1 distanceCulled=0 perLOD=0,0,11, apiDrawn=11 instance2=-4.8,0.2,-6 visible0=0 visible4=1
+frame-dump E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Content/instances-followup-restored.bmp written=1 size=1000x500
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdates=38
+GameStop
+[TiredBomber] subsystem scene closing: Main
+GameDestroy
+[VfsRead] Unbind
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped

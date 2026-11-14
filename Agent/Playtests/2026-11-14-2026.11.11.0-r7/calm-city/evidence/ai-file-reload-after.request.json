@@ -1,0 +1,25 @@
+{
+  "machine": "/Game/AI/CalmRoutine.fsm",
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/calm-city/AIPlayground/Project.json",
+  "steps": [
+    {
+      "target": "Calm Sentinel",
+      "action": "select"
+    },
+    {
+      "machine": "/Game/AI/CalmRoutine.fsm",
+      "action": "open"
+    },
+    {
+      "action": "play"
+    },
+    {
+      "dt": 0.05,
+      "action": "frames",
+      "count": 5
+    },
+    {
+      "action": "stop"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+[
+  {
+    "sequence": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\ai-trash\\GpuChecks\\cascade-dolly",
+    "cascades": [
+      {
+        "cascade": 0,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 5.120000139413605e-07,
+        "worstFrame": 31
+      },
+      {
+        "cascade": 1,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 0.0,
+        "worstFrame": 0
+      },
+      {
+        "cascade": 2,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 0.0,
+        "worstFrame": 0
+      }
+    ]
+  }
+]

@@ -1,0 +1,44 @@
+{
+  "expected": {
+    "hole": [
+      134,
+      32,
+      134
+    ],
+    "covered": [
+      134,
+      134,
+      19
+    ]
+  },
+  "modes": {
+    "0": {
+      "image": "material-blends-mode0.bmp",
+      "maskedHole": [
+        134,
+        32,
+        134
+      ],
+      "maskedCovered": [
+        134,
+        134,
+        19
+      ],
+      "sha256": "9e45342da549e435875bdfbfe35a171ebe32bdc4e8f5b224453957c415e6a533"
+    },
+    "1": {
+      "image": "material-blends-mode1.bmp",
+      "maskedHole": [
+        134,
+        32,
+        134
+      ],
+      "maskedCovered": [
+        134,
+        134,
+        19
+      ],
+      "sha256": "9e45342da549e435875bdfbfe35a171ebe32bdc4e8f5b224453957c415e6a533"
+    }
+  }
+}

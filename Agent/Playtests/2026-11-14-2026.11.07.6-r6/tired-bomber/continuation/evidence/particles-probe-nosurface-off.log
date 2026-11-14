@@ -1,0 +1,30 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 400x300
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 400x300
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 400x300
+[Info] Overlay: early return (empty lines and billboards)
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\particles-probe-nosurface-off.bmp written=1 size=400x300
+[Info] Frame 121: AntialiasingMode = 0 (Off), bb = 400x300
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "depthCollision": false,
+    "frames": [
+        {
+            "dispatches": 57,
+            "drawCalls": 1,
+            "elapsed": 2.003999948501587,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\particles-probe-nosurface-off.bmp",
+            "instances": 1024,
+            "sha256": "53b6087e02db5493c53e03827322304afa64432976b26886ea0d7a7605cb4aa9",
+            "steps": 120
+        }
+    ],
+    "measurement": "Real GPU simulation and image readback; no particle-state readback or inferred collision counter.",
+    "ok": true,
+    "surface": false
+}

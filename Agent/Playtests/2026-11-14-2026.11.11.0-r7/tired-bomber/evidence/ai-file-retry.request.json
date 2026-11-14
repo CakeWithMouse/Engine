@@ -1,0 +1,19 @@
+{
+  "steps": [
+    {
+      "value": {
+        "lastSeenKey": "LastSeen",
+        "thinkInterval": 0.25,
+        "targetKey": "Player"
+      },
+      "action": "settings",
+      "lockedFile": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber/AiTutorialScriptProject/Content/AI/Guard.fsm"
+    },
+    {
+      "machine": "/Game/AI/Guard.fsm",
+      "action": "reopen"
+    }
+  ],
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber/AiTutorialScriptProject/Project.json",
+  "machine": "/Game/AI/Guard.fsm"
+}

@@ -1,0 +1,9 @@
+{
+  "feature_id": "light-sun",
+  "scenario": "CityApiProbe, same top-down scene and Studio sky; set directional sun intensity/color warm-strength then disabled-intensity/dim",
+  "runs": [
+    {"setting":"warm strong sun","image":"light-sun-warm.bmp","sha256":"378D0D62AED85413E668D680F52DEA30F86D3ED941FACD1119702F81AAFF509C"},
+    {"setting":"dim sun","image":"light-sun-dim.bmp","sha256":"A0E821383A687D88F859B134897685A939DEEA9945C343E1EA7DED9FADE8F13C"}
+  ],
+  "actual":"GPU screenshots differ; this verifies visible sun lighting response."
+}

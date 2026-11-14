@@ -1,0 +1,35 @@
+{
+    "connections": [
+    ],
+    "format": "ITMOEngine.Graph",
+    "nodes": [
+        {
+            "id": 1,
+            "properties": {
+                "name": "Idle",
+                "tasks": [
+                    {
+                        "seconds": 1,
+                        "type": "Ai.Wait"
+                    }
+                ]
+            },
+            "title": "Idle",
+            "type": "Fsm.State",
+            "x": 0,
+            "y": 0
+        }
+    ],
+    "schema": "ai.fsm",
+    "schemaVersion": 1,
+    "settings": {
+        "targetKey": "Target"
+    },
+    "variables": [
+        {
+            "name": "Target",
+            "type": "object"
+        }
+    ],
+    "version": 1
+}

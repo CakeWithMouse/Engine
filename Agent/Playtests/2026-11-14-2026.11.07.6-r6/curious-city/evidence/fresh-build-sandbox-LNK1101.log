@@ -1,0 +1,14 @@
+﻿
+  ComponentGenerator: 7 component(s), Project
+  CityEconomySubsystem.cpp
+  CityInteractionComponent.cpp
+  HouseComponent.cpp
+  Module.cpp
+  ProjectComponent.cpp
+  ProjectGame.cpp
+  RotatingCube.cpp
+  TraceExamples.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+     Создается библиотека E:\Engine\Engine\build\playtests\20261114-r6\curious-city\fresh-city\Binaries\Release\9661ca43b9004b04a8a33f109ddeeb31\Game.lib и объект E:\Engine\Engine\build\playtests\20261114-r6\curious-city\fresh-city\Binaries\Release\9661ca43b9004b04a8a33f109ddeeb31\Game.exp
+LINK : fatal error LNK1101: неправильная версия MSPDB140.DLL; перепроверьте установку этого продукта [E:\Engine\Engine\build\playtests\20261114-r6\curious-city\fresh-city\Game.vcxproj]

@@ -1,0 +1,16 @@
+{
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Project.json",
+  "steps": [
+    {"action":"create-file","directory":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/AI","name":"CityGate2","image":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/ai-citygate2-created.png"},
+    {"action":"add","type":"Fsm.State","x":260,"y":20,"properties":{"name":"Patrol","tasks":[{"type":"Ai.Wait","seconds":0.35}]}},
+    {"action":"connect","from":1,"to":2,"properties":{"trigger":"completed"}},
+    {"action":"variables","values":[{"name":"Target","type":"object"},{"name":"LastSeen","type":"vec3"},{"name":"Speed","type":"float","value":1.75}],"renames":{}},
+    {"action":"settings","value":{"targetKey":"Target","lastSeenKey":"LastSeen","thinkInterval":0.2}},
+    {"action":"save","image":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/ai-citygate2-edited.png"},
+    {"action":"undo"},
+    {"action":"redo"},
+    {"action":"save"},
+    {"action":"close"},
+    {"action":"reopen","image":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/ai-citygate2-reopened.png"}
+  ]
+}

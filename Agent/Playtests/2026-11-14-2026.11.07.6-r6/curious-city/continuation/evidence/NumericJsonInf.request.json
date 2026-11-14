@@ -1,0 +1,30 @@
+{
+  "material": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Content\\Materials\\NumericProbe\\NumericJsonInf.mat",
+  "size": 1,
+  "height": 240,
+  "orthoHeight": 2,
+  "orthographic": true,
+  "up": [
+    0,
+    1,
+    0
+  ],
+  "target": [
+    0,
+    0,
+    0
+  ],
+  "camera": [
+    3,
+    3,
+    4
+  ],
+  "shape": "cube",
+  "frames": [
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\NumericJsonInf.bmp"
+    }
+  ],
+  "width": 320,
+  "rendering": 0
+}

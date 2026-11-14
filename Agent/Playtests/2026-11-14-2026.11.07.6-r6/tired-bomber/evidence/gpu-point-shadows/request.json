@@ -1,0 +1,98 @@
+{
+  "sceneLighting": true,
+  "globalShadows": true,
+  "target": [
+    0,
+    0,
+    0
+  ],
+  "caster": "skeletal",
+  "camera": [
+    9,
+    8,
+    -13
+  ],
+  "travel": 5,
+  "height": 480,
+  "frames": [
+    {
+      "light": [
+        0,
+        4,
+        0
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\gpu-final\\point-shadows\\frame-00.bmp",
+      "time": 0.1,
+      "position": [
+        0,
+        1,
+        0
+      ],
+      "shadows": true
+    },
+    {
+      "light": [
+        3,
+        4,
+        0
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\gpu-final\\point-shadows\\frame-01.bmp",
+      "time": 0.45,
+      "position": [
+        0,
+        1,
+        0
+      ],
+      "shadows": true
+    },
+    {
+      "light": [
+        3,
+        4,
+        0
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\gpu-final\\point-shadows\\frame-02.bmp",
+      "time": 0.8,
+      "position": [
+        0,
+        1,
+        0
+      ],
+      "shadows": false
+    },
+    {
+      "light": [
+        0,
+        4,
+        0
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\gpu-final\\point-shadows\\frame-03.bmp",
+      "time": 0.1,
+      "position": [
+        0,
+        1,
+        0
+      ],
+      "shadows": true
+    }
+  ],
+  "width": 640,
+  "rendering": 0,
+  "probes": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ]
+  ]
+}

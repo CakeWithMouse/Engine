@@ -1,0 +1,334 @@
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+[ToolBarFacts] initial tb geom=0,0 100x36, margins=(0,0,0,0), layoutMargins=(6,6,6,6), PM_ToolBarFrameWidth=6, PM_ItemMargin=0, PM_ItemSpacing=4
+[ToolBarFacts] configured tb height=36, btn height=28, topMargin=4, bottomMargin=4
+[Info] SettingsService: Set 'view/grid'
+[Info] SettingsService: Set 'view/gizmo'
+[Info] SettingsService: Set 'view/icons'
+[Info] SettingsService: Set 'view/overlays'
+[Info] SettingsService: Set 'viewport/antialiasing'
+[Info] QtHost::SetAntialiasing: mode = 1, serviceVersion = 3, handler = 00007FFF793C2600
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/continuation/BomberContinue'
+[Info] FileService: wrote 55 bytes to 'E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/continuation/BomberContinue/Content/Models/blend-suzanne-multiple_1/blend-suzanne-multiple.glb.importsettings.json'
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/continuation/BomberContinue'
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "accepted": true,
+    "after": [
+        {
+            "id": 1,
+            "material": "",
+            "name": "Ground",
+            "parent": 0,
+            "position": [
+                0,
+                -0.5,
+                0
+            ],
+            "projectData": {
+            },
+            "scale": [
+                20,
+                1,
+                20
+            ],
+            "type": "Primitive.Plane"
+        },
+        {
+            "id": 2,
+            "material": "",
+            "name": "Cube",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Primitive.Cube"
+        },
+        {
+            "id": 3,
+            "material": "",
+            "name": "Warm Light",
+            "parent": 0,
+            "position": [
+                2,
+                3,
+                2
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Light.Point"
+        },
+        {
+            "id": 4,
+            "material": "",
+            "name": "Cool Light",
+            "parent": 0,
+            "position": [
+                -3,
+                2,
+                1
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Light.Point"
+        },
+        {
+            "id": 5,
+            "material": "",
+            "name": "blend-suzanne-multiple",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+                "materialSlots": {
+                    "0": "/Game/Models/blend-suzanne-multiple_1/Materials/Material_0.mat",
+                    "1": "/Game/Models/blend-suzanne-multiple_1/Materials/Material_1.mat"
+                },
+                "version": 1
+            },
+            "scale": [
+                0.02500000037252903,
+                0.02500000037252903,
+                0.02500000037252903
+            ],
+            "type": "Engine.Model"
+        }
+    ],
+    "asset": "/Game/Models/blend-suzanne-multiple_1/blend-suzanne-multiple.glb",
+    "before": [
+        {
+            "id": 1,
+            "material": "",
+            "name": "Ground",
+            "parent": 0,
+            "position": [
+                0,
+                -0.5,
+                0
+            ],
+            "projectData": {
+            },
+            "scale": [
+                20,
+                1,
+                20
+            ],
+            "type": "Primitive.Plane"
+        },
+        {
+            "id": 2,
+            "material": "",
+            "name": "Cube",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Primitive.Cube"
+        },
+        {
+            "id": 3,
+            "material": "",
+            "name": "Warm Light",
+            "parent": 0,
+            "position": [
+                2,
+                3,
+                2
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Light.Point"
+        },
+        {
+            "id": 4,
+            "material": "",
+            "name": "Cool Light",
+            "parent": 0,
+            "position": [
+                -3,
+                2,
+                1
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Light.Point"
+        }
+    ],
+    "dialog": {
+        "action": "accept",
+        "presets": [
+            {
+                "preset": "Preset1",
+                "scale": 1
+            },
+            {
+                "preset": "Preset01",
+                "scale": 0.1
+            },
+            {
+                "preset": "Preset001",
+                "scale": 0.01
+            }
+        ],
+        "scale": 0.025,
+        "spinFocused": true
+    },
+    "dialogs": [
+    ],
+    "ok": true,
+    "sidecar": {
+        "scale": 0.02500000037252903,
+        "version": 1
+    },
+    "sidecarExists": true,
+    "spawned": [
+        {
+            "id": 1,
+            "material": "",
+            "name": "Ground",
+            "parent": 0,
+            "position": [
+                0,
+                -0.5,
+                0
+            ],
+            "projectData": {
+            },
+            "scale": [
+                20,
+                1,
+                20
+            ],
+            "type": "Primitive.Plane"
+        },
+        {
+            "id": 2,
+            "material": "",
+            "name": "Cube",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Primitive.Cube"
+        },
+        {
+            "id": 3,
+            "material": "",
+            "name": "Warm Light",
+            "parent": 0,
+            "position": [
+                2,
+                3,
+                2
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Light.Point"
+        },
+        {
+            "id": 4,
+            "material": "",
+            "name": "Cool Light",
+            "parent": 0,
+            "position": [
+                -3,
+                2,
+                1
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Light.Point"
+        },
+        {
+            "id": 5,
+            "material": "",
+            "name": "blend-suzanne-multiple",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+                "materialSlots": {
+                    "0": "/Game/Models/blend-suzanne-multiple_1/Materials/Material_0.mat",
+                    "1": "/Game/Models/blend-suzanne-multiple_1/Materials/Material_1.mat"
+                },
+                "version": 1
+            },
+            "scale": [
+                0.02500000037252903,
+                0.02500000037252903,
+                0.02500000037252903
+            ],
+            "type": "Engine.Model"
+        }
+    ]
+}

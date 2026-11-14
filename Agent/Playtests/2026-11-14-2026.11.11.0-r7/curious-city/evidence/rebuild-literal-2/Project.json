@@ -1,0 +1,6 @@
+{
+  "content": "Content",
+  "module": "Binaries/Release/e0e86fb192e142728659304c36fc50fd/Game.dll",
+  "name": "CuriousCityR5",
+  "startupScene": "Content/Scenes/SlotRenderProbe.scene.json"
+}

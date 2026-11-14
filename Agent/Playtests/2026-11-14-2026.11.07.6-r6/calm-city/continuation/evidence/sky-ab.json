@@ -1,0 +1,10 @@
+{
+  "feature_id": "sky",
+  "scenario": "CityApiProbe built against current Runtime; camera=horizon (perspective), warm sun; stock SceneProject::Sky. Three fresh processes explicitly select no cubemap, Studio, and Space.",
+  "runs": [
+    {"setting":"gradient / SetCubeMap(nullptr)","image":"sky-ab-gradient.bmp","sha256":"ECB904FF66AC3D180DD4D1BCE1287EEAE7F4A176A453F067C33E0E1C9F257968","log":"sky-ab-gradient.log"},
+    {"setting":"Studio cubemap","image":"sky-ab-studio.bmp","sha256":"38EB1C85CD05D8C4B04B1E662D26EBFCF6B093FA84CAA91A88472A6584C3F1C4","log":"sky-ab-studio.log"},
+    {"setting":"Space cubemap","image":"sky-ab-space.bmp","sha256":"3B1EDB15B39D8BD03C7279245B650E65A629D917A0847BC46EA27EDE76C7E093","log":"sky-ab-space.log"}
+  ],
+  "actual":"All three frames differ. Logs confirm HasCubeMap false for gradient and true for both selected presets. The image pairs were visually inspected."
+}

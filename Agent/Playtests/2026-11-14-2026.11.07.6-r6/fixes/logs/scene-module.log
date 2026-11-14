@@ -1,0 +1,93 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator.vcxproj -> E:\Engine\Engine\build\x64\Release\ComponentGenerator.exe
+  ComponentGenerator: 2 component(s), RuntimeExample
+  RuntimeExample.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Projects\RuntimeExample\Game.dll
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  SceneModuleTests.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\SceneModuleTests.lib и объект E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\SceneModuleTests.exp
+  SceneModuleTests.vcxproj -> E:\Engine\Engine\build\x64\Release\SceneModuleTests.exe
+
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  Fixture.vcxproj -> E:\Engine\Engine\build\x64\Release\RuntimeFixtures\SceneLegacy.dll
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  Fixture.vcxproj -> E:\Engine\Engine\build\x64\Release\RuntimeFixtures\SceneBadVersion.dll
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  Fixture.vcxproj -> E:\Engine\Engine\build\x64\Release\RuntimeFixtures\SceneIncomplete.dll
+
+[SceneModule] Host getService is null, falling back to local VFS
+[SceneModule] Host getService is null, falling back to local VFS
+RuntimeError: Incompatible or incomplete scene module API
+RuntimeError: Incompatible or incomplete scene module API
+[VfsRead] using local VFS (no host service)
+[VfsRead] Unbind
+[VfsRead] using local VFS (no host service)
+[VfsRead] Unbind
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/build/x64/Release/EngineContent'
+ModuleLoaded
+[VfsRead] Bind host VFS service v1
+GameCreate
+GameStart
+Scene bridge test
+GameUpdate
+EngineUpdate (stub)
+EngineRender (stub)
+EngineFrameEnd (stub)
+GameUpdates=1
+GameStop
+GameDestroy
+[VfsRead] Unbind
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/build/x64/Release/EngineContent'
+ModuleLoaded
+FixtureCreate
+FixtureStart
+FixtureUpdate
+FixtureStop
+FixtureDestroy
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/build/x64/Release/EngineContent'
+ModuleLoaded
+FixtureCreate
+FixtureStart
+FixtureStop
+FixtureDestroy
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/build/x64/Release/EngineContent'
+ModuleLoaded
+FixtureCreate
+FixtureStart
+FixtureStop
+FixtureDestroy
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped
+Scene module: 109 checks passed; no editor/window/GPU

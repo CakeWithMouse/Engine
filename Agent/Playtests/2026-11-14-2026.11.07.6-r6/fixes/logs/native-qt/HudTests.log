@@ -1,0 +1,16 @@
+UIComponent: reloaded E:\Engine\Engine\build\editor-regression\Release-62e201bdddbb411faecd482897af00ee\Hud\UI/Hud.ui
+UIComponent: E:\Engine\Engine\build\editor-regression\Release-62e201bdddbb411faecd482897af00ee\Hud\UI/Hud.ui:1: unknown element <wrong>
+UIComponent: reloaded E:\Engine\Engine\build\editor-regression\Release-62e201bdddbb411faecd482897af00ee\Hud\UI/Hud.ui
+UIComponent: reloaded E:\Engine\Engine\build\editor-regression\Release-62e201bdddbb411faecd482897af00ee\Hud\UI/Hud.ui
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/UI.hlsl [VARIANT_DEFAULT]
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Invalidated all 2 cached shader(s)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/UI.hlsl [VARIANT_DEFAULT]
+UIComponent: reloaded E:/Engine/Engine/build/editor-regression/Release-62e201bdddbb411faecd482897af00ee/Hud/UI/Hud.ui
+HUD: 50 checks passed
+

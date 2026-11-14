@@ -1,0 +1,106 @@
+{
+  "name": "Scene",
+  "objects": [
+    {
+      "id": 1,
+      "inheritParentScale": true,
+      "name": "CloneParent",
+      "parent": 0,
+      "transform": {
+        "position": [
+          5.0,
+          2.0,
+          -3.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "Primitive.Cube"
+    },
+    {
+      "id": 2,
+      "inheritParentScale": true,
+      "name": "CloneChild",
+      "parent": 1,
+      "transform": {
+        "position": [
+          1.0,
+          3.0,
+          2.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "Primitive.Sphere"
+    },
+    {
+      "id": 3,
+      "inheritParentScale": true,
+      "name": "CloneParent 2",
+      "parent": 0,
+      "transform": {
+        "position": [
+          6.0,
+          2.0,
+          -3.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "Primitive.Cube"
+    },
+    {
+      "id": 4,
+      "inheritParentScale": true,
+      "name": "CloneChild 2",
+      "parent": 3,
+      "transform": {
+        "position": [
+          1.0,
+          3.0,
+          2.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "Primitive.Sphere"
+    }
+  ],
+  "version": 1
+}

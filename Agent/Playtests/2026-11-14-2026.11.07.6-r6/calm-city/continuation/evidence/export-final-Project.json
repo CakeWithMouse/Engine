@@ -1,0 +1,6 @@
+{
+  "content": "Content",
+  "module": "Binaries/Game.dll",
+  "name": "City API Probe",
+  "startupScene": "Content/Scenes/Continuation.scene.json"
+}

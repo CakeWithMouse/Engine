@@ -1,0 +1,28 @@
+[
+  {
+    "sequence": "Engine\\build\\playtests\\20261114-r7\\calm-city\\results\\cascade-orbit",
+    "cascades": [
+      {
+        "cascade": 0,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 9.215999998701818e-07,
+        "worstFrame": 13
+      },
+      {
+        "cascade": 1,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 2.457599999061699e-07,
+        "worstFrame": 19
+      },
+      {
+        "cascade": 2,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 6.348799996835908e-08,
+        "worstFrame": 49
+      }
+    ]
+  }
+]

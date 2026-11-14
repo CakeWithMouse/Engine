@@ -1,0 +1,17 @@
+# AI Trash r7 — diary
+
+**Версия:** PainEngine 2026.11.11.0, Release, localOnly v143. **Runtime SDK:** `Game/build/x64/Release/Runtime`; `Engine.lib` SHA-256 `87F34A76ABF802F85264E20AF0897C85BE3B18C32D77E12DBDD91CAAE18B6527`.
+
+- Создал изолированный `EngineStore` в `Engine/build/playtests/20261114-r7/ai-trash/EngineStore`, установил туда именно Runtime .11.11.0 и передавал `PAINENGINE_ENGINE_STORE` всем launcher-командам. Создал отдельный no-code проект и проверил отсутствие Source/Game.vcxproj. Для него затем отдельно выполнил штатное Enable C++ и получил первичную DLL.
+- Скопировал актуальный r6 `TrashGameUpgraded` через `EngineLauncher --upgrade-project` в новый r7 корень. Исходный r6 проект не менял. UpgradeReport подтвердил `originalPreserved:true`, `engineVersion:2026.11.11.0`. Пересобрал C++ игровую DLL через явный Runtime SDK, затем `--check-project` завершился 0.
+- Сохранил логику трёх предметов, траектории, трассировки и учёта попаданий. Исправил собственный путь SaveData: вместо `__FILE__` использую `EngineModuleVfs::Resolve("/Game")`, чтобы данные писались рядом с конкретной копией проекта. Уточнил HUD aim-подсказку: Left/Right меняют прицел, Space/T бросают. Это маленькое изменение игрового фрагмента, не новая игровая подсистема.
+- Реальный `project.input`: Right, затем Space, затем 100 кадров; `Throw ledger` прошёл `throws=0,hits=0` → `throws=1,hits=0` → `throws=1,hits=1`. Отдельные standalone-процессы проверили промежуточное сохранение броска в полёте, загрузку в следующем процессе и продолжение до попадания.
+- Запустил отдельный побочный сценарий AI: на копии Main scene создал `Gameplay.AiCharacter` и сохранил `TrashAIPractice.scene.json`; FSM `TrashSorter.fsm` чередует MoveTo между двумя точками. Настоящие окна состояния/перехода поменяли имя `WalkToBin`→`WalkAlongBin`, delay/priority связи на `0.04`/`2`; Save и Reopen прошли. Play на 120 кадров дал active path/history с успешным переходом и переместил персонажа с `(-4,0.5,3)` на `(-2.8225,0.5,3)`. После опыта Project.json восстановлен на обычную `Main.scene.json`.
+- Просмотрел кадр игрового HUD: в финале последовательности три броска дали 1 hit, 2 misses (оба остальных предмета попали в препятствие); это видимый игровой результат, а не заявка на реалистичную физику. HUD показывает счёт, точность, текущий статус и действие.
+- В дополнительной проверке HUD обнаружил длинную aim-строку, выходившую за край панели. Сократил её до `Aim: <value> m | L/R; T/Space toss`, сохранив указание на управление прицелом и бросок. Отдельные кадры реального Main game на viewport 1000×600 и 640×480 показывают, что вся строка помещается в панель; предыдущий кадр оставлен как before. DLL пересобрана через явный текущий Runtime SDK, без сборки движка.
+- Source-only ZIP распакован в новый корень, без Binaries/Intermediate/SaveData на момент распаковки. Свежая сборка через текущий Runtime SDK прошла с exit 0; standalone игра завершила 20 кадров с exit 0. Архив включает текстовые Game.sln/Game.vcxproj и закреплённый Engine.lock.json. Подробности в `evidence/source-archive-rebuild/`.
+- После HUD-правки ZIP обновлён; новую копию повторно распаковал, собрал и запустил 20 standalone кадров (оба exit 0). Доказательства лежат в `evidence/source-archive-hud-fix/`; свежий SHA в `evidence/ai-trash-r7-source.sha256.txt`.
+
+Не проверял визуальный D3D кадр именно AI side scene; поведение подтверждено статусом машины и изменением transform в runtime snapshot. Общая игровая сцена и HUD проверены реальным BMP.
+
+

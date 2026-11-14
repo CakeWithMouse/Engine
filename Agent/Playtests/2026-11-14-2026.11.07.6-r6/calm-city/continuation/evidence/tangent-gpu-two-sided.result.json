@@ -1,0 +1,158 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "basis": [
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ]
+            ],
+            "center": [
+                0,
+                0,
+                206
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation/mesh-normal/ts-0.bmp",
+            "restored": false,
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "sha256": "dd4a4fdde26493df90224580861bcb97c456ba65596dc0b04274ea5ed58dd1a9",
+            "transientMaterialRebound": false
+        },
+        {
+            "basis": [
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ]
+            ],
+            "center": [
+                0,
+                0,
+                241
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation/mesh-normal/ts-1.bmp",
+            "restored": true,
+            "scale": [
+                -1,
+                1,
+                1
+            ],
+            "sha256": "88031416152aaa1546ce2941a43b559a18fbaad7f0913d5d88d3f0f191f541a2",
+            "transientMaterialRebound": true
+        },
+        {
+            "basis": [
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ]
+            ],
+            "center": [
+                0,
+                0,
+                200
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation/mesh-normal/ts-2.bmp",
+            "restored": false,
+            "scale": [
+                1,
+                1,
+                -1
+            ],
+            "sha256": "cce8cbc361a123507ed81ca58a6d7644e0fc9550b6019118215d8566a1e71900",
+            "transientMaterialRebound": false
+        }
+    ],
+    "ok": true,
+    "originalBasis": [
+        [
+            -1,
+            0,
+            0,
+            -1
+        ],
+        [
+            -1,
+            0,
+            0,
+            -1
+        ],
+        [
+            -1,
+            0,
+            0,
+            -1
+        ],
+        [
+            -1,
+            0,
+            0,
+            -1
+        ]
+    ]
+}

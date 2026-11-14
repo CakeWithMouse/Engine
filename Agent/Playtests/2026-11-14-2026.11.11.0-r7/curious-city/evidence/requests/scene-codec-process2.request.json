@@ -1,0 +1,13 @@
+{
+  "steps": [
+    {
+      "action": "load",
+      "path": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/Scenes/HierarchyProbe.scene.json"
+    },
+    {
+      "action": "save",
+      "path": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/Scenes/HierarchyProbe-roundtrip.scene.json"
+    }
+  ],
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Project.json"
+}

@@ -1,0 +1,16 @@
+{
+  "params": {
+    "Tint": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "shader": "Imported.hlsl",
+  "sourceMaterial": "Cesium_Man-effect",
+  "textures": {
+    "BaseMap": "../Textures/BaseColor_0.jpg"
+  },
+  "version": 1
+}

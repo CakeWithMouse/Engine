@@ -1,0 +1,11 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  AssetCommandHandler.cpp
+  EditorHistory.cpp
+  SceneCommandHandler.cpp
+  ViewportCommandHandler.cpp
+  QtHost.cpp
+  HostTests.cpp
+  HostTests.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\HostTests.exe
+

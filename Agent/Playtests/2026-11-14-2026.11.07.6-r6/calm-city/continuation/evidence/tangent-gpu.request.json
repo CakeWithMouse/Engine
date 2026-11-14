@@ -1,0 +1,71 @@
+{
+  "up": [
+    0,
+    0,
+    1
+  ],
+  "camera": [
+    0,
+    5,
+    0
+  ],
+  "size": 2,
+  "material": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation\\CityApiProbe\\Content\\Materials\\NormalTest.mat",
+  "rendering": 0,
+  "target": [
+    0,
+    0,
+    0
+  ],
+  "width": 320,
+  "height": 256,
+  "frames": [
+    {
+      "saveFile": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation/mesh-normal/positive.save.json",
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation/mesh-normal/positive-top.bmp",
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "saveRoundTrip": false,
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "saveFile": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation/mesh-normal/negative-x-top.save.json",
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation/mesh-normal/negative-x-top.bmp",
+      "scale": [
+        -1,
+        1,
+        1
+      ],
+      "saveRoundTrip": true,
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "saveFile": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation/mesh-normal/negative-z.save.json",
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation/mesh-normal/negative-z-top.bmp",
+      "scale": [
+        1,
+        1,
+        -1
+      ],
+      "saveRoundTrip": false,
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "shape": "plane",
+  "mirrorUv": true
+}

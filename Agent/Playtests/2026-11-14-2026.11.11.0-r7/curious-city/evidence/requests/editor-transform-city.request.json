@@ -1,0 +1,73 @@
+{
+  "steps": [
+    {
+      "action": "frames",
+      "count": 1
+    },
+    {
+      "image": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/editor-transform-selected.png",
+      "target": "Cube",
+      "action": "hierarchy-click",
+      "scope": "main"
+    },
+    {
+      "name": "Transform0",
+      "value": 1.25,
+      "action": "field",
+      "scope": "main"
+    },
+    {
+      "name": "Transform1",
+      "value": 2.5,
+      "action": "field",
+      "scope": "main"
+    },
+    {
+      "name": "Transform2",
+      "value": -0.75,
+      "action": "field",
+      "scope": "main"
+    },
+    {
+      "name": "Transform4",
+      "value": 45,
+      "action": "field",
+      "scope": "main"
+    },
+    {
+      "name": "Transform6",
+      "value": 1.5,
+      "action": "field",
+      "scope": "main"
+    },
+    {
+      "name": "Transform7",
+      "value": 0.75,
+      "action": "field",
+      "scope": "main"
+    },
+    {
+      "name": "Transform8",
+      "value": 2,
+      "action": "field",
+      "scope": "main"
+    },
+    {
+      "action": "scene-undo"
+    },
+    {
+      "action": "scene-redo"
+    },
+    {
+      "action": "save-scene",
+      "path": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/Scenes/TransformProbe.scene.json"
+    },
+    {
+      "image": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/editor-transform-reloaded.png",
+      "action": "load-scene",
+      "path": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/Scenes/TransformProbe.scene.json",
+      "scope": "main"
+    }
+  ],
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Project.json"
+}

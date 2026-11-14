@@ -1,0 +1,18 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "depthCollision": true,
+    "frames": [
+        {
+            "dispatches": 57,
+            "drawCalls": 1,
+            "elapsed": 2.003999948501587,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\particles-probe-nosurface-on.bmp",
+            "instances": 1024,
+            "sha256": "53b6087e02db5493c53e03827322304afa64432976b26886ea0d7a7605cb4aa9",
+            "steps": 120
+        }
+    ],
+    "measurement": "Real GPU simulation and image readback; no particle-state readback or inferred collision counter.",
+    "ok": true,
+    "surface": false
+}

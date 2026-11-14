@@ -36,6 +36,33 @@ $tool = 'Game/build/x64/Release/Runtime/EngineCommandlets.exe'
 
 ## Команды
 
+### Импорт с настройками редактора
+
+`project.import` принимает абсолютные `project` (scratch Project.json) и `source`
+(существующая модель), необязательный `scale` (0.0001–10000, по умолчанию 1).
+Вызывает настоящий `Assets.Import` в EditorMainWindow, обработчик завершения
+с записью `.importsettings.json` и `UseAsset`. Неверный scale даёт `accepted:false`
+без импорта. Ошибка самого импорта даёт ненулевой exit и `ok:false`.
+Выход: `asset`, `sidecarExists`, `sidecar`, `dialogs`, снимки `before`, `spawned`,
+`after` с масштабом объектов. `reimportSource` выполняет настоящий переимпорт и
+добавляет ещё один объект; `moveTo` (новый /Game путь, то же имя модели) переносит
+папку модели и размещает третий объект. Снимки `afterReimport`/`afterMove` позволяют
+проверить сохранение старых объектов и масштаб новых. Команда изменяет scratch
+проект. Нужны Qt, D3D и Assimp. `image` сохраняет Qt-раскладку (не доказательство
+D3D-картинки), `width`/`height` задают её размер.
+
+Вместо `scale` можно передать `dialog`: `presets` — последовательность имён
+`Preset1`, `Preset01`, `Preset001`, необязательное числовое `value`,
+`action:"accept"|"cancel"`, необязательный PNG `image`. Это настоящий модальный
+ImportSettingsDialog с полной темой: команда нажимает кнопки, читает SpinBox,
+ставит фокус и принимает/отменяет диалог. `dialog.presets` результата содержит
+наблюдаемые значения после каждого нажатия; Cancel возвращает `accepted:false`
+без импорта. PNG показывает диалог, а не игровой viewport.
+
+```powershell
+python Editor/tests/ImportSettingsCommandletTests.py --tool Game/build/x64/Release/Runtime/EngineCommandlets.exe --launcher Game/build/x64/Release/EngineLauncher.exe --output Engine/build/import-settings-new
+```
+
 ### Движение точечных теней
 
 `render.point-shadows` создаёт приёмник, одну лампу и отбрасыватель на настоящем
@@ -128,6 +155,42 @@ Intersection runner независимо пересекает лучи каме�
 дальний остаток. Пограничные пиксели силуэта/совпадающей глубины исключаются из численного
 сравнения; их BMP остаются для визуального осмотра.
 
+### Частицы и отражённый масштаб меша
+
+`render.particles` использует настоящий ParticleSystemComponent и D3D11:
+`depthCollision`, `surface` (bool), `surfacePosition`/`surfaceScale`, `position`,
+`baseVelocity`, `acceleration`, `radialSpeed`, `spread`, `lifetime`, `size`,
+`brightness`, `bias`, `bounce`, `friction`, `sorting`, `particleCount` (64..4096),
+`camera`/`target`, `width`/`height`, `rendering` (0/1). `frames` содержит `steps`
+(1..600, суммарно до 2000), `dt` (0..0.1) и новый абсолютный BMP `image`.
+Перед симуляцией прогревается depth buffer; time scale и particle rate равны 1.
+Выход: GPU adapter, изображения/хеши, счётчики последнего завершённого кадра.
+Это не чтение внутренних координат частиц и не счётчик столкновений: сравнивайте
+контролируемые on/off кадры до и после контакта. ParticleCommandletTests.py
+проверяет поверхность/её отсутствие, оба renderer и реальные цветные пиксели.
+
+`render.mesh`: абсолютный `material` (.mat), `shape` (plane/cube/sphere), `size`,
+`mirrorUv`, `camera`/`target`/`up`, `orthographic`/`orthoHeight`, `rendering`, размер
+viewport и `frames`. Кадр содержит `scale` (включая отражение), `rotation`,
+`position`, новый абсолютный BMP `image`. Возвращаются центральный RGB-пиксель,
+хеш и реальный tangent basis меша. Для plane по умолчанию камера сверху,
+up=[0,0,1]; для косых ракурсов задавайте согласованный up.
+`saveRoundTrip:true` вызывает настоящий SaveGame Capture/Restore; необязательный
+`saveFile` сохраняет байты в новый файл. После восстановления transient Material
+явно назначается снова (`transientMaterialRebound:true`): это проверка геометрии
+и тангентов, а не доказательство сохранения ссылок материала.
+
+`asset.import` дополнительно принимает `kind:"model"|"texture"|"audio"`.
+Для texture/audio выполняется настоящий importAsset с соответствующим Kind,
+возвращаются путь /Game, размер и SHA256 скопированных байтов; `placed:false`.
+Поведение model по умолчанию сохранено.
+
+`mesh.simplify` выполняет публичные SimplifyMesh/ValidateMesh для процедурной
+сферы: `radius`, `slices` (3..128), `stacks` (2..128), `offset`, `ratio` (0..1),
+`error` (0..1), `allowSloppy`. Возвращает source/reduced validation с проблемами,
+предупреждениями, количеством вершин/треугольников, ошибкой и silhouetteDrift.
+Это CPU-геометрия; отрисовка LOD проверяется отдельными GPU-командами.
+
 ### Тангенты меша
 
 `mesh.tangents` вызывает `GenerateTangents` без GPU. Вход: `vertices` — массив
@@ -160,7 +223,12 @@ scratch `Project.json`) и передаёт события через EditorQtHo
 
 `control.action`: `play`, `pause`, `resume`, `stop`. `key` — значение **Engine Keys**
 0..507 (W=87, LeftButton=500, RightButton=501). Для клика сначала передать
-`{"kind":"cursor","x":95,"y":131,"valid":true}`: viewport 640×480.
+`{"kind":"cursor","x":95,"y":131,"valid":true}`: начальный viewport 640×480.
+`{"kind":"resize","width":1280,"height":720}` меняет скрытый HWND и передаёт
+штатный ViewportResize через EditorQtHost (width64..1920, height64..1080).
+Cursor использует новый размер. Выполните хотя бы один игровой кадр после resize;
+`steps[].camera` содержит фактический размер/проекцию, `viewportRequested` — запрос.
+Размер настоящего backbuffer дополнительно проверяется по сохранённому D3D-кадру.
 `frames.count`: 0..600, суммарно не более 2000; шагов не более 100.
 Относительное движение мыши: `{"kind":"pointer","delta":[60,0,0]}`
 (x/y и колесо), через штатный viewport input API.
@@ -195,6 +263,13 @@ scratch `Project.json`) и передаёт события через EditorQtHo
 Offscreen Qt не предоставляет HWND для native preview; команда проверяет его
 и возвращает `nativePreviewWindow:true`. PNG снимает Qt canvas/форму и не
 захватывает пиксели native swapchain превью.
+Для самого D3D preview задайте `previewOnly:true`: commandlet минимизирует основной
+viewport через существующий edit API, а отдельный material preview продолжает
+рисоваться. Тогда `PAINENGINE_D3D_SCREENSHOT` и `PAINENGINE_D3D_SCREENSHOT_FRAME`
+могут снять только preview; число кадров должно быть достаточным для выбранного
+порога. Проверяйте BMP по возвращённому `nativePreviewSize` и видимому материалу.
+Для сравнения сохранённых A/B материалов используйте отдельные процессы: шаги
+редактирования и кадр capture имеют независимые моменты времени.
 
 ```json
 {"project":"E:/scratch/Project.json","material":"/Game/Materials/Stone.mat",
@@ -218,6 +293,11 @@ Offscreen Qt не предоставляет HWND для native preview; ком�
 **Операции меняют файлы указанного материала.** Для тестов используйте копию
 проекта. Для отката несохранённых изменений явно добавляйте `revert`.
 
+`Editor/tests/AuthoringCommandletTests.py --tool <exe> --launcher <launcher>
+--output <new-directory>` проверяет реальный мастер классов и создание файлов,
+пресеты/Cancel импорта, стартовую сцену и recovery между процессами. Создаёт
+отдельный проект и включает C++; требует MSVC/PowerShell, Qt, GPU и Assimp.
+
 ### Операции редактора над сценой
 
 `project.scene` использует ту же очередь EditorQtHost, историю и batch API,
@@ -232,6 +312,14 @@ Offscreen Qt не предоставляет HWND для native preview; ком�
 - `property`: `target`, JSON-pointer `path`, JSON `value`.
 - `material`: `target`, `path` к материалу.
 - `save`/`load`: абсолютный `path` сцены; `new`, `undo`, `redo`.
+- `startup`: требует верхнеуровневый `editorWindow:true` и ранее выполненный
+  `save`/`load`; нажимает настоящее действие Set Startup Scene и возвращает
+  manifest. Изменяет `startupScene` в scratch Project.json.
+- `write-recovery`/`recover`: требуют верхнеуровневый `recovery:true`.
+  Первый сохраняет несохранённую сцену штатным host; второй загружает последний
+  оставленный checkpoint. Проверяются в разных процессах: живой lock не предлагается
+  как кандидат. Командлет завершается без RequestExit, поэтому checkpoint остаётся.
+  Выход содержит `recoveryRecords` и доступные `recoveryCandidates`.
 
 Каждый объект результата содержит также `material` (общий override) и `projectData`,
 включая `materialSlots`. Это позволяет сравнить назначения до/после изменения и Undo/Redo.
@@ -265,6 +353,8 @@ Offscreen Qt не предоставляет HWND для native preview; ком�
 | `ui.edit-text` | `file`, `element`, `text` | Открывает UIEditorWindow, задаёт активный текст без editingFinished, вызывает Save; возвращает сохранённый XML. **Изменяет указанный файл** |
 | `input.rebind` | `focused:true/false` | Через очередь EditorQtHost отправляет InputFocus, заменяет API и измеряет доставку фокуса новой сессии |
 | `project.build` | абсолютный `project` (Project.json) | Настоящее действие Recompile/Hot Reload на offscreen EditorMainWindow, рабочий C++ SDK и GameEditModule; console, dialogs, windowEnabled, buildSucceeded, replaced. **Собирает и обновляет проект** |
+| `ui.class-wizard` | абсолютный `projectRoot`, `steps` с `name`, `kind` (Component/Character/Game/Object), необязательные `base`/`header`; PNG `image` | Настоящий CodeClassDialog, состояние кнопки, ошибка и аргументы генератора после каждого ввода. Файлы не генерирует |
+| `project.class-wizard` | `project`, `name`, `kind`, необязательные `base`/`header` | Настоящее действие Add C++ Class, модальный диалог и производственный ProjectTools AddClass. Требует включённый C++; возвращает wizardAccepted, wizardError, arguments, generated (.h/.cpp), Console и dialogs. **Создаёт исходники**; сборка отдельным project.build |
 | `project.reload-input` | `project`, `candidate` (другой путь DLL), `key:84`; необязательные `clickX/clickY` | Один Focus до первого Play; Play → key/click → Stop → Reload → Play → key/click. Снимки объектов before/afterKey/afterClick до и после DLL. Viewport 640×480, стандартные игровые callbacks |
 
 При `project.build` закрытый read handle Project.json не мешает атомарной активации. Команда не использует отдельную упрощённую реализацию сборки: QAction вызывает штатный CodeTools. Сборка ограничена 180 сек. Проверки запускать на scratch-проектах. `project.reload-input` сам не сохраняет проект, но создаёт временный checkpoint через editor history; candidate должен иметь другую файловую идентичность.
@@ -316,6 +406,95 @@ runner добавляет импортированные ресурсы. Мод�
 Связанные наборы: `Engine/tests/run.ps1`, `Engine/tests/input/run.ps1`, `Engine/tests/subsystems/run.ps1`, Editor CoreTests/HostTests. Основной runner пересобирает RuntimeFixtures, чтобы Module API не устаревал. Без Assimp импортная часть AuthoringTests явно SKIP после проверки доступных свойств/текстур и корректного отказа импортёра; она не учитывается как passed. С `-EnableAssimp` выполняется полный сценарий моделей.
 
 ## Добавление проверки следующего релиза
+
+`ai.editor` принимает `project` (изолированный `Project.json`), необязательный
+`machine` (`/Game/...fsm`) и `steps` (не более 120 операций). Это настоящее Qt-окно
+AI и runtime extension из Game.dll. `before` и каждый `steps[].snapshot` содержат
+граф, ошибки по ID нод, файл/SHA256, объекты сцены, состояние Play и AI
+states/memory/history. Код успеха самого runner не заменяет проверку
+`controlStatus`, `status`, `accepted` и результата сценария.
+
+- Файлы: `create-file` (`directory`, `name`), `open`/`reopen` (`machine`), `close`,
+  `save`, `check`. `lockedFile` удерживает существующий файл от записи на время
+  шага для проверки ошибки и последующего retry.
+- Граф: `add` (`type`, `x`, `y`, `properties`), `state` (`node`, `properties`),
+  `connect`/`link` (`from`, `to`, `properties`), `remove` (`nodes`), `variables`
+  (`values`, `renames`), `settings` (`value`), `undo`, `redo`, `arrange`.
+- Настоящие диалоги по двойному щелчку: `dialog-state` (`node`) и `dialog-link`
+  (`from`, `to`). `edits` — упорядоченный массив `{name,value}` по objectName
+  поля; `{blockList,add}` добавляет блок, `{blockList,row}` выбирает его.
+  `cancel:true` нажимает Cancel, иначе OK. `dialogImage` сохраняет новый PNG.
+- Сцена/карточка: `select`, `property`, `clone` с `target` (уникальное имя),
+  `save-scene`/`load-scene` с `path`, `scene-undo`, `scene-redo`, `button` (`name`),
+  `field` (`scope:"main"`, `name`, `value`), `scroll` (`name` поля инспектора).
+- Runtime: `play`, `pause`, `resume`, `stop`, `frames` (`count`: 1..2000,
+  `dt`: 0..0.1, строго больше нуля), `key` (`key`: Engine Keys, `down`). Между
+  нажатием и отпусканием нужен игровой кадр. Focus устанавливается при Play.
+  `wait` (`milliseconds`: 1..5000) прокачивает реальные Qt-таймеры без шага игры,
+  например для обновления карточки с частотой раз в секунду.
+- `image` в шаге сохраняет новый абсолютный PNG окна графа или `scope:"main"`.
+  Кадр Qt не содержит D3D viewport и не доказывает визуальное поведение игры.
+
+`editor.scene` использует те же steps с настоящим native Windows viewport.
+Перед picking выполните `frames` с `count:1`, чтобы появилась projection matrix.
+`hierarchy-click` (`target`, optional `control`) посылает настоящий клик по дереву,
+`viewport-click` (`x`,`y` в диапазоне 0..1, optional `control`) — по viewport.
+`ui-command` вызывает зарегистрированную команду, например `Gizmo.FocusSelected`.
+Поле Inspector задаётся через `field`/`scope:"main"`: `Transform0..2` — position,
+`Transform3..5` — Euler degrees, `Transform6..8` — scale. Отправляется editingFinished.
+Snapshot содержит selectedIds и матрицы камеры; objects — локальный quaternion.
+`coordinateSpaceLocal` читает настоящий режим viewport; переключение доступно через
+`ui-command`/`id:"Gizmo.ToggleCoordinateSpace"`. `resize-window` меняет размер главного
+окна (`width`:640..1920, `height`:480..1080); фактический размер viewport и projection
+проверяются по snapshot после следующего кадра. `viewport-drag` посылает press/move/release
+в native viewport: нормализованные `fromX/fromY/toX/toY`, `moves`:1..32 (default8),
+optional `control`. `button` выбирает `left` (по умолчанию), `right` (camera look)
+или `middle`. Попадание в конкретную ось gizmo определяется текущей камерой и выбранным
+объектом; сам по себе exit0 не означает, что перетаскивание изменило объект.
+В native режиме после UI-операций в Edit отрисовывается кадр с dt=0.
+Рамочное выделение сцены (marquee) в текущем viewport отсутствует; его нельзя
+считать проверенной доступной возможностью. Ctrl-click поддерживается отдельно.
+
+  UI/HUD сценарии используют настоящие окна и действия редактора:
+  `ui-create` / `ui-open` (`path`: абсолютный `.ui` внутри Content), `ui-close`;
+  `ui-add` (`type`: Panel/Label/Button/Bar) вызывает toolbar action;
+  `ui-select` (`target`: имя элемента) выбирает строку UIHierarchy;
+  `ui-field` (`name`, `value`) редактирует Inspector, либо `index` для combo;
+  `ui-action` (`name`: UISave/UIDelete) вызывает соответствующее действие.
+  Поля: UIName, UIText, UIRect0..3 (X/Y/Width/Height), UIAnchor (0..8),
+  UIVisible; UIPreviewSize имеет индексы0..3. `scope:"ui"` сохраняет Qt image
+  UI-редактора. Snapshot содержит uiMarkup, uiSavedMarkup, uiSelected, uiPath.
+  `hud-settings` открывает настоящий Project HUD dialog: необязательный `choice`
+  — Content-relative `.ui` или пустая строка для None; `cancel:true` нажимает
+  Cancel вместо OK, `dialogImage` сохраняет снимок до нажатия. Результат содержит
+  beforeChoice/selectedChoice/cancelled; snapshot — hudDescriptorExists/hudChoice.
+  Для проверки сохранения и отмены сравнивайте фактический descriptor и открывайте
+  диалог снова; для игрового эффекта требуется отдельный Play/Runtime и D3D-кадр.
+
+Новые SDK можно собирать локально с установленным MSVC через
+`Engine/build.ps1 -Configuration Release -Target All -EnableAssimp $true -LocalSdk`.
+Такой SDK помечается `localOnly:true`; обычная сборка по-прежнему требует v142
+и проверяет совместимость распространяемого SDK. Локальный режим не является
+проверкой совместимости с отсутствующими на машине компиляторами.
+
+`Engine/tests/ai/run.ps1 -Configuration Release` компилирует сохранённые в
+репозитории примеры и запускает все AI-тесты. `-RefreshGuide` отдельно запускает
+генерацию из исходного `AI-CPP-GUIDE.md`, который не включён в текущий upstream.
+Без этого файла регенерация строго завершается ошибкой; обычный запуск не
+объявляет соответствие отсутствующему руководству проверенным.
+
+`Editor/tests/MeshDiagnosticsTests.py --tool <EngineCommandlets.exe> --output <new-directory>`
+проверяет Forward/Deferred normal map при отражении/неравномерном масштабе,
+SaveGame, реальные texture/audio imports и упрощение сетки с отрицательным контролем.
+`ParticleCommandletTests.py` с теми же параметрами сравнивает столкновения частиц
+с полом и без пола в обоих рендерах. `AuthoringCommandletTests.py` дополнительно
+принимает `--launcher <EngineLauncher.exe>` и проверяет настоящие Qt-формы,
+генерацию/отказ повторного класса, пресеты/Cancel, startup и recovery между процессами.
+`MaterialGraphCommandletTests.ps1` также проверяет предел 121 уникальной текстуры,
+отказ 122-й без изменения графа и истории, уникальность регистров и резерв t32.
+`CommandletIntegerValidationTests.py --tool <exe> --output <new-directory>`
+проверяет отказ дробных/огромных width/count/steps/slices/rendering до приведения
+к int; остальные диагностические наборы проверяют допустимые целые значения.
 
 Добавить в dispatcher параметризованный вызов настоящей операции, описать вход/побочные эффекты/зависимости здесь и добавить сценарии в tests. ID жалобы принадлежит сценарию, а не API-команде. Не переносить игровую логику в Engine и не подменять неподдерживаемую возможность тестовой заглушкой. Сохранять before/after, код завершения и проверяемый эффект, а для отображения — PNG и осмотр.
 

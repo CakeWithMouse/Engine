@@ -1,0 +1,12 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "drawCalls": 52,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\results\\material-blends-mode0.bmp",
+            "lod": [
+            ]
+        }
+    ],
+    "ok": true
+}

@@ -1,0 +1,38 @@
+{
+  "experiment": "shadow-cascade-fit",
+  "runtime": "E:/Engine/Game/build/x64/Release/Runtime/EngineRuntime.exe",
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberUpgradedR7/Project.json",
+  "env": {
+    "TB_CASCADE_PROBE": "1"
+  },
+  "args": [
+    "--mode",
+    "game",
+    "--frames",
+    "8"
+  ],
+  "samples": [
+    {
+      "cameraX": 0.05,
+      "label": "base"
+    },
+    {
+      "cameraX": 0.051,
+      "label": "subtexel"
+    },
+    {
+      "cameraX": 1.05,
+      "label": "large"
+    },
+    {
+      "cameraX": 0.051,
+      "label": "return-subtexel"
+    }
+  ],
+  "expected": {
+    "texelEstimate": "2*cascade0Radius / shadowMapSize",
+    "largeWorldDelta": 1.0,
+    "subtexelWorldDelta": 0.001,
+    "shadowMapSize": 2048
+  }
+}

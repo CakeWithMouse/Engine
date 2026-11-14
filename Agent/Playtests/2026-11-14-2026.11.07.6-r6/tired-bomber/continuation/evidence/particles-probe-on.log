@@ -1,0 +1,40 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 400x300
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 400x300
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\particles-probe-on-early.bmp written=1 size=400x300
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 400x300
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 121: AntialiasingMode = 0 (Off), bb = 400x300
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\particles-probe-on-late.bmp written=1 size=400x300
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "depthCollision": true,
+    "frames": [
+        {
+            "dispatches": 57,
+            "drawCalls": 2,
+            "elapsed": 0.08349999785423279,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\particles-probe-on-early.bmp",
+            "instances": 1025,
+            "sha256": "92ef8791737bca6590faa8e7f76b25564855709c75acdca2207bd6bd496a0b00",
+            "steps": 5
+        },
+        {
+            "dispatches": 57,
+            "drawCalls": 2,
+            "elapsed": 2.0874999463558197,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\particles-probe-on-late.bmp",
+            "instances": 1025,
+            "sha256": "ad4cf95e316c62a8074fa4ea9e3eee1564a7d8e1f0695c153640fac607cf7e19",
+            "steps": 125
+        }
+    ],
+    "measurement": "Real GPU simulation and image readback; no particle-state readback or inferred collision counter.",
+    "ok": true,
+    "surface": true
+}

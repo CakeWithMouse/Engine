@@ -1,0 +1,27 @@
+{
+  "archive": "tired-bomber-r7-source.zip",
+  "archiveSha256": "7AB224C99B34B9A14A07B841751B9B83A9B64982CA5C7E7EEEC073264CEA35E2",
+  "entries": 54,
+  "forbiddenBuildArtifacts": 0,
+  "forbiddenEntries": [],
+  "sdkEngineLibSha256": "87F34A76ABF802F85264E20AF0897C85BE3B18C32D77E12DBDD91CAAE18B6527",
+  "extractedBuild": {
+    "path": "Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck",
+    "exitCode": 0,
+    "buildId": "145eb8972431411e8776e76663ccdf21",
+    "dllSha256": "5AA42C89BCB25D578D00C031A86B1B0D15E10925F2FDECBE698AE2C5567D68D0"
+  },
+  "runtime": {
+    "saveExitCode": 0,
+    "loadExitCode": 0,
+    "lodPanelExitCode": 0,
+    "graphicsFollowupExits": {
+      "lod": 0,
+      "skeletal": 0,
+      "instances": 0
+    },
+    "saveRequest": "accepted at frame35; completion status2, ticket1",
+    "loadedState": "elapsed0.583333; hits0; misses0; explicit resume logged",
+    "graphicsMeasurements": "skeletal t0/.25/.50/reset ROI pixel changes 0/3141/3235/0; LOD Y24/Y8/Y3/Y24 perLOD [0,0,11]/[0,11,0]/[8,3,0]/[0,0,11]; instances move changed126 pixels, hide changed211 pixels, restore changed0 pixels"
+  }
+}

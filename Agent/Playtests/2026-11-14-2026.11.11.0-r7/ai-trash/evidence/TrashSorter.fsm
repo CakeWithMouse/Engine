@@ -1,0 +1,87 @@
+{
+    "connections": [
+        {
+            "fromNode": 1,
+            "fromPin": "out",
+            "properties": {
+                "trigger": "completed"
+            },
+            "toNode": 2,
+            "toPin": "in"
+        },
+        {
+            "fromNode": 2,
+            "fromPin": "out",
+            "properties": {
+                "delay": 0.04,
+                "priority": 2,
+                "trigger": "completed"
+            },
+            "toNode": 1,
+            "toPin": "in"
+        }
+    ],
+    "format": "ITMOEngine.Graph",
+    "nodes": [
+        {
+            "id": 1,
+            "properties": {
+                "name": "WalkAlongBin",
+                "tasks": [
+                    {
+                        "radius": 0.4,
+                        "target": "BinSide",
+                        "type": "Ai.MoveTo"
+                    }
+                ]
+            },
+            "title": "WalkAlongBin",
+            "type": "Fsm.State",
+            "x": 0,
+            "y": 0
+        },
+        {
+            "id": 2,
+            "properties": {
+                "name": "ReturnToStart",
+                "tasks": [
+                    {
+                        "radius": 0.4,
+                        "target": "StartSide",
+                        "type": "Ai.MoveTo"
+                    }
+                ]
+            },
+            "title": "Return to start",
+            "type": "Fsm.State",
+            "x": 320,
+            "y": 0
+        }
+    ],
+    "schema": "ai.fsm",
+    "schemaVersion": 1,
+    "settings": {
+        "thinkInterval": 0.05
+    },
+    "variables": [
+        {
+            "name": "BinSide",
+            "type": "vec3",
+            "value": [
+                -2,
+                0.5,
+                3
+            ]
+        },
+        {
+            "name": "StartSide",
+            "type": "vec3",
+            "value": [
+                -4,
+                0.5,
+                3
+            ]
+        }
+    ],
+    "version": 1
+}

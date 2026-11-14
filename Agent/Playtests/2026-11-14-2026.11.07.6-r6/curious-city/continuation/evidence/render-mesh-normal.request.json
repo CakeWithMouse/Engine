@@ -1,0 +1,54 @@
+{
+  "mirrorUv": false,
+  "target": [
+    0,
+    0,
+    0
+  ],
+  "up": [
+    0,
+    1,
+    0
+  ],
+  "orthoHeight": 3,
+  "shape": "plane",
+  "size": 2,
+  "camera": [
+    0,
+    3,
+    4
+  ],
+  "width": 320,
+  "height": 240,
+  "orthographic": true,
+  "material": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Content\\Materials\\NormalTangentProbe.mat",
+  "rendering": 0,
+  "frames": [
+    {
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-normal-base.bmp"
+    },
+    {
+      "scale": [
+        -1,
+        1,
+        1
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-normal-world-reflection.bmp"
+    },
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-normal-save-return.bmp",
+      "scale": [
+        -1,
+        1,
+        1
+      ],
+      "saveRoundTrip": true,
+      "saveFile": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-savegame-normal.json"
+    }
+  ]
+}

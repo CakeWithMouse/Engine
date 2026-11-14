@@ -1,0 +1,116 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "basis": [
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ]
+            ],
+            "center": [
+                0,
+                128,
+                127
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-mirror-postfix.bmp",
+            "restored": false,
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "sha256": "3a8a3b706542884766993dcdcdf5321777a7289e3ab2224512a59f17baa6642a",
+            "transientMaterialRebound": false
+        },
+        {
+            "basis": [
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ]
+            ],
+            "center": [
+                0,
+                128,
+                127
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-mirror-postfix-save.bmp",
+            "restored": true,
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "sha256": "3a8a3b706542884766993dcdcdf5321777a7289e3ab2224512a59f17baa6642a",
+            "transientMaterialRebound": true
+        }
+    ],
+    "ok": true,
+    "originalBasis": [
+        [
+            -1,
+            0,
+            0,
+            -1
+        ],
+        [
+            -1,
+            0,
+            0,
+            -1
+        ],
+        [
+            -1,
+            0,
+            0,
+            -1
+        ],
+        [
+            -1,
+            0,
+            0,
+            -1
+        ]
+    ]
+}

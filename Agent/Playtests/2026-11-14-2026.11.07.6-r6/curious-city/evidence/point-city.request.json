@@ -1,0 +1,24 @@
+{
+  "caster": "crowd",
+  "travel": 0,
+  "rendering": 0,
+  "sceneLighting": true,
+  "radius": 30,
+  "width": 320,
+  "height": 256,
+  "lights": [
+    {"position":[-3,4,-2],"color":[1,0.45,0.2],"intensity":0.7,"radius":30,"enabled":true,"shadows":true},
+    {"position":[3,4,2],"color":[0.25,0.5,1],"intensity":0.7,"radius":30,"enabled":true,"shadows":true},
+    {"position":[0,5,4],"color":[0.3,1,0.35],"intensity":0.7,"radius":30,"enabled":true,"shadows":true}
+  ],
+  "lodDistances":[12,20],
+  "lodScales":[1,0.6,0.3],
+  "frames":[
+    {"time":0,"position":[0,0.05,0],"camera":[0,4.6,-4.8],"target":[0,1,0],"image":"E:/Engine/Engine/build/playtests/20261114-r6/curious-city/point-city-00.bmp"},
+    {"time":0,"position":[0,0.05,0],"camera":[0,4.6,-4.8],"target":[0,1,0],"lights":[{"position":[-3,4,-2],"color":[1,0.45,0.2],"intensity":0,"radius":30,"enabled":true,"shadows":true},{"position":[3,4,2],"color":[0.25,0.5,1],"intensity":0.7,"radius":30,"enabled":true,"shadows":true},{"position":[0,5,4],"color":[0.3,1,0.35],"intensity":0.7,"radius":30,"enabled":true,"shadows":true}],"image":"E:/Engine/Engine/build/playtests/20261114-r6/curious-city/point-city-01-zero-a.bmp"},
+    {"time":0,"position":[0,0.05,0],"camera":[0,4.6,-4.8],"target":[0,1,0],"lights":[{"position":[-3,4,-2],"color":[1,0.45,0.2],"intensity":0.7,"radius":30,"enabled":true,"shadows":true},{"position":[3,4,2],"color":[0.25,0.5,1],"intensity":0.7,"radius":30,"enabled":true,"shadows":true},{"position":[0,5,4],"color":[0.3,1,0.35],"intensity":0,"radius":30,"enabled":true,"shadows":true}],"image":"E:/Engine/Engine/build/playtests/20261114-r6/curious-city/point-city-02-zero-c.bmp"},
+    {"time":0,"position":[0,0.05,0],"camera":[0,9.4,-11.2],"target":[0,1,0],"image":"E:/Engine/Engine/build/playtests/20261114-r6/curious-city/point-city-03-lod1.bmp"},
+    {"time":0,"position":[0,0.05,0],"camera":[0,15.4,-19.2],"target":[0,1,0],"image":"E:/Engine/Engine/build/playtests/20261114-r6/curious-city/point-city-04-lod2.bmp"},
+    {"time":0,"position":[0,0.05,0],"camera":[0,4.6,-4.8],"target":[0,1,0],"image":"E:/Engine/Engine/build/playtests/20261114-r6/curious-city/point-city-05-return.bmp"}
+  ]
+}

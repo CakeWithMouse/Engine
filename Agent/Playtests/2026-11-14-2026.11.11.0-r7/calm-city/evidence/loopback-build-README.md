@@ -1,0 +1,1 @@
+BuildLoopbackCapture.ps1 compiles loopback-capture.cpp in this directory. It uses cl.exe when launched from a Visual Studio Developer PowerShell. Otherwise it finds the latest Visual Studio C++ x64 tools with vswhere.exe and initializes them through VC\Auxiliary\Build\vcvars64.bat. Outputs stay beside the helper.

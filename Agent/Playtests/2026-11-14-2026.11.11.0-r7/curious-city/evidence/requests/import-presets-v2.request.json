@@ -1,0 +1,14 @@
+{
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Project.json",
+  "source": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/sources/PresetProbe.obj",
+  "dialog": {
+    "useFileUnitScale": false,
+    "presets": [
+      "Preset1",
+      "Preset01",
+      "Preset001"
+    ],
+    "action": "accept",
+    "image": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/import-options-dialog-preset-v2.png"
+  }
+}

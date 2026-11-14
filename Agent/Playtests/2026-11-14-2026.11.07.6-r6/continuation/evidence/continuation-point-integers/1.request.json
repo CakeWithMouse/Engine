@@ -1,0 +1,16 @@
+{
+  "caster": "mesh",
+  "width": 320,
+  "frames": [
+    {
+      "light": [
+        0,
+        4,
+        0
+      ],
+      "image": "E:/Engine/Engine/build/playtests/20261114-r6/continuation-point-integers/1.bmp"
+    }
+  ],
+  "height": 240,
+  "rendering": 1
+}

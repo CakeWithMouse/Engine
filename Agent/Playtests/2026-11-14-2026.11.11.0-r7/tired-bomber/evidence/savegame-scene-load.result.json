@@ -1,0 +1,597 @@
+{
+    "ok": true,
+    "state": {
+        "components": {
+            "1": {
+                "GameComponent": {
+                    "collision": false,
+                    "color": [
+                        0.4000000059604645,
+                        0.5799999833106995,
+                        0.41999998688697815,
+                        1
+                    ],
+                    "fresnel": 5,
+                    "instanceCount": 0,
+                    "opacity": false,
+                    "pixelShader": "",
+                    "reflection": 0,
+                    "rotationSpeed": 0.10000000149011612,
+                    "skybox": false,
+                    "staticShadow": false,
+                    "traceChannels": 1,
+                    "uvOffset": [
+                        0,
+                        0
+                    ],
+                    "uvScale": [
+                        1,
+                        1
+                    ],
+                    "velocitySpeed": 1,
+                    "version": 1,
+                    "vertexShader": "",
+                    "visualPrimitive": false
+                },
+                "MeshComponent": {
+                    "indices": [
+                        0,
+                        1,
+                        3,
+                        0,
+                        3,
+                        2,
+                        4,
+                        7,
+                        5,
+                        4,
+                        6,
+                        7
+                    ],
+                    "version": 1,
+                    "vertices": [
+                        [
+                            -0.5,
+                            0,
+                            0.5,
+                            1,
+                            0,
+                            1,
+                            0,
+                            0,
+                            0,
+                            0,
+                            0,
+                            0
+                        ],
+                        [
+                            0.5,
+                            0,
+                            0.5,
+                            1,
+                            0,
+                            1,
+                            0,
+                            0,
+                            1,
+                            0,
+                            0,
+                            0
+                        ],
+                        [
+                            -0.5,
+                            0,
+                            -0.5,
+                            1,
+                            0,
+                            1,
+                            0,
+                            0,
+                            0,
+                            1,
+                            0,
+                            0
+                        ],
+                        [
+                            0.5,
+                            0,
+                            -0.5,
+                            1,
+                            0,
+                            1,
+                            0,
+                            0,
+                            1,
+                            1,
+                            0,
+                            0
+                        ],
+                        [
+                            -0.5,
+                            0,
+                            0.5,
+                            1,
+                            0,
+                            -1,
+                            0,
+                            0,
+                            0,
+                            0,
+                            0,
+                            0
+                        ],
+                        [
+                            0.5,
+                            0,
+                            0.5,
+                            1,
+                            0,
+                            -1,
+                            0,
+                            0,
+                            1,
+                            0,
+                            0,
+                            0
+                        ],
+                        [
+                            -0.5,
+                            0,
+                            -0.5,
+                            1,
+                            0,
+                            -1,
+                            0,
+                            0,
+                            0,
+                            1,
+                            0,
+                            0
+                        ],
+                        [
+                            0.5,
+                            0,
+                            -0.5,
+                            1,
+                            0,
+                            -1,
+                            0,
+                            0,
+                            1,
+                            1,
+                            0,
+                            0
+                        ]
+                    ]
+                }
+            },
+            "2": {
+                "GameComponent": {
+                    "collision": false,
+                    "color": [
+                        1,
+                        1,
+                        1,
+                        1
+                    ],
+                    "fresnel": 5,
+                    "instanceCount": 0,
+                    "opacity": false,
+                    "pixelShader": "",
+                    "reflection": 0,
+                    "rotationSpeed": 0.10000000149011612,
+                    "skybox": false,
+                    "staticShadow": false,
+                    "traceChannels": 1,
+                    "uvOffset": [
+                        0,
+                        0
+                    ],
+                    "uvScale": [
+                        1,
+                        1
+                    ],
+                    "velocitySpeed": 1,
+                    "version": 1,
+                    "vertexShader": "",
+                    "visualPrimitive": false
+                }
+            },
+            "3": {
+                "GameComponent": {
+                    "collision": false,
+                    "color": [
+                        1,
+                        1,
+                        1,
+                        1
+                    ],
+                    "fresnel": 5,
+                    "instanceCount": 0,
+                    "opacity": false,
+                    "pixelShader": "",
+                    "reflection": 0,
+                    "rotationSpeed": 0.10000000149011612,
+                    "skybox": false,
+                    "staticShadow": false,
+                    "traceChannels": 1,
+                    "uvOffset": [
+                        0,
+                        0
+                    ],
+                    "uvScale": [
+                        1,
+                        1
+                    ],
+                    "velocitySpeed": 1,
+                    "version": 1,
+                    "vertexShader": "",
+                    "visualPrimitive": false
+                }
+            },
+            "4": {
+                "GameComponent": {
+                    "collision": false,
+                    "color": [
+                        1,
+                        1,
+                        1,
+                        1
+                    ],
+                    "fresnel": 5,
+                    "instanceCount": 0,
+                    "opacity": false,
+                    "pixelShader": "",
+                    "reflection": 0,
+                    "rotationSpeed": 0.10000000149011612,
+                    "skybox": false,
+                    "staticShadow": false,
+                    "traceChannels": 1,
+                    "uvOffset": [
+                        0,
+                        0
+                    ],
+                    "uvScale": [
+                        1,
+                        1
+                    ],
+                    "velocitySpeed": 1,
+                    "version": 1,
+                    "vertexShader": "",
+                    "visualPrimitive": false
+                },
+                "SkeletalMeshComponent": {
+                    "clip": 0,
+                    "playing": true,
+                    "speed": 1,
+                    "time": 0,
+                    "version": 1,
+                    "yaw": 0
+                }
+            },
+            "5": {
+                "GameComponent": {
+                    "collision": false,
+                    "color": [
+                        1,
+                        1,
+                        1,
+                        1
+                    ],
+                    "fresnel": 5,
+                    "instanceCount": 0,
+                    "opacity": false,
+                    "pixelShader": "",
+                    "reflection": 0,
+                    "rotationSpeed": 0.10000000149011612,
+                    "skybox": false,
+                    "staticShadow": false,
+                    "traceChannels": 1,
+                    "uvOffset": [
+                        0,
+                        0
+                    ],
+                    "uvScale": [
+                        1,
+                        1
+                    ],
+                    "velocitySpeed": 1,
+                    "version": 1,
+                    "vertexShader": "",
+                    "visualPrimitive": false
+                },
+                "SkeletalMeshComponent": {
+                    "clip": 0,
+                    "playing": true,
+                    "speed": 1,
+                    "time": 0,
+                    "version": 1,
+                    "yaw": 0
+                }
+            },
+            "6": {
+                "GameComponent": {
+                    "collision": false,
+                    "color": [
+                        0,
+                        0,
+                        1,
+                        1
+                    ],
+                    "fresnel": 5,
+                    "instanceCount": 0,
+                    "opacity": false,
+                    "pixelShader": "",
+                    "reflection": 0,
+                    "rotationSpeed": 0.10000000149011612,
+                    "skybox": false,
+                    "staticShadow": false,
+                    "traceChannels": 1,
+                    "uvOffset": [
+                        0,
+                        0
+                    ],
+                    "uvScale": [
+                        1,
+                        1
+                    ],
+                    "velocitySpeed": 1,
+                    "version": 1,
+                    "vertexShader": "",
+                    "visualPrimitive": false
+                }
+            }
+        },
+        "controller": {
+        },
+        "format": 1,
+        "game": {
+            "Game": {
+                "ambient": 0.05999999865889549,
+                "antialiasing": 0,
+                "realTime": 0,
+                "renderer": 0,
+                "sceneLighting": false,
+                "sceneTime": 0,
+                "shininess": 32,
+                "simulationEnabled": true,
+                "timeScale": 7.799999713897705,
+                "version": 1,
+                "vsync": true
+            }
+        },
+        "gameId": "tired-bomber-r7",
+        "scene": {
+            "name": "Main",
+            "objects": [
+                {
+                    "id": 1,
+                    "inheritParentScale": true,
+                    "name": "Ground",
+                    "parent": 0,
+                    "transform": {
+                        "position": [
+                            4,
+                            -0.5,
+                            0
+                        ],
+                        "rotation": [
+                            0.16561122238636017,
+                            -0.29613742232322693,
+                            0.0522170215845108,
+                            0.9392279386520386
+                        ],
+                        "scale": [
+                            2,
+                            -1,
+                            0.75
+                        ]
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "inheritParentScale": true,
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "properties": {
+                        "Engine.PointLight": {
+                            "value": {
+                                "color": [
+                                    0.7799999713897705,
+                                    0.8799999952316284,
+                                    1
+                                ],
+                                "enabled": true,
+                                "intensity": 0.3499999940395355,
+                                "radius": 32
+                            },
+                            "version": 1
+                        }
+                    },
+                    "transform": {
+                        "position": [
+                            -5,
+                            10,
+                            -4
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ]
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "inheritParentScale": true,
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "properties": {
+                        "Engine.PointLight": {
+                            "value": {
+                                "color": [
+                                    1,
+                                    0.6200000047683716,
+                                    0.3199999928474426
+                                ],
+                                "enabled": true,
+                                "intensity": 0.2800000011920929,
+                                "radius": 32
+                            },
+                            "version": 1
+                        }
+                    },
+                    "transform": {
+                        "position": [
+                            5,
+                            9,
+                            4
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ]
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "assets": {
+                        "model": "/Game/Models/blend-suzanne-multiple/blend-suzanne-multiple.glb",
+                        "texture": ""
+                    },
+                    "id": 4,
+                    "inheritParentScale": true,
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat"
+                        },
+                        "version": 1
+                    },
+                    "transform": {
+                        "position": [
+                            10,
+                            0.800000011920929,
+                            0
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            2.5,
+                            2.5,
+                            2.5
+                        ]
+                    },
+                    "type": "Engine.Model"
+                },
+                {
+                    "assets": {
+                        "material": "/Game/Models/blend-uv/Materials/Material_0.mat",
+                        "model": "/Game/Models/blend-uv/blend-uv.glb",
+                        "texture": ""
+                    },
+                    "id": 5,
+                    "inheritParentScale": true,
+                    "name": "UV.Control",
+                    "parent": 0,
+                    "projectData": {
+                        "materialSlots": {
+                            "0": ""
+                        },
+                        "version": 1
+                    },
+                    "transform": {
+                        "position": [
+                            -11,
+                            0.800000011920929,
+                            0
+                        ],
+                        "rotation": [
+                            -0.7071068286895752,
+                            0,
+                            0,
+                            0.7071068286895752
+                        ],
+                        "scale": [
+                            4,
+                            4,
+                            4
+                        ]
+                    },
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 6,
+                    "inheritParentScale": true,
+                    "name": "ProbeSun",
+                    "parent": 0,
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 1,
+                        "shadowDistance": 100,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "transform": {
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "rotation": [
+                            -0.38268348574638367,
+                            0,
+                            0,
+                            0.9238796234130859
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ]
+                    },
+                    "type": "Light.Directional"
+                }
+            ],
+            "version": 3
+        },
+        "subsystems": {
+            "Engine.Ai": {
+                "Ai": {
+                    "count": 0,
+                    "version": 1
+                },
+                "GameSubsystem": {
+                    "tickEnabled": true,
+                    "version": 1
+                }
+            }
+        }
+    }
+}

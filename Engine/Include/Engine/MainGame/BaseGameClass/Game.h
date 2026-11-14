@@ -179,6 +179,8 @@ public:
     // preserveSceneOnFailure is for data-only edit scenes (no custom AfterInitialize).
     bool InitializeViewport(HWND window, int width, int height, bool preserveSceneOnFailure = false);
     bool RenderViewportFrame(float deltaTime);
+    // Hosts that already called StepProjectSimulation render without a second tick.
+    bool RenderViewportFrame(float deltaTime, bool advanceSimulation);
     // Transitional preview sessions share one device/swap chain, never scene objects.
     bool InitializePlayViewport(Game& editorScene);
     void SuspendViewportTargets();
@@ -201,8 +203,10 @@ public:
      * for (the old code advanced 0.13 time units per frame, i.e. 7.8 units per second at 60 FPS).
      */
     void SetSimulationTimeScale(float scale) { SimulationTimeScale = scale > 0.0f ? scale : 0.0f; }
+    float GetSimulationTimeScale() const { return SimulationTimeScale; }
     virtual void AfterInitialize() {}
-    // One simulation path for standalone and embedded project games.
+    // Explicit simulation seconds, already scaled by a host that owns a real-time clock.
+    // Keeping this primitive unscaled also permits deterministic offline stepping.
     void StepProjectSimulation(float deltaTime) { UpdateSimulation(deltaTime); }
 
     bool IsShadowEnabled() const { return bShadowsEnabled; }
@@ -408,7 +412,7 @@ protected:
     void Run();
     bool PumpMessages();
     void ApplyPendingResize();
-    void UpdateFrame(float realDeltaTime);
+    void UpdateFrame(float realDeltaTime, bool advanceSimulation = true);
     void UpdateSimulation(float deltaTime);
     void UpdateAudio();
     void StartGameplayComponents();

@@ -1,0 +1,16 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation\\CityApiProbe\\Project.json",
+  "material": "/Game/Materials/GraphProbe.mat",
+  "steps": [
+    {
+      "action": "enable"
+    },
+    {
+      "action": "ai",
+      "text": "{\"version\":1,\"nodes\":[{\"id\":1,\"title\":\"Material Output\",\"type\":\"MaterialOutput\",\"x\":600,\"y\":160,\"properties\":{}},{\"id\":2,\"title\":\"Bad\",\"type\":\"ScalarParam\",\"x\":0,\"y\":0,\"properties\":{\"name\":\"Bad\",\"value\":NaN}}],\"connections\":[]}"
+    },
+    {
+      "action": "revert"
+    }
+  ]
+}

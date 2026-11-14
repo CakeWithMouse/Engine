@@ -1,0 +1,31 @@
+{
+  "steps": [
+    {
+      "action": "new"
+    },
+    {
+      "action": "model",
+      "name": "ImportedCityTriangleFront",
+      "path": "/Game/Models/CityTriangleFront/CityTriangleFront.obj"
+    },
+    {
+      "action": "create",
+      "name": "ImportProbeLight",
+      "type": "Light.Point"
+    },
+    {
+      "action": "move",
+      "target": "ImportProbeLight",
+      "delta": [
+        0,
+        2,
+        -3
+      ]
+    },
+    {
+      "path": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/Scenes/ModelImportFrontLitProbe.scene.json",
+      "action": "save"
+    }
+  ],
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Project.json"
+}

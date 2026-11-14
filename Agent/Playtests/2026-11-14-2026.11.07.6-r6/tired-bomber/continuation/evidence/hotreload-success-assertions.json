@@ -1,0 +1,12 @@
+{
+  "windowEnabled": true,
+  "replaced": true,
+  "module": "Binaries/Release/23229916b30041de8846d85fa815c910/Game.dll",
+  "previousBuildId": "e05f4f7876c64a5ba634d337f2ed9545",
+  "changedHash": true,
+  "changedBuildId": true,
+  "previousSha256": "043646418D1D6F02C1947505A321AF6360AD427CF8EB64005A1744B595B12839",
+  "buildSucceeded": true,
+  "sha256": "888ADB0303311C95D551BB82D7C24A115602BA510B400B7FB6CB3506F0E29F25",
+  "buildId": "23229916b30041de8846d85fa815c910"
+}

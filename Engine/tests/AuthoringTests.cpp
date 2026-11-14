@@ -72,6 +72,19 @@ void AuthoringTests(){
     auto modernData=modernSession.GetProjectDataApi();std::string modernSaved;
     CHECK(modernData.read(modernData.context,modernId,[](void* p,const char* text){*static_cast<std::string*>(p)=text;},&modernSaved)==EngineSceneOk);
     CHECK(Json::parse(modernSaved)["speed"]==8);
+    // Components without a property provider expose {}, not a reflected field
+    // list. Editing one must fail through the normal contract without mutation.
+    const ComponentType plainType{"Test.Plain","Plain",[]()->std::unique_ptr<GameComponent>{return std::make_unique<GameComponent>();}};
+    SceneEditSession plainSession({&plainType,1});
+    auto plainApi=plainSession.GetApi();auto plainAuthor=plainSession.GetAuthoringApi();
+    uint64_t plainId=0;
+    CHECK(plainApi.scene.createObject(plainApi.scene.context,plainType.typeName,"Plain",&modernTransform,&plainId)==EngineSceneOk);
+    std::string plainSchema;
+    CHECK(plainAuthor.describe(plainAuthor.context,plainId,[](void* p,const char* text){*static_cast<std::string*>(p)=text;},&plainSchema)==EngineSceneOk);
+    CHECK(Json::parse(plainSchema)==Json::object());
+    CHECK(plainAuthor.setProperty(plainAuthor.context,plainId,"/transform/position","[99,99,99]",modernError,sizeof(modernError))==EngineSceneFailure);
+    CHECK(std::string(modernError)=="Property is not editable");
+    CHECK(Rows(plainApi).size()==1 && Rows(plainApi).front().x==0);
     SceneCamera camera; camera.orthographic=true;camera.viewPlane=2;camera.fov=80;
     SceneCamera copy;copy.LoadProjectData(camera.SaveProjectData());CHECK(copy.orthographic && copy.viewPlane==2 && copy.fov==80);
     const auto cameraBefore=copy.SaveProjectData();auto invalidCamera=Json::parse(cameraBefore);invalidCamera["farClip"]=0.05;

@@ -1,0 +1,50 @@
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=3, backbuffer 713x423
+[Info] Frame 7681: AntialiasingMode = 1 (FXAA), bb = 713x423
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=9 | lines=144 (grid=140, gizmo=3, dir=1) | bbs=4 | tris=36
+[Info] Overlay: entered, pipelineReady=1, lineCount=144, billboardCount=4, backbuffer 713x423
+[Info] Frame 7801: AntialiasingMode = 1 (FXAA), bb = 713x423
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[Info] Overlay: entered, pipelineReady=1, lineCount=144, billboardCount=4, backbuffer 713x423
+[Info] Frame 7921: AntialiasingMode = 1 (FXAA), bb = 713x423
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=8 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=3 | tris=0
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=9 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=4 | tris=0
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=4, backbuffer 713x423
+[Info] Frame 8041: AntialiasingMode = 1 (FXAA), bb = 713x423
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=10 | lines=143 (grid=140, gizmo=3, dir=0) | bbs=5 | tris=36
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=10 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=5 | tris=0
+Texture loaded: /Game/Textures/outside.bmp (4x4)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 713x423
+[Info] Frame 8161: AntialiasingMode = 1 (FXAA), bb = 713x423
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=10 | lines=143 (grid=140, gizmo=3, dir=0) | bbs=5 | tris=36
+[Info] SettingsService: Set 'layout/62613da144ba/state'
+[Info] SettingsService: Set 'layout/62613da144ba/geometry'
+EditorRequestExit
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=0 | snapObjs=10 | lines=138 (grid=138, gizmo=0, dir=0) | bbs=5 | tris=0
+EditorUpdates=6359
+EditorStop
+EditorUiTests: 7170 checks passed
+[Info] Viewport overlay service: NOT FOUND (version 0)

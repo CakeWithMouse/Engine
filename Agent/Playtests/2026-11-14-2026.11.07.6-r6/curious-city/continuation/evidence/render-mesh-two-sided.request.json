@@ -1,0 +1,54 @@
+{
+  "mirrorUv": false,
+  "rendering": 0,
+  "width": 320,
+  "height": 240,
+  "material": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Content\\Materials\\NormalTangentProbe.mat",
+  "orthographic": true,
+  "size": 2,
+  "shape": "plane",
+  "orthoHeight": 3,
+  "up": [
+    0,
+    1,
+    0
+  ],
+  "camera": [
+    0,
+    3,
+    4
+  ],
+  "target": [
+    0,
+    0,
+    0
+  ],
+  "frames": [
+    {
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-two-sided-base.bmp"
+    },
+    {
+      "scale": [
+        -1,
+        1,
+        1
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-two-sided-negx.bmp"
+    },
+    {
+      "saveFile": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-two-sided-save.json",
+      "saveRoundTrip": true,
+      "scale": [
+        -1,
+        1,
+        1
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-two-sided-return.bmp"
+    }
+  ]
+}

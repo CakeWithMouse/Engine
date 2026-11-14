@@ -1,0 +1,127 @@
+{
+  "rendering": 1,
+  "width": 320,
+  "frames": [
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\GpuChecks\\transparency-0.bmp",
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "time": 0.25,
+      "camera": [
+        -4.5886,
+        0,
+        -6.5532
+      ]
+    },
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\GpuChecks\\transparency-1.bmp",
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "time": 0.25,
+      "camera": [
+        0.0,
+        0,
+        -8.0
+      ]
+    },
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\GpuChecks\\transparency-2.bmp",
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "time": 0.25,
+      "camera": [
+        4.5886,
+        0,
+        -6.5532
+      ]
+    },
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\GpuChecks\\transparency-3.bmp",
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "time": 0.25,
+      "camera": [
+        7.5175,
+        0,
+        -2.7362
+      ]
+    }
+  ],
+  "groups": [
+    {
+      "layers": [
+        {
+          "color": [
+            1,
+            0,
+            0
+          ],
+          "position": [
+            0,
+            0,
+            -0.25
+          ],
+          "rotation": [
+            0,
+            -45.0,
+            0
+          ],
+          "alpha": 0.45
+        },
+        {
+          "color": [
+            0,
+            0,
+            1
+          ],
+          "position": [
+            0,
+            0,
+            0.0
+          ],
+          "rotation": [
+            0,
+            45.0,
+            0
+          ],
+          "alpha": 0.45
+        },
+        {
+          "color": [
+            0,
+            1,
+            0
+          ],
+          "position": [
+            0,
+            0,
+            0.25
+          ],
+          "rotation": [
+            0,
+            0.0,
+            0
+          ],
+          "alpha": 0.45
+        }
+      ],
+      "kind": "mesh",
+      "material": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\GpuChecks\\Layer.mat",
+      "height": 4,
+      "width": 6
+    }
+  ],
+  "height": 256
+}

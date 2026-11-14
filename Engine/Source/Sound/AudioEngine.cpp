@@ -413,6 +413,11 @@ namespace audio
         active.emitter = emitter;
         active.basePitchRatio = basePitch;
 
+        // Play may be called during scene loading, long before the first Update.
+        // Set spatial routing before Start so a distant source cannot emit an
+        // unattenuated burst (or inherit routing from a previously pooled voice).
+        listener_.Commit();
+        Apply3D(active);
         active3DSounds_.push_back(active);
 
         hr = voice->voice->Start(0);

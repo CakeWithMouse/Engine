@@ -1,0 +1,1 @@
+{"project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\ai-editor-smoke\\Project.json", "machine": "/Game/AI/Guard.fsm", "steps": [{"action": "play"}, {"action": "frames", "count": 2}, {"action": "key", "key": 69, "down": true}, {"action": "frames", "count": 2}, {"action": "key", "key": 69, "down": false}, {"action": "frames", "count": 100}]}

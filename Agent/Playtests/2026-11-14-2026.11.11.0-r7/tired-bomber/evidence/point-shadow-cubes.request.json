@@ -1,0 +1,142 @@
+{
+  "width": 480,
+  "height": 360,
+  "camera": [
+    0,
+    10,
+    -14
+  ],
+  "target": [
+    0,
+    0,
+    0
+  ],
+  "lights": [
+    {
+      "position": [
+        -4,
+        4,
+        0
+      ],
+      "enabled": true,
+      "shadows": true,
+      "intensity": 2,
+      "radius": 20,
+      "color": [
+        1,
+        0.8,
+        0.6
+      ]
+    },
+    {
+      "position": [
+        4,
+        4,
+        0
+      ],
+      "enabled": true,
+      "shadows": true,
+      "intensity": 2,
+      "radius": 20,
+      "color": [
+        0.6,
+        0.8,
+        1
+      ]
+    }
+  ],
+  "caster": "mesh",
+  "frames": [
+    {
+      "position": [
+        0,
+        1,
+        0
+      ],
+      "lights": [
+        {
+          "position": [
+            -4,
+            4,
+            0
+          ],
+          "enabled": true,
+          "shadows": true,
+          "intensity": 2,
+          "radius": 20,
+          "color": [
+            1,
+            0.8,
+            0.6
+          ]
+        },
+        {
+          "position": [
+            4,
+            4,
+            0
+          ],
+          "enabled": true,
+          "shadows": true,
+          "intensity": 2,
+          "radius": 20,
+          "color": [
+            0.6,
+            0.8,
+            1
+          ]
+        }
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\point-shadow-cubes-0.bmp"
+    },
+    {
+      "position": [
+        0,
+        1,
+        0
+      ],
+      "lights": [
+        {
+          "shadows": false
+        },
+        {
+          "shadows": true
+        }
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\point-shadow-cubes-1.bmp"
+    },
+    {
+      "position": [
+        0,
+        1,
+        0
+      ],
+      "lights": [
+        {
+          "shadows": true
+        },
+        {
+          "shadows": false
+        }
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\point-shadow-cubes-2.bmp"
+    }
+  ],
+  "probes": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      -2,
+      0,
+      0
+    ],
+    [
+      2,
+      0,
+      0
+    ]
+  ]
+}

@@ -137,6 +137,50 @@ static void Exercise(const EngineEditSessionApi& api, const char* type)
 #include "GameStartupTests.h"
 #include "RuntimeRenderTests.h"
 void ExerciseModeParity(const std::filesystem::path& content);
+static void ExerciseGuardedGameplay()
+{
+    struct GuardedGame : Game {
+        int updates = 0;
+        float elapsed = 0;
+        void PreUpdate(float dt) override { if (IsSimulationEnabled()) { ++updates; elapsed += dt; } }
+    };
+    static GuardedGame* game = nullptr;
+    HWND window = CreateWindowExW(0, L"STATIC", L"Simulation state regression", WS_OVERLAPPEDWINDOW,
+        0, 0, 320, 240, nullptr, nullptr, GetModuleHandleW(nullptr), nullptr);
+    Check(window != nullptr, "simulation regression HWND");
+    struct WindowGuard { HWND value; ~WindowGuard() { DestroyWindow(value); } } guard{window};
+    for (bool attach : {false, true}) {
+        SceneEditSession session({}, []() -> std::unique_ptr<Game> {
+            auto value = std::make_unique<GuardedGame>(); game = value.get(); return value;
+        });
+        auto api = session.GetApi();
+        if (attach) Check(api.attachViewport(api.context, window, 320, 240) == EngineSceneOk, "guarded viewport attach");
+        Check(api.control(api.context, EnginePlay) == EngineSceneOk, "guarded game Play");
+        Check(game->IsSimulationEnabled(), "Play reports simulation enabled to game code");
+        Check(api.frame(api.context, 0.05) == EngineSceneOk && game->updates == 1,
+              "guarded game updates exactly once with or without viewport");
+        for (float scale : {0.0f, 0.5f, 2.0f}) {
+            game->SetSimulationTimeScale(scale);
+            const auto beforeTime = game->elapsed;
+            const auto beforeUpdates = game->updates;
+            Check(api.frame(api.context, 0.04) == EngineSceneOk, "scaled Editor Play frame");
+            Check(game->updates == beforeUpdates + 1 &&
+                  std::abs(game->elapsed - beforeTime - 0.04f * scale) < 1e-6f,
+                  "Editor Play applies simulation time scale exactly once");
+        }
+        const auto beforePause = game->updates;
+        const auto pausedTime = game->elapsed;
+        Check(api.control(api.context, EnginePause) == EngineSceneOk && !game->IsSimulationEnabled(),
+              "Pause reports simulation disabled");
+        Check(api.frame(api.context, 0.05) == EngineSceneOk && game->updates == beforePause && game->elapsed == pausedTime,
+              "Pause does not update gameplay or scaled time");
+        Check(api.control(api.context, EngineResume) == EngineSceneOk && game->IsSimulationEnabled(), "Resume enables simulation");
+        Check(api.frame(api.context, 0.05) == EngineSceneOk && game->updates == beforePause + 1 &&
+              std::abs(game->elapsed - pausedTime - 0.1f) < 1e-6f,
+              "Resume steps exactly once and preserves simulation time scale");
+        Check(api.control(api.context, EngineStop) == EngineSceneOk, "guarded game Stop");
+    }
+}
 int wmain(int argc, wchar_t** argv)
 {
     try
@@ -145,6 +189,7 @@ int wmain(int argc, wchar_t** argv)
         const auto module = std::filesystem::absolute(argv[1]);
         const auto content = std::filesystem::absolute(argv[2]);
         EnginePaths::SetContentRoot(content);
+        ExerciseGuardedGameplay();
         ExerciseRuntimeRender(content);
         ExerciseModeParity(content);
         {
@@ -168,6 +213,7 @@ int wmain(int argc, wchar_t** argv)
             Check(api.control(api.context, EnginePlay) == EngineSceneOk, "play before tick failure");
             failTick = true;
             Check(api.frame(api.context, 0.01) == EngineSceneSimulationFailed && State(api) == EnginePaused, "tick failure freezes game copy");
+            Check(!last->GetGame()->IsSimulationEnabled(), "tick failure reports disabled simulation");
             failTick = false;
             Check(api.control(api.context, EngineStop) == EngineSceneOk, "stop after tick failure");
         }

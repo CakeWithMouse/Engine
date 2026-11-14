@@ -1,0 +1,28 @@
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+[ToolBarFacts] initial tb geom=0,0 100x36, margins=(0,0,0,0), layoutMargins=(6,6,6,6), PM_ToolBarFrameWidth=6, PM_ItemMargin=0, PM_ItemSpacing=4
+[ToolBarFacts] configured tb height=36, btn height=28, topMargin=4, bottomMargin=4
+[Info] SettingsService: Set 'view/grid'
+[Info] SettingsService: Set 'view/gizmo'
+[Info] SettingsService: Set 'view/icons'
+[Info] SettingsService: Set 'view/overlays'
+[Info] SettingsService: Set 'viewport/antialiasing'
+[Info] QtHost::SetAntialiasing: mode = 1, serviceVersion = 3, handler = 00007FFFD99C17B0
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "buildSucceeded": false,
+    "console": "[04:31:49.886] C++: Build\n[04:32:13.541] C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Microsoft\\VC\\v170\\Microsoft.CppBuild.targets(548,5): warning MSB8029: Промежуточный каталог или каталог выхода не может располагаться во временном каталоге, потому что это может стать причиной проблем с добавочной сборкой. [E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Game.vcxproj]\n\n[04:32:13.541]   ComponentGenerator: 8 component(s), Project\n\n[04:32:13.541]   CityEconomyRules.cpp\n\n[04:32:13.541] E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Source\\CityEconomyRules.cpp(3,1): error C1189: #error:  CITY_ROLLBACK_PROBE [E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Game.vcxproj]\n\n[04:32:13.541]   CityEconomySubsystem.cpp\n\n[04:32:13.541]   CityInteractionComponent.cpp\n\n[04:32:13.541]   HouseComponent.cpp\n\n[04:32:13.541]   Module.cpp\n\n[04:32:13.541]   ProjectComponent.cpp\n\n[04:32:13.541]   ProjectGame.cpp\n\n[04:32:13.541]   RotatingCube.cpp\n\n[04:32:13.541]   TraceExamples.cpp\n\n[04:32:13.541]   GeneratedComponents.cpp\n\n[04:32:13.541]   Создание кода...\n\n[04:32:13.541] Full build log: E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Binaries\\Release\\3040343800b249f2be9a55f0ee35e196\\build.log\n\n[04:32:13.627] Project build failed; previous module preserved\n\n[04:32:13.627] E:\\Engine\\Game\\build\\x64\\Release\\Runtime\\SDK\\ProjectTools.ps1:294 знак:31\n\n[04:32:13.627] + ... ExitCode) { throw 'Project build failed; previous module preserved' } ...\n\n[04:32:13.627] +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n[04:32:13.627]     + CategoryInfo          : OperationStopped: (Project build f...odule preserved:String) [], RuntimeException\n\n[04:32:13.627]     + FullyQualifiedErrorId : Project build failed; previous module preserved\n\n[04:32:13.659] [Ошибка C++] Build: код завершения 1. Проект: E:/Engine/Engine/build/playtests/20261114-r6/curious-city/continuation/city-copy/Project.json",
+    "dialogs": [
+        "Операция не завершена. Предыдущая DLL сохранена. Диагностика находится в Console."
+    ],
+    "ok": false,
+    "replaced": false,
+    "windowEnabled": true
+}

@@ -1,0 +1,1 @@
+{"project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\continuation-authoring-03\\Project\\Project.json", "recovery": true, "steps": [{"action": "create", "type": "Primitive.Cube", "name": "Recovered"}, {"action": "write-recovery"}]}

@@ -1,0 +1,9 @@
+
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator: 3 component(s), Project
+  ProjectGame.cpp
+     Создается библиотека E:\Engine\Engine\build\playtests\20261114-r6\calm-city\continuation\CityApiProbe\Binaries\Release\b3a97661737a4193a88c55cc72e36ceb\Game.lib и объект E:\Engine\Engine\build\playtests\20261114-r6\calm-city\continuation\CityApiProbe\Binaries\Release\b3a97661737a4193a88c55cc72e36ceb\Game.exp
+  Game.vcxproj -> E:\Engine\Engine\build\playtests\20261114-r6\calm-city\continuation\CityApiProbe\Binaries\Release\b3a97661737a4193a88c55cc72e36ceb\Game.dll
+
+Full build log: E:\Engine\Engine\build\playtests\20261114-r6\calm-city\continuation\CityApiProbe\Binaries\Release\b3a97661737a4193a88c55cc72e36ceb\build.log
+Build validated and activated. Use Hot Reload in the editor, or reopen the project.

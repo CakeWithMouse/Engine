@@ -1,0 +1,40 @@
+{
+  "run": "tired-bomber independent graphics second pass",
+  "engineVersion": "2026.11.11.0",
+  "engineLibSha256": "87F34A76ABF802F85264E20AF0897C85BE3B18C32D77E12DBDD91CAAE18B6527",
+  "project": "Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Project.json",
+  "buildId": "145eb8972431411e8776e76663ccdf21",
+  "runtime": "Game/build/x64/Release/Runtime/EngineRuntime.exe",
+  "execution": "Three isolated hidden Runtime game processes, exit code 0 each. Each probe sets public simulation TimeScale to 0 at frame 4 so subsequent callbacks/rendering continue while background gameplay stays static.",
+  "cases": [
+    {
+      "feature_id": "skeletal",
+      "env": ["TB_SKELETAL_PROBE=1", "TB_SKELETAL_DEEP_PROBE=1"],
+      "frames": 32,
+      "model": "/Game/Models/CesiumMan.glb",
+      "checks": ["Load imported 19-bone model and one 2s clip", "Set animation time and evaluate poses at 0, 0.25, 0.5, then reset to 0", "Capture actual D3D game frame at each sample; compare character crop"]
+    },
+    {
+      "feature_id": "lod",
+      "env": ["TB_LOD_FOLLOWUP_PROBE=1"],
+      "frames": 40,
+      "component": "Bomber.Markers.LOD",
+      "configured": {"meshLods": 3, "autoLodRatios": [0.5, 0.25], "distanceThresholds": [9, 17], "drawDistance": 60, "instances": 13},
+      "cameraYSequence": [24, 8, 3, 24],
+      "checks": ["Capture selected component panel, perLOD counts and actual game frames at each camera distance", "Assert first and return counts match exactly"]
+    },
+    {
+      "feature_id": "instances",
+      "env": ["TB_INSTANCE_FOLLOWUP_PROBE=1"],
+      "frames": 38,
+      "component": "Bomber.Markers.LOD",
+      "initial": {"count": 13, "index0Hidden": true, "drawn": 11},
+      "operations": [
+        {"operation": "move", "index": 2, "from": [-4.8, 0.2, -6], "to": [3, 0.2, -2]},
+        {"operation": "hide", "index": 4, "initialPosition": [-1.6, 0.2, -6]},
+        {"operation": "restore", "indices": [2, 4]}
+      ],
+      "checks": ["Record completed-frame and component draw counts, public position/visibility values and actual game captures at baseline, after move, after hide, and after restore"]
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+    "dialogs": [
+    ],
+    "ok": true,
+    "recoveryCandidates": [
+    ],
+    "recoveryRecords": [
+        {
+            "engineVersion": "2026.11.07.6",
+            "format": 1,
+            "module": "Game.dll",
+            "moduleSha256": "357cdc199ad013ed6f80f2360def4aa3efd671d1e3701518dffe309faab0e493",
+            "project": "E:/Engine/Engine/build/playtests/20261114-r6/continuation-authoring-regression-05/Project/Project.json",
+            "recordPath": "E:/Engine/Engine/build/playtests/20261114-r6/continuation-authoring-regression-05/Project/.painengine/Recovery/2287c3d1-8279-4e55-99f6-51e516fb040e.json",
+            "savedUtc": "2026-11-14T02:12:45.508Z",
+            "snapshot": "2287c3d1-8279-4e55-99f6-51e516fb040e-3bb91e84-11c6-4c7e-981f-d125a04810d3.scene.json",
+            "sourceScene": "E:/Engine/Engine/build/playtests/20261114-r6/continuation-authoring-regression-05/Project/Content/Scenes/Continuation.scene.json"
+        }
+    ],
+    "steps": [
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Persisted",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Recovered",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+                2
+            ],
+            "status": 0
+        },
+        {
+            "action": "write-recovery",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Persisted",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Recovered",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+                2
+            ],
+            "status": 6
+        }
+    ]
+}

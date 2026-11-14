@@ -1,0 +1,540 @@
+{
+  "source": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\CalmCityUpgraded\\Content\\Audio\\Signal.wav",
+  "capture": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\3d-far-relative.wav",
+  "sampleRate": 48000,
+  "frequencyHz": 733.0,
+  "chipSeconds": 0.125,
+  "captureDurationSeconds": 14.0,
+  "bestMatch": {
+    "startSeconds": 3.475,
+    "correlation": 0.9945531125100096,
+    "linearGain": 0.020035013469942523,
+    "referenceChipAmplitudes": [
+      0.6910713540235688,
+      0.6910487648486393,
+      0.17276173939382894,
+      0.6910692064578222,
+      0.1727678228155874,
+      0.17276228817812517,
+      0.6910465959947156,
+      0.17276725002907237,
+      0.6910713540235688,
+      0.6910487648486393,
+      0.6910465959947156,
+      0.17276725002907237,
+      0.1727678228155874,
+      0.17276228817812517,
+      0.6910465959947156,
+      0.17276725002907237,
+      0.6910713540235688,
+      0.6910487648486393,
+      0.17276173939382894,
+      0.6910692064578222,
+      0.1727678228155874,
+      0.17276228817812517,
+      0.6910465959947156,
+      0.6910692064578222,
+      0.1727678228155874,
+      0.17276228817812517,
+      0.17276173939382894,
+      0.6910692064578222,
+      0.1727678228155874,
+      0.6910487648486393,
+      0.6910465959947156,
+      0.17276725002907237
+    ],
+    "observedChipAmplitudes": [
+      0.012612762211533337,
+      0.012489386255630215,
+      0.004688511903844662,
+      0.012523287114781626,
+      0.004839018598550705,
+      0.005240383943455208,
+      0.013114296770168494,
+      0.004729288494017681,
+      0.012350216114521691,
+      0.011028969131459083,
+      0.01255963299415925,
+      0.004694864213260818,
+      0.005158438882836867,
+      0.005059599518586007,
+      0.012376710990533352,
+      0.004534560065849648,
+      0.012442869516344905,
+      0.012035721043418948,
+      0.0045989941492948425,
+      0.012790130831310219,
+      0.004581234026215371,
+      0.005333183107026889,
+      0.01252214555154524,
+      0.011956062698713833,
+      0.004480626817659205,
+      0.0054491867801146655,
+      0.0055149367460158,
+      0.012767718428121713,
+      0.004753013501126142,
+      0.012655405670736568,
+      0.012385097733946507,
+      0.004640901262069777
+    ]
+  },
+  "repeatMatches": [
+    {
+      "cycle": 1,
+      "startSeconds": 7.475,
+      "correlation": 0.1796149501528148,
+      "linearGain": 1.1308344967410983e-07
+    }
+  ],
+  "searchStepSeconds": 0.025,
+  "fixedWindows": [
+    {
+      "startSeconds": 0.0,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 0.125,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 0.25,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 0.375,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 0.5,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 0.625,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 0.75,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 0.875,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 1.0,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 1.125,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 1.25,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 1.375,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 1.5,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 1.625,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 1.75,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 1.875,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 2.0,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 2.125,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 2.25,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 2.375,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 2.5,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 2.625,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 2.75,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 2.875,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 3.0,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 3.125,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 3.25,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 3.375,
+      "toneAmplitude": 0.00282136426456367
+    },
+    {
+      "startSeconds": 3.5,
+      "toneAmplitude": 0.012450558387558989
+    },
+    {
+      "startSeconds": 3.625,
+      "toneAmplitude": 0.010646370038266899
+    },
+    {
+      "startSeconds": 3.75,
+      "toneAmplitude": 0.006639347188240998
+    },
+    {
+      "startSeconds": 3.875,
+      "toneAmplitude": 0.010649870563821003
+    },
+    {
+      "startSeconds": 4.0,
+      "toneAmplitude": 0.005004760452116109
+    },
+    {
+      "startSeconds": 4.125,
+      "toneAmplitude": 0.0070031082665911945
+    },
+    {
+      "startSeconds": 4.25,
+      "toneAmplitude": 0.01077888264195894
+    },
+    {
+      "startSeconds": 4.375,
+      "toneAmplitude": 0.006492742806189427
+    },
+    {
+      "startSeconds": 4.5,
+      "toneAmplitude": 0.012431745160601438
+    },
+    {
+      "startSeconds": 4.625,
+      "toneAmplitude": 0.011079448587914455
+    },
+    {
+      "startSeconds": 4.75,
+      "toneAmplitude": 0.010719933196416339
+    },
+    {
+      "startSeconds": 4.875,
+      "toneAmplitude": 0.005069577912033109
+    },
+    {
+      "startSeconds": 5.0,
+      "toneAmplitude": 0.00522449186983756
+    },
+    {
+      "startSeconds": 5.125,
+      "toneAmplitude": 0.006748377877553882
+    },
+    {
+      "startSeconds": 5.25,
+      "toneAmplitude": 0.010275944650756295
+    },
+    {
+      "startSeconds": 5.375,
+      "toneAmplitude": 0.0069156503893131795
+    },
+    {
+      "startSeconds": 5.5,
+      "toneAmplitude": 0.011953007285566369
+    },
+    {
+      "startSeconds": 5.625,
+      "toneAmplitude": 0.010277143755852751
+    },
+    {
+      "startSeconds": 5.75,
+      "toneAmplitude": 0.006733152919064842
+    },
+    {
+      "startSeconds": 5.875,
+      "toneAmplitude": 0.010626781243644403
+    },
+    {
+      "startSeconds": 6.0,
+      "toneAmplitude": 0.004844841669112134
+    },
+    {
+      "startSeconds": 6.125,
+      "toneAmplitude": 0.007257438888151841
+    },
+    {
+      "startSeconds": 6.25,
+      "toneAmplitude": 0.011899678619416067
+    },
+    {
+      "startSeconds": 6.375,
+      "toneAmplitude": 0.010573141871208927
+    },
+    {
+      "startSeconds": 6.5,
+      "toneAmplitude": 0.004782126188967073
+    },
+    {
+      "startSeconds": 6.625,
+      "toneAmplitude": 0.00533981323053984
+    },
+    {
+      "startSeconds": 6.75,
+      "toneAmplitude": 0.007324316750980891
+    },
+    {
+      "startSeconds": 6.875,
+      "toneAmplitude": 0.010693034478657867
+    },
+    {
+      "startSeconds": 7.0,
+      "toneAmplitude": 0.006912640090046309
+    },
+    {
+      "startSeconds": 7.125,
+      "toneAmplitude": 0.012015562482133988
+    },
+    {
+      "startSeconds": 7.25,
+      "toneAmplitude": 0.010644332840714626
+    },
+    {
+      "startSeconds": 7.375,
+      "toneAmplitude": 0.003996872505132575
+    },
+    {
+      "startSeconds": 7.5,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 7.625,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 7.75,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 7.875,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 8.0,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 8.125,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 8.25,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 8.375,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 8.5,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 8.625,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 8.75,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 8.875,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 9.0,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 9.125,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 9.25,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 9.375,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 9.5,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 9.625,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 9.75,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 9.875,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 10.0,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 10.125,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 10.25,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 10.375,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 10.5,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 10.625,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 10.75,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 10.875,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 11.0,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 11.125,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 11.25,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 11.375,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 11.5,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 11.625,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 11.75,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 11.875,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 12.0,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 12.125,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 12.25,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 12.375,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 12.5,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 12.625,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 12.75,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 12.875,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 13.0,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 13.125,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 13.25,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 13.375,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 13.5,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 13.625,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 13.75,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 13.875,
+      "toneAmplitude": 0.0
+    }
+  ]
+}

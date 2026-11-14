@@ -1,0 +1,91 @@
+{
+  "width": 640,
+  "height": 480,
+  "camera": [
+    9,
+    9,
+    -14
+  ],
+  "target": [
+    0,
+    0,
+    0
+  ],
+  "globalShadows": true,
+  "sceneLighting": false,
+  "radius": 24,
+  "intensity": 2.4,
+  "caster": "mesh",
+  "frames": [
+    {
+      "position": [
+        0,
+        1.2,
+        0
+      ],
+      "light": [
+        -4,
+        5,
+        -3
+      ],
+      "shadows": true,
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\final-b-graphics\\shadow-final-0.bmp"
+    },
+    {
+      "position": [
+        0,
+        1.2,
+        0
+      ],
+      "light": [
+        -4,
+        5,
+        -3
+      ],
+      "shadows": false,
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\final-b-graphics\\shadow-final-1.bmp"
+    },
+    {
+      "position": [
+        0,
+        1.2,
+        0
+      ],
+      "light": [
+        4,
+        5,
+        -3
+      ],
+      "shadows": true,
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\final-b-graphics\\shadow-final-2.bmp"
+    },
+    {
+      "position": [
+        0,
+        1.2,
+        0
+      ],
+      "light": [
+        -4,
+        5,
+        -3
+      ],
+      "shadows": true,
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\final-b-graphics\\shadow-final-3.bmp"
+    },
+    {
+      "position": [
+        0,
+        1.2,
+        0
+      ],
+      "light": [
+        4,
+        5,
+        -3
+      ],
+      "shadows": false,
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\final-b-graphics\\shadow-final-4.bmp"
+    }
+  ]
+}

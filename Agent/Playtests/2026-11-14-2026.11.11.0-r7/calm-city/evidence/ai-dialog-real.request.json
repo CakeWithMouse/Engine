@@ -1,0 +1,43 @@
+{
+  "steps": [
+    {
+      "action": "dialog-state",
+      "node": 2,
+      "edits": [
+        {
+          "value": "ApproachHome",
+          "name": "FsmStateName"
+        }
+      ],
+      "dialogImage": "E:/Engine/Engine/build/playtests/20261114-r7/calm-city/results/ai-state-dialog.png"
+    },
+    {
+      "action": "dialog-link",
+      "from": 1,
+      "to": 2,
+      "edits": [
+        {
+          "value": 0.05,
+          "name": "FsmLinkDelay"
+        },
+        {
+          "value": 4,
+          "name": "FsmLinkPriority"
+        }
+      ],
+      "dialogImage": "E:/Engine/Engine/build/playtests/20261114-r7/calm-city/results/ai-link-dialog.png"
+    },
+    {
+      "action": "save"
+    },
+    {
+      "action": "reopen"
+    },
+    {
+      "action": "check",
+      "image": "E:/Engine/Engine/build/playtests/20261114-r7/calm-city/results/ai-graph-dialog-final.png"
+    }
+  ],
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/calm-city/AIPlayground/Project.json",
+  "machine": "/Game/AI/CalmRoutine.fsm"
+}

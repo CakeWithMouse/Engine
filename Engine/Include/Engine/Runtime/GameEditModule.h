@@ -39,6 +39,7 @@ public:
     const EngineGraphTraceApi& GraphTraceApi() const noexcept { return graphTrace_; }
     const EngineAiMachineApi& AiMachineApi() const noexcept { return aiMachine_; }
     const EngineAudioPreviewApi& AudioPreviewApi() const noexcept { return audio_; }
+    const EngineAssetImportApi& AssetImportApi() const noexcept { return assetImport_; }
     const EngineAuthoringApi& AuthoringApi() const noexcept { return authoring_; }
     const EngineSceneBatchApi& BatchApi() const noexcept { return batch_; }
 private:
@@ -59,6 +60,7 @@ private:
     EngineGraphTraceApi graphTrace_{};
     EngineAiMachineApi aiMachine_{};
     EngineAudioPreviewApi audio_{};
+    EngineAssetImportApi assetImport_{};
     EngineLegacyV4::Factory legacyFactory_{};
     std::unique_ptr<EngineLegacyV4::EditApi> legacy_ = std::make_unique<EngineLegacyV4::EditApi>();
     EngineLegacyV5::Factory legacy5Factory_{};

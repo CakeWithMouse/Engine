@@ -1,0 +1,1 @@
+PASS: material parameter edit changed GPU pixels; revert restored identical image hash.

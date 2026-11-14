@@ -1,0 +1,7 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\CalmCityUpgraded\\Project.json",
+  "source": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\inputs\\CityCalibration2.glb",
+  "scale": 0.01,
+  "reimportSource": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\inputs\\CityCalibration2.glb",
+  "moveTo": "/Game/Models/ScaleCity/CityCalibration2.glb"
+}

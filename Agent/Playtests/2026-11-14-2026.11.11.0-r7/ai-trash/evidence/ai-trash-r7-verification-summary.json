@@ -1,0 +1,134 @@
+{
+  "engineVersion": "2026.11.11.0",
+  "expected": {
+    "play": "machine transitions and moves AI character",
+    "dialogState": "rename state through real modal",
+    "savegame": "new process resumes in-flight object",
+    "dialogLink": "set delay and priority through real modal",
+    "input": "Right adjusts aim; Space throws and score records hit"
+  },
+  "actual": {
+    "dialogs": {
+      "linkDelay": 0.04,
+      "stateDialogStepStatus": 0,
+      "linkPriority": 2,
+      "stateName": "WalkAlongBin",
+      "saveStatus": 0,
+      "reopenStatus": 0,
+      "linkDialogStepStatus": 0
+    },
+    "gameTypesLog": "phase=types launched=Multi-material item round=1 aim=0.000000\r\nphase=types impact=hit item=imported-multimaterial hits=1 misses=0 throws=1\r\nphase=types launched=Soda can round=1 aim=0.000000\r\nphase=types impact=miss item=primitive hits=1 misses=1 throws=2 reason=The trash hit an obstacle.\r\nphase=types launched=Crumpled paper round=2 aim=0.000000\r\nphase=types impact=miss item=primitive hits=1 misses=2 throws=3 reason=The trash hit an obstacle.\r\nphase=types complete hits=1 misses=2 accuracy=33% round=2 PASS\r\n",
+    "inputLedger": [
+      {
+        "step": 0,
+        "misses": 0,
+        "kind": "control",
+        "action": null,
+        "hits": 0,
+        "throws": 0
+      },
+      {
+        "step": 1,
+        "misses": 0,
+        "kind": "focus",
+        "action": null,
+        "hits": 0,
+        "throws": 0
+      },
+      {
+        "step": 2,
+        "misses": 0,
+        "kind": "frames",
+        "action": null,
+        "hits": 0,
+        "throws": 0
+      },
+      {
+        "step": 3,
+        "misses": 0,
+        "kind": "key",
+        "action": null,
+        "hits": 0,
+        "throws": 0
+      },
+      {
+        "step": 4,
+        "misses": 0,
+        "kind": "frames",
+        "action": null,
+        "hits": 0,
+        "throws": 0
+      },
+      {
+        "step": 5,
+        "misses": 0,
+        "kind": "key",
+        "action": null,
+        "hits": 0,
+        "throws": 0
+      },
+      {
+        "step": 6,
+        "misses": 0,
+        "kind": "key",
+        "action": null,
+        "hits": 0,
+        "throws": 0
+      },
+      {
+        "step": 7,
+        "misses": 0,
+        "kind": "frames",
+        "action": null,
+        "hits": 0,
+        "throws": 1
+      },
+      {
+        "step": 8,
+        "misses": 0,
+        "kind": "key",
+        "action": null,
+        "hits": 0,
+        "throws": 1
+      },
+      {
+        "step": 9,
+        "misses": 0,
+        "kind": "frames",
+        "action": null,
+        "hits": 1,
+        "throws": 1
+      },
+      {
+        "step": 10,
+        "misses": 0,
+        "kind": "control",
+        "action": null,
+        "hits": 0,
+        "throws": 0
+      }
+    ],
+    "aiPlay": {
+      "visual": "D3D visual of this side-scene character not verified",
+      "startPosition": [
+        -4,
+        0.5,
+        3
+      ],
+      "history": [
+        "  0.02  -> WalkAlongBin   start",
+        "  0.92  WalkAlongBin -> ReturnToStart   task succeeded",
+        "  1.67  -> WalkAlongBin   completed without a transition, selecting from the root"
+      ],
+      "running": true,
+      "frameCount": 120,
+      "endPosition": [
+        -2.8225011825561523,
+        0.5,
+        3
+      ],
+      "activePath": "WalkAlongBin"
+    },
+    "saveLoad": "phase=save action=throw kind=box throws=1\r\nphase=save request=accepted elapsed=0.483334 x=-0.024167 y=3.711394 z=-1.918749\r\nphase=save result=saved throws=1 hits=0\r\nphase=save load-request=accepted ticket=2\r\nphase=save result=loaded throws=1 hits=0 elapsed=0.500000 projectile=15 PASS\r\nphase=restart loaded throws=1 hits=0 elapsed=0.500000 PASS\r\nphase=restart resumed hits=1 throws=1 PASS\r\n"
+  }
+}

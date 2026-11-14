@@ -1,0 +1,29 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[VfsRead] Dynamic mount '/_ext_8441174280472389121' -> 'E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/transparency-fixture' (path 'E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/transparency-fixture/Layer.hlsl' outside registered mounts)
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 320x256
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 320x256
+frame-dump E:\Engine\Engine\build\playtests\20261114-r7\tired-bomber\transparency-sort-nearred.bmp written=1 size=320x256
+frame-dump E:\Engine\Engine\build\playtests\20261114-r7\tired-bomber\transparency-sort-nearblue.bmp written=1 size=320x256
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "drawCalls": 116,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-sort-nearred.bmp",
+            "lod": [
+            ]
+        },
+        {
+            "drawCalls": 116,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-sort-nearblue.bmp",
+            "lod": [
+            ]
+        }
+    ],
+    "ok": true
+}

@@ -1,0 +1,27 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator.vcxproj -> E:\Engine\Engine\build\x64\Release\ComponentGenerator.exe
+  ComponentGenerator: 2 component(s), RuntimeExample
+  RuntimeExample.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Projects\RuntimeExample\Game.dll
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  EditConsumer.vcxproj -> E:\Engine\Engine\build\x64\Release\EditConsumer.dll
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  EditSessionTests.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\EditSessionTests.lib и объект E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\EditSessionTests.exp
+  EditSessionTests.vcxproj -> E:\Engine\Engine\build\x64\Release\EditSessionTests.exe
+
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  Fixture.vcxproj -> E:\Engine\Engine\build\x64\Release\RuntimeFixtures\SceneLegacy.dll
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  Fixture.vcxproj -> E:\Engine\Engine\build\x64\Release\RuntimeFixtures\SceneBadVersion.dll
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  Fixture.vcxproj -> E:\Engine\Engine\build\x64\Release\RuntimeFixtures\SceneIncomplete.dll
+
+[VfsRead] using local VFS (no host service)
+Play reports simulation enabled to game code

@@ -1,0 +1,49 @@
+{
+  "steps": [
+    {
+      "action": "create",
+      "type": "Light.Directional",
+      "name": "Continuation Sun"
+    },
+    {
+      "action": "create",
+      "type": "Environment.Sky",
+      "name": "Continuation Sky"
+    },
+    {
+      "action": "model",
+      "name": "Suzanne",
+      "path": "/Game/Models/blend-suzanne-multiple/blend-suzanne-multiple.glb"
+    },
+    {
+      "action": "select",
+      "target": "Suzanne"
+    },
+    {
+      "action": "material",
+      "target": "Suzanne",
+      "path": "/Game/Materials/WarmStone.mat"
+    },
+    {
+      "action": "property",
+      "target": "Suzanne",
+      "value": "/Game/Materials/WarmStone.mat",
+      "path": "/materialSlots/0"
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "action": "redo"
+    },
+    {
+      "action": "save",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation\\cmd-scene-material\\saved.scene.json"
+    },
+    {
+      "action": "load",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation\\cmd-scene-material\\saved.scene.json"
+    }
+  ],
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation\\CityApiProbe\\Project.json"
+}

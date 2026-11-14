@@ -3738,6 +3738,11 @@ static void SaveBackbufferToBmp(ID3D11Device* device, ID3D11DeviceContext* conte
 
 bool Game::RenderViewportFrame(float deltaTime)
 {
+    return RenderViewportFrame(deltaTime, true);
+}
+
+bool Game::RenderViewportFrame(float deltaTime, bool advanceSimulation)
+{
     if (!bEmbedded || !bInitialized || ExitCode != 0) return false;
     bRunning = true;
     ApplyPendingResize();
@@ -3745,7 +3750,7 @@ bool Game::RenderViewportFrame(float deltaTime)
     if (bMinimized) return true;
     ++FrameIndex;
     Stats.Reset();CountedVisibleObjects.clear();
-    UpdateFrame(std::clamp(deltaTime, 0.0f, MaxFrameDeltaSeconds));
+    UpdateFrame(std::clamp(deltaTime, 0.0f, MaxFrameDeltaSeconds), advanceSimulation);
     BeginGpuTimer();
 
     char forceFxaa[16]{};
@@ -3977,7 +3982,7 @@ void Game::ProcessHotkeys()
     bRenderTypeKeyWasDown = renderTypeDown;
 }
 
-void Game::UpdateFrame(float realDeltaTime)
+void Game::UpdateFrame(float realDeltaTime, bool advanceSimulation)
 {
     FrameDebugLines.clear();
     SynchronizeSceneResources();
@@ -3985,7 +3990,7 @@ void Game::UpdateFrame(float realDeltaTime)
     RealTime += realDeltaTime;
     LastRealDeltaTime = realDeltaTime;
     ProcessHotkeys();
-    if (bSimulationEnabled) UpdateSimulation(deltaTime);
+    if (bSimulationEnabled && advanceSimulation) UpdateSimulation(deltaTime);
     else FirstPlayer->UpdateCamera(0.0f);
     if(saveGame_) saveGame_->ProcessPending();
     UpdateAudio();

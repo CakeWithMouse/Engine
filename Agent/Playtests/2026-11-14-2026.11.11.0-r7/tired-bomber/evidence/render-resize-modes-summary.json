@@ -1,0 +1,94 @@
+{
+  "resizeFrames": [
+    {
+      "drawCalls": 116,
+      "size": [
+        640,
+        480
+      ],
+      "actualBmp": [
+        640,
+        480
+      ]
+    },
+    {
+      "drawCalls": 116,
+      "size": [
+        1280,
+        720
+      ],
+      "actualBmp": [
+        1280,
+        720
+      ]
+    },
+    {
+      "drawCalls": 116,
+      "size": [
+        800,
+        600
+      ],
+      "actualBmp": [
+        800,
+        600
+      ]
+    }
+  ],
+  "modeComparison": {
+    "deferred": {
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+      "centerRGB": [
+        127,
+        64,
+        38
+      ],
+      "drawCalls": 117,
+      "differentPixelsFromCorner": 113288
+    },
+    "forward": {
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+      "centerRGB": [
+        127,
+        64,
+        38
+      ],
+      "drawCalls": 116,
+      "differentPixelsFromCorner": 113288
+    }
+  },
+  "screenRays": [
+    {
+      "size": [
+        640,
+        480
+      ],
+      "direction": [
+        0.3592103422,
+        0,
+        -0.9332566261
+      ]
+    },
+    {
+      "size": [
+        1280,
+        720
+      ],
+      "direction": [
+        0.4565837681,
+        0,
+        -0.8896804452
+      ]
+    },
+    {
+      "size": [
+        800,
+        600
+      ],
+      "direction": [
+        0.3592103422,
+        0,
+        -0.9332566261
+      ]
+    }
+  ]
+}

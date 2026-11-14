@@ -1,0 +1,13 @@
+{
+  "steps": [
+    {
+      "action": "enable"
+    },
+    {
+      "action": "ai",
+      "text": "{\"version\":1,\"connections\":[],\"nodes\":[{\"title\":\"Material Output\",\"type\":\"MaterialOutput\",\"properties\":{},\"y\":160,\"x\":600,\"id\":1},{\"title\":\"Map0\",\"type\":\"Texture2D\",\"properties\":{\"slot\":121,\"textureName\":\"Map0\"},\"y\":0,\"x\":0,\"id\":2}]}"
+    }
+  ],
+  "material": "/Game/Materials/GraphProbe.mat",
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation\\CityApiProbe\\Project.json"
+}

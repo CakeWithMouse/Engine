@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "shader": "NumericProbe.hlsl",
+  "render": {"lighting": "unlit", "twoSided": true},
+  "params": {"T32": 1e999}
+}

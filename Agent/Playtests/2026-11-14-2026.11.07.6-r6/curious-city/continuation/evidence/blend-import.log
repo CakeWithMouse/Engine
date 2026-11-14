@@ -1,0 +1,14 @@
+[VfsRead] using local VFS (no host service)
+{
+    "asset": "/Game/Models/MarketFacade/MarketFacade.glb",
+    "clips": 0,
+    "indices": 3,
+    "material": "/Game/Models/MarketFacade/Materials/Material_0.mat",
+    "materialSlots": {
+        "0": ""
+    },
+    "meshes": 1,
+    "ok": true,
+    "placed": true,
+    "type": "Engine.Model"
+}

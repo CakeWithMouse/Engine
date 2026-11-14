@@ -1,0 +1,14 @@
+{
+  "purpose": "Independent imported UV chart check using the BomberArchiveCheck project copy.",
+  "command": "EngineLauncher.exe --smoke-project <BomberUvChartProbe>/Project.json",
+  "environment": {"TB_HUD_PROBE": "1", "reason": "hides render diagnostics panel so all four chart quadrants remain visible"},
+  "projectSceneObject": "UV.Control",
+  "model": "Content/Models/blend-uv/blend-uv.glb",
+  "material": "Content/Models/blend-uv/Materials/Material_0.mat",
+  "materialTextureBinding": "BaseMap -> ../Textures/BaseColor_0.png",
+  "replacementTexture": "128x128 RGBA four-quadrant chart: red, green, blue, yellow",
+  "frame": "Content/tired-bomber-frame.bmp",
+  "processExitCode": 0,
+  "engineVersion": "2026.11.11.0",
+  "sdkSha256": "87F34A76ABF802F85264E20AF0897C85BE3B18C32D77E12DBDD91CAAE18B6527"
+}

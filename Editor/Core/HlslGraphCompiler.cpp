@@ -275,7 +275,7 @@ GraphCompileResult HlslGraphCompiler::Compile(const GraphDocument& model)
             {
                 result.problems.insert(n.id, Tr("Нет свободных слотов текстур материала (максимум 121).",
                     "No free material texture slots (maximum 121)."));
-                break;
+                return result; // Never emit an HLSL binding already owned by another texture.
             }
         }
         declaredTextures << texName;

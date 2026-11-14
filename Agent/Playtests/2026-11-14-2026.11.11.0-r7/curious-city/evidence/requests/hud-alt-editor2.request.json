@@ -1,0 +1,38 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Project.json",
+  "steps": [
+    {
+      "action": "ui-open",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Content\\UI\\CityHudAlt.ui"
+    },
+    {
+      "action": "ui-select",
+      "target": "buildHouse"
+    },
+    {
+      "value": "Build home • 100",
+      "action": "ui-field",
+      "name": "UIText"
+    },
+    {
+      "action": "ui-action",
+      "name": "UISave"
+    },
+    {
+      "index": 2,
+      "action": "ui-field",
+      "name": "UIPreviewSize"
+    },
+    {
+      "action": "ui-action",
+      "name": "UISave"
+    },
+    {
+      "action": "ui-close"
+    },
+    {
+      "action": "ui-open",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Content\\UI\\CityHudAlt.ui"
+    }
+  ]
+}

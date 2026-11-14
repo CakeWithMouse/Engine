@@ -39,7 +39,7 @@ template<class F> uint32_t DocumentCall(const char* path, char* error, uint32_t 
 std::unique_ptr<Game> EmptyGame()
 {
     auto game = std::make_unique<Game>();
-    game->SetSimulationEnabled(false); // frame() is the sole simulation owner
+    game->SetSimulationEnabled(false); // Edit and material previews do not simulate.
     game->GetSettings().SetVSync(false);
     game->SetSceneLightingEnabled(true);
     return game;
@@ -53,7 +53,7 @@ std::unique_ptr<Game> SceneEditSession::CopyForPlay()
     auto candidate = gameFactory_ ? gameFactory_() : EmptyGame();
     if (!candidate) throw std::runtime_error("Game factory returned null");
     candidate->Saves().SetCatalog(catalog_);
-    candidate->SetSimulationEnabled(false);
+    candidate->SetSimulationEnabled(true);
     candidate->SetSimulationTimeScale(1.0f);
     candidate->SetSceneLightingEnabled(true);
     candidate->GetSettings().SetAntialiasing(antialiasingMode_);
@@ -118,12 +118,14 @@ uint32_t SceneEditSession::Control(uint32_t command)
     }
     if (command == EnginePause && state_ == EnginePlaying) {
         if (auto* audio = play_->GetAudioEngine()) audio->SetPaused(true);
+        play_->SetSimulationEnabled(false);
         play_->OnFocusLost(); play_->GetInput().SetContextEnabled(Input::Context::Game,false);
         state_ = EnginePaused; return EngineSceneOk;
     }
     if (command == EngineResume && state_ == EnginePaused) {
         if (auto* audio = play_->GetAudioEngine())
             if (!audio->SetPaused(false)) return EngineSceneFailure;
+        play_->SetSimulationEnabled(true);
         play_->OnFocusLost(); play_->GetInput().SetContextEnabled(Input::Context::Game,inputFocused_);
         state_ = EnginePlaying; return EngineSceneOk;
     }
@@ -205,9 +207,13 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
                 if (s.state_ == EnginePlaying)
                 {
                     for (const auto& item : s.play_->GetScene().GetComponents()) item.second->SetGame(s.play_.get());
-                    try { s.play_->StepProjectSimulation(static_cast<float>(dt)); }
+                    // The edit API frame delta is real time (also used for rendering below).
+                    // StepProjectSimulation accepts simulation seconds; apply the Game scale
+                    // here, exactly as the standalone UpdateFrame path does.
+                    try { s.play_->StepProjectSimulation(static_cast<float>(dt) * s.play_->GetSimulationTimeScale()); }
                     catch (...) {
                         if (auto* audio = s.play_->GetAudioEngine()) audio->SetPaused(true);
+                        s.play_->SetSimulationEnabled(false);
                         s.state_ = EnginePaused; return EngineSceneSimulationFailed;
                     }
                     if (s.pendingStop_) return EngineSceneOk;
@@ -217,7 +223,7 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
                         if (auto* particles = dynamic_cast<ParticleSystemComponent*>(item.second.get()))
                             particles->ParticleSystemComponent::Tick(static_cast<float>(dt));
                 // Simulation is stepped above; rendering still needs real elapsed time for materials.
-                if (s.attached_ && !s.Active().RenderViewportFrame(static_cast<float>(dt))) return EngineSceneFailure;
+                if (s.attached_ && !s.Active().RenderViewportFrame(static_cast<float>(dt), false)) return EngineSceneFailure;
                 s.RenderPreviews(dt);
                 return EngineSceneOk;
             });

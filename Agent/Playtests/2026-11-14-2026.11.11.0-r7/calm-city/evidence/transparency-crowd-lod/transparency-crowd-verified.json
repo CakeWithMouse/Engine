@@ -1,0 +1,276 @@
+{
+  "results": [
+    {
+      "rendering": 0,
+      "frames": [
+        {
+          "frame": 0,
+          "lodCounts": [
+            4,
+            2,
+            0
+          ],
+          "dimensions": [
+            320,
+            240
+          ],
+          "sha256": "83913a804fb717d5d9fed5bf79fe417055459d9668cd712da173bba77dd1e86e",
+          "image": "transparency-crowd-lod-m0-0.bmp"
+        },
+        {
+          "frame": 1,
+          "lodCounts": [
+            0,
+            4,
+            0
+          ],
+          "dimensions": [
+            480,
+            320
+          ],
+          "sha256": "47b4c35282112f6509391c4a653d35ab6261662c72481625acc69dfa158a3ef8",
+          "image": "transparency-crowd-lod-m0-1.bmp"
+        },
+        {
+          "frame": 2,
+          "lodCounts": [
+            0,
+            0,
+            4
+          ],
+          "dimensions": [
+            400,
+            240
+          ],
+          "sha256": "959462ce48a81551d1ba670427e161469d1117a31402cd6f6928991a6fd30bf6",
+          "image": "transparency-crowd-lod-m0-2.bmp"
+        }
+      ]
+    },
+    {
+      "rendering": 1,
+      "frames": [
+        {
+          "frame": 0,
+          "lodCounts": [
+            4,
+            2,
+            0
+          ],
+          "dimensions": [
+            320,
+            240
+          ],
+          "sha256": "83913a804fb717d5d9fed5bf79fe417055459d9668cd712da173bba77dd1e86e",
+          "image": "transparency-crowd-lod-m1-0.bmp"
+        },
+        {
+          "frame": 1,
+          "lodCounts": [
+            0,
+            4,
+            0
+          ],
+          "dimensions": [
+            480,
+            320
+          ],
+          "sha256": "47b4c35282112f6509391c4a653d35ab6261662c72481625acc69dfa158a3ef8",
+          "image": "transparency-crowd-lod-m1-1.bmp"
+        },
+        {
+          "frame": 2,
+          "lodCounts": [
+            0,
+            0,
+            4
+          ],
+          "dimensions": [
+            400,
+            240
+          ],
+          "sha256": "959462ce48a81551d1ba670427e161469d1117a31402cd6f6928991a6fd30bf6",
+          "image": "transparency-crowd-lod-m1-2.bmp"
+        }
+      ]
+    },
+    {
+      "rendering": 0,
+      "animationFrames": [
+        {
+          "time": 0,
+          "lodCounts": [
+            4,
+            2,
+            0
+          ],
+          "dimensions": [
+            320,
+            240
+          ],
+          "sha256": "83913a804fb717d5d9fed5bf79fe417055459d9668cd712da173bba77dd1e86e",
+          "image": "transparency-crowd-animation-m0-t0-v2.bmp"
+        },
+        {
+          "time": 0.25,
+          "lodCounts": [
+            4,
+            2,
+            0
+          ],
+          "dimensions": [
+            320,
+            240
+          ],
+          "sha256": "6a98d110fc665b503dd9f64299d1a20bb64893ef82a8ca5ab74960b391779a65",
+          "image": "transparency-crowd-animation-m0-t0.25-v2.bmp"
+        },
+        {
+          "time": 0.5,
+          "lodCounts": [
+            4,
+            2,
+            0
+          ],
+          "dimensions": [
+            320,
+            240
+          ],
+          "sha256": "b00214ab46a745054ab93bef87f91b795ee29810e5d5eb662e153dcff1d15f0a",
+          "image": "transparency-crowd-animation-m0-t0.5-v2.bmp"
+        },
+        {
+          "time": 0.75,
+          "lodCounts": [
+            4,
+            2,
+            0
+          ],
+          "dimensions": [
+            320,
+            240
+          ],
+          "sha256": "6a98d110fc665b503dd9f64299d1a20bb64893ef82a8ca5ab74960b391779a65",
+          "image": "transparency-crowd-animation-m0-t0.75-v2.bmp"
+        },
+        {
+          "time": 1,
+          "lodCounts": [
+            4,
+            2,
+            0
+          ],
+          "dimensions": [
+            320,
+            240
+          ],
+          "sha256": "83913a804fb717d5d9fed5bf79fe417055459d9668cd712da173bba77dd1e86e",
+          "image": "transparency-crowd-animation-m0-t1-v2.bmp"
+        },
+        {
+          "time": 0,
+          "lodCounts": [
+            4,
+            2,
+            0
+          ],
+          "dimensions": [
+            320,
+            240
+          ],
+          "sha256": "83913a804fb717d5d9fed5bf79fe417055459d9668cd712da173bba77dd1e86e",
+          "image": "transparency-crowd-animation-m0-t0-return-v2.bmp"
+        }
+      ]
+    },
+    {
+      "rendering": 1,
+      "animationFrames": [
+        {
+          "time": 0,
+          "lodCounts": [
+            4,
+            2,
+            0
+          ],
+          "dimensions": [
+            320,
+            240
+          ],
+          "sha256": "83913a804fb717d5d9fed5bf79fe417055459d9668cd712da173bba77dd1e86e",
+          "image": "transparency-crowd-animation-m1-t0-v2.bmp"
+        },
+        {
+          "time": 0.25,
+          "lodCounts": [
+            4,
+            2,
+            0
+          ],
+          "dimensions": [
+            320,
+            240
+          ],
+          "sha256": "6a98d110fc665b503dd9f64299d1a20bb64893ef82a8ca5ab74960b391779a65",
+          "image": "transparency-crowd-animation-m1-t0.25-v2.bmp"
+        },
+        {
+          "time": 0.5,
+          "lodCounts": [
+            4,
+            2,
+            0
+          ],
+          "dimensions": [
+            320,
+            240
+          ],
+          "sha256": "b00214ab46a745054ab93bef87f91b795ee29810e5d5eb662e153dcff1d15f0a",
+          "image": "transparency-crowd-animation-m1-t0.5-v2.bmp"
+        },
+        {
+          "time": 0.75,
+          "lodCounts": [
+            4,
+            2,
+            0
+          ],
+          "dimensions": [
+            320,
+            240
+          ],
+          "sha256": "6a98d110fc665b503dd9f64299d1a20bb64893ef82a8ca5ab74960b391779a65",
+          "image": "transparency-crowd-animation-m1-t0.75-v2.bmp"
+        },
+        {
+          "time": 1,
+          "lodCounts": [
+            4,
+            2,
+            0
+          ],
+          "dimensions": [
+            320,
+            240
+          ],
+          "sha256": "83913a804fb717d5d9fed5bf79fe417055459d9668cd712da173bba77dd1e86e",
+          "image": "transparency-crowd-animation-m1-t1-v2.bmp"
+        },
+        {
+          "time": 0,
+          "lodCounts": [
+            4,
+            2,
+            0
+          ],
+          "dimensions": [
+            320,
+            240
+          ],
+          "sha256": "83913a804fb717d5d9fed5bf79fe417055459d9668cd712da173bba77dd1e86e",
+          "image": "transparency-crowd-animation-m1-t0-return-v2.bmp"
+        }
+      ]
+    }
+  ]
+}

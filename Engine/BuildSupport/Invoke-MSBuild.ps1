@@ -5,6 +5,7 @@ param([Parameter(Mandatory=$true)][string]$Project,
     # Builds this project alone. Used when a referenced project cannot be built here, which is
     # the editor without Qt: everything else still has to come out.
     [switch]$SkipProjectReferences,
+    [switch]$LocalSdk,
     [switch]$EditorUiTest,
     [switch]$EngineCommandlet)
 $ErrorActionPreference = 'Stop'
@@ -67,6 +68,7 @@ if ($useAssimp) { $arguments += ConvertTo-MSBuildProperty 'IncludePath' ((Get-En
 if ($SkipProjectReferences) { $arguments += '/p:BuildProjectReferences=false' }
 if ($EditorUiTest) { $arguments += '/p:EditorUiTest=true' }
 if ($EngineCommandlet) { $arguments += '/p:EngineCommandlet=true' }
+if ($LocalSdk) { $arguments += '/p:ProjectSdkOptions=-UseBuildToolset' }
 $result = Invoke-ToolchainProcess $msbuild $arguments -Timeout 3600000
 Write-Output $result.stdout
 if ($result.stderr) { Write-Output $result.stderr }

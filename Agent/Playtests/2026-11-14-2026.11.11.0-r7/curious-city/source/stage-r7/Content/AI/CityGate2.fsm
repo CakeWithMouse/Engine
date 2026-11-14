@@ -1,0 +1,85 @@
+{
+    "connections": [
+        {
+            "fromNode": 1,
+            "fromPin": "out",
+            "properties": {
+                "event": "Noise",
+                "trigger": "event"
+            },
+            "toNode": 2,
+            "toPin": "in"
+        },
+        {
+            "fromNode": 2,
+            "fromPin": "out",
+            "properties": {
+                "trigger": "completed"
+            },
+            "toNode": 1,
+            "toPin": "in"
+        }
+    ],
+    "format": "ITMOEngine.Graph",
+    "nodes": [
+        {
+            "id": 1,
+            "properties": {
+                "name": "Idle",
+                "tasks": [
+                    {
+                        "seconds": 100,
+                        "type": "Ai.Wait"
+                    }
+                ]
+            },
+            "title": "Idle",
+            "type": "Fsm.State",
+            "x": 0,
+            "y": 0
+        },
+        {
+            "id": 2,
+            "properties": {
+                "name": "Investigate",
+                "tasks": [
+                    {
+                        "event": "FromAI",
+                        "type": "Ai.CallScriptEvent"
+                    }
+                ]
+            },
+            "title": "Investigate",
+            "type": "Fsm.State",
+            "x": 260,
+            "y": 20
+        }
+    ],
+    "schema": "ai.fsm",
+    "schemaVersion": 1,
+    "settings": {
+        "lastSeenKey": "LastSeen",
+        "targetKey": "Target",
+        "thinkInterval": 0.2
+    },
+    "variables": [
+        {
+            "name": "Target",
+            "type": "object"
+        },
+        {
+            "name": "LastSeen",
+            "type": "vec3"
+        },
+        {
+            "name": "NoiseAt",
+            "type": "vec3"
+        },
+        {
+            "name": "Speed",
+            "type": "float",
+            "value": 1.75
+        }
+    ],
+    "version": 1
+}

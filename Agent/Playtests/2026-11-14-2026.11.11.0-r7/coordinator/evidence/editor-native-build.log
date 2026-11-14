@@ -1,0 +1,137 @@
+Using v143 / MSVC 14.44.35207 / Windows SDK 10.0.26100.0
+Assimp enabled: true
+
+  MOC FileService.h
+  MOC MainWindow.h
+  MOC ObjectInspectorPanel.h
+  MOC ViewportWidget.h
+  pch.cpp
+  EditorUiTests.cpp
+  GameEditModule.cpp
+  moc_Logger.cpp
+  moc_CommandRegistry.cpp
+  moc_FileService.cpp
+  UIElement.cpp
+  UIMarkup.cpp
+  FontAtlas.cpp
+  moc_MainWindow.cpp
+  moc_ViewportWidget.cpp
+  moc_ObjectInspectorPanel.cpp
+  moc_SceneObjectsPanel.cpp
+  moc_MaterialEditorWindow.cpp
+  moc_MainToolBar.cpp
+E:\Engine\Editor\tests\EditorUiTests.cpp(2365,209): warning C4305: аргумент: усечение из "double" в "float" [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\tests\EditorUiTests.cpp(2365,209): message : контекст создания экземпляра шаблона (сначала самый старый) [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\tests\EditorUiTests.cpp(2365,303): message : во время компиляции функции-члена класс шаблон "std::function<void (EditorMainWindow *)>::function(_Fx &&)" [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\tests\EditorUiTests.cpp(2365,303): message : при обработке аргумента шаблона по умолчанию "std::function<void (EditorMainWindow *)>::function(_Fx &&)" [E:\Engine\Editor\EditorModule.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\functional(1102,92): message : выполняется компиляция ссылки на экземпляр псевдоним шаблон функции "std::_Func_class<_Ret,EditorMainWindow *>::_Enable_if_callable_t<wmain::<lambda_485>,std::function<void (EditorMainWindow *)>>" [E:\Engine\Editor\EditorModule.vcxproj]
+          with
+          [
+              _Ret=void
+          ] (компилируется исходный файл tests/EditorUiTests.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\functional(940,47): message : выполняется компиляция ссылки на шаблон переменной "const bool conjunction_v<std::negation<std::is_same<`wmain'::`3'::<lambda_485>,std::function<void __cdecl(EditorMainWindow *)> > >,std::_Is_invocable_r<void,`wmain'::`3'::<lambda_485> &,EditorMainWindow *> >" (компилируется исходный файл tests/EditorUiTests.cpp) [E:\Engine\Editor\EditorModule.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\functional(940,47): message : выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Is_invocable_r<_Ret,wmain::<lambda_485> &,EditorMainWindow *>" [E:\Engine\Editor\EditorModule.vcxproj]
+          with
+          [
+              _Ret=void
+          ] (компилируется исходный файл tests/EditorUiTests.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(1827,26): message : выполняется компиляция ссылки на экземпляр псевдоним шаблон функции "std::_Is_invocable_r_<_Rx,_Callable,EditorMainWindow*>" [E:\Engine\Editor\EditorModule.vcxproj]
+          with
+          [
+              _Rx=void,
+              _Callable=wmain::<lambda_485> &
+          ] (компилируется исходный файл tests/EditorUiTests.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(1789,38): message : выполняется компиляция ссылки на экземпляр псевдоним шаблон функции "std::_Decltype_invoke_nonzero<_Callable,EditorMainWindow*,>" [E:\Engine\Editor\EditorModule.vcxproj]
+          with
+          [
+              _Callable=wmain::<lambda_485> &
+          ] (компилируется исходный файл tests/EditorUiTests.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(1785,71): message : во время компиляции функции-члена класс шаблон "unknown-type std::_Invoker_functor::_Call(_Callable &&,_Types ...) noexcept(<expr>)" (компилируется исходный файл tests/EditorUiTests.cpp) [E:\Engine\Editor\EditorModule.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(1576,46): message : выполняется компиляция ссылки на экземпляр шаблон функции "auto wmain::<lambda_485>::operator ()<EditorMainWindow>(_T1 *) const" [E:\Engine\Editor\EditorModule.vcxproj]
+          with
+          [
+              _T1=EditorMainWindow
+          ] (компилируется исходный файл tests/EditorUiTests.cpp)
+E:\Engine\Editor\tests\EditorUiTests.cpp(2365,205): warning C4305: аргумент: усечение из "double" в "float" [E:\Engine\Editor\EditorModule.vcxproj]
+  Module.cpp
+  QtHost.cpp
+  EditorHistory.cpp
+  ViewportCommandHandler.cpp
+  AssetCommandHandler.cpp
+  SceneCommandHandler.cpp
+  EditorApp.cpp
+  EditorTheme.cpp
+  EditorStyles.cpp
+  DockLayoutManager.cpp
+  MainToolBar.cpp
+  IconProvider.cpp
+  ImportSettingsDialog.cpp
+  ModelImportEditFlow.cpp
+  PlaySettingsDialog.cpp
+  ExternalGameRunner.cpp
+  MainWindow.cpp
+  AssetTools.cpp
+  ImportCommands.cpp
+  AssetDeleteCommand.cpp
+  FileBrowser.cpp
+  ViewportWidget.cpp
+  ViewportWidget_Input.cpp
+  ViewportOverlayHelper.cpp
+  ObjectInspectorPanel.cpp
+  ObjectInspectorLight.cpp
+  ProjectProperties.cpp
+  SceneObjectsPanel.cpp
+  MaterialEditorWindow.cpp
+  MaterialTextureTools.cpp
+  MaterialGraphWidget.cpp
+  GraphEditorWidget.cpp
+  ScriptGraphWidget.cpp
+  ScriptEditorWindow.cpp
+  FsmBlockListEditor.cpp
+  FsmGraphWidget.cpp
+  AiMachineEditorWindow.cpp
+  Logger.cpp
+  CommandRegistry.cpp
+  FileService.cpp
+  EditorLocale.cpp
+  GizmoMath.cpp
+  ViewportOverlay.cpp
+  GizmoGeometry.cpp
+  GizmoTriangles.cpp
+  EditorSettings.cpp
+  SettingsService.cpp
+  AssetOps.cpp
+  HlslGraphCompiler.cpp
+  MaterialGraphModel.cpp
+  GraphDocument.cpp
+  GraphSchema.cpp
+  GraphHistory.cpp
+  GraphClipboard.cpp
+  GraphSchemaRegistry.cpp
+  GraphLayout.cpp
+  MaterialGraphSchema.cpp
+  CodeGraphSchema.cpp
+  FsmGraphSchema.cpp
+  ScriptMessages.cpp
+  SceneFile.cpp
+  ImportSettings.cpp
+  ModelImportSidecar.cpp
+  ModelImportSidecarTransaction.cpp
+  Terminal.cpp
+  UIEditorWindow.cpp
+  HudTools.cpp
+  CodeTools.cpp
+  ImportMigration.cpp
+E:\Engine\Editor\Source\MainWindow.cpp(332,32): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(340,33): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(344,31): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(348,35): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(356,37): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(376,30): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(377,30): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(378,35): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EditorUiTests.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EditorUiTests.exp
+  Создание кода
+  Создание кода завершено
+  EditorModule.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\EditorUiTests.exe
+

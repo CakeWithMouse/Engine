@@ -1,0 +1,83 @@
+{
+    "connections": [
+        {
+            "fromNode": 1,
+            "fromPin": "out",
+            "properties": {
+                "delay": 0.05,
+                "priority": 4,
+                "trigger": "succeeded"
+            },
+            "toNode": 2,
+            "toPin": "in"
+        }
+    ],
+    "format": "ITMOEngine.Graph",
+    "nodes": [
+        {
+            "id": 1,
+            "properties": {
+                "name": "WaitBeacon",
+                "tasks": [
+                    {
+                        "seconds": 0.05,
+                        "type": "Ai.Wait"
+                    }
+                ]
+            },
+            "title": "WaitBeacon",
+            "type": "Fsm.State",
+            "x": 0,
+            "y": 0
+        },
+        {
+            "id": 2,
+            "properties": {
+                "name": "ApproachHome",
+                "tasks": [
+                    {
+                        "radius": 0.25,
+                        "target": "Home",
+                        "type": "Ai.MoveTo"
+                    }
+                ]
+            },
+            "title": "ApproachHome",
+            "type": "Fsm.State",
+            "x": 320,
+            "y": 20
+        }
+    ],
+    "schema": "ai.fsm",
+    "schemaVersion": 1,
+    "settings": {
+        "lastSeenKey": "LastSeen",
+        "targetKey": "Target",
+        "thinkInterval": 0.1
+    },
+    "variables": [
+        {
+            "name": "Home",
+            "type": "vec3",
+            "value": [
+                0,
+                0,
+                -8
+            ]
+        },
+        {
+            "name": "LastSeen",
+            "type": "vec3",
+            "value": [
+                0,
+                0,
+                0
+            ]
+        },
+        {
+            "name": "Target",
+            "type": "object"
+        }
+    ],
+    "version": 1
+}

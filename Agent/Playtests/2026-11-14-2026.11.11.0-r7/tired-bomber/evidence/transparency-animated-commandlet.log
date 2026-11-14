@@ -1,0 +1,90 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[VfsRead] Dynamic mount '/_ext_8441174280472389121' -> 'E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/transparency-fixture' (path 'E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/transparency-fixture/Layer.hlsl' outside registered mounts)
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 640x480
+frame-dump E:\Engine\Engine\build\playtests\20261114-r7\tired-bomber\transparency-animated-lod-resize-pass2\near-640-t0.bmp written=1 size=640x480
+frame-dump E:\Engine\Engine\build\playtests\20261114-r7\tired-bomber\transparency-animated-lod-resize-pass2\near-640-t06.bmp written=1 size=640x480
+frame-dump E:\Engine\Engine\build\playtests\20261114-r7\tired-bomber\transparency-animated-lod-resize-pass2\near-1280-t06.bmp written=1 size=1280x720
+frame-dump E:\Engine\Engine\build\playtests\20261114-r7\tired-bomber\transparency-animated-lod-resize-pass2\far-640-t12.bmp written=1 size=640x480
+frame-dump E:\Engine\Engine\build\playtests\20261114-r7\tired-bomber\transparency-animated-lod-resize-pass2\far-1280-t18.bmp written=1 size=1280x720
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "drawCalls": 83,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-animated-lod-resize-pass2\\near-640-t0.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        1,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 83,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-animated-lod-resize-pass2\\near-640-t06.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        1,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 83,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-animated-lod-resize-pass2\\near-1280-t06.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        1,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 83,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-animated-lod-resize-pass2\\far-640-t12.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        0,
+                        1,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 83,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-animated-lod-resize-pass2\\far-1280-t18.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        0,
+                        1,
+                        0
+                    ]
+                }
+            ]
+        }
+    ],
+    "ok": true
+}

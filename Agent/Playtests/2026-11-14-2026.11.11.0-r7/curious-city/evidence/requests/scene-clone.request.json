@@ -1,0 +1,20 @@
+{
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Project.json",
+  "steps": [
+    {
+      "target": "SaveGameSlotProbe",
+      "action": "duplicate"
+    },
+    {
+      "path": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/Scenes/CloneProbe.scene.json",
+      "action": "save"
+    },
+    {
+      "action": "new"
+    },
+    {
+      "path": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/Scenes/CloneProbe.scene.json",
+      "action": "load"
+    }
+  ]
+}

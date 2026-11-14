@@ -1,0 +1,12 @@
+{
+  "dialog": {
+    "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\import-cancel.png",
+    "action": "cancel",
+    "presets": [
+      "Preset1",
+      "Preset01"
+    ]
+  },
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Project.json",
+  "source": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\CityDialog.obj"
+}

@@ -1,0 +1,15 @@
+{
+  "project":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Project.json",
+  "machine":"/Game/AI/CityGate2.fsm",
+  "steps":[
+    {"action":"select","target":"CityGuard"},
+    {"action":"state","node":2,"properties":{"name":"RouteB","tasks":[{"type":"Ai.Fly"}]}},
+    {"action":"check","image":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/ai-invalid-check.png"},
+    {"action":"play","image":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/ai-invalid-play-refused.png","scope":"main"},
+    {"action":"state","node":2,"properties":{"name":"RouteB","tasks":[{"type":"Ai.Wait","seconds":0.15}]}},
+    {"action":"check"},
+    {"action":"play"},
+    {"action":"frames","count":40,"dt":0.05,"image":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/ai-valid-live.png","scope":"main"},
+    {"action":"stop"}
+  ]
+}

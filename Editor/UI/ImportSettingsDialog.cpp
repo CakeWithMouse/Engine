@@ -5,6 +5,8 @@
 #include "IconProvider.h"
 #include "ImportSettings.h"
 #include "SettingsService.h"
+#include "Logger.h"
+#include <cmath>
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -87,12 +89,25 @@ ModelImportDecision ResolveModelImportDecision(
         {
             return { true, settings, settings.model.scale };
         }
+        Logger::Instance().Error(QStringLiteral("Invalid import options: %1").arg(err));
+        return { false, {}, ImportSettingsFile::DefaultScale };
     }
 
     if (parameters.contains(QStringLiteral("scale")))
     {
+        bool numeric = false;
+        const double value = parameters.value(QStringLiteral("scale")).toDouble(&numeric);
+        if (parameters.value(QStringLiteral("scale")).metaType().id() == QMetaType::Bool ||
+            !numeric || !std::isfinite(value) ||
+            value < static_cast<double>(ImportSettingsFile::MinScale) ||
+            value > static_cast<double>(ImportSettingsFile::MaxScale))
+        {
+            Logger::Instance().Error(QStringLiteral("Import scale must be a finite number in [%1, %2]")
+                .arg(ImportSettingsFile::MinScale).arg(ImportSettingsFile::MaxScale));
+            return { false, {}, ImportSettingsFile::DefaultScale };
+        }
         EditorCore::ImportSettings settings;
-        settings.model.scale = static_cast<float>(parameters.value(QStringLiteral("scale")).toDouble());
+        settings.model.scale = static_cast<float>(value);
         return { true, settings, settings.model.scale };
     }
 

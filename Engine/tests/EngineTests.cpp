@@ -4,6 +4,7 @@
 #include <Engine/Resources/VirtualFileSystem.h>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
+#include <Engine/Project/StandardTypes.h>
 #include <Engine/Components/SpecificComponents/InstancedMeshComponent.h>
 #include <Engine/Components/SpecificComponents/MeshComponent.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
@@ -691,7 +692,7 @@ void MaterialOffscreenRendering()
 }
 
 // Exercise the production vertex/pixel shaders, not a CPU copy of the tangent math.
-void MaterialMirroredNormalMap()
+void MaterialMirroredNormalMap(bool twoSided)
 {
     TestGame game;
     CHECK(game.CreateInputLayouts());
@@ -702,6 +703,7 @@ void MaterialMirroredNormalMap()
     TempShaderDir dir;
     MaterialRenderState state;
     state.bUnlit = true;
+    state.bTwoSided = twoSided;
     Material material(dir.Write("NormalBasis.hlsl",
         "void Surface(MaterialInput i, inout MaterialOutput o) { "
         "o.Albedo = abs(i.Tangent.w) < 0.5 ? float3(1, 0, 1) : "
@@ -726,6 +728,28 @@ void MaterialMirroredNormalMap()
     // Reflecting Z reverses +V; its encoded blue channel must complement the original.
     const uint32_t flippedV = draw({1, 1, -1});
     CHECK(((flippedV >> 16) & 255) + ((original >> 16) & 255) == 255);
+}
+
+void StandardSkyCubeMap()
+{
+    TestGame game;
+    CHECK(game.CreateInputLayouts());
+    game.SetCamera({0, 0, 0}, {0, 0, 1}, {0, 1, 0});
+    auto* sky = new SceneProject::Sky();
+    CHECK(game.RegisterComponent("sky", sky) == RegisterResult::Ok);
+    auto draw = [&] { return RenderOffscreen(game, *sky, D3D11_CULL_NONE); };
+    const auto gradient = draw();
+    CHECK((gradient[32 * 64 + 32] >> 24) == 255);
+    CHECK(game.CreateProceduralCubeMap("sky-studio", CubeMapPreset::Studio, 32));
+    CHECK(game.CreateProceduralCubeMap("sky-space", CubeMapPreset::Space, 32));
+    sky->SetCubeMap(game.GetCubeMap("sky-studio"));
+    const auto studio = draw();
+    CHECK(studio != gradient);
+    sky->SetCubeMap(game.GetCubeMap("sky-space"));
+    const auto space = draw();
+    CHECK(space != studio && space != gradient);
+    sky->SetCubeMap(nullptr);
+    CHECK(draw() == gradient);
 }
 
 std::string ReadAll(const std::string& path)
@@ -2249,7 +2273,9 @@ int main()
         }},
         {"point shadow faces match cube sampling", PointShadowMath},
         {"VAT bounds contain quantized poses and interpolation", SkeletalAnimationBoundsTests::AnimatedCrowdBoundsContainSamplesAndInterpolation},
-        {"normal map survives mirrored world scale", MaterialMirroredNormalMap},
+        {"normal map survives mirrored world scale", [] { MaterialMirroredNormalMap(false); }},
+        {"two-sided normal map preserves UV directions under reflection", [] { MaterialMirroredNormalMap(true); }},
+        {"standard sky uses assigned cubemap and restores procedural fallback", StandardSkyCubeMap},
         {"vfs service: resolve and toVirtual", VfsService_ResolveAndToVirtual},
         {"vfs service: exists and stat", VfsService_ExistsAndStat},
         {"vfs service: readFile and allocator", VfsService_ReadFileAndAllocator},

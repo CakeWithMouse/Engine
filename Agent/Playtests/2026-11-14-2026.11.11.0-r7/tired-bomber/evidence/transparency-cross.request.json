@@ -1,0 +1,65 @@
+{
+  "width": 320,
+  "height": 256,
+  "orthographic": false,
+  "rendering": 0,
+  "groups": [
+    {
+      "layers": [
+        {
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "alpha": 0.5,
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "color": [
+            1,
+            1,
+            1
+          ]
+        }
+      ],
+      "geometry": "cross",
+      "height": 4,
+      "width": 6,
+      "kind": "mesh",
+      "material": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-fixture\\Cross.mat"
+    }
+  ],
+  "frames": [
+    {
+      "camera": [
+        -4,
+        0,
+        -6.928203
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-cross-30.bmp",
+      "time": 0.25,
+      "target": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "camera": [
+        4,
+        0,
+        -6.928203
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-cross-plus30.bmp",
+      "time": 0.25,
+      "target": [
+        0,
+        0,
+        0
+      ]
+    }
+  ]
+}

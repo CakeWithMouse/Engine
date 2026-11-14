@@ -1,0 +1,43 @@
+{
+  "name": "Scene",
+  "objects": [
+    {
+      "assets": {
+        "material": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+        "model": "/Game/Models/blend-suzanne-multiple/blend-suzanne-multiple.glb",
+        "texture": ""
+      },
+      "id": 1,
+      "inheritParentScale": true,
+      "name": "TwinMaterialSuzanne",
+      "parent": 0,
+      "projectData": {
+        "materialSlots": {
+          "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat",
+          "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+        },
+        "version": 1
+      },
+      "transform": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "Engine.Model"
+    }
+  ],
+  "version": 3
+}

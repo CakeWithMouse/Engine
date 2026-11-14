@@ -1,0 +1,112 @@
+{
+  "scenario": "CesiumMan imported skeletal animation updates point-shadow depth cubemap",
+  "model": "Game/Battle/Content/Models/CesiumMan.glb",
+  "results": [
+    {
+      "time": 0,
+      "faceHashes": [
+        "b7b510681bc606f64c52f661643ad78cd31d933907a33791a2c5b32c9803fe89",
+        "0596df97ce45733a29acb30d9832c15a8bea49628d6c7985c7c2ebda9708183a",
+        "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d",
+        "a708dd183590b5e90a3771997b82af83ffff289a6eaebc37f60bfd1dcf309da2",
+        "3245228cceb744ae669dcae98865f5716749637b733cde5cd0f8b1aa0cb10ccb",
+        "3245228cceb744ae669dcae98865f5716749637b733cde5cd0f8b1aa0cb10ccb"
+      ],
+      "occupiedTexels": [
+        6446,
+        12300,
+        0,
+        1048576,
+        19456,
+        19456
+      ],
+      "image": "skeletal-frame-0.bmp",
+      "imageSha256": "ddc4cf00849dadcd173e71ddc0428658e59e7695ec434685afed96ec9784f4dc"
+    },
+    {
+      "time": 0.25,
+      "faceHashes": [
+        "b7b510681bc606f64c52f661643ad78cd31d933907a33791a2c5b32c9803fe89",
+        "0596df97ce45733a29acb30d9832c15a8bea49628d6c7985c7c2ebda9708183a",
+        "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d",
+        "cf47c98c8204a08f28c4bb4a8b4e453d26f30a1d336aca209f08c31c685c2be0",
+        "3245228cceb744ae669dcae98865f5716749637b733cde5cd0f8b1aa0cb10ccb",
+        "3245228cceb744ae669dcae98865f5716749637b733cde5cd0f8b1aa0cb10ccb"
+      ],
+      "occupiedTexels": [
+        6446,
+        12300,
+        0,
+        1048576,
+        19456,
+        19456
+      ],
+      "image": "skeletal-frame-1.bmp",
+      "imageSha256": "eb773e3a9263ec16c8975a010668e2fd4200fb2c0695958f6d7f86a5ed437f4b"
+    },
+    {
+      "time": 0.5,
+      "faceHashes": [
+        "b7b510681bc606f64c52f661643ad78cd31d933907a33791a2c5b32c9803fe89",
+        "0596df97ce45733a29acb30d9832c15a8bea49628d6c7985c7c2ebda9708183a",
+        "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d",
+        "f06a1dc3fb8f27636a990dcd72243816dd75144fa96b5d649a6eba6ad8743cfd",
+        "3245228cceb744ae669dcae98865f5716749637b733cde5cd0f8b1aa0cb10ccb",
+        "3245228cceb744ae669dcae98865f5716749637b733cde5cd0f8b1aa0cb10ccb"
+      ],
+      "occupiedTexels": [
+        6446,
+        12300,
+        0,
+        1048576,
+        19456,
+        19456
+      ],
+      "image": "skeletal-frame-2.bmp",
+      "imageSha256": "ea8965d404a466700876f2591bce28f9eb2f56541886059f6fd120b02aff0200"
+    },
+    {
+      "time": 0.75,
+      "faceHashes": [
+        "b7b510681bc606f64c52f661643ad78cd31d933907a33791a2c5b32c9803fe89",
+        "0596df97ce45733a29acb30d9832c15a8bea49628d6c7985c7c2ebda9708183a",
+        "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d",
+        "86f7ce4473556631673a5b8745b90582022a867cfa16c3223f33716d9738355b",
+        "3245228cceb744ae669dcae98865f5716749637b733cde5cd0f8b1aa0cb10ccb",
+        "3245228cceb744ae669dcae98865f5716749637b733cde5cd0f8b1aa0cb10ccb"
+      ],
+      "occupiedTexels": [
+        6446,
+        12300,
+        0,
+        1048576,
+        19456,
+        19456
+      ],
+      "image": "skeletal-frame-3.bmp",
+      "imageSha256": "f2b54775a713a8db3368bfdd96adee5cb358f2431e209d7ef7e96ba7199e0c8f"
+    },
+    {
+      "time": 1,
+      "faceHashes": [
+        "b7b510681bc606f64c52f661643ad78cd31d933907a33791a2c5b32c9803fe89",
+        "0596df97ce45733a29acb30d9832c15a8bea49628d6c7985c7c2ebda9708183a",
+        "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d",
+        "1b74be040cef9444d50777f30a3eda024712c7dfe70799f277c47bea12ec3e67",
+        "3245228cceb744ae669dcae98865f5716749637b733cde5cd0f8b1aa0cb10ccb",
+        "3245228cceb744ae669dcae98865f5716749637b733cde5cd0f8b1aa0cb10ccb"
+      ],
+      "occupiedTexels": [
+        6446,
+        12300,
+        0,
+        1048576,
+        19456,
+        19456
+      ],
+      "image": "skeletal-frame-return.bmp",
+      "imageSha256": "f7efaac8a968d9c6469cb0b20a543f14f1751e35bc21dc515da4381cc252dd95"
+    }
+  ],
+  "uniqueShadowMapStates": 5
+}

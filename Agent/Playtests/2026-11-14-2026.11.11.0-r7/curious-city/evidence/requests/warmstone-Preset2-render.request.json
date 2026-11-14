@@ -1,0 +1,33 @@
+{
+  "frames": [
+    {
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\frames\\warmstone-Preset2-render.bmp"
+    }
+  ],
+  "shape": "sphere",
+  "material": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Content\\Materials\\WarmStonePreset2.mat",
+  "height": 240,
+  "width": 320,
+  "rendering": 0,
+  "target": [
+    0,
+    0,
+    0
+  ],
+  "size": 2,
+  "up": [
+    0,
+    1,
+    0
+  ],
+  "camera": [
+    0,
+    0,
+    -8
+  ]
+}

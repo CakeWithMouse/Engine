@@ -615,6 +615,13 @@
 
 ## Чек-лист среза S16: Настройки импорта моделей (Sidecar .importsettings.json, Scale, пресеты)
 
+Проверка r6 (2026-11-14): исправлены имена моделей с двумя точками и ранний отказ
+неверного explicit scale в Assets.Import. Host regression теперь проверяет только
+маршрутизацию и completion, без самостоятельной записи ожидаемого JSON. Настоящая
+цепочка MainWindow import → sidecar → spawn → reimport → move проверяется
+`project.import` / `ImportSettingsCommandletTests.py`; история и результаты —
+[r6](../Agent/Playtests/2026-11-14-2026.11.07.6-r6/issues.md).
+
 - [x] **Шаг 16.1 (feat(core)):** `Editor/Core/ImportSettings.h/.cpp`. Структура `ImportSettings` (scale), загрузка и сохранение JSON через `QJsonDocument`, вещественные числа в C-локали, валидация scale в диапазоне `[1e-4, 1e4]`. Запись только через `FileService` с логом. Юнит-тесты в `CoreTests`: round-trip, битый JSON (лог + дефолт, без молчаливого fallback), выход за диапазон (418/418 PASS).
 - [x] **fix(core):** Семантика `ImportSettingsFile::Load`: `LoadResult::NotFound` (scale 1.0, лог Info, без Error); битый JSON и scale вне диапазона возвращают `LoadResult::Error`. Добавлен метод `FileService::FileExists`. Тесты обновлены (429/429 PASS).
 - [x] **Шаг 16.2 (feat(ui)):** Тонкий виджет/диалог `ImportSettingsDialog` в `Editor/UI/`, без логики. Поля: Scale (`QDoubleSpinBox` с `objectName="ImportScaleSpin"`) + кнопки пресетов `1` / `0.1` / `0.01` (`Preset1`, `Preset01`, `Preset001`) + OK/Cancel (`ImportOkBtn`, `ImportCancelBtn`). Показывается при импорте моделей (один диалог на всю пачку при мультивыборе). Вызов через команду `Assets.Import` в `CommandRegistry`, прямой вызов `ImportAsset` из FileBrowser убран. Локализация через `Tr()`. Добавлено поле `importScale` в `EditorCommand`. Тесты в `UiTests` через `UiTestHelper` (13/13 PASS).

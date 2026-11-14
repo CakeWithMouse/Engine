@@ -1,0 +1,7 @@
+phase=types launched=Multi-material item round=1 aim=0.000000
+phase=types impact=hit item=imported-multimaterial hits=1 misses=0 throws=1
+phase=types launched=Soda can round=1 aim=0.000000
+phase=types impact=miss item=primitive hits=1 misses=1 throws=2 reason=The trash hit an obstacle.
+phase=types launched=Crumpled paper round=2 aim=0.000000
+phase=types impact=miss item=primitive hits=1 misses=2 throws=3 reason=The trash hit an obstacle.
+phase=types complete hits=1 misses=2 accuracy=33% round=2 PASS

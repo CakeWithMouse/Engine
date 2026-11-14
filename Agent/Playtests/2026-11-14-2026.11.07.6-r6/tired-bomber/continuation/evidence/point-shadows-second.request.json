@@ -1,0 +1,83 @@
+{
+  "sceneLighting": true,
+  "globalShadows": true,
+  "target": [
+    0,
+    0,
+    0
+  ],
+  "caster": "crowd",
+  "camera": [
+    7,
+    5,
+    -11
+  ],
+  "travel": 3,
+  "height": 360,
+  "frames": [
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\point-shadows-second-a.bmp",
+      "time": 0.15,
+      "shadows": true,
+      "light": [
+        0,
+        3,
+        1
+      ],
+      "position": [
+        -1,
+        0.7,
+        0
+      ]
+    },
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\point-shadows-second-b.bmp",
+      "time": 0.55,
+      "shadows": true,
+      "light": [
+        2.5,
+        3,
+        -1
+      ],
+      "position": [
+        1,
+        0.7,
+        0
+      ]
+    },
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\point-shadows-second-off.bmp",
+      "time": 0.8,
+      "shadows": false,
+      "light": [
+        2.5,
+        3,
+        -1
+      ],
+      "position": [
+        1,
+        0.7,
+        0
+      ]
+    }
+  ],
+  "width": 480,
+  "rendering": 0,
+  "probes": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ]
+  ]
+}

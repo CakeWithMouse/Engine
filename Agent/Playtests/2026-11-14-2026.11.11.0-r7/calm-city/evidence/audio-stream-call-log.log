@@ -1,0 +1,2 @@
+case=stream soundId=1 accepted=1 sample=/Game/Audio/Signal.wav volume=0.75 emitterDistance=-1
+stopRequestedAt=2.01667

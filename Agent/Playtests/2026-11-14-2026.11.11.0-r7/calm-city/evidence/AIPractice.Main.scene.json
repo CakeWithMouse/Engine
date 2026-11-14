@@ -1,0 +1,460 @@
+{
+  "name": "Calm City AI Practice",
+  "objects": [
+    {
+      "id": 1,
+      "inheritParentScale": true,
+      "name": "Пол",
+      "parent": 0,
+      "transform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          30,
+          1,
+          30
+        ]
+      },
+      "type": "Primitive.Plane"
+    },
+    {
+      "id": 2,
+      "inheritParentScale": true,
+      "name": "Стена",
+      "parent": 0,
+      "transform": {
+        "position": [
+          0,
+          1,
+          -2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          8,
+          2,
+          0.6
+        ]
+      },
+      "type": "Primitive.Cube"
+    },
+    {
+      "id": 3,
+      "inheritParentScale": true,
+      "name": "Свет над двором",
+      "parent": 0,
+      "transform": {
+        "position": [
+          0,
+          8,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "type": "Light.Point",
+      "properties": {
+        "Engine.PointLight": {
+          "version": 1,
+          "value": {
+            "color": [
+              1,
+              0.95,
+              0.85
+            ],
+            "enabled": true,
+            "intensity": 3,
+            "radius": 40
+          }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "inheritParentScale": true,
+      "name": "Свет у ворот",
+      "parent": 0,
+      "transform": {
+        "position": [
+          0,
+          4,
+          -8
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "type": "Light.Point",
+      "properties": {
+        "Engine.PointLight": {
+          "version": 1,
+          "value": {
+            "color": [
+              0.55,
+              0.7,
+              1
+            ],
+            "enabled": true,
+            "intensity": 2,
+            "radius": 15
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "inheritParentScale": true,
+      "name": "Навигация: двор",
+      "parent": 0,
+      "transform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          30,
+          2,
+          30
+        ]
+      },
+      "type": "Gameplay.NavVolume",
+      "projectData": {
+        "version": 1,
+        "mode": 0,
+        "cellSize": 0.5
+      }
+    },
+    {
+      "id": 6,
+      "inheritParentScale": true,
+      "name": "Навигация: стена",
+      "parent": 0,
+      "transform": {
+        "position": [
+          0,
+          1,
+          -2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          8.4,
+          2,
+          1
+        ]
+      },
+      "type": "Gameplay.NavVolume",
+      "projectData": {
+        "version": 1,
+        "mode": 1
+      }
+    },
+    {
+      "id": 7,
+      "inheritParentScale": true,
+      "name": "Скамейка (вид)",
+      "parent": 0,
+      "transform": {
+        "position": [
+          9,
+          0.25,
+          7
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2,
+          0.5,
+          0.6
+        ]
+      },
+      "type": "Primitive.Cube"
+    },
+    {
+      "id": 8,
+      "inheritParentScale": true,
+      "name": "Скамейка",
+      "parent": 0,
+      "transform": {
+        "position": [
+          9,
+          0,
+          6.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "type": "Gameplay.SmartObject",
+      "projectData": {
+        "version": 1,
+        "tag": "Bench",
+        "slots": 1
+      }
+    },
+    {
+      "id": 9,
+      "inheritParentScale": true,
+      "name": "Скамейка 2 (вид)",
+      "parent": 0,
+      "transform": {
+        "position": [
+          -9,
+          0.25,
+          7
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2,
+          0.5,
+          0.6
+        ]
+      },
+      "type": "Primitive.Cube"
+    },
+    {
+      "id": 10,
+      "inheritParentScale": true,
+      "name": "Скамейка 2",
+      "parent": 0,
+      "transform": {
+        "position": [
+          -9,
+          0,
+          6.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "type": "Gameplay.SmartObject",
+      "projectData": {
+        "version": 1,
+        "tag": "Bench",
+        "slots": 1
+      }
+    },
+    {
+      "id": 11,
+      "inheritParentScale": true,
+      "name": "Колодец (вид)",
+      "parent": 0,
+      "transform": {
+        "position": [
+          9,
+          0.5,
+          -10
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1.4,
+          1,
+          1.4
+        ]
+      },
+      "type": "Primitive.Cylinder"
+    },
+    {
+      "id": 12,
+      "inheritParentScale": true,
+      "name": "Колодец",
+      "parent": 0,
+      "transform": {
+        "position": [
+          9,
+          0,
+          -9
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "type": "Gameplay.SmartObject",
+      "projectData": {
+        "version": 1,
+        "tag": "Well",
+        "slots": 2
+      }
+    },
+    {
+      "id": 13,
+      "inheritParentScale": true,
+      "name": "Игрок",
+      "parent": 0,
+      "transform": {
+        "position": [
+          0,
+          0.9,
+          10
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.6,
+          1.8,
+          0.6
+        ]
+      },
+      "type": "Gameplay.Player",
+      "projectData": {
+        "version": 1,
+        "moveSpeed": 6
+      },
+      "assets": {
+        "model": "",
+        "texture": "",
+        "script": "/Game/Scripts/Player.vscript"
+      }
+    },
+    {
+      "id": 14,
+      "inheritParentScale": true,
+      "name": "Calm Sentinel",
+      "parent": 0,
+      "transform": {
+        "position": [
+          -8,
+          0.9,
+          -8
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.6,
+          1.8,
+          0.6
+        ]
+      },
+      "type": "Gameplay.AiCharacter",
+      "projectData": {
+        "version": 1,
+        "moveSpeed": 1.4,
+        "stateMachine": "/Game/AI/CalmRoutine.fsm",
+        "team": 2,
+        "sightRadius": 11,
+        "fieldOfView": 110,
+        "hearingRadius": 0,
+        "machineMemory": ""
+      }
+    },
+    {
+      "id": 15,
+      "inheritParentScale": true,
+      "name": "Посетитель",
+      "parent": 0,
+      "transform": {
+        "position": [
+          6,
+          0.9,
+          4
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.6,
+          1.8,
+          0.6
+        ]
+      },
+      "type": "Gameplay.AiCharacter",
+      "projectData": {
+        "version": 1,
+        "moveSpeed": 2.5,
+        "stateMachine": "/Game/AI/Visitor.fsm",
+        "team": 0
+      }
+    }
+  ],
+  "version": 3
+}

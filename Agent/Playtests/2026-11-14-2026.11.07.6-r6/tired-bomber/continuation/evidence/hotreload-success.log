@@ -1,0 +1,34 @@
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+[ToolBarFacts] initial tb geom=0,0 100x36, margins=(0,0,0,0), layoutMargins=(6,6,6,6), PM_ToolBarFrameWidth=6, PM_ItemMargin=0, PM_ItemSpacing=4
+[ToolBarFacts] configured tb height=36, btn height=28, topMargin=4, bottomMargin=4
+[Info] SettingsService: Set 'viewport/antialiasing'
+[Info] QtHost::SetAntialiasing: mode = 1, serviceVersion = 3, handler = 00007FFFD99ACAE0
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 640x480
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "buildSucceeded": true,
+    "console": "[05:04:59.968] C++: Build\n[05:05:06.448]   The vcpkg manifest was disabled, but we found a manifest file in E:\\Engine\\Engine\\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.\n\n[05:05:06.448]   ComponentGenerator: 7 component(s), Project\n\n[05:05:06.448]   ProjectGame.cpp\n\n[05:05:06.448]      Создается библиотека E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\SdkProbe\\Binaries\\Release\\23229916b30041de8846d85fa815c910\\Game.lib и объект E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\SdkProbe\\Binaries\\Release\\23229916b30041de8846d85fa815c910\\Game.exp\n\n[05:05:06.448]   Game.vcxproj -> E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\SdkProbe\\Binaries\\Release\\23229916b30041de8846d85fa815c910\\Game.dll\n\n[05:05:06.448] Full build log: E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\SdkProbe\\Binaries\\Release\\23229916b30041de8846d85fa815c910\\build.log\n\n[05:05:08.537] Build validated and activated. Use Hot Reload in the editor, or reopen the project.\n\n[05:05:09.039] Hot reload: DLL заменена. Сцена, выбор и камера сохранены; история отмены очищена.",
+    "dialogs": [
+    ],
+    "ok": true,
+    "replaced": true,
+    "windowEnabled": true
+}

@@ -1,0 +1,49 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\BomberUpgradedR7\\Project.json",
+  "steps": [
+    {
+      "action": "new"
+    },
+    {
+      "action": "create",
+      "type": "BomberReferenceProbe",
+      "name": "RoleCodec.Owner"
+    },
+    {
+      "action": "create",
+      "type": "Primitive.Cube",
+      "name": "RoleCodec.Target"
+    },
+    {
+      "action": "property",
+      "path": "/score",
+      "target": "RoleCodec.Owner",
+      "value": 84.5
+    },
+    {
+      "action": "property",
+      "path": "/target",
+      "target": "RoleCodec.Owner",
+      "value": 2
+    },
+    {
+      "action": "select",
+      "targets": [
+        "RoleCodec.Owner",
+        "RoleCodec.Target"
+      ]
+    },
+    {
+      "action": "duplicate",
+      "target": "RoleCodec.Owner"
+    },
+    {
+      "action": "save",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\BomberUpgradedR7\\Content\\Scenes\\role-codec-clone.scene.json"
+    },
+    {
+      "action": "load",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\BomberUpgradedR7\\Content\\Scenes\\role-codec-clone.scene.json"
+    }
+  ]
+}

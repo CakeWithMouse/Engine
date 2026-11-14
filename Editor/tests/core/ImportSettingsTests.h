@@ -369,6 +369,17 @@ inline void RunImportSettingsTests(int& outChecks)
     check(std::abs(brokenScale - 1.0f) < 1e-6f, "Broken sidecar defaults scale to 1.0f");
     check(!brokenSidecarErr.isEmpty(), "Broken sidecar produces error message");
 
+    // A filename containing two dots is not a parent-directory segment.
+    const QString dottedVirtual = QStringLiteral("/Game/Models/Hero..v2.glb");
+    check(ModelImportSidecar::WriteSidecar(fs, dottedVirtual, 0.0254f, contentRoot),
+          "Dotted model name accepts import settings");
+    check(std::abs(ModelImportSidecar::ReadSpawnScale(fs, dottedVirtual, contentRoot) - 0.0254f) < 1e-6f,
+          "Dotted model name preserves spawn scale");
+    check(!ModelImportSidecar::ResolveSidecarPath(QStringLiteral("Models\\Hero..v2.glb"), projectRoot, contentRoot).isEmpty(),
+          "Native relative path accepts dotted filename");
+    check(ModelImportSidecar::ResolveSidecarPath(QStringLiteral("/Game/Models/../Hero.glb"), projectRoot, contentRoot).isEmpty(),
+          "Parent segment remains rejected");
+
     // 7. путь вне корня проекта отвергается
     const QString outsideVirtual = QStringLiteral("/Game/../../outside.glb");
     QString outsideErr;

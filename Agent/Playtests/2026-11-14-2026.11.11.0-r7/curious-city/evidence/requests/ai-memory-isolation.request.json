@@ -1,0 +1,11 @@
+{
+  "project":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Project.json",
+  "steps":[
+    {"action":"select","target":"CityGuard 2","image":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/ai-memory-clone-loaded.png","scope":"main"},
+    {"action":"field","scope":"main","name":"AiMemory_Speed","value":"5.5"},
+    {"action":"scene-undo","target":"CityGuard 2"},
+    {"action":"scene-redo","target":"CityGuard 2"},
+    {"action":"select","target":"CityGuard"},
+    {"action":"save-scene","path":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/Scenes/AiProbe.scene.json","image":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/ai-memory-original-reset.png","scope":"main"}
+  ]
+}

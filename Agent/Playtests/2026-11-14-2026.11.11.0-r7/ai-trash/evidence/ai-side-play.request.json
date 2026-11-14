@@ -1,0 +1,50 @@
+{
+  "machine": "/Game/AI/TrashSorter.fsm",
+  "steps": [
+    {
+      "action": "dialog-state",
+      "edits": [
+        {
+          "name": "FsmStateName",
+          "value": "WalkAlongBin"
+        }
+      ],
+      "dialogImage": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\ai-trash\\ai-state-dialog.png",
+      "node": 1
+    },
+    {
+      "action": "dialog-link",
+      "from": 1,
+      "to": 2,
+      "edits": [
+        {
+          "name": "FsmLinkDelay",
+          "value": 0.04
+        },
+        {
+          "name": "FsmLinkPriority",
+          "value": 2
+        }
+      ],
+      "dialogImage": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\ai-trash\\ai-link-dialog.png"
+    },
+    {
+      "action": "save"
+    },
+    {
+      "action": "reopen"
+    },
+    {
+      "action": "play"
+    },
+    {
+      "action": "frames",
+      "dt": 0.0167,
+      "count": 120
+    },
+    {
+      "action": "stop"
+    }
+  ],
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\ai-trash\\TrashGameUpgraded\\Project.json"
+}

@@ -19,7 +19,7 @@ QString ModelImportSidecar::ResolveSidecarPath(const QString& assetPath,
     if (assetPath.startsWith(QStringLiteral("/Game/"), Qt::CaseInsensitive))
     {
         const QString subPath = assetPath.mid(6);
-        if (subPath.contains(QStringLiteral("..")))
+        if (QDir::fromNativeSeparators(subPath).split('/').contains(QStringLiteral("..")))
         {
             return {};
         }
@@ -34,7 +34,7 @@ QString ModelImportSidecar::ResolveSidecarPath(const QString& assetPath,
         }
         else
         {
-            if (assetPath.contains(QStringLiteral("..")))
+            if (QDir::fromNativeSeparators(assetPath).split('/').contains(QStringLiteral("..")))
             {
                 return {};
             }

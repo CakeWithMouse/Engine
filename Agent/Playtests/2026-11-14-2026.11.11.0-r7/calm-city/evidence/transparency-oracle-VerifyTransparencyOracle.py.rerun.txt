@@ -1,0 +1,1 @@
+PASS: all 6 Forward/Deferred crossing-plane oracle frames, sampled, within RGB tolerance

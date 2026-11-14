@@ -1,0 +1,434 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 480x360
+[Info] Overlay: early return (empty lines and billboards)
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\point-shadows-second-a.bmp written=1 size=480x360
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 480x360
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\point-shadows-second-b.bmp written=1 size=480x360
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\point-shadows-second-off.bmp written=1 size=480x360
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "caster": "crowd",
+    "frames": [
+        {
+            "count": 1,
+            "cubes": [
+                {
+                    "faces": [
+                        {
+                            "face": 0,
+                            "occupied": 6435,
+                            "sha256": "0a6b4fc7894bde55ff88b2c026f083a44f2db1132c1dec4f4a5f3e27fe353f91"
+                        },
+                        {
+                            "face": 1,
+                            "occupied": 12285,
+                            "sha256": "66c8d3f73bc27fa2fbbb9f5ad87fe7e3080932fbc57c8980de5735c9deb2c79e"
+                        },
+                        {
+                            "face": 2,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        },
+                        {
+                            "face": 3,
+                            "occupied": 1048576,
+                            "sha256": "ef721da515906bb666c743d4b3b071cefe4c303aff44070abe6320e0aae78d1a"
+                        },
+                        {
+                            "face": 4,
+                            "occupied": 22528,
+                            "sha256": "28f16d7389849b2fbe2e4777f9a2bdce1b84c054a951e6d9a3c9f0e86fcd0d41"
+                        },
+                        {
+                            "face": 5,
+                            "occupied": 17408,
+                            "sha256": "4a2612b4430620cc69bd0d57e714227ae33bf575edcfb51a9ed6620d7ee38de3"
+                        }
+                    ],
+                    "light": [
+                        0,
+                        3,
+                        1,
+                        30
+                    ],
+                    "probes": [
+                        {
+                            "depth": 0.8474576473236084,
+                            "face": 3,
+                            "occluded": true,
+                            "position": [
+                                0,
+                                0,
+                                0
+                            ],
+                            "stored": 0.7344990372657776
+                        },
+                        {
+                            "depth": 0.8474576473236084,
+                            "face": 3,
+                            "occluded": false,
+                            "position": [
+                                1,
+                                0,
+                                0
+                            ],
+                            "stored": 0.8474934101104736
+                        },
+                        {
+                            "depth": 0.8474576473236084,
+                            "face": 3,
+                            "occluded": false,
+                            "position": [
+                                0,
+                                0,
+                                1
+                            ],
+                            "stored": 0.8474934101104736
+                        }
+                    ],
+                    "slot": 0
+                }
+            ],
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 6435,
+                    "sha256": "0a6b4fc7894bde55ff88b2c026f083a44f2db1132c1dec4f4a5f3e27fe353f91"
+                },
+                {
+                    "face": 1,
+                    "occupied": 12285,
+                    "sha256": "66c8d3f73bc27fa2fbbb9f5ad87fe7e3080932fbc57c8980de5735c9deb2c79e"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "ef721da515906bb666c743d4b3b071cefe4c303aff44070abe6320e0aae78d1a"
+                },
+                {
+                    "face": 4,
+                    "occupied": 22528,
+                    "sha256": "28f16d7389849b2fbe2e4777f9a2bdce1b84c054a951e6d9a3c9f0e86fcd0d41"
+                },
+                {
+                    "face": 5,
+                    "occupied": 17408,
+                    "sha256": "4a2612b4430620cc69bd0d57e714227ae33bf575edcfb51a9ed6620d7ee38de3"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\point-shadows-second-a.bmp",
+            "light": [
+                0,
+                3,
+                1,
+                30
+            ],
+            "lights": [
+                {
+                    "enabled": true,
+                    "index": 0,
+                    "intensity": 2,
+                    "position": [
+                        0,
+                        3,
+                        1
+                    ],
+                    "radius": 30,
+                    "slot": 0
+                }
+            ],
+            "lod": {
+                "distance": 14.264992713928223,
+                "drawn": 1,
+                "fade": 0,
+                "perLod": [
+                    1,
+                    0,
+                    0
+                ],
+                "screenSize": false
+            },
+            "position": [
+                -1,
+                0.699999988079071,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8474576473236084,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "stored": 0.7344990372657776
+                },
+                {
+                    "depth": 0.8474576473236084,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        1,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8474934101104736
+                },
+                {
+                    "depth": 0.8474576473236084,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        0,
+                        0,
+                        1
+                    ],
+                    "stored": 0.8474934101104736
+                }
+            ],
+            "slot": 0,
+            "time": 0.15000000596046448
+        },
+        {
+            "count": 1,
+            "cubes": [
+                {
+                    "faces": [
+                        {
+                            "face": 0,
+                            "occupied": 9269,
+                            "sha256": "849384ffdf0104af42a7a5d9db46d4adb459ac7f7c2ba22c9ef8bac27269d28d"
+                        },
+                        {
+                            "face": 1,
+                            "occupied": 7872,
+                            "sha256": "e82c91a5779e456c96497678d9fb0f66a1243675f99669d43688d6be78855293"
+                        },
+                        {
+                            "face": 2,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        },
+                        {
+                            "face": 3,
+                            "occupied": 1048576,
+                            "sha256": "5b5b409c5f3f1fe8d8221dd6abacc71098d23d7bdfdfff0b96c79a1d2028c15e"
+                        },
+                        {
+                            "face": 4,
+                            "occupied": 17408,
+                            "sha256": "4a2612b4430620cc69bd0d57e714227ae33bf575edcfb51a9ed6620d7ee38de3"
+                        },
+                        {
+                            "face": 5,
+                            "occupied": 22528,
+                            "sha256": "28f16d7389849b2fbe2e4777f9a2bdce1b84c054a951e6d9a3c9f0e86fcd0d41"
+                        }
+                    ],
+                    "light": [
+                        2.5,
+                        3,
+                        -1,
+                        30
+                    ],
+                    "probes": [
+                        {
+                            "depth": 0.8474576473236084,
+                            "face": 3,
+                            "occluded": false,
+                            "position": [
+                                0,
+                                0,
+                                0
+                            ],
+                            "stored": 0.8474934101104736
+                        },
+                        {
+                            "depth": 0.8474576473236084,
+                            "face": 3,
+                            "occluded": false,
+                            "position": [
+                                1,
+                                0,
+                                0
+                            ],
+                            "stored": 0.8474934101104736
+                        },
+                        {
+                            "depth": 0.8474576473236084,
+                            "face": 3,
+                            "occluded": false,
+                            "position": [
+                                0,
+                                0,
+                                1
+                            ],
+                            "stored": 0.8474934101104736
+                        }
+                    ],
+                    "slot": 0
+                }
+            ],
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 9269,
+                    "sha256": "849384ffdf0104af42a7a5d9db46d4adb459ac7f7c2ba22c9ef8bac27269d28d"
+                },
+                {
+                    "face": 1,
+                    "occupied": 7872,
+                    "sha256": "e82c91a5779e456c96497678d9fb0f66a1243675f99669d43688d6be78855293"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "5b5b409c5f3f1fe8d8221dd6abacc71098d23d7bdfdfff0b96c79a1d2028c15e"
+                },
+                {
+                    "face": 4,
+                    "occupied": 17408,
+                    "sha256": "4a2612b4430620cc69bd0d57e714227ae33bf575edcfb51a9ed6620d7ee38de3"
+                },
+                {
+                    "face": 5,
+                    "occupied": 22528,
+                    "sha256": "28f16d7389849b2fbe2e4777f9a2bdce1b84c054a951e6d9a3c9f0e86fcd0d41"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\point-shadows-second-b.bmp",
+            "light": [
+                2.5,
+                3,
+                -1,
+                30
+            ],
+            "lights": [
+                {
+                    "enabled": true,
+                    "index": 0,
+                    "intensity": 2,
+                    "position": [
+                        2.5,
+                        3,
+                        -1
+                    ],
+                    "radius": 30,
+                    "slot": 0
+                }
+            ],
+            "lod": {
+                "distance": 13.24726390838623,
+                "drawn": 1,
+                "fade": 0,
+                "perLod": [
+                    1,
+                    0,
+                    0
+                ],
+                "screenSize": false
+            },
+            "position": [
+                1,
+                0.699999988079071,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8474576473236084,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8474934101104736
+                },
+                {
+                    "depth": 0.8474576473236084,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        1,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8474934101104736
+                },
+                {
+                    "depth": 0.8474576473236084,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        0,
+                        0,
+                        1
+                    ],
+                    "stored": 0.8474934101104736
+                }
+            ],
+            "slot": 0,
+            "time": 0.550000011920929
+        },
+        {
+            "count": 0,
+            "cubes": [
+            ],
+            "directionalShadows": false,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\point-shadows-second-off.bmp",
+            "lights": [
+                {
+                    "enabled": true,
+                    "index": 0,
+                    "intensity": 2,
+                    "position": [
+                        2.5,
+                        3,
+                        -1
+                    ],
+                    "radius": 30,
+                    "slot": -1
+                }
+            ],
+            "lod": {
+                "distance": 13.24726390838623,
+                "drawn": 1,
+                "fade": 0,
+                "perLod": [
+                    1,
+                    0,
+                    0
+                ],
+                "screenSize": false
+            },
+            "position": [
+                1,
+                0.699999988079071,
+                0
+            ],
+            "time": 0.800000011920929
+        }
+    ],
+    "ok": true
+}

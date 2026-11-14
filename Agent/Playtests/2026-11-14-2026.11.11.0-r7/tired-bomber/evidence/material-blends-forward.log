@@ -1,0 +1,23 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[VfsRead] Dynamic mount '/_ext_16894332752248130008' -> 'E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/final-b-graphics' (path 'E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/final-b-graphics/Opaque.hlsl' outside registered mounts)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/final-b-graphics/Mask.png (64x64)
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x360
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 640x360
+frame-dump E:\Engine\Engine\build\playtests\20261114-r7\tired-bomber\final-b-graphics\material-blends-forward.bmp written=1 size=640x360
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "drawCalls": 52,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\final-b-graphics\\material-blends-forward.bmp",
+            "lod": [
+            ]
+        }
+    ],
+    "ok": true
+}

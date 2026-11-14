@@ -1,0 +1,394 @@
+{
+  "schema_version": 1,
+  "persona": "calm-city",
+  "release": "2026.11.07.6",
+  "runtime": "Game/build/x64/Release/Runtime (post BUG-R6-004 SDK)",
+  "feature_count": 33,
+  "features": [
+    {
+      "feature_id": "model-blend",
+      "status": "passed",
+      "expected": "Import a Blender model with multiple source materials and an external texture into this scratch content tree.",
+      "actual": "BLEND imports completed; generated model/assets/sidecars are present, including two material slots for the Suzanne fixture and copied BaseColor_0.png for external textures.",
+      "evidence_paths": [
+        "evidence/blend-uv-import.request.json",
+        "evidence/blend-uv-import.json",
+        "evidence/blend-external-import.request.json",
+        "evidence/blend-external-import.json"
+      ]
+    },
+    {
+      "feature_id": "texture-import",
+      "status": "passed",
+      "expected": "Import a project-owned PNG as texture and receive a copied /Game asset with byte count and SHA.",
+      "actual": "asset.import kind=texture returned ok=true, placed=false, /Game/Textures/source.png, 439 bytes and SHA256 55ae9b1f956cd077b299987508a6f4e685db036fde6a83ceb5bd6766f2a28fb6.",
+      "evidence_paths": [
+        "evidence/import-texture.request.json",
+        "evidence/import-texture.result.json"
+      ]
+    },
+    {
+      "feature_id": "mesh-tools",
+      "status": "passed",
+      "expected": "Call public primitive and mesh simplification APIs with a nontrivial LOD ratio.",
+      "actual": "CityApiProbe built and its assertion mesh-tools-simplify-lod passed: sphere source had indices and SimplifyMesh at TargetRatio=.45 returned nonempty fewer triangles.",
+      "evidence_paths": [
+        "evidence/CityApiProbe.ProjectGame.cpp",
+        "evidence/build-current-sdk.log",
+        "evidence/game-probe-hud-input.log",
+        "evidence/mesh-primitives.request.json",
+        "evidence/mesh-primitives.json"
+      ]
+    },
+    {
+      "feature_id": "material-assign",
+      "status": "passed",
+      "expected": "Assign a project material to an imported model and verify the saved slot override.",
+      "actual": "project.scene material and /materialSlots/0 property steps both returned status 0; saved scene retained /Game/Materials/WarmStone.mat for Suzanne slot 0, with slot 1 still pointing to its imported material.",
+      "evidence_paths": [
+        "evidence/scene-material.request.json",
+        "evidence/scene-material.result.json"
+      ]
+    },
+    {
+      "feature_id": "material-errors",
+      "status": "passed",
+      "expected": "Reject an intentionally invalid HLSL material with actionable compiler diagnostics.",
+      "actual": "render.point-shadows exited 2 and returned ok=false with X3000 syntax error and X3004 undeclared UnexpectedFunction at Bad.hlsl line 1; no misleading GPU pass was reported.",
+      "evidence_paths": [
+        "evidence/material-errors.Bad.hlsl",
+        "evidence/material-errors.Bad.mat",
+        "evidence/material-errors.request.json",
+        "evidence/material-errors.result.json"
+      ]
+    },
+    {
+      "feature_id": "light-sun",
+      "status": "passed",
+      "expected": "Change sun intensity/color while holding scene and sky fixed; produce a visibly different GPU frame.",
+      "actual": "Warm/strong and dim directional-light screenshots differ: SHA 378D0D62AED85413E668D680F52DEA30F86D3ED941FACD1119702F81AAFF509C vs A0E821383A687D88F859B134897685A939DEEA9945C343E1EA7DED9FADE8F13C.",
+      "evidence_paths": [
+        "evidence/light-sun-ab.json",
+        "evidence/light-sun-warm.bmp",
+        "evidence/light-sun-dim.bmp",
+        "evidence/CityApiProbe.ProjectGame.cpp"
+      ]
+    },
+    {
+      "feature_id": "sky",
+      "status": "passed",
+      "expected": "With an overhead perspective camera and the stock Environment.Sky, switching between cubemaps should change the sky; clearing the map should restore procedural gradient.",
+      "actual": "Controlled fresh-process A/B after current BasicSky fix: gradient SHA ECB904FF66AC3D180DD4D1BCE1287EEAE7F4A176A453F067C33E0E1C9F257968; Studio 38EB1C85CD05D8C4B04B1E662D26EBFCF6B093FA84CAA91A88472A6584C3F1C4; Space 3B1EDB15B39D8BD03C7279245B650E65A629D917A0847BC46EA27EDE76C7E093. Probe logs say hasCubeMap false for gradient and true for both presets. All outputs visibly differ.",
+      "evidence_paths": [
+        "evidence/sky-ab.json",
+        "evidence/sky-ab-gradient.bmp",
+        "evidence/sky-ab-studio.bmp",
+        "evidence/sky-ab-space.bmp",
+        "evidence/sky-ab-gradient.log",
+        "evidence/sky-ab-studio.log",
+        "evidence/sky-ab-space.log",
+        "evidence/build-sky-ablations.log"
+      ]
+    },
+    {
+      "feature_id": "material-graph-write-failure",
+      "status": "passed",
+      "expected": "A write-locked graph sidecar must make Save fail without discarding dirty state; Revert should clear it.",
+      "actual": "The actual graph editor returned save accepted=false and dirty=true with permission-denied dialog, then Revert accepted=true and dirty=false.",
+      "evidence_paths": [
+        "evidence/material-graph-failure.request.json",
+        "evidence/material-graph-failure.result.json"
+      ]
+    },
+    {
+      "feature_id": "material-slot-edit",
+      "status": "passed",
+      "expected": "Edit an imported material slot, undo/redo, save and reopen the scene.",
+      "actual": "Slot 0 edit, Undo, Redo, Save and Load steps each returned status 0; the saved scene records the expected per-slot material.",
+      "evidence_paths": [
+        "evidence/scene-material.request.json",
+        "evidence/scene-material.result.json"
+      ]
+    },
+    {
+      "feature_id": "imported-uv",
+      "status": "passed",
+      "expected": "Render an imported UV chart/material from an overhead view and observe its texture.",
+      "actual": "The imported UV material loaded BaseColor_0.png (64x64); overhead XZ-plane preview shows the chart color block, center RGB [2,2,57], frame SHA 01fb5ee557e0d5aef863d83b67a5dad39df6efc9534c17d06c78726f0c8f7b22.",
+      "evidence_paths": [
+        "evidence/imported-uv.request.json",
+        "evidence/imported-uv.result.json",
+        "evidence/imported-uv-render.bmp",
+        "evidence/blend-uv-import.json"
+      ]
+    },
+    {
+      "feature_id": "mesh-tangents",
+      "status": "passed",
+      "expected": "Generate a tangent basis on a regular quad with valid UVs.",
+      "actual": "All four vertices returned tangent [1,0,0,1].",
+      "evidence_paths": [
+        "evidence/tangent-normal.request.json",
+        "evidence/tangent-normal.json"
+      ]
+    },
+    {
+      "feature_id": "tangent-degenerate",
+      "status": "passed",
+      "expected": "Handle degenerate UV triangles with finite fallback tangent values.",
+      "actual": "All four outputs remained finite and returned fallback [0,1,0,0] for the degenerate fixture.",
+      "evidence_paths": [
+        "evidence/tangent-degenerate.request.json",
+        "evidence/tangent-degenerate.json"
+      ]
+    },
+    {
+      "feature_id": "tangent-gpu",
+      "status": "passed",
+      "expected": "Render a normal-mapped material in a visible GPU setup; A/B mirrored UV and negative scale.",
+      "actual": "With camera above the XZ plane and render.twoSided=true, RTX 4070 frames were visible and distinct: positive dd4a4fdde26493df90224580861bcb97c456ba65596dc0b04274ea5ed58dd1a9, negative-X 88031416152aaa1546ce2941a43b559a18fbaad7f0913d5d88d3f0f191f541a2, negative-Z cce8cbc361a123507ed81ca58a6d7644e0fc9550b6019118215d8566a1e71900.",
+      "evidence_paths": [
+        "evidence/tangent-gpu-two-sided.request.json",
+        "evidence/tangent-gpu-two-sided.result.json",
+        "evidence/tangent-gpu-positive-two-sided.bmp",
+        "evidence/tangent-gpu-negative-x-two-sided.bmp",
+        "evidence/tangent-gpu-negative-z-two-sided.bmp"
+      ]
+    },
+    {
+      "feature_id": "tangent-world-reflection",
+      "status": "passed",
+      "expected": "Negative-X and negative-Z world reflections should preserve a valid normal-map response in a two-sided material.",
+      "actual": "Both reflected frames rendered non-background color and produced hashes different from positive; tangents remained finite in all four diagnostic vertices.",
+      "evidence_paths": [
+        "evidence/tangent-gpu-two-sided.request.json",
+        "evidence/tangent-gpu-two-sided.result.json",
+        "evidence/tangent-gpu-positive-two-sided.bmp",
+        "evidence/tangent-gpu-negative-x-two-sided.bmp",
+        "evidence/tangent-gpu-negative-z-two-sided.bmp"
+      ]
+    },
+    {
+      "feature_id": "tangent-savegame",
+      "status": "passed",
+      "expected": "Capture/restore a reflected mesh and retain its transform/tangent basis.",
+      "actual": "Negative-X SaveGame round-trip returned restored=true and transientMaterialRebound=true; restored tangent basis was reported by render.mesh.",
+      "evidence_paths": [
+        "evidence/tangent-gpu-two-sided.request.json",
+        "evidence/tangent-gpu-two-sided.result.json",
+        "evidence/tangent-savegame-two-sided.json"
+      ]
+    },
+    {
+      "feature_id": "material-register-numeric-validation",
+      "status": "passed",
+      "expected": "Reject graph node-count overflow and keep all 121 unique D3D texture slots (t6..t127 except reserved t32) unique.",
+      "actual": "Before fix a 122-node graph emitted duplicate t127. After fix, 122 Texture2D nodes were rejected with maximum 121 and graph remained unchanged; 121 nodes were accepted, emitted 121 unique registers t6..t127 excluding t32, for both explicit boundary slots and int32-max input values.",
+      "evidence_paths": [
+        "evidence/material-registers.request.json",
+        "evidence/material-registers.result.json",
+        "evidence/material-registers-after-fix.request.json",
+        "evidence/material-registers-after-fix.result.json",
+        "evidence/material-register-121.request.json",
+        "evidence/material-register-121.result.json",
+        "evidence/material-register-boundary121.request.json",
+        "evidence/material-register-boundary121.result.json"
+      ]
+    },
+    {
+      "feature_id": "session",
+      "status": "passed",
+      "expected": "Run a separately parameterized session with 3 scenes and deterministic ticking, then stop it.",
+      "actual": "session.lifecycle completed ready=3, closing=3, elapsed≈0.6s, ticks=15, running=false.",
+      "evidence_paths": [
+        "evidence/session-scenes.request.json",
+        "evidence/session-scenes.json"
+      ]
+    },
+    {
+      "feature_id": "character",
+      "status": "passed",
+      "expected": "Move a character through the public SDK and confirm its actual position delta.",
+      "actual": "CityApiProbe assertion character-move-world passed; Move({1,0,0},.25) at speed 5 changed local X by 1.25.",
+      "evidence_paths": [
+        "evidence/CityApiProbe.ProjectGame.cpp",
+        "evidence/game-probe-hud-input.log"
+      ]
+    },
+    {
+      "feature_id": "controller",
+      "status": "passed",
+      "expected": "Possess the character and camera with the public controller API.",
+      "actual": "CharacterController possession assertion passed and returned the same character pointer/id.",
+      "evidence_paths": [
+        "evidence/CityApiProbe.ProjectGame.cpp",
+        "evidence/game-probe-hud-input.log"
+      ]
+    },
+    {
+      "feature_id": "camera-orthographic",
+      "status": "passed",
+      "expected": "Create an orthographic camera and query rays through its actual screen matrix.",
+      "actual": "Camera was added as Gameplay.Camera; own orthographic screen-ray request succeeded with parallel direction and displaced origin.",
+      "evidence_paths": [
+        "evidence/screen-ortho.request.json",
+        "evidence/screen-ortho.json",
+        "evidence/CityApiProbe.ProjectGame.cpp"
+      ]
+    },
+    {
+      "feature_id": "trace-screen",
+      "status": "passed",
+      "expected": "Query a screen ray and raycast it against the live scene.",
+      "actual": "In the game probe, ScreenPointToRay returned Success and RaycastScreen returned Hit (component id 7); standalone trace.raycast request also hit its triangle.",
+      "evidence_paths": [
+        "evidence/game-probe-hud-input.log",
+        "evidence/trace-hit.request.json",
+        "evidence/trace-hit.json",
+        "evidence/screen-perspective.request.json",
+        "evidence/screen-perspective.json"
+      ]
+    },
+    {
+      "feature_id": "particles",
+      "status": "passed",
+      "expected": "Run the real particle component on GPU and record output at controlled simulation checkpoints.",
+      "actual": "RTX 4070 render.particles on/off frames executed 18 and 54 cumulative steps with dispatch/instance counts and saved outputs.",
+      "evidence_paths": [
+        "evidence/collision-on.request.json",
+        "evidence/collision-on.result.json",
+        "evidence/particles-collision-on.bmp"
+      ]
+    },
+    {
+      "feature_id": "particle-collision",
+      "status": "passed",
+      "expected": "Collision-on/off A/B should match before contact and diverge after particle-floor contact.",
+      "actual": "At step 18 on/off SHA matched 3c19b064…a2ab37; at step 54 on=7213d00b…c038 and off=d83f7b…4509; inspected on frame had a red particle at floor and off had none.",
+      "evidence_paths": [
+        "evidence/collision-on.request.json",
+        "evidence/collision-on.result.json",
+        "evidence/collision-off.request.json",
+        "evidence/collision-off.result.json",
+        "evidence/particles-collision-on.bmp",
+        "evidence/particles-collision-off.bmp"
+      ]
+    },
+    {
+      "feature_id": "hud-events",
+      "status": "passed",
+      "expected": "Send press/release through project.input to an actual project HUD button and observe its handler.",
+      "actual": "project.input ran 7 frames; click at (40,32) invoked callback and appended `hud-button-clicked` to the project log.",
+      "evidence_paths": [
+        "evidence/hud-events.request.json",
+        "evidence/hud-events.result.json",
+        "evidence/game-probe-hud-input.log",
+        "evidence/game-probe-hud-frame.bmp"
+      ]
+    },
+    {
+      "feature_id": "game-settings",
+      "status": "passed",
+      "expected": "Change Deferred/VSync/AA settings and read them back from the runtime game.",
+      "actual": "Own public SDK assertions confirmed Deferred, VSync=false and AA=1; standalone settings commandlet also returned requested values.",
+      "evidence_paths": [
+        "evidence/game-settings.request.json",
+        "evidence/game-settings.json",
+        "evidence/CityApiProbe.ProjectGame.cpp",
+        "evidence/game-probe-hud-input.log"
+      ]
+    },
+    {
+      "feature_id": "vfs",
+      "status": "passed",
+      "expected": "Exercise host asset resolution and local virtual-file mount/write/read/stat/unmount.",
+      "actual": "Host resolved /Game/Audio/probe.wav; local VFS mount and write/read/stat/unmount assertions all passed; exported package includes relative WAV content.",
+      "evidence_paths": [
+        "evidence/CityApiProbe.ProjectGame.cpp",
+        "evidence/game-probe-hud-input.log",
+        "evidence/export-report.json"
+      ]
+    },
+    {
+      "feature_id": "export",
+      "status": "passed",
+      "expected": "Export current project with relative content/module paths and verify runtime mounts exported Game/Content and completes standalone smoke.",
+      "actual": "Fresh CityProbeExportFinal has content=Content, module=Binaries/Game.dll, startupScene=Content/Scenes/Continuation.scene.json. GameSmoke mounted /Game to the export staging Game/Content, first read /Game model via module, ran 3 updates and stopped. ProjectGame.cpp has no __FILE__; it resolves audio through EngineModuleVfs and writes diagnostic frames under env/default temp. Manual source-folder removal was not run.",
+      "evidence_paths": [
+        "evidence/export-final.log",
+        "evidence/export-final-report.json",
+        "evidence/export-final-validation.log",
+        "evidence/export-final-smoke.log",
+        "evidence/export-final-Project.json",
+        "evidence/export-final-Start.cmd",
+        "evidence/CityApiProbe.ProjectGame.cpp"
+      ]
+    },
+    {
+      "feature_id": "sdk-examples",
+      "status": "passed",
+      "expected": "Compile and run a small project using public SDK examples for settings, components, meshes, VFS, tracing, audio and HUD.",
+      "actual": "CityApiProbe built against explicit current Runtime SDK and executed feature assertions through real game initialization/input.",
+      "evidence_paths": [
+        "evidence/CityApiProbe.ProjectGame.cpp",
+        "evidence/build-current-sdk.log",
+        "evidence/build-sky-shader.log",
+        "evidence/game-probe-hud-input.log"
+      ]
+    },
+    {
+      "feature_id": "audio-decode",
+      "status": "passed",
+      "expected": "Decode a project WAV and consume all frames.",
+      "actual": "WavDecoder opened the fixture and decoded all 800 frames; project WAV imports as 1644 bytes.",
+      "evidence_paths": [
+        "evidence/CityApiProbe.ProjectGame.cpp",
+        "evidence/game-probe-hud-input.log",
+        "evidence/import-audio.request.json",
+        "evidence/import-audio.result.json"
+      ]
+    },
+    {
+      "feature_id": "audio-play2d",
+      "status": "partial",
+      "expected": "Confirm runtime 2D playback starts and can be heard.",
+      "actual": "AudioEngine returned accepted=true for Play2D on a valid sound handle; no listening/audible output check was performed.",
+      "evidence_paths": [
+        "evidence/CityApiProbe.ProjectGame.cpp",
+        "evidence/game-probe-hud-input.log"
+      ]
+    },
+    {
+      "feature_id": "audio-play3d",
+      "status": "partial",
+      "expected": "Confirm runtime 3D playback starts with an emitter at a nonzero position and can be heard.",
+      "actual": "AudioEngine returned accepted=true for Play3D with emitter position [2,0,0]; no listening/spatial audibility check was performed.",
+      "evidence_paths": [
+        "evidence/CityApiProbe.ProjectGame.cpp",
+        "evidence/game-probe-hud-input.log"
+      ]
+    },
+    {
+      "feature_id": "audio-stream",
+      "status": "partial",
+      "expected": "Exercise stream lifecycle including multiple updates and stop; verify audible output.",
+      "actual": "Stream handle accepted; three updates ran with 10ms spacing, StopStream issued and a final Update ran. Audio was not listened to.",
+      "evidence_paths": [
+        "evidence/CityApiProbe.ProjectGame.cpp",
+        "evidence/game-probe-hud-input.log"
+      ]
+    },
+    {
+      "feature_id": "subsystem",
+      "status": "passed",
+      "expected": "Use a custom GameSubsystem with startup, per-frame Tick and shutdown callbacks in a real session.",
+      "actual": "Parameterized session ran 3 scenes and 5 frames each at dt=.04: the custom subsystem observed ready=3, ticks=15, closing=3; after Stop running=false and elapsed=0.599999964s.",
+      "evidence_paths": [
+        "evidence/session-scenes.request.json",
+        "evidence/session-scenes.json"
+      ]
+    }
+  ],
+  "source_archive": "calm-city-continuation-source.zip",
+  "source_archive_sha256": "981514B93F2E820EB13F2CFBF0F1CF5A70BC59C90E77F74581ED6B9ED67289DA"
+}

@@ -1,0 +1,8 @@
+﻿
+C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(548,5): warning MSB8029: Промежуточный каталог или каталог выхода не может располагаться во временном каталоге, потому что это может стать причиной проблем с добавочной сборкой. [E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Game.vcxproj]
+  ComponentGenerator: 6 component(s), Project
+  ProjectGame.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+     Создается библиотека E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Binaries\Release\64003d09aa3e43439214ee73d4539d96\Game.lib и объект E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Binaries\Release\64003d09aa3e43439214ee73d4539d96\Game.exp
+LINK : fatal error LNK1101: неправильная версия MSPDB140.DLL; перепроверьте установку этого продукта [E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Game.vcxproj]

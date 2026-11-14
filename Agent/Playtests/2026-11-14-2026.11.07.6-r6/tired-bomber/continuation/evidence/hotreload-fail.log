@@ -1,0 +1,24 @@
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+[ToolBarFacts] initial tb geom=0,0 100x36, margins=(0,0,0,0), layoutMargins=(6,6,6,6), PM_ToolBarFrameWidth=6, PM_ItemMargin=0, PM_ItemSpacing=4
+[ToolBarFacts] configured tb height=36, btn height=28, topMargin=4, bottomMargin=4
+[Info] SettingsService: Set 'viewport/antialiasing'
+[Info] QtHost::SetAntialiasing: mode = 1, serviceVersion = 3, handler = 00007FFFD99ACAE0
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "buildSucceeded": false,
+    "console": "[05:02:24.502] C++: Build\n[05:02:47.081]   The vcpkg manifest was disabled, but we found a manifest file in E:\\Engine\\Engine\\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.\n\n[05:02:47.081]   ComponentGenerator: 7 component(s), Project\n\n[05:02:47.081]   BomberCrewController.cpp\n\n[05:02:47.081]   Module.cpp\n\n[05:02:47.081]   ProbeController.cpp\n\n[05:02:47.081]   ProbeRenderComponent.cpp\n\n[05:02:47.081]   ProbeSubsystem.cpp\n\n[05:02:47.081]   ProjectComponent.cpp\n\n[05:02:47.081]   ProjectGame.cpp\n\n[05:02:47.081]   ReferenceExamples.cpp\n\n[05:02:47.081] E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\SdkProbe\\Source\\ProjectGame.cpp(196,1): error C1189: #error:  BOMBER_ROLLBACK_PROBE [E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\SdkProbe\\Game.vcxproj]\n\n[05:02:47.081]   RotatingCube.cpp\n\n[05:02:47.081]   GeneratedComponents.cpp\n\n[05:02:47.081]   Создание кода...\n\n[05:02:47.081] Full build log: E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\SdkProbe\\Binaries\\Release\\1de25b25220f4e1fbaaccc91f2dbc8ba\\build.log\n\n[05:02:47.168] Project build failed; previous module preserved\n\n[05:02:47.168] E:\\Engine\\Game\\build\\x64\\Release\\Runtime\\SDK\\ProjectTools.ps1:294 знак:31\n\n[05:02:47.168] + ... ExitCode) { throw 'Project build failed; previous module preserved' } ...\n\n[05:02:47.168] +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n[05:02:47.168]     + CategoryInfo          : OperationStopped: (Project build f...odule preserved:String) [], RuntimeException\n\n[05:02:47.168]     + FullyQualifiedErrorId : Project build failed; previous module preserved\n\n[05:02:47.231] [Ошибка C++] Build: код завершения 1. Проект: E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/continuation/SdkProbe/Project.json",
+    "dialogs": [
+        "Операция не завершена. Предыдущая DLL сохранена. Диагностика находится в Console."
+    ],
+    "ok": false,
+    "replaced": false,
+    "windowEnabled": true
+}

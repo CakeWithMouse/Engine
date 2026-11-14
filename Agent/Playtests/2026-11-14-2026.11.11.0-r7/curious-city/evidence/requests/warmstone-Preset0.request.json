@@ -1,0 +1,20 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Project.json",
+  "material": "/Game/Materials/WarmStonePreset0.mat",
+  "steps": [
+    {
+      "action": "enable"
+    },
+    {
+      "action": "preset",
+      "index": 0
+    },
+    {
+      "action": "apply"
+    },
+    {
+      "action": "save"
+    }
+  ],
+  "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\frames\\warmstone-Preset0-graph.png"
+}

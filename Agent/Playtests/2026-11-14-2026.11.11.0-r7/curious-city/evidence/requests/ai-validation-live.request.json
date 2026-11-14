@@ -1,0 +1,71 @@
+{
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Project.json",
+  "steps": [
+    {
+      "target": "CityGuard",
+      "action": "select"
+    },
+    {
+      "action": "play"
+    },
+    {
+      "dt": 0.05,
+      "count": 40,
+      "action": "frames"
+    },
+    {
+      "scope": "main",
+      "name": "AiMachineLive",
+      "action": "scroll"
+    },
+    {
+      "scope": "main",
+      "name": "AiMachineLive",
+      "action": "scroll"
+    },
+    {
+      "scope": "main",
+      "name": "AiMachineLive",
+      "action": "scroll"
+    },
+    {
+      "scope": "main",
+      "name": "AiMachineLive",
+      "action": "scroll"
+    },
+    {
+      "scope": "main",
+      "name": "AiMachineLive",
+      "action": "scroll"
+    },
+    {
+      "scope": "main",
+      "name": "AiMachineLive",
+      "action": "scroll"
+    },
+    {
+      "scope": "main",
+      "name": "AiMachineLive",
+      "action": "scroll"
+    },
+    {
+      "scope": "main",
+      "name": "AiMachineLive",
+      "action": "scroll"
+    },
+    {
+      "scope": "main",
+      "name": "AiMachineLive",
+      "action": "scroll"
+    },
+    {
+      "scope": "main",
+      "name": "AiMachineLive",
+      "image": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/ai-live-card.png",
+      "action": "scroll"
+    },
+    {
+      "action": "stop"
+    }
+  ]
+}

@@ -1,0 +1,235 @@
+Running CoreTests...
+[Test] TestUserPrompt...
+[Test] TestLogger...
+[Info] Hello Info
+[Warning] Careful!
+[Error] Critical error
+[Debug] Thread 0 Msg 0
+[Debug] Thread 0 Msg 1
+[Debug] Thread 0 Msg 2
+[Debug] Thread 0 Msg 3
+[Debug] Thread 0 Msg 4
+[Debug] Thread 0 Msg 5
+[Debug] Thread 0 Msg 6
+[Debug] Thread 1 Msg 0
+[Debug] Thread 2 Msg 0
+[Debug] Thread 1 Msg 1
+[Debug] Thread 0 Msg 7
+[Debug] Thread 0 Msg 8
+[Debug] Thread 2 Msg 1
+[Debug] Thread 2 Msg 2
+[Debug] Thread 2 Msg 3
+[Debug] Thread 2 Msg 4
+[Debug] Thread 2 Msg 5
+[Debug] Thread 0 Msg 9
+[Debug] Thread 2 Msg 6
+[Debug] Thread 2 Msg 7
+[Debug] Thread 3 Msg 0
+[Debug] Thread 2 Msg 8
+[Debug] Thread 2 Msg 9
+[Debug] Thread 1 Msg 2
+[Debug] Thread 1 Msg 3
+[Debug] Thread 0 Msg 10
+[Debug] Thread 0 Msg 11
+[Debug] Thread 2 Msg 10
+[Debug] Thread 2 Msg 11
+[Debug] Thread 3 Msg 1
+[Debug] Thread 1 Msg 4
+[Debug] Thread 0 Msg 12
+[Debug] Thread 0 Msg 13
+[Debug] Thread 2 Msg 12
+[Debug] Thread 3 Msg 2
+[Debug] Thread 3 Msg 3
+[Debug] Thread 1 Msg 5
+[Debug] Thread 1 Msg 6
+[Debug] Thread 1 Msg 7
+[Debug] Thread 1 Msg 8
+[Debug] Thread 1 Msg 9
+[Debug] Thread 1 Msg 10
+[Debug] Thread 1 Msg 11
+[Debug] Thread 1 Msg 12
+[Debug] Thread 1 Msg 13
+[Debug] Thread 3 Msg 4
+[Debug] Thread 0 Msg 14
+[Debug] Thread 2 Msg 13
+[Debug] Thread 2 Msg 14
+[Debug] Thread 2 Msg 15
+[Debug] Thread 3 Msg 5
+[Debug] Thread 0 Msg 15
+[Debug] Thread 0 Msg 16
+[Debug] Thread 0 Msg 17
+[Debug] Thread 2 Msg 16
+[Debug] Thread 3 Msg 6
+[Debug] Thread 3 Msg 7
+[Debug] Thread 3 Msg 8
+[Debug] Thread 0 Msg 18
+[Debug] Thread 0 Msg 19
+[Debug] Thread 0 Msg 20
+[Debug] Thread 0 Msg 21
+[Debug] Thread 0 Msg 22
+[Debug] Thread 0 Msg 23
+[Debug] Thread 3 Msg 9
+[Debug] Thread 3 Msg 10
+[Debug] Thread 3 Msg 11
+[Debug] Thread 1 Msg 14
+[Debug] Thread 1 Msg 15
+[Debug] Thread 1 Msg 16
+[Debug] Thread 2 Msg 17
+[Debug] Thread 2 Msg 18
+[Debug] Thread 2 Msg 19
+[Debug] Thread 2 Msg 20
+[Debug] Thread 2 Msg 21
+[Debug] Thread 2 Msg 22
+[Debug] Thread 2 Msg 23
+[Debug] Thread 2 Msg 24
+[Debug] Thread 2 Msg 25
+[Debug] Thread 1 Msg 17
+[Debug] Thread 1 Msg 18
+[Debug] Thread 1 Msg 19
+[Debug] Thread 2 Msg 26
+[Debug] Thread 1 Msg 20
+[Debug] Thread 1 Msg 21
+[Debug] Thread 3 Msg 12
+[Debug] Thread 3 Msg 13
+[Debug] Thread 3 Msg 14
+[Debug] Thread 0 Msg 24
+[Debug] Thread 1 Msg 22
+[Debug] Thread 1 Msg 23
+[Debug] Thread 1 Msg 24
+[Debug] Thread 1 Msg 25
+[Debug] Thread 1 Msg 26
+[Debug] Thread 1 Msg 27
+[Debug] Thread 1 Msg 28
+[Debug] Thread 0 Msg 25
+[Debug] Thread 0 Msg 26
+[Debug] Thread 0 Msg 27
+[Debug] Thread 0 Msg 28
+[Debug] Thread 0 Msg 29
+[Debug] Thread 0 Msg 30
+[Debug] Thread 0 Msg 31
+[Debug] Thread 0 Msg 32
+[Debug] Thread 0 Msg 33
+[Debug] Thread 0 Msg 34
+[Debug] Thread 0 Msg 35
+[Debug] Thread 0 Msg 36
+[Debug] Thread 0 Msg 37
+[Debug] Thread 0 Msg 38
+[Debug] Thread 3 Msg 15
+[Debug] Thread 0 Msg 39
+[Debug] Thread 0 Msg 40
+[Debug] Thread 0 Msg 41
+[Debug] Thread 0 Msg 42
+[Debug] Thread 3 Msg 16
+[Debug] Thread 2 Msg 27
+[Debug] Thread 2 Msg 28
+[Debug] Thread 2 Msg 29
+[Debug] Thread 2 Msg 30
+[Debug] Thread 2 Msg 31
+[Debug] Thread 2 Msg 32
+[Debug] Thread 0 Msg 43
+[Debug] Thread 0 Msg 44
+[Debug] Thread 0 Msg 45
+[Debug] Thread 0 Msg 46
+[Debug] Thread 0 Msg 47
+[Debug] Thread 0 Msg 48
+[Debug] Thread 0 Msg 49
+[Debug] Thread 3 Msg 17
+[Debug] Thread 1 Msg 29
+[Debug] Thread 2 Msg 33
+[Debug] Thread 3 Msg 18
+[Debug] Thread 2 Msg 34
+[Debug] Thread 2 Msg 35
+[Debug] Thread 3 Msg 19
+[Debug] Thread 1 Msg 30
+[Debug] Thread 1 Msg 31
+[Debug] Thread 1 Msg 32
+[Debug] Thread 1 Msg 33
+[Debug] Thread 1 Msg 34
+[Debug] Thread 1 Msg 35
+[Debug] Thread 3 Msg 20
+[Debug] Thread 3 Msg 21
+[Debug] Thread 3 Msg 22
+[Debug] Thread 1 Msg 36
+[Debug] Thread 1 Msg 37
+[Debug] Thread 1 Msg 38
+[Debug] Thread 1 Msg 39
+[Debug] Thread 1 Msg 40
+[Debug] Thread 1 Msg 41
+[Debug] Thread 2 Msg 36
+[Debug] Thread 2 Msg 37
+[Debug] Thread 2 Msg 38
+[Debug] Thread 1 Msg 42
+[Debug] Thread 2 Msg 39
+[Debug] Thread 1 Msg 43
+[Debug] Thread 1 Msg 44
+[Debug] Thread 3 Msg 23
+[Debug] Thread 1 Msg 45
+[Debug] Thread 3 Msg 24
+[Debug] Thread 3 Msg 25
+[Debug] Thread 3 Msg 26
+[Debug] Thread 2 Msg 40
+[Debug] Thread 3 Msg 27
+[Debug] Thread 1 Msg 46
+[Debug] Thread 1 Msg 47
+[Debug] Thread 1 Msg 48
+[Debug] Thread 3 Msg 28
+[Debug] Thread 1 Msg 49
+[Debug] Thread 2 Msg 41
+[Debug] Thread 3 Msg 29
+[Debug] Thread 3 Msg 30
+[Debug] Thread 2 Msg 42
+[Debug] Thread 2 Msg 43
+[Debug] Thread 2 Msg 44
+[Debug] Thread 2 Msg 45
+[Debug] Thread 2 Msg 46
+[Debug] Thread 2 Msg 47
+[Debug] Thread 2 Msg 48
+[Debug] Thread 2 Msg 49
+[Debug] Thread 3 Msg 31
+[Debug] Thread 3 Msg 32
+[Debug] Thread 3 Msg 33
+[Debug] Thread 3 Msg 34
+[Debug] Thread 3 Msg 35
+[Debug] Thread 3 Msg 36
+[Debug] Thread 3 Msg 37
+[Debug] Thread 3 Msg 38
+[Debug] Thread 3 Msg 39
+[Debug] Thread 3 Msg 40
+[Debug] Thread 3 Msg 41
+[Debug] Thread 3 Msg 42
+[Debug] Thread 3 Msg 43
+[Debug] Thread 3 Msg 44
+[Debug] Thread 3 Msg 45
+[Debug] Thread 3 Msg 46
+[Debug] Thread 3 Msg 47
+[Debug] Thread 3 Msg 48
+[Debug] Thread 3 Msg 49
+[Test] TestCommandRegistry...
+[Error] CommandRegistry: cannot register command with empty id
+[Warning] CommandRegistry: duplicate command registration 'Edit.Test'
+[Warning] CommandRegistry: command cannot execute 'Edit.Disabled'
+[Error] CommandRegistry: command not found 'Edit.Test'
+[Test] TestFileService...
+[Info] FileService: sandbox root set to 'C:/Users/serge/AppData/Local/Temp/CoreTests-ntGiba'
+[Info] FileService: wrote 26 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-ntGiba/SubDir/test.txt'
+[Info] FileService: wrote 18 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-ntGiba/SubDir/test.txt'
+[Info] FileService: deleted 'C:/Users/serge/AppData/Local/Temp/CoreTests-ntGiba/SubDir/test.txt'
+[Error] FileService: read failed 'C:/Users/serge/AppData/Local/Temp/CoreTests-ntGiba/SubDir/test.txt': Не удается найти указанный файл.
+[Error] FileService: path '../forbidden.txt' is outside sandbox 'C:/Users/serge/AppData/Local/Temp/CoreTests-ntGiba'
+[Error] Access denied: path is outside project sandbox (../forbidden.txt)
+[Error] FileService: path '../forbidden.txt' is outside sandbox 'C:/Users/serge/AppData/Local/Temp/CoreTests-ntGiba'
+[Error] Access denied: path is outside project sandbox (../forbidden.txt)
+[Error] FileService: path '../forbidden.txt' is outside sandbox 'C:/Users/serge/AppData/Local/Temp/CoreTests-ntGiba'
+[Error] Access denied: path is outside project sandbox
+[Test] TestEditorLocale...
+[Info] SettingsService: Set 'ui/language'
+[Info] SettingsService: Set 'ui/language'
+[Test] TestGizmoMath...
+[Test] TestGizmoGeometry...
+[Test] TestSettingsService...
+[Info] SettingsService: Set 'layout/6027d7610ab2/state'
+[Info] SettingsService: Set 'layout/6027d7610ab2/geometry'
+[Info] SettingsService: Remove 'layout/6027d7610ab2/state'
+[Info] SettingsService: Remove 'layout/6027d7610ab2/geometry'
+[Test] TestMaterialGraph...
+FAIL (MaterialGraph): Texture exhaustion never emits aliased registers

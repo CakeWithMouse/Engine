@@ -1,0 +1,25 @@
+{
+    "arguments": [
+        "-Name",
+        "BomberDamageCounter",
+        "-Kind",
+        "Component",
+        "-Base",
+        "GameComponent",
+        "-BaseHeader",
+        "Engine/Components/GameComponents.h"
+    ],
+    "console": "[04:30:09.120] C++: AddClass -Name BomberDamageCounter -Kind Component -Base GameComponent -BaseHeader Engine/Components/GameComponents.h",
+    "dialogs": [
+        "Созданы .h и .cpp в Source. Соберите проект, чтобы класс появился в редакторе."
+    ],
+    "generated": {
+        ".cpp": "#include \"BomberDamageCounter.h\"\nvoid BomberDamageCounter::BeginPlay() { GameComponent::BeginPlay(); }\nvoid BomberDamageCounter::Tick(float deltaTime) { GameComponent::Tick(deltaTime); }\n",
+        ".h": "#pragma once\n#include <Engine/Components/ComponentAnnotations.h>\n#include \"Engine/Components/GameComponents.h\"\nENGINE_COMPONENT(\"BomberDamageCounter\")\nclass BomberDamageCounter : public GameComponent\n{\npublic:\n    BomberDamageCounter() = default;\n    void BeginPlay() override;\n    void Tick(float deltaTime) override;\n};\n"
+    },
+    "ok": true,
+    "replaced": false,
+    "windowEnabled": true,
+    "wizardAccepted": true,
+    "wizardError": ""
+}

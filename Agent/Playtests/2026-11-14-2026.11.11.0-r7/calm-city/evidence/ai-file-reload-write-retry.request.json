@@ -1,0 +1,29 @@
+{
+  "machine": "/Game/AI/CalmRoutine.fsm",
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/calm-city/AIPlayground/Project.json",
+  "steps": [
+    {
+      "node": 1,
+      "action": "state",
+      "properties": {
+        "name": "WaitBeacon",
+        "tasks": [
+          {
+            "seconds": 1.2,
+            "type": "Ai.Wait"
+          }
+        ]
+      },
+      "lockedFile": "E:/Engine/Engine/build/playtests/20261114-r7/calm-city/AIPlayground/Content/AI/CalmRoutine.fsm"
+    },
+    {
+      "action": "save"
+    },
+    {
+      "action": "check"
+    },
+    {
+      "action": "reopen"
+    }
+  ]
+}

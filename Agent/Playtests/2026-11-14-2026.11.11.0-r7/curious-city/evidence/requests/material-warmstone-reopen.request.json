@@ -1,0 +1,10 @@
+{
+  "steps": [
+    {
+      "action": "enable"
+    }
+  ],
+  "material": "/Game/Materials/WarmStone.mat",
+  "image": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/material-warmstone-reopened.png",
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Project.json"
+}

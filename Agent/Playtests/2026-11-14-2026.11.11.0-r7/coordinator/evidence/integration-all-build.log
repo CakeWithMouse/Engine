@@ -1,0 +1,407 @@
+Using v143 / MSVC 14.44.35207 / Windows SDK 10.0.26100.0
+Assimp enabled: true
+
+  Base.cpp
+  DirectionalLightComponent.cpp
+  Scene.cpp
+  Trace.cpp
+  ComponentTrace.cpp
+  StandardSky.cpp
+  GameTrace.cpp
+  SaveGame.cpp
+  SaveState.cpp
+  RenderDiagnostics.cpp
+  SceneCommands.cpp
+  SceneDocument.cpp
+  SceneAssets.cpp
+  ModelImport.cpp
+  ModelImportSettings.cpp
+  BlendImport.cpp
+  SceneEditAssets.cpp
+  SceneEditAudio.cpp
+  SceneEditScripts.cpp
+  SceneEditAi.cpp
+  SceneEditMaterials.cpp
+  SceneEditSession.cpp
+  SceneEditBatch.cpp
+  SceneAuthoring.cpp
+E:\Engine\Engine\Source\Base\Base.cpp(770,26): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. [E:\Engine\Engine\Engine.vcxproj]
+  AssetUpdate.cpp
+  GameEditModule.cpp
+  BaseResources.cpp
+  BaseGameConfig.cpp
+  GameComponents.cpp
+  CubeMap.cpp
+  CubeComponent.cpp
+  FBXComponent.cpp
+  InstancedMeshComponent.cpp
+  MeshComponent.cpp
+  InstancedMeshSkinned.cpp
+  InstancedMeshImpostor.cpp
+  InstancedMeshShadows.cpp
+  ParticleSystemComponent.cpp
+  SphereComponent.cpp
+  TriangleComponent.cpp
+  UIComponent.cpp
+  Display.cpp
+  Delegates.cpp
+  InputDevice.cpp
+  InputActions.cpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(476,82): warning C4244: аргумент: преобразование "_Ty" в "float", возможна потеря данных [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(476,82): message : контекст создания экземпляра шаблона (сначала самый старый) (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp) [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\Components\SpecificComponents\InstancedMeshComponent.cpp(44,106): message : выполняется компиляция ссылки на экземпляр шаблон функции "DirectX::XMFLOAT4 &std::vector<DirectX::XMFLOAT4,std::allocator<DirectX::XMFLOAT4>>::emplace_back<int,int,int,int>(int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\Components\SpecificComponents\InstancedMeshComponent.cpp(44,118): message : см. первую ссылку на "std::vector<DirectX::XMFLOAT4,std::allocator<DirectX::XMFLOAT4>>::emplace_back" в "InstancedMeshComponent::SetLod" [E:\Engine\Engine\Engine.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(924,24): message : выполняется компиляция ссылки на экземпляр шаблон функции "_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_one_at_back<int,int,int,int>(int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=DirectX::XMFLOAT4
+          ] (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(845,20): message : выполняется компиляция ссылки на экземпляр шаблон функции "_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_back_with_unused_capacity<int,int,int,int>(int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=DirectX::XMFLOAT4
+          ] (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(860,18): message : выполняется компиляция ссылки на экземпляр шаблон функции "void std::_Construct_in_place<DirectX::XMFLOAT4,_Ty,_Ty,_Ty,_Ty>(DirectX::XMFLOAT4 &,_Ty &&,_Ty &&,_Ty &&,_Ty &&) noexcept" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(732,103): warning C4244: аргумент: преобразование "_Ty" в "float", возможна потеря данных [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(732,103): message : контекст создания экземпляра шаблона (сначала самый старый) (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp) [E:\Engine\Engine\Engine.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(848,17): message : выполняется компиляция ссылки на экземпляр шаблон функции "DirectX::XMFLOAT4 *std::vector<DirectX::XMFLOAT4,std::allocator<DirectX::XMFLOAT4>>::_Emplace_reallocate<_Ty,_Ty,_Ty,_Ty>(DirectX::XMFLOAT4 *const ,_Ty &&,_Ty &&,_Ty &&,_Ty &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(900,23): message : выполняется компиляция ссылки на экземпляр шаблон функции "void std::_Default_allocator_traits<_Alloc>::construct<_Ty,int,int,int,int>(_Alloc &,_Objty *const ,int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Alloc=std::allocator<DirectX::XMFLOAT4>,
+              _Ty=DirectX::XMFLOAT4,
+              _Objty=DirectX::XMFLOAT4
+          ] (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp)
+  Character.cpp
+  AiCharacter.cpp
+  Blackboard.cpp
+  Controller.cpp
+  Debugger.cpp
+  Group.cpp
+  MachineBlocks.cpp
+  MachineFile.cpp
+  MachineInstance.cpp
+  Navigation.cpp
+  Query.cpp
+  StateMachine.cpp
+  Tasks.cpp
+  World.cpp
+  CharacterController.cpp
+  GameSession.cpp
+  Game.cpp
+  Player.cpp
+  ImpostorAtlas.cpp
+  Material.cpp
+  MeshData.cpp
+  MaterialAsset.cpp
+  ScriptCatalog.cpp
+  ScriptProgram.cpp
+  ScriptInstance.cpp
+  MeshPrimitives.cpp
+  MeshSimplifier.cpp
+  MeshValidation.cpp
+  AudioEngine.cpp
+  AudioStream.cpp
+  DecoderFactory.cpp
+  MediaFoundationDecoder.cpp
+  VoicePool.cpp
+  WavDecoder.cpp
+  FontAtlas.cpp
+  UIElement.cpp
+  UIMarkup.cpp
+  allocator.cpp
+  indexgenerator.cpp
+  simplifier.cpp
+  spatialorder.cpp
+  vcacheoptimizer.cpp
+  vfetchoptimizer.cpp
+  TextureLoader.cpp
+  ShaderCompiler.cpp
+  SkeletalAnimation.cpp
+  SkeletalBaker.cpp
+  SkeletalLoaderAssimp.cpp
+  SkeletalMeshComponent.cpp
+  Paths.cpp
+  VirtualFileSystem.cpp
+  VfsRead.cpp
+  LocalVfs.cpp
+  HostVfsProxy.cpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(4813,18): warning C4244: =: преобразование "const wchar_t" в "char", возможна потеря данных (компилируется исходный файл Source\MainGame\BaseGameClass\Game.cpp) [E:\Engine\Engine\Engine.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(4813,18): message : контекст создания экземпляра шаблона (сначала самый старый) (компилируется исходный файл Source\MainGame\BaseGameClass\Game.cpp) [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\MainGame\BaseGameClass\Game.cpp(727,21): message : выполняется компиляция ссылки на экземпляр шаблон функции "std::basic_string<char,std::char_traits<char>,std::allocator<char>> &std::basic_string<char,std::char_traits<char>,std::allocator<char>>::assign<std::_String_const_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(const _Iter,const _Iter)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Elem=wchar_t,
+              _Iter=std::_String_const_iterator<std::_String_val<std::_Simple_types<wchar_t>>>
+          ]
+E:\Engine\Engine\Source\MainGame\BaseGameClass\Game.cpp(727,27): message : см. первую ссылку на "std::basic_string<char,std::char_traits<char>,std::allocator<char>>::assign" в "Game::CreateDeviceAndSwapChain" [E:\Engine\Engine\Engine.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xstring(1669,32): message : выполняется компиляция ссылки на экземпляр шаблон функции "std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<const wchar_t*,0>(_Iter,_Iter,const _Alloc &)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Iter=const wchar_t *,
+              _Alloc=std::allocator<char>
+          ] (компилируется исходный файл Source\MainGame\BaseGameClass\Game.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xstring(812,17): message : выполняется компиляция ссылки на экземпляр шаблон функции "void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_iter<const wchar_t*,const wchar_t*,_Size_type>(_Iter,const _Sent,_Size)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Size_type=unsigned __int64,
+              _Iter=const wchar_t *,
+              _Sent=const wchar_t *,
+              _Size=unsigned __int64
+          ] (компилируется исходный файл Source\MainGame\BaseGameClass\Game.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xstring(968,18): message : выполняется компиляция ссылки на экземпляр шаблон функции "_OutIt *std::_Copy_n_unchecked4<const wchar_t*,_Size,char*>(_InIt,_SizeTy,_OutIt)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _OutIt=char *,
+              _Size=unsigned __int64,
+              _InIt=const wchar_t *,
+              _SizeTy=unsigned __int64
+          ] (компилируется исходный файл Source\MainGame\BaseGameClass\Game.cpp)
+  VfsService.cpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(476,82): warning C4244: аргумент: преобразование "_Ty" в "float", возможна потеря данных [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(476,82): message : контекст создания экземпляра шаблона (сначала самый старый) (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp) [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\Components\SpecificComponents\SkeletalMeshComponent.cpp(200,49): message : выполняется компиляция ссылки на экземпляр шаблон функции "DirectX::XMFLOAT4 &std::vector<DirectX::XMFLOAT4,std::allocator<DirectX::XMFLOAT4>>::emplace_back<int,int,int,int>(int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\Components\SpecificComponents\SkeletalMeshComponent.cpp(200,61): message : см. первую ссылку на "std::vector<DirectX::XMFLOAT4,std::allocator<DirectX::XMFLOAT4>>::emplace_back" в "SkeletalMeshComponent::SetModel" [E:\Engine\Engine\Engine.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(924,24): message : выполняется компиляция ссылки на экземпляр шаблон функции "_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_one_at_back<int,int,int,int>(int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=DirectX::XMFLOAT4
+          ] (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(845,20): message : выполняется компиляция ссылки на экземпляр шаблон функции "_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_back_with_unused_capacity<int,int,int,int>(int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=DirectX::XMFLOAT4
+          ] (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(860,18): message : выполняется компиляция ссылки на экземпляр шаблон функции "void std::_Construct_in_place<DirectX::XMFLOAT4,_Ty,_Ty,_Ty,_Ty>(DirectX::XMFLOAT4 &,_Ty &&,_Ty &&,_Ty &&,_Ty &&) noexcept" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(732,103): warning C4244: аргумент: преобразование "_Ty" в "float", возможна потеря данных [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(732,103): message : контекст создания экземпляра шаблона (сначала самый старый) (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp) [E:\Engine\Engine\Engine.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(848,17): message : выполняется компиляция ссылки на экземпляр шаблон функции "DirectX::XMFLOAT4 *std::vector<DirectX::XMFLOAT4,std::allocator<DirectX::XMFLOAT4>>::_Emplace_reallocate<_Ty,_Ty,_Ty,_Ty>(DirectX::XMFLOAT4 *const ,_Ty &&,_Ty &&,_Ty &&,_Ty &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(900,23): message : выполняется компиляция ссылки на экземпляр шаблон функции "void std::_Default_allocator_traits<_Alloc>::construct<_Ty,int,int,int,int>(_Alloc &,_Objty *const ,int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Alloc=std::allocator<DirectX::XMFLOAT4>,
+              _Ty=DirectX::XMFLOAT4,
+              _Objty=DirectX::XMFLOAT4
+          ] (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp)
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  MOC FileService.h
+  MOC MainWindow.h
+  MOC ObjectInspectorPanel.h
+  MOC ViewportWidget.h
+  pch.cpp
+  Module.cpp
+  QtHost.cpp
+  EditorHistory.cpp
+  ViewportCommandHandler.cpp
+  AssetCommandHandler.cpp
+  SceneCommandHandler.cpp
+  EditorApp.cpp
+  EditorTheme.cpp
+  EditorStyles.cpp
+  DockLayoutManager.cpp
+  MainToolBar.cpp
+  IconProvider.cpp
+  ImportSettingsDialog.cpp
+  ModelImportEditFlow.cpp
+  PlaySettingsDialog.cpp
+  ExternalGameRunner.cpp
+  MainWindow.cpp
+  AssetTools.cpp
+  ImportCommands.cpp
+  AssetDeleteCommand.cpp
+  FileBrowser.cpp
+  ViewportWidget.cpp
+  ViewportWidget_Input.cpp
+  ViewportOverlayHelper.cpp
+  ObjectInspectorPanel.cpp
+  ObjectInspectorLight.cpp
+  ProjectProperties.cpp
+  SceneObjectsPanel.cpp
+  MaterialEditorWindow.cpp
+  MaterialTextureTools.cpp
+  MaterialGraphWidget.cpp
+  GraphEditorWidget.cpp
+  ScriptGraphWidget.cpp
+  ScriptEditorWindow.cpp
+  FsmBlockListEditor.cpp
+  FsmGraphWidget.cpp
+  AiMachineEditorWindow.cpp
+  Logger.cpp
+  CommandRegistry.cpp
+  FileService.cpp
+  EditorLocale.cpp
+  GizmoMath.cpp
+  ViewportOverlay.cpp
+  GizmoGeometry.cpp
+  GizmoTriangles.cpp
+  EditorSettings.cpp
+  SettingsService.cpp
+  AssetOps.cpp
+  HlslGraphCompiler.cpp
+  MaterialGraphModel.cpp
+  GraphDocument.cpp
+  GraphSchema.cpp
+  GraphHistory.cpp
+  GraphClipboard.cpp
+  GraphSchemaRegistry.cpp
+  GraphLayout.cpp
+  MaterialGraphSchema.cpp
+  CodeGraphSchema.cpp
+  FsmGraphSchema.cpp
+  ScriptMessages.cpp
+  SceneFile.cpp
+  ImportSettings.cpp
+  ModelImportSidecar.cpp
+  ModelImportSidecarTransaction.cpp
+  Terminal.cpp
+  UIEditorWindow.cpp
+  HudTools.cpp
+  CodeTools.cpp
+  ImportMigration.cpp
+E:\Engine\Editor\Source\MainWindow.cpp(332,32): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(340,33): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(344,31): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(348,35): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(356,37): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(376,30): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(377,30): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(378,35): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+  moc_Logger.cpp
+  moc_CommandRegistry.cpp
+  moc_FileService.cpp
+  UIElement.cpp
+  UIMarkup.cpp
+  FontAtlas.cpp
+  moc_MainWindow.cpp
+  moc_ViewportWidget.cpp
+  moc_ObjectInspectorPanel.cpp
+  moc_SceneObjectsPanel.cpp
+  moc_MaterialEditorWindow.cpp
+  moc_MainToolBar.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Editor.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Editor.exp
+  Создание кода
+  Создание кода завершено
+  EditorModule.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Editor.dll
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator.cpp
+  ComponentGenerator.vcxproj -> E:\Engine\Engine\build\x64\Release\ComponentGenerator.exe
+  ComponentGenerator: 2 component(s), RuntimeExample
+  Module.cpp
+  GeneratedComponents.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Projects/RuntimeExample/Game.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Projects/RuntimeExample/Game.exp
+  RuntimeExample.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Projects\RuntimeExample\Game.dll
+  Module.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Templates/SceneProject/Game.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Templates/SceneProject/Game.exp
+  SceneProject.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Templates\SceneProject\Game.dll
+  Main.cpp
+  Project.cpp
+  PreviewScenes.cpp
+  OrderedSceneGame.cpp
+  TrianglesScene.cpp
+  PongGame.cpp
+  PongScene.cpp
+  Ball.cpp
+  Rocket.cpp
+  Wall.cpp
+  SunGame.cpp
+  BattleGame.cpp
+  BattleAi.cpp
+  BattleBench.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EngineRuntime.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EngineRuntime.exp
+  EngineRuntime.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\EngineRuntime.exe
+  Main.cpp
+  Project.cpp
+  EngineLauncher.vcxproj -> E:\Engine\Game\build\x64\Release\EngineLauncher.exe
+  Tutorial ready: E:\Engine\Game\build\x64\Release\Tutorials\AiTutorial
+  No compatible x64 C++ tools. Required MSVC >= 14.29.30133, v142. Found: v143 14.40.33807, v143 14.44.35207. Install the
+   matching MSVC component in Visual Studio Installer (VS 2019 or newer).
+  E:\Engine\Engine\BuildSupport\Toolchain.ps1:100 знак:9
+  +         throw "No compatible x64 C++ tools. Required MSVC >= $Minimum ...
+  +         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + CategoryInfo          : OperationStopped: (No compatible x...2019 or newer).:String) [], RuntimeException
+      + FullyQualifiedErrorId : No compatible x64 C++ tools. Required MSVC >= 14.29.30133, v142. Found: v143 14.40.33807 
+     , v143 14.44.35207. Install the matching MSVC component in Visual Studio Installer (VS 2019 or newer).
+   
+E:\Engine\Game\Launcher\EngineLauncher.vcxproj(36,5): error MSB3073: выход из команды "powershell.exe -NoProfile -ExecutionPolicy Bypass -File "E:\Engine\Engine\BuildSupport\..\..\Engine/BuildSupport/New-ProjectSdk.ps1" -Runtime "E:\Engine\Engine\BuildSupport\..\..\Game\build\x64\Release\Runtime" -Configuration Release -PlatformToolset v143 -Assimp true " с кодом 1.
+  SoundDecoderTests.cpp
+  EngineTests.cpp
+  PrimitiveApiTests.cpp
+  GameSettingsTests.cpp
+  SceneTests.cpp
+  TraceTests.cpp
+  TraceExamples.cpp
+  SceneBatchTests.cpp
+  AuthoringTests.cpp
+  ScriptTests.cpp
+  AiMachineExtensionTests.cpp
+  VfsLifecycleTests.cpp
+  VfsServiceTests.cpp
+  VfsServiceReadTests.cpp
+  VfsProxyLifecycleTests.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\EngineTests.lib и объект E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\EngineTests.exp
+  EngineTests.vcxproj -> E:\Engine\Engine\build\x64\Release\EngineTests.exe
+  ComponentGenerator: 1 component(s), BasicExamples
+  Main.cpp
+  TrianglesScene.cpp
+  CubeScene.cpp
+  MaterialsScene.cpp
+  ScriptsScene.cpp
+  OrderedSceneGame.cpp
+  GeneratedComponents.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game\build\x64\Release\BasicExamples\BasicExamples.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game\build\x64\Release\BasicExamples\BasicExamples.exp
+  BasicExamples.vcxproj -> E:\Engine\Game\build\x64\Release\BasicExamples\BasicExamples.exe
+  ComponentGenerator: 0 component(s), Pong
+  Ball.cpp
+  Main.cpp
+  PongGame.cpp
+  PongScene.cpp
+  Rocket.cpp
+  Wall.cpp
+  GeneratedComponents.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game\build\x64\Release\Pong\Pong.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game\build\x64\Release\Pong\Pong.exp
+  Pong.vcxproj -> E:\Engine\Game\build\x64\Release\Pong\Pong.exe
+  ComponentGenerator: 0 component(s), SunGame
+  Main.cpp
+  SunGame.cpp
+  GeneratedComponents.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game\build\x64\Release\SunGame\SunGame.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game\build\x64\Release\SunGame\SunGame.exp
+  SunGame.vcxproj -> E:\Engine\Game\build\x64\Release\SunGame\SunGame.exe
+  Main.cpp
+  BattleGame.cpp
+  BattleBench.cpp
+  BattleAi.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game\build\x64\Release\Battle\Battle.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game\build\x64\Release\Battle\Battle.exp
+  Battle.vcxproj -> E:\Engine\Game\build\x64\Release\Battle\Battle.exe
+

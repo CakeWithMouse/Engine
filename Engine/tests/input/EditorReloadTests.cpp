@@ -58,6 +58,20 @@ int wmain(int argc,wchar_t** argv) {
         if(result!=EngineSceneOk) std::cerr<<error<<'\n';
         Check(result==EngineSceneOk,"reload commits candidate with same HWND"); api=module.Api();
         Check(api.context!=previousContext,"session replaced without closing window");
+        const auto ai=module.AiMachineApi();
+        Check(ai.context==api.context && ai.describe && ai.listUnits,
+            "AI extension follows reloaded session");
+        std::string catalog;
+        Check(ai.describe(ai.context,[](void* p,const char* text){*static_cast<std::string*>(p)=text?text:"";},&catalog)==EngineSceneOk && !catalog.empty(),
+            "AI catalog callable after unloading old DLL");
+        Check(module.ScriptApi().context==api.context && module.ScriptApi().check,
+            "script extension follows reloaded session");
+        Check(module.GraphTraceApi().context==api.context && module.GraphTraceApi().read,
+            "graph trace extension follows reloaded session");
+        Check(module.PointLightV2Api().context==api.scene.context && module.PointLightV2Api().set,
+            "point light extension follows reloaded session");
+        Check(module.AssetImportApi().context==api.context && module.AssetImportApi().importWithOptions,
+            "asset import extension follows reloaded session");
         const auto overlay=module.ViewportOverlayApi();
         Check(overlay.context==api.context,"overlay extension follows new DLL session");
         const auto cursor=module.ViewportCursorApi();
@@ -100,6 +114,9 @@ int wmain(int argc,wchar_t** argv) {
         Check(api.control(api.context,EngineStop)==EngineSceneOk,"final Stop");
         Check(module.Reload(original,checkpoint,window,320,240,error,sizeof(error))==EngineSceneOk,"second reload");
         Check(module.ViewportOverlayApi().context==module.Api().context,"overlay follows repeated reload");
+        Check(module.AiMachineApi().context==module.Api().context && module.ScriptApi().context==module.Api().context &&
+            module.GraphTraceApi().context==module.Api().context && module.PointLightV2Api().context==module.Api().scene.context &&
+            module.AssetImportApi().context==module.Api().context,"all new extensions follow repeated reload");
         std::cout<<"Editor reload: "<<checks<<" checks passed\n";return 0;
     } catch(const std::exception& e) {std::cerr<<e.what()<<'\n';return 1;}
 }

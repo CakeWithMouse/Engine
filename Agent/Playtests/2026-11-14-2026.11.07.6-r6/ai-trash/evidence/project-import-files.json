@@ -1,0 +1,12 @@
+{
+  "importSettings": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\ai-trash\\FreshTrash\\Content\\Models\\Moved\\blend-suzanne-multiple.glb.importsettings.json",
+  "sourceSidecar": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\ai-trash\\FreshTrash\\Content\\Models\\Moved\\blend-suzanne-multiple.glb.source.json",
+  "sourceSidecarExists": true,
+  "assetExists": true,
+  "asset": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\ai-trash\\FreshTrash\\Content\\Models\\Moved\\blend-suzanne-multiple.glb",
+  "importSettingsExists": true,
+  "settings": {
+    "scale": 0.009999999776482582,
+    "version": 1
+  }
+}

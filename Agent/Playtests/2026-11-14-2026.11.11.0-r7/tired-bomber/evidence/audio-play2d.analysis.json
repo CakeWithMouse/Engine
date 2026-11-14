@@ -1,0 +1,51 @@
+{
+  "device": "Speakers (2- Realtek(R) Audio)",
+  "sample_rate": 48000,
+  "channels": 1,
+  "bits": 16,
+  "windows": 120,
+  "frequency_hz": 997.0,
+  "baseline_max_abs_correlation": 0.0,
+  "play_mean_abs_correlation": 0.06094341902011205,
+  "play_mean_rms": 0.045940637218459195,
+  "post_max_rms": 0.0,
+  "active_window_count": 48,
+  "active_windows": [
+    {
+      "index": 20,
+      "start": 2.0,
+      "rms": 0.0,
+      "matched_amplitude": 0.0
+    },
+    {
+      "index": 21,
+      "start": 2.1,
+      "rms": 0.0,
+      "matched_amplitude": 0.0
+    },
+    {
+      "index": 22,
+      "start": 2.2,
+      "rms": 0.0,
+      "matched_amplitude": 0.0
+    },
+    {
+      "index": 77,
+      "start": 7.7,
+      "rms": 0.0,
+      "matched_amplitude": 0.0
+    },
+    {
+      "index": 78,
+      "start": 7.8,
+      "rms": 0.0,
+      "matched_amplitude": 0.0
+    },
+    {
+      "index": 79,
+      "start": 7.9,
+      "rms": 0.0,
+      "matched_amplitude": 0.0
+    }
+  ]
+}

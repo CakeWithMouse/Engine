@@ -3,7 +3,8 @@ param(
     [ValidateSet('All','Engine','EngineRuntime','EngineLauncher','BasicExamples','Pong','SunGame','Battle','Katamari')][string]$Target = 'All',
     [string]$PlatformToolset = 'auto',
     [Nullable[bool]]$EnableAssimp = $null,
-    [switch]$DisableAssimp
+    [switch]$DisableAssimp,
+    [switch]$LocalSdk
 )
 $ErrorActionPreference = 'Stop'
 
@@ -66,7 +67,7 @@ function Test-QtAvailable {
 
 function Build-Project([string]$relativePath, [bool]$alone) {
     & $invoke -Project (Join-Path $PSScriptRoot $relativePath) -Configuration $Configuration `
-        -PlatformToolset $PlatformToolset -EnableAssimp:$useAssimp -SkipProjectReferences:$alone
+        -PlatformToolset $PlatformToolset -EnableAssimp:$useAssimp -SkipProjectReferences:$alone -LocalSdk:$LocalSdk
 }
 
 $project = switch ($Target) {

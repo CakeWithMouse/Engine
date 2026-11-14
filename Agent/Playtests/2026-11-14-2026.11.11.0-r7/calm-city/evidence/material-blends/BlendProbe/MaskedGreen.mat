@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "shader": "MaskedGreen.hlsl",
+  "render": {
+    "blend": "masked",
+    "lighting": "unlit",
+    "alphaClip": 0.5,
+    "twoSided": true
+  },
+  "textures": {
+    "MaskMap": "Mask.png"
+  }
+}

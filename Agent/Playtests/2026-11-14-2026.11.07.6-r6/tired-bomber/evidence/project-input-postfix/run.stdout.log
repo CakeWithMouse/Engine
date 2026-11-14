@@ -1,0 +1,2645 @@
+[VfsRead] using local VFS (no host service)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+[TiredBomber] subsystem initialized
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[TiredBomber] settings vsync=0 aa=1 mode=0 adapter=
+[MaterialSlotsProbe] target slots=2 sourceID=0 path=/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat sourceID=1 path=/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat
+[MaterialSlotsProbe] changed=1 unknownIdRejected=1 overrideSet=1 overrideCleared=1 slotRestored=1
+[TiredBomber] mesh check usable=0 triangles=12 configured=1 lowLOD=12 sphere=224 sphereLOD=130 error=0
+asset-check procedural cube (default unit profile): 12 triangles, 24 vertices, size 1.00 x 1.00 x 1.00 m, pivot y -0.50, uv yes, NOT USABLE
+  problem: Pivot is not on the ground: the lowest point is at y = -0.50 m. Move the model so that its tracks or wheels touch y = 0.
+[TiredBomber] trace filter channel=1 -> ground
+[TiredBomber] trace filter channel=2 -> unit
+[TiredBomber] scene ready: 4 moving units, orthographic XZ camera, W/A/S/D controller, B drops a bomb
+[TiredBomber] subsystem scene ready: Main
+[TiredBomber] GetSubsystem after startup=available
+[TiredBomber] marker instances drawn=0 total=13 LODs=1 lod0=0
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+auto-lod mesh LOD1: 12 -> 12 triangles (target 6, error 0, silhouette drift 0%)
+auto-lod mesh LOD2: 12 -> 12 triangles (target 3, error 0, silhouette drift 0%)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+auto-lod mesh LOD1: 12 -> 12 triangles (target 6, error 0, silhouette drift 0%)
+auto-lod mesh LOD2: 12 -> 12 triangles (target 3, error 0, silhouette drift 0%)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/BomberUpgrade/Content/Models/blend-uv/Textures/BaseColor_0.png (64x64)
+Material E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/BomberUpgrade/Content/Models/blend-suzanne-multiple/Materials/Material_0.mat: params.Tint is not declared by the shader
+Material E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/BomberUpgrade/Content/Models/blend-suzanne-multiple/Materials/Material_0.mat: textures.BaseMap is not declared by the shader
+Material E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/BomberUpgrade/Content/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat: params.Tint is not declared by the shader
+Material E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/BomberUpgrade/Content/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat: textures.BaseMap is not declared by the shader
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+FontAtlas: 161 glyphs at 14 px in a 512x128 atlas.
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\BomberUpgrade\Content/tired-bomber-frame.bmp written=1 size=640x480
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 640x480
+[TiredBomber] marker instances drawn=11 total=13 LODs=3 lod0=0 lod1=0 lod2=11
+[TiredBomber] completed frame valid=1 index=59 draws=89 instances=120 visible=10 culled=0
+[TiredBomber] LOD component=Bomber.LOD.ScreenHeightProbe frame=59 prepared=1 drawn=1/1 hidden=0 distance=0 frustum=0 camera=24..24 thresholds=50,20, perLOD=0,1,0,
+[TiredBomber] LOD component=Bomber.Markers.LOD frame=59 prepared=1 drawn=11/13 hidden=1 distance=0 frustum=1 camera=24.5967..46.545 thresholds=9,17, perLOD=0,0,11,
+[LOD panel] RENDER / LOD    F7 hide | F8 next
+[LOD panel] Frame 59 | CPU submission counters
+[LOD panel] Draws 89  instances 120  dispatch 0
+[LOD panel] Indices 222327 (all passes)
+[LOD panel] Component 1/2  Bomber.LOD.ScreenHeightProbe
+[LOD panel] Color visible 1 / 1
+[LOD panel] Hidden 0  distance 0  frustum 0
+[LOD panel] Camera distance 24.0..24.0
+[LOD panel] Draw limit off | LOD by screen pixels
+[LOD panel] LOD0 mesh: 0 | next < 50.0 px
+[LOD panel] LOD1 mesh: 1 | next < 20.0 px
+[LOD panel] LOD2 mesh: 0
+[LOD panel] Buckets may overlap during LOD fade
+[LOD panel] Color selection only; shadows counted separately
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\BomberUpgrade\Content/lod-camera-24.bmp written=1 size=640x480
+[TiredBomber] player position x=-10 y=0.5 z=5 t=1.008s
+[TiredBomber] bomb released at t=1.008s
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[TiredBomber] diagnostics camera moved to Y=8 at frame 90
+[TiredBomber] save completion status=0 ticket=0 message=
+[TiredBomber] completed-frame snapshot after near-camera move
+[TiredBomber] completed frame valid=1 index=109 draws=95 instances=133 visible=11 culled=0
+[TiredBomber] LOD component=Bomber.LOD.ScreenHeightProbe frame=109 prepared=1 drawn=1/1 hidden=0 distance=0 frustum=0 camera=8..8 thresholds=50,20, perLOD=0,1,0,
+[TiredBomber] LOD component=Bomber.Markers.LOD frame=109 prepared=1 drawn=11/13 hidden=1 distance=0 frustum=1 camera=9.96996..40.7534 thresholds=9,17, perLOD=0,11,0,
+[LOD panel] RENDER / LOD    F7 hide | F8 next
+[LOD panel] Frame 109 | CPU submission counters
+[LOD panel] Draws 95  instances 133  dispatch 0
+[LOD panel] Indices 225339 (all passes)
+[LOD panel] Component 1/2  Bomber.LOD.ScreenHeightProbe
+[LOD panel] Color visible 1 / 1
+[LOD panel] Hidden 0  distance 0  frustum 0
+[LOD panel] Camera distance 8.0..8.0
+[LOD panel] Draw limit off | LOD by screen pixels
+[LOD panel] LOD0 mesh: 0 | next < 50.0 px
+[LOD panel] LOD1 mesh: 1 | next < 20.0 px
+[LOD panel] LOD2 mesh: 0
+[LOD panel] Buckets may overlap during LOD fade
+[LOD panel] Color selection only; shadows counted separately
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\BomberUpgrade\Content/lod-camera-8.bmp written=1 size=640x480
+[TiredBomber] HIT unit id=7 t=1.936s trace=Hit queries=60 triangles=28
+[TiredBomber] GPU spark burst started (256, depth collision, sorting)
+[Info] Overlay: entered, pipelineReady=1, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Frame 121: AntialiasingMode = 1 (FXAA), bb = 640x480
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\BomberUpgrade\Content/tired-bomber-hit-1.bmp written=1 size=640x480
+[TiredBomber] player position x=-10 y=0.5 z=5 t=2.016s
+[TiredBomber] screen-height probe same orthoHeight=24 at camera Y=24
+[TiredBomber] subsystem scene closing: Main
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "frames": 150,
+    "ok": true,
+    "steps": [
+        {
+            "kind": "control",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        48,
+                        1,
+                        24
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        10,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat"
+                        },
+                        "version": 1
+                    },
+                    "scale": [
+                        2.5,
+                        2.5,
+                        2.5
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 5,
+                    "material": "/Game/Models/blend-uv/Materials/Material_0.mat",
+                    "name": "UV.Control",
+                    "parent": 0,
+                    "position": [
+                        -11,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": ""
+                        },
+                        "version": 1
+                    },
+                    "scale": [
+                        4,
+                        4,
+                        4
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ProbeSun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 1,
+                        "shadowDistance": 100,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Directional"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bomber.Unit.1",
+                    "parent": 0,
+                    "position": [
+                        -6,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bomber.Unit.2",
+                    "parent": 0,
+                    "position": [
+                        -2,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bomber.Unit.3",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Bomber.Unit.4",
+                    "parent": 0,
+                    "position": [
+                        6,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Bomber.Markers.LOD",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "Bomber.Camera",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        24,
+                        0
+                    ],
+                    "projectData": {
+                        "farClip": 100,
+                        "fov": 60,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 24,
+                        "orthographic": true,
+                        "version": 1,
+                        "viewPlane": 2
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "Bomber.Player",
+                    "parent": 0,
+                    "position": [
+                        -10,
+                        0.5,
+                        5
+                    ],
+                    "projectData": {
+                        "camera": 13,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": true,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "Bomber.HUD",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberHud"
+                }
+            ]
+        },
+        {
+            "kind": "focus",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        48,
+                        1,
+                        24
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        10,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat"
+                        },
+                        "version": 1
+                    },
+                    "scale": [
+                        2.5,
+                        2.5,
+                        2.5
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 5,
+                    "material": "/Game/Models/blend-uv/Materials/Material_0.mat",
+                    "name": "UV.Control",
+                    "parent": 0,
+                    "position": [
+                        -11,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": ""
+                        },
+                        "version": 1
+                    },
+                    "scale": [
+                        4,
+                        4,
+                        4
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ProbeSun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 1,
+                        "shadowDistance": 100,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Directional"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bomber.Unit.1",
+                    "parent": 0,
+                    "position": [
+                        -6,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bomber.Unit.2",
+                    "parent": 0,
+                    "position": [
+                        -2,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bomber.Unit.3",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Bomber.Unit.4",
+                    "parent": 0,
+                    "position": [
+                        6,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Bomber.Markers.LOD",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "Bomber.Camera",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        24,
+                        0
+                    ],
+                    "projectData": {
+                        "farClip": 100,
+                        "fov": 60,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 24,
+                        "orthographic": true,
+                        "version": 1,
+                        "viewPlane": 2
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "Bomber.Player",
+                    "parent": 0,
+                    "position": [
+                        -10,
+                        0.5,
+                        5
+                    ],
+                    "projectData": {
+                        "camera": 13,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": true,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "Bomber.HUD",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberHud"
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        48,
+                        1,
+                        24
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        11.238962173461914,
+                        0.41999998688697815,
+                        -1.517198920249939
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat"
+                        },
+                        "version": 1
+                    },
+                    "scale": [
+                        2.5,
+                        2.5,
+                        2.5
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 5,
+                    "material": "/Game/Models/blend-uv/Materials/Material_0.mat",
+                    "name": "UV.Control",
+                    "parent": 0,
+                    "position": [
+                        -11,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": ""
+                        },
+                        "version": 1
+                    },
+                    "scale": [
+                        4,
+                        4,
+                        4
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ProbeSun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 1,
+                        "shadowDistance": 100,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Directional"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bomber.Unit.1",
+                    "parent": 0,
+                    "position": [
+                        -4.655859470367432,
+                        0.41999998688697815,
+                        -1.78278648853302
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bomber.Unit.2",
+                    "parent": 0,
+                    "position": [
+                        -2.2310681343078613,
+                        0.41999998688697815,
+                        1.6256122589111328
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bomber.Unit.3",
+                    "parent": 0,
+                    "position": [
+                        0.6922399997711182,
+                        0.41999998688697815,
+                        -2.5198495388031006
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Bomber.Unit.4",
+                    "parent": 0,
+                    "position": [
+                        6.436967849731445,
+                        0.41999998688697815,
+                        1.9541678428649902
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Bomber.Markers.LOD",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "Bomber.Camera",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        24,
+                        0
+                    ],
+                    "projectData": {
+                        "farClip": 100,
+                        "fov": 60,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 24,
+                        "orthographic": true,
+                        "version": 1,
+                        "viewPlane": 2
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "Bomber.Player",
+                    "parent": 0,
+                    "position": [
+                        -10,
+                        0.5,
+                        5
+                    ],
+                    "projectData": {
+                        "camera": 13,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": true,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "Bomber.HUD",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberHud"
+                },
+                {
+                    "id": 17,
+                    "material": "",
+                    "name": "Bomber.HitSparks",
+                    "parent": 0,
+                    "position": [
+                        -4.665158271789551,
+                        0.7200000286102295,
+                        -1.7003206014633179
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberSparks"
+                }
+            ]
+        },
+        {
+            "kind": "control",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        48,
+                        1,
+                        24
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        11.238962173461914,
+                        0.41999998688697815,
+                        -1.517198920249939
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat"
+                        },
+                        "version": 1
+                    },
+                    "scale": [
+                        2.5,
+                        2.5,
+                        2.5
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 5,
+                    "material": "/Game/Models/blend-uv/Materials/Material_0.mat",
+                    "name": "UV.Control",
+                    "parent": 0,
+                    "position": [
+                        -11,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": ""
+                        },
+                        "version": 1
+                    },
+                    "scale": [
+                        4,
+                        4,
+                        4
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ProbeSun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 1,
+                        "shadowDistance": 100,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Directional"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bomber.Unit.1",
+                    "parent": 0,
+                    "position": [
+                        -4.655859470367432,
+                        0.41999998688697815,
+                        -1.78278648853302
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bomber.Unit.2",
+                    "parent": 0,
+                    "position": [
+                        -2.2310681343078613,
+                        0.41999998688697815,
+                        1.6256122589111328
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bomber.Unit.3",
+                    "parent": 0,
+                    "position": [
+                        0.6922399997711182,
+                        0.41999998688697815,
+                        -2.5198495388031006
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Bomber.Unit.4",
+                    "parent": 0,
+                    "position": [
+                        6.436967849731445,
+                        0.41999998688697815,
+                        1.9541678428649902
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Bomber.Markers.LOD",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "Bomber.Camera",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        24,
+                        0
+                    ],
+                    "projectData": {
+                        "farClip": 100,
+                        "fov": 60,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 24,
+                        "orthographic": true,
+                        "version": 1,
+                        "viewPlane": 2
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "Bomber.Player",
+                    "parent": 0,
+                    "position": [
+                        -10,
+                        0.5,
+                        5
+                    ],
+                    "projectData": {
+                        "camera": 13,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": true,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "Bomber.HUD",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberHud"
+                },
+                {
+                    "id": 17,
+                    "material": "",
+                    "name": "Bomber.HitSparks",
+                    "parent": 0,
+                    "position": [
+                        -4.665158271789551,
+                        0.7200000286102295,
+                        -1.7003206014633179
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberSparks"
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        48,
+                        1,
+                        24
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        11.238962173461914,
+                        0.41999998688697815,
+                        -1.517198920249939
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat"
+                        },
+                        "version": 1
+                    },
+                    "scale": [
+                        2.5,
+                        2.5,
+                        2.5
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 5,
+                    "material": "/Game/Models/blend-uv/Materials/Material_0.mat",
+                    "name": "UV.Control",
+                    "parent": 0,
+                    "position": [
+                        -11,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": ""
+                        },
+                        "version": 1
+                    },
+                    "scale": [
+                        4,
+                        4,
+                        4
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ProbeSun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 1,
+                        "shadowDistance": 100,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Directional"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bomber.Unit.1",
+                    "parent": 0,
+                    "position": [
+                        -4.655859470367432,
+                        0.41999998688697815,
+                        -1.78278648853302
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bomber.Unit.2",
+                    "parent": 0,
+                    "position": [
+                        -2.2310681343078613,
+                        0.41999998688697815,
+                        1.6256122589111328
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bomber.Unit.3",
+                    "parent": 0,
+                    "position": [
+                        0.6922399997711182,
+                        0.41999998688697815,
+                        -2.5198495388031006
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Bomber.Unit.4",
+                    "parent": 0,
+                    "position": [
+                        6.436967849731445,
+                        0.41999998688697815,
+                        1.9541678428649902
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Bomber.Markers.LOD",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "Bomber.Camera",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        24,
+                        0
+                    ],
+                    "projectData": {
+                        "farClip": 100,
+                        "fov": 60,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 24,
+                        "orthographic": true,
+                        "version": 1,
+                        "viewPlane": 2
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "Bomber.Player",
+                    "parent": 0,
+                    "position": [
+                        -10,
+                        0.5,
+                        5
+                    ],
+                    "projectData": {
+                        "camera": 13,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": true,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "Bomber.HUD",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberHud"
+                },
+                {
+                    "id": 17,
+                    "material": "",
+                    "name": "Bomber.HitSparks",
+                    "parent": 0,
+                    "position": [
+                        -4.665158271789551,
+                        0.7200000286102295,
+                        -1.7003206014633179
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberSparks"
+                }
+            ]
+        },
+        {
+            "kind": "control",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        48,
+                        1,
+                        24
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        11.238962173461914,
+                        0.41999998688697815,
+                        -1.517198920249939
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat"
+                        },
+                        "version": 1
+                    },
+                    "scale": [
+                        2.5,
+                        2.5,
+                        2.5
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 5,
+                    "material": "/Game/Models/blend-uv/Materials/Material_0.mat",
+                    "name": "UV.Control",
+                    "parent": 0,
+                    "position": [
+                        -11,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": ""
+                        },
+                        "version": 1
+                    },
+                    "scale": [
+                        4,
+                        4,
+                        4
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ProbeSun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 1,
+                        "shadowDistance": 100,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Directional"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bomber.Unit.1",
+                    "parent": 0,
+                    "position": [
+                        -4.655859470367432,
+                        0.41999998688697815,
+                        -1.78278648853302
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bomber.Unit.2",
+                    "parent": 0,
+                    "position": [
+                        -2.2310681343078613,
+                        0.41999998688697815,
+                        1.6256122589111328
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bomber.Unit.3",
+                    "parent": 0,
+                    "position": [
+                        0.6922399997711182,
+                        0.41999998688697815,
+                        -2.5198495388031006
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Bomber.Unit.4",
+                    "parent": 0,
+                    "position": [
+                        6.436967849731445,
+                        0.41999998688697815,
+                        1.9541678428649902
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Bomber.Markers.LOD",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "Bomber.Camera",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        24,
+                        0
+                    ],
+                    "projectData": {
+                        "farClip": 100,
+                        "fov": 60,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 24,
+                        "orthographic": true,
+                        "version": 1,
+                        "viewPlane": 2
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "Bomber.Player",
+                    "parent": 0,
+                    "position": [
+                        -10,
+                        0.5,
+                        5
+                    ],
+                    "projectData": {
+                        "camera": 13,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": true,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "Bomber.HUD",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberHud"
+                },
+                {
+                    "id": 17,
+                    "material": "",
+                    "name": "Bomber.HitSparks",
+                    "parent": 0,
+                    "position": [
+                        -4.665158271789551,
+                        0.7200000286102295,
+                        -1.7003206014633179
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberSparks"
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        48,
+                        1,
+                        24
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        11.104028701782227,
+                        0.41999998688697815,
+                        -1.4845134019851685
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat"
+                        },
+                        "version": 1
+                    },
+                    "scale": [
+                        2.5,
+                        2.5,
+                        2.5
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 5,
+                    "material": "/Game/Models/blend-uv/Materials/Material_0.mat",
+                    "name": "UV.Control",
+                    "parent": 0,
+                    "position": [
+                        -11,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": ""
+                        },
+                        "version": 1
+                    },
+                    "scale": [
+                        4,
+                        4,
+                        4
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ProbeSun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 1,
+                        "shadowDistance": 100,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Directional"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bomber.Unit.1",
+                    "parent": 0,
+                    "position": [
+                        -4.682894706726074,
+                        0.41999998688697815,
+                        -1.828871488571167
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bomber.Unit.2",
+                    "parent": 0,
+                    "position": [
+                        -2.4236509799957275,
+                        0.41999998688697815,
+                        1.5861557722091675
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bomber.Unit.3",
+                    "parent": 0,
+                    "position": [
+                        0.7658002376556396,
+                        0.41999998688697815,
+                        -2.4954543113708496
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Bomber.Unit.4",
+                    "parent": 0,
+                    "position": [
+                        6.6651763916015625,
+                        0.41999998688697815,
+                        2.0255613327026367
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1.2000000476837158,
+                        0.6000000238418579,
+                        0.75
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Bomber.Markers.LOD",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "Bomber.Camera",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        24,
+                        0
+                    ],
+                    "projectData": {
+                        "farClip": 100,
+                        "fov": 60,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 24,
+                        "orthographic": true,
+                        "version": 1,
+                        "viewPlane": 2
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "Bomber.Player",
+                    "parent": 0,
+                    "position": [
+                        -10,
+                        0.5,
+                        5
+                    ],
+                    "projectData": {
+                        "camera": 13,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": true,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "Bomber.HUD",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberHud"
+                },
+                {
+                    "id": 17,
+                    "material": "",
+                    "name": "Bomber.HitSparks",
+                    "parent": 0,
+                    "position": [
+                        -4.665158271789551,
+                        0.7200000286102295,
+                        -1.7003206014633179
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "BomberSparks"
+                }
+            ]
+        },
+        {
+            "kind": "control",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        48,
+                        1,
+                        24
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        10,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat"
+                        },
+                        "version": 1
+                    },
+                    "scale": [
+                        2.5,
+                        2.5,
+                        2.5
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 5,
+                    "material": "/Game/Models/blend-uv/Materials/Material_0.mat",
+                    "name": "UV.Control",
+                    "parent": 0,
+                    "position": [
+                        -11,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": ""
+                        },
+                        "version": 1
+                    },
+                    "scale": [
+                        4,
+                        4,
+                        4
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ProbeSun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 1,
+                        "shadowDistance": 100,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Directional"
+                }
+            ]
+        }
+    ]
+}

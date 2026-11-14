@@ -116,6 +116,12 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
             {
                 if (audio.version == 1 && audio.context && audio.play && audio.stop) audio_ = audio;
             }
+            EngineAssetImportApi assetImport{};
+            if (query && query(extensionContext, EngineAssetImportExtension, 1, sizeof(assetImport), &assetImport))
+            {
+                if (assetImport.version == 1 && assetImport.context == extensionContext && assetImport.importWithOptions)
+                    assetImport_ = assetImport;
+            }
         }
         if (!projectContent.empty())
         {
@@ -177,6 +183,9 @@ uint32_t GameEditModule::Reload(const std::filesystem::path& module, const std::
         swap(projectData_, candidate->projectData_); swap(selection_, candidate->selection_); swap(batch_, candidate->batch_); swap(authoring_, candidate->authoring_);
         swap(viewportInput_, candidate->viewportInput_); swap(cursor_, candidate->cursor_); swap(camera_, candidate->camera_);
         swap(overlay_, candidate->overlay_); swap(audio_, candidate->audio_);
+        swap(pointLightV2_, candidate->pointLightV2_); swap(script_, candidate->script_);
+        swap(graphTrace_, candidate->graphTrace_); swap(aiMachine_, candidate->aiMachine_);
+        swap(assetImport_, candidate->assetImport_);
         swap(legacyFactory_, candidate->legacyFactory_); swap(legacy_, candidate->legacy_);
         swap(legacy5Factory_, candidate->legacy5Factory_); swap(legacy5_, candidate->legacy5_);
         // Heap-owned adapter tables move with their DLL, preserving session identity.

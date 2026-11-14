@@ -1,0 +1,1 @@
+exit=0; viewport=1000x600; bmp=1000x600; frames=420; gameScene=Main; captureFrame=410

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "shader": "NativePreviewTeal.hlsl",
+  "render": {
+    "blend": "opaque",
+    "lighting": "unlit",
+    "castShadows": false,
+    "twoSided": true
+  },
+  "params": {
+    "NativePreviewTeal": [
+      0.04,
+      0.82,
+      0.68,
+      1.0
+    ],
+    "Gloss": 0.25
+  }
+}

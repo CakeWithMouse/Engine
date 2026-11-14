@@ -217,9 +217,10 @@ void MaterialGraphWidget::BuildMaterialToolbar()
     auto* paste = new QToolButton(this);
     paste->setText(Tr("Вставить из ИИ", "Paste from AI"));
     connect(paste, &QToolButton::clicked, this, [this] {
-        if (!PasteFromAi(QGuiApplication::clipboard()->text()))
+        QString error;
+        if (!PasteFromAi(QGuiApplication::clipboard()->text(), &error))
             QMessageBox::warning(this, Tr("Граф не вставлен", "Graph not pasted"),
-                Tr("В буфере обмена нет JSON графа с выходом материала.", "The clipboard has no graph JSON with a material output."));
+                error);
     });
     AddToolbarWidget(paste);
 }
@@ -632,8 +633,10 @@ QString MaterialGraphWidget::AiPrompt() const
     return prompt;
 }
 
-bool MaterialGraphWidget::PasteFromAi(const QString& text)
+bool MaterialGraphWidget::PasteFromAi(const QString& text, QString* error)
 {
+    if (error) *error = Tr("В буфере обмена нет корректного JSON графа с выходом материала.",
+                           "The clipboard has no valid graph JSON with a material output.");
     QString json = text.trimmed();
     static const QRegularExpression block(QStringLiteral(R"(```(?:json)?\s*([\s\S]*?)\s*```)"));
     if (const auto match = block.match(json); match.hasMatch()) json = match.captured(1);
@@ -644,6 +647,13 @@ bool MaterialGraphWidget::PasteFromAi(const QString& text)
     // Выдуманная нейросетью нода молча дала бы 0 в HLSL: такой ответ не принимается.
     if (std::any_of(nodes.begin(), nodes.end(), [](const GraphNodeData& n) { return !EditorCore::HlslGraphCompiler::IsKnownNode(n.type); }))
         return false;
+    const auto compiled = EditorCore::HlslGraphCompiler::Compile(model);
+    if (!compiled.problems.isEmpty())
+    {
+        if (error) *error = compiled.problems.constBegin().value();
+        return false;
+    }
+    if (error) error->clear();
     Checkpoint(); // готовый граф и ответ ИИ отменяются, как любая правка
     ReplaceDocument(model);
     NotifyStructure();

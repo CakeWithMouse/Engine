@@ -1,0 +1,71 @@
+{
+    "dialogs": [
+    ],
+    "ok": true,
+    "recoveryCandidates": [
+    ],
+    "recoveryRecords": [
+        {
+            "engineVersion": "2026.11.07.6",
+            "format": 1,
+            "module": "Game.dll",
+            "moduleSha256": "357cdc199ad013ed6f80f2360def4aa3efd671d1e3701518dffe309faab0e493",
+            "project": "E:/Engine/Engine/build/playtests/20261114-r6/continuation-authoring-regression-05/Project/Project.json",
+            "recordPath": "E:/Engine/Engine/build/playtests/20261114-r6/continuation-authoring-regression-05/Project/.painengine/Recovery/d14d6645-68f6-449e-a193-af36dc490427.json",
+            "savedUtc": "2026-11-14T02:12:46.406Z",
+            "snapshot": "d14d6645-68f6-449e-a193-af36dc490427-6c0eef88-6e51-4654-ae7e-754374fb7ecb.scene.json",
+            "sourceScene": ""
+        }
+    ],
+    "steps": [
+        {
+            "action": "recover",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Persisted",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Recovered",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        }
+    ]
+}

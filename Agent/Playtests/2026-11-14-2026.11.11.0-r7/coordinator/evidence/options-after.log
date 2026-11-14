@@ -1,0 +1,140 @@
+[Test] Running UiTestHelperTests...
+UiTestHelperTests: 15 checks passed.
+[Test] Running ImportSettingsDialogTests...
+[Info] SettingsService: Remove 'import/model/scale'
+[Info] SettingsService: Remove 'import/model/useFileUnitScale'
+[Info] SettingsService: Remove 'import/model/importMaterials'
+[Info] SettingsService: Remove 'import/model/importTextures'
+[Info] SettingsService: Remove 'import/model/normals'
+[Info] SettingsService: Remove 'import/model/smoothingAngle'
+[Info] SettingsService: Remove 'import/model/flipUv'
+[Info] SettingsService: Remove 'import/model/mergeMeshes'
+[Info] SettingsService: Set 'import/model/useFileUnitScale'
+[Info] SettingsService: Set 'import/model/importMaterials'
+[Info] SettingsService: Set 'import/model/importTextures'
+[Info] SettingsService: Set 'import/model/normals'
+[Info] SettingsService: Set 'import/model/smoothingAngle'
+[Info] SettingsService: Set 'import/model/mergeMeshes'
+[Info] SettingsService: Set 'import/model/scale'
+[Info] SettingsService: Set 'import/model/flipUv'
+[Info] SettingsService: Remove 'import/model/scale'
+[Info] SettingsService: Remove 'import/model/flipUv'
+[Info] SettingsService: Set 'import/model/useFileUnitScale'
+[Info] SettingsService: Set 'import/model/importMaterials'
+[Info] SettingsService: Set 'import/model/importTextures'
+[Info] SettingsService: Set 'import/model/normals'
+[Info] SettingsService: Set 'import/model/smoothingAngle'
+[Info] SettingsService: Set 'import/model/mergeMeshes'
+[Info] SettingsService: Set 'import/model/useFileUnitScale'
+[Info] SettingsService: Set 'import/model/importMaterials'
+[Info] SettingsService: Set 'import/model/importTextures'
+[Info] SettingsService: Set 'import/model/normals'
+[Info] SettingsService: Set 'import/model/smoothingAngle'
+[Info] SettingsService: Set 'import/model/mergeMeshes'
+[Info] SettingsService: Remove 'import/model/useFileUnitScale'
+[Info] SettingsService: Remove 'import/model/importMaterials'
+[Info] SettingsService: Remove 'import/model/importTextures'
+[Info] SettingsService: Remove 'import/model/normals'
+[Info] SettingsService: Remove 'import/model/smoothingAngle'
+[Info] SettingsService: Remove 'import/model/mergeMeshes'
+[Info] SettingsService: Set 'import/model/scale'
+[Info] SettingsService: Set 'import/model/flipUv'
+[Info] SettingsService: Remove 'import/model/scale'
+[Info] SettingsService: Remove 'import/model/flipUv'
+[Info] FileService: sandbox root set to 'C:/Users/serge/AppData/Local/Temp/UiTests-PXBWyw'
+[Info] FileService: created directory 'C:/Users/serge/AppData/Local/Temp/UiTests-PXBWyw/Content/Models'
+[Info] FileService: wrote 294 bytes to 'C:/Users/serge/AppData/Local/Temp/UiTests-PXBWyw/Content/Defaults/CmModel.fbx.importsettings.json'
+[DialogResizeDiag] before: 274, expanded: 396, after: 274
+[Error] ImportSettings: JSON parse error: unterminated object
+ImportSettingsDialogTests: 38 checks passed.
+[Error] Invalid import options: ImportSettings: JSON parse error: unterminated object
+[Error] ImportSettings: JSON parse error: no error occurred
+[Error] Invalid import options: ImportSettings: JSON parse error: no error occurred
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Test] Running EditImportSettingsTests...
+[Info] SettingsService: Remove 'import/model/useFileUnitScale'
+[Info] FileService: sandbox root set to 'C:/Users/serge/AppData/Local/Temp/UiTests-zysTqv'
+[Info] FileService: wrote 355 bytes to 'C:/Users/serge/AppData/Local/Temp/UiTests-zysTqv/Hero.glb.importsettings.json'
+[Info] FileService: sandbox root set to 'C:/Users/serge/AppData/Local/Temp/UiTests-IWXCOQ'
+[Info] ImportSettings: sidecar not found for 'NoSidecar.glb.importsettings.json', using default settings
+[Info] FileService: sandbox root set to 'C:/Users/serge/AppData/Local/Temp/UiTests-CXnZep'
+[Error] ImportSettings: JSON parse error: unterminated object
+[Info] SettingsService: Remove 'import/model/normals'
+EditImportSettingsTests: 18 checks passed.
+[Test] Running ImportSettingsV2EditTests...
+[Info] SettingsService: Set 'import/model/scale'
+[Info] SettingsService: Set 'import/model/flipUv'
+[Info] SettingsService: Set 'import/model/normals'
+[Info] SettingsService: Set 'import/model/mergeMeshes'
+[Info] SettingsService: Remove 'import/model/scale'
+[Info] SettingsService: Remove 'import/model/flipUv'
+[Info] SettingsService: Remove 'import/model/normals'
+[Info] SettingsService: Remove 'import/model/mergeMeshes'
+ImportSettingsV2EditTests: 5 checks passed.
+[Test] Running AssetDeleteTests...
+[Info] FileService: sandbox root set to 'C:/Users/serge/AppData/Local/Temp/UiTests-BZRREZ'
+[Error] FileService: path '../outside.glb' is outside sandbox 'C:/Users/serge/AppData/Local/Temp/UiTests-BZRREZ'
+[Info] FileService: sandbox root set to 'C:/Users/serge/AppData/Local/Temp/UiTests-qMVJXF'
+[Info] FileService: wrote 8 bytes to 'C:/Users/serge/AppData/Local/Temp/UiTests-qMVJXF/Content/Models/Hero.fbx'
+[Info] FileService: wrote 14 bytes to 'C:/Users/serge/AppData/Local/Temp/UiTests-qMVJXF/Content/Models/Hero.fbx.importsettings.json'
+[Info] FileService: wrote 28 bytes to 'C:/Users/serge/AppData/Local/Temp/UiTests-qMVJXF/Content/Models/Hero.fbx.source.json'
+[Info] FileService: wrote 17 bytes to 'C:/Users/serge/AppData/Local/Temp/UiTests-qMVJXF/Content/Models/Hero.fbx.import.json'
+[Info] FileService: wrote 9 bytes to 'C:/Users/serge/AppData/Local/Temp/UiTests-qMVJXF/Content/Models/Other.fbx'
+[Info] FileService: wrote 13 bytes to 'C:/Users/serge/AppData/Local/Temp/UiTests-qMVJXF/Content/Models/Other.fbx.importsettings.json'
+[Info] FileService: deleted 'C:/Users/serge/AppData/Local/Temp/UiTests-qMVJXF/Content/Models/Hero.fbx'
+[Info] FileService: deleted 'C:/Users/serge/AppData/Local/Temp/UiTests-qMVJXF/Content/Models/Hero.fbx.source.json'
+[Info] FileService: deleted 'C:/Users/serge/AppData/Local/Temp/UiTests-qMVJXF/Content/Models/Hero.fbx.import.json'
+[Info] FileService: deleted 'C:/Users/serge/AppData/Local/Temp/UiTests-qMVJXF/Content/Models/Hero.fbx.importsettings.json'
+[Info] FileService: sandbox root set to 'C:/Users/serge/AppData/Local/Temp/UiTests-jpAZnP'
+[Info] FileService: wrote 4 bytes to 'C:/Users/serge/AppData/Local/Temp/UiTests-jpAZnP/Folder/Sub/item.txt'
+[Info] FileService: deleted directory 'C:/Users/serge/AppData/Local/Temp/UiTests-jpAZnP/Folder'
+[Info] FileService: sandbox root set to 'C:/Users/serge/AppData/Local/Temp/UiTests-RxKPwt'
+[Error] FileService: path '../outside' is outside sandbox 'C:/Users/serge/AppData/Local/Temp/UiTests-RxKPwt'
+[Error] FileService: access denied (outside sandbox)
+[Info] FileService: deleted directory 'C:/Users/serge/AppData/Local/Temp/UiTests-RxKPwt/TestDir'
+[Info] FileService: sandbox root set to 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ'
+[Error] FileService: cannot delete protected directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ/Content'
+[Error] FileService: cannot delete protected directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ/Source'
+[Error] FileService: cannot delete protected directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ'
+[Error] FileService: cannot delete protected directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ/content'
+[Error] FileService: cannot delete protected directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ/CONTENT'
+[Error] FileService: cannot delete protected directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ/source'
+[Error] FileService: cannot delete protected directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ/SOURCE'
+[Error] FileService: cannot delete protected directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ/Content'
+[Error] FileService: cannot delete protected directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ/Content'
+[Error] FileService: cannot delete protected directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ/Content'
+[Error] FileService: cannot delete protected directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ/Content'
+[Error] FileService: cannot delete protected directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ/Source'
+[Error] FileService: cannot delete protected directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ/Source'
+[Error] FileService: cannot delete protected directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ'
+[Error] FileService: cannot delete protected directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ'
+[Error] FileService: cannot delete protected directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ'
+[Error] FileService: cannot delete protected directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ/Content'
+[Info] FileService: sandbox root set to 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ'
+[Error] FileService: cannot delete protected directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ/content'
+[Error] FileService: cannot delete protected directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ/Source'
+[Info] FileService: deleted directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ/Content/Source'
+[Info] FileService: deleted directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ/Content/Content'
+[Info] FileService: deleted directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ/Content/CONTENT'
+[Info] FileService: deleted directory 'C:/Users/serge/AppData/Local/Temp/UiTests-DrLIjQ/Content/SOURCE'
+AssetDeleteTests: 15 checks passed.
+[Test] Running UiSmokeTests...
+[ToolBarFacts] initial tb geom=0,0 640x36, margins=(0,0,0,0), layoutMargins=(6,6,6,6), PM_ToolBarFrameWidth=6, PM_ItemMargin=0, PM_ItemSpacing=4
+[ToolBarFacts] configured tb height=36, btn height=28, topMargin=4, bottomMargin=4
+[Info] SettingsService: Set 'ui/language'
+[Info] SettingsService: Set 'ui/language'
+[SpinDiag] Dark grab size: 120x22
+[SpinDiag] Dark contrasting pixels in button zone: 26
+[Info] SettingsService: Set 'ui/theme_mode'
+[SpinDiag] Light grab size: 120x22
+[SpinDiag] Light contrasting pixels in button zone: 42
+[Info] SettingsService: Set 'ui/theme_mode'
+UiSmokeTests: 397 checks passed (106 Cyrillic strings in RU mode).

@@ -1,0 +1,100 @@
+{
+  "pointShadowLodFrames": [
+    {
+      "distance": 8.9443,
+      "drawn": 1,
+      "occupied": [
+        6446,
+        12300,
+        0,
+        1048576,
+        19456,
+        19456
+      ],
+      "depthHashes": [
+        "9da197cb",
+        "adcf4536",
+        "e678838a",
+        "cc69497b",
+        "4a116434",
+        "4a116434"
+      ],
+      "perLod": [
+        1,
+        0,
+        0
+      ],
+      "probeOccluded": [
+        true,
+        true,
+        false
+      ]
+    },
+    {
+      "distance": 74.9466,
+      "drawn": 1,
+      "occupied": [
+        6446,
+        12300,
+        0,
+        1048576,
+        19456,
+        19456
+      ],
+      "depthHashes": [
+        "9da197cb",
+        "adcf4536",
+        "e678838a",
+        "cc69497b",
+        "4a116434",
+        "4a116434"
+      ],
+      "perLod": [
+        0,
+        0,
+        1
+      ],
+      "probeOccluded": [
+        true,
+        true,
+        false
+      ]
+    },
+    {
+      "distance": 8.9443,
+      "drawn": 1,
+      "occupied": [
+        6446,
+        12300,
+        0,
+        1048576,
+        19456,
+        19456
+      ],
+      "depthHashes": [
+        "9da197cb",
+        "adcf4536",
+        "e678838a",
+        "cc69497b",
+        "4a116434",
+        "4a116434"
+      ],
+      "perLod": [
+        1,
+        0,
+        0
+      ],
+      "probeOccluded": [
+        true,
+        true,
+        false
+      ]
+    }
+  ],
+  "twoLightStates": [
+    "both active: independent cube hashes for lights at -4,4,0 and +4,4,0, slots0/1",
+    "light0 disabled: light1 occupies slot0 and its face hashes match its original cube",
+    "light1 disabled: light0 occupies slot0 and its face hashes match its original cube"
+  ],
+  "pointShadowFixture": "one mesh caster only; matrix requests two casters"
+}

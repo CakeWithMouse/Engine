@@ -1,0 +1,14 @@
+[
+  {
+    "suite": "material-graph",
+    "initialStatus": "runner-invocation-error",
+    "initialLog": "logs/material-graph.log",
+    "cause": "Coordinator passed unsupported -Output; then fresh template lacked WarmStone fixture.",
+    "retryPreparation": "Copied WarmStone.mat and WarmStone.hlsl from historical CalmCity into private import-regression project only.",
+    "command": "Editor/tests/MaterialGraphCommandletTests.ps1 -Project Engine/build/playtests/20261114-r6/import-regression/Project/Project.json",
+    "exit": 0,
+    "passed": true,
+    "log": "logs/material-graph-final.log",
+    "scope": "Actual Qt graph save, failed rollback, retry, malformed AI text rejection, undo/redo. Not an Engine defect."
+  }
+]

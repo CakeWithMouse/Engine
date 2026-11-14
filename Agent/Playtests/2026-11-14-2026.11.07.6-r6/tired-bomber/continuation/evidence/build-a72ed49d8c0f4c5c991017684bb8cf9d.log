@@ -1,0 +1,26 @@
+﻿
+C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(548,5): warning MSB8029: Промежуточный каталог или каталог выхода не может располагаться во временном каталоге, потому что это может стать причиной проблем с добавочной сборкой. [E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Game.vcxproj]
+  ComponentGenerator: 6 component(s), Project
+  BomberCrewController.cpp
+  Module.cpp
+  ProbeController.cpp
+  ProbeRenderComponent.cpp
+  ProbeSubsystem.cpp
+  ProjectComponent.cpp
+  ProjectGame.cpp
+  ReferenceExamples.cpp
+E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Source\ProjectGame.cpp(41,35): error C2664: "AddComponentResult Scene::AddComponent(std::string,std::unique_ptr<GameComponent,std::default_delete<GameComponent>> &,std::string)": невозможно преобразовать аргумент 2 из "std::unique_ptr<PlayerCharacter,std::default_delete<PlayerCharacter>>" в "std::unique_ptr<GameComponent,std::default_delete<GameComponent>> &" [E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Game.vcxproj]
+      E:\Engine\Game\build\x64\Release\Runtime\SDK\Include\Engine\Scene\Scene.h(86,24):
+       см. объявление "Scene::AddComponent"
+      E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Source\ProjectGame.cpp(41,35):
+      при попытке сопоставить список аргументов "(const char [17], std::unique_ptr<PlayerCharacter,std::default_delete<PlayerCharacter>>, const char [16])"
+  
+E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Source\ProjectGame.cpp(112,31): error C2039: "GetPosition": не является членом "Character". [E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Game.vcxproj]
+      E:\Engine\Game\build\x64\Release\Runtime\SDK\Include\Engine\Components\Character.h(24,7):
+       см. объявление "Character"
+  
+E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Source\ProjectGame.cpp(112,20): error C2737: "p": необходимо инициализировать объект const [E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Game.vcxproj]
+E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Source\ProjectGame.cpp(113,59): error C3536: p: не может использоваться до инициализации [E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Game.vcxproj]
+  RotatingCube.cpp
+  GeneratedComponents.cpp
+  Создание кода...

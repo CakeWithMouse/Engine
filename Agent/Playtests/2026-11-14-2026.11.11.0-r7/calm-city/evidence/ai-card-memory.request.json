@@ -1,0 +1,75 @@
+{
+  "steps": [
+    {
+      "action": "select",
+      "target": "Calm Sentinel"
+    },
+    {
+      "action": "wait",
+      "milliseconds": 1200
+    },
+    {
+      "value": "3, 0, 2",
+      "action": "field",
+      "name": "AiMemory_Home",
+      "scope": "main"
+    },
+    {
+      "action": "scene-undo"
+    },
+    {
+      "action": "scene-redo"
+    },
+    {
+      "action": "select",
+      "target": "Игрок"
+    },
+    {
+      "action": "select",
+      "target": "Calm Sentinel"
+    },
+    {
+      "action": "wait",
+      "milliseconds": 300
+    },
+    {
+      "action": "button",
+      "name": "AiMemoryReset_Home"
+    },
+    {
+      "action": "select",
+      "target": "Игрок"
+    },
+    {
+      "action": "select",
+      "target": "Calm Sentinel"
+    },
+    {
+      "action": "wait",
+      "milliseconds": 300
+    },
+    {
+      "value": "4, 0, 1",
+      "action": "field",
+      "name": "AiMemory_Home",
+      "scope": "main"
+    },
+    {
+      "action": "clone",
+      "target": "Calm Sentinel"
+    },
+    {
+      "action": "save-scene",
+      "path": "E:/Engine/Engine/build/playtests/20261114-r7/calm-city/AIPlayground/Content/Scenes/CalmCityMemory.scene.json"
+    },
+    {
+      "action": "load-scene",
+      "path": "E:/Engine/Engine/build/playtests/20261114-r7/calm-city/AIPlayground/Content/Scenes/CalmCityMemory.scene.json"
+    },
+    {
+      "action": "reopen"
+    }
+  ],
+  "machine": "/Game/AI/CalmRoutine.fsm",
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/calm-city/AIPlayground/Project.json"
+}

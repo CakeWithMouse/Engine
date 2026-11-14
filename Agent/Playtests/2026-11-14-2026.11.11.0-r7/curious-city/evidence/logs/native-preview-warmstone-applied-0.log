@@ -1,0 +1,612 @@
+[VfsRead] using local VFS (no host service)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Material E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/Materials/WarmStone.mat: params.Tint is not declared by the shader
+Material E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/Materials/WarmStone.mat: params.Gloss is not declared by the shader
+Material E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/Materials/WarmStone.mat: params.Rim is not declared by the shader
+Material E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/Materials/WarmStone.mat: params.Tint is not declared by the shader
+Material E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/Materials/WarmStone.mat: params.Gloss is not declared by the shader
+Material E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/Materials/WarmStone.mat: params.Rim is not declared by the shader
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 389x282
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 389x282
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/Materials/WarmStone.hlsl
+Recompiled 1 material(s) depending on E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/Materials/WarmStone.hlsl
+[Info] D3D backbuffer screenshot saved: E:\Engine\Engine\build\playtests\20261114-r7\curious-city\native-preview-warmstone-applied-0\frames\preview.bmp (241x282)
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 241x282
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 121: AntialiasingMode = 0 (Off), bb = 241x282
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "dialogs": [
+    ],
+    "nativePreviewSize": [
+        241,
+        282
+    ],
+    "nativePreviewWindow": true,
+    "ok": true,
+    "projectViewportMinimized": true,
+    "steps": [
+        {
+            "accepted": true,
+            "action": "preset",
+            "dirty": true,
+            "error": "",
+            "graph": {
+                "connections": [
+                    {
+                        "fromNode": 3,
+                        "fromPin": "RGB",
+                        "toNode": 4,
+                        "toPin": "A"
+                    },
+                    {
+                        "fromNode": 2,
+                        "fromPin": "RGB",
+                        "toNode": 4,
+                        "toPin": "B"
+                    },
+                    {
+                        "fromNode": 4,
+                        "fromPin": "Out",
+                        "toNode": 1,
+                        "toPin": "Albedo"
+                    },
+                    {
+                        "fromNode": 5,
+                        "fromPin": "Value",
+                        "toNode": 1,
+                        "toPin": "Specular"
+                    }
+                ],
+                "nodes": [
+                    {
+                        "id": 1,
+                        "properties": {
+                        },
+                        "title": "Material Output",
+                        "type": "MaterialOutput",
+                        "x": 600,
+                        "y": 180
+                    },
+                    {
+                        "id": 2,
+                        "properties": {
+                            "color": [
+                                0.8627451062202454,
+                                0.8627451062202454,
+                                0.8823529481887817,
+                                1
+                            ],
+                            "name": "BaseColor"
+                        },
+                        "title": "BaseColor",
+                        "type": "ColorParam",
+                        "x": 100,
+                        "y": 100
+                    },
+                    {
+                        "id": 3,
+                        "properties": {
+                            "slot": 6,
+                            "textureName": "BaseMap"
+                        },
+                        "title": "BaseMap",
+                        "type": "Texture2D",
+                        "x": -160,
+                        "y": 100
+                    },
+                    {
+                        "id": 4,
+                        "properties": {
+                        },
+                        "title": "Multiply",
+                        "type": "Multiply",
+                        "x": 360,
+                        "y": 120
+                    },
+                    {
+                        "id": 5,
+                        "properties": {
+                            "name": "Specular",
+                            "value": 0.5
+                        },
+                        "title": "Specular",
+                        "type": "ScalarParam",
+                        "x": 100,
+                        "y": 260
+                    }
+                ],
+                "version": 1
+            },
+            "hasGraph": true,
+            "hlsl": "// =========================================================\n// Generated by PainEngine Material Node Graph\n// =========================================================\n\ncbuffer MaterialParams : register(b1)\n{\n    float4 BaseColor = float4(0.8627f, 0.8627f, 0.8824f, 1.0000f);\n    float Specular = 0.5000f;\n};\n\nTexture2D BaseMap : register(t6);\n\nvoid Surface(MaterialInput i, inout MaterialOutput o)\n{\n    o.Albedo = saturate((BaseMap.Sample(MaterialSampler, i.UV).rgb * BaseColor.rgb));\n    o.SpecularWeight = saturate(Specular);\n}\n"
+        },
+        {
+            "accepted": true,
+            "action": "apply",
+            "dirty": true,
+            "error": "",
+            "graph": {
+                "connections": [
+                    {
+                        "fromNode": 3,
+                        "fromPin": "RGB",
+                        "toNode": 4,
+                        "toPin": "A"
+                    },
+                    {
+                        "fromNode": 2,
+                        "fromPin": "RGB",
+                        "toNode": 4,
+                        "toPin": "B"
+                    },
+                    {
+                        "fromNode": 4,
+                        "fromPin": "Out",
+                        "toNode": 1,
+                        "toPin": "Albedo"
+                    },
+                    {
+                        "fromNode": 5,
+                        "fromPin": "Value",
+                        "toNode": 1,
+                        "toPin": "Specular"
+                    }
+                ],
+                "nodes": [
+                    {
+                        "id": 1,
+                        "properties": {
+                        },
+                        "title": "Material Output",
+                        "type": "MaterialOutput",
+                        "x": 600,
+                        "y": 180
+                    },
+                    {
+                        "id": 2,
+                        "properties": {
+                            "color": [
+                                0.8627451062202454,
+                                0.8627451062202454,
+                                0.8823529481887817,
+                                1
+                            ],
+                            "name": "BaseColor"
+                        },
+                        "title": "BaseColor",
+                        "type": "ColorParam",
+                        "x": 100,
+                        "y": 100
+                    },
+                    {
+                        "id": 3,
+                        "properties": {
+                            "slot": 6,
+                            "textureName": "BaseMap"
+                        },
+                        "title": "BaseMap",
+                        "type": "Texture2D",
+                        "x": -160,
+                        "y": 100
+                    },
+                    {
+                        "id": 4,
+                        "properties": {
+                        },
+                        "title": "Multiply",
+                        "type": "Multiply",
+                        "x": 360,
+                        "y": 120
+                    },
+                    {
+                        "id": 5,
+                        "properties": {
+                            "name": "Specular",
+                            "value": 0.5
+                        },
+                        "title": "Specular",
+                        "type": "ScalarParam",
+                        "x": 100,
+                        "y": 260
+                    }
+                ],
+                "version": 1
+            },
+            "hasGraph": true,
+            "hlsl": "// =========================================================\n// Generated by PainEngine Material Node Graph\n// =========================================================\n\ncbuffer MaterialParams : register(b1)\n{\n    float4 BaseColor = float4(0.8627f, 0.8627f, 0.8824f, 1.0000f);\n    float Specular = 0.5000f;\n};\n\nTexture2D BaseMap : register(t6);\n\nvoid Surface(MaterialInput i, inout MaterialOutput o)\n{\n    o.Albedo = saturate((BaseMap.Sample(MaterialSampler, i.UV).rgb * BaseColor.rgb));\n    o.SpecularWeight = saturate(Specular);\n}\n"
+        },
+        {
+            "accepted": true,
+            "action": "save",
+            "dirty": false,
+            "error": "",
+            "graph": {
+                "connections": [
+                    {
+                        "fromNode": 3,
+                        "fromPin": "RGB",
+                        "toNode": 4,
+                        "toPin": "A"
+                    },
+                    {
+                        "fromNode": 2,
+                        "fromPin": "RGB",
+                        "toNode": 4,
+                        "toPin": "B"
+                    },
+                    {
+                        "fromNode": 4,
+                        "fromPin": "Out",
+                        "toNode": 1,
+                        "toPin": "Albedo"
+                    },
+                    {
+                        "fromNode": 5,
+                        "fromPin": "Value",
+                        "toNode": 1,
+                        "toPin": "Specular"
+                    }
+                ],
+                "nodes": [
+                    {
+                        "id": 1,
+                        "properties": {
+                        },
+                        "title": "Material Output",
+                        "type": "MaterialOutput",
+                        "x": 600,
+                        "y": 180
+                    },
+                    {
+                        "id": 2,
+                        "properties": {
+                            "color": [
+                                0.8627451062202454,
+                                0.8627451062202454,
+                                0.8823529481887817,
+                                1
+                            ],
+                            "name": "BaseColor"
+                        },
+                        "title": "BaseColor",
+                        "type": "ColorParam",
+                        "x": 100,
+                        "y": 100
+                    },
+                    {
+                        "id": 3,
+                        "properties": {
+                            "slot": 6,
+                            "textureName": "BaseMap"
+                        },
+                        "title": "BaseMap",
+                        "type": "Texture2D",
+                        "x": -160,
+                        "y": 100
+                    },
+                    {
+                        "id": 4,
+                        "properties": {
+                        },
+                        "title": "Multiply",
+                        "type": "Multiply",
+                        "x": 360,
+                        "y": 120
+                    },
+                    {
+                        "id": 5,
+                        "properties": {
+                            "name": "Specular",
+                            "value": 0.5
+                        },
+                        "title": "Specular",
+                        "type": "ScalarParam",
+                        "x": 100,
+                        "y": 260
+                    }
+                ],
+                "version": 1
+            },
+            "hasGraph": true,
+            "hlsl": "// =========================================================\n// Generated by PainEngine Material Node Graph\n// =========================================================\n\ncbuffer MaterialParams : register(b1)\n{\n    float4 BaseColor = float4(0.8627f, 0.8627f, 0.8824f, 1.0000f);\n    float Specular = 0.5000f;\n};\n\nTexture2D BaseMap : register(t6);\n\nvoid Surface(MaterialInput i, inout MaterialOutput o)\n{\n    o.Albedo = saturate((BaseMap.Sample(MaterialSampler, i.UV).rgb * BaseColor.rgb));\n    o.SpecularWeight = saturate(Specular);\n}\n"
+        },
+        {
+            "accepted": true,
+            "action": "save",
+            "dirty": false,
+            "error": "",
+            "graph": {
+                "connections": [
+                    {
+                        "fromNode": 3,
+                        "fromPin": "RGB",
+                        "toNode": 4,
+                        "toPin": "A"
+                    },
+                    {
+                        "fromNode": 2,
+                        "fromPin": "RGB",
+                        "toNode": 4,
+                        "toPin": "B"
+                    },
+                    {
+                        "fromNode": 4,
+                        "fromPin": "Out",
+                        "toNode": 1,
+                        "toPin": "Albedo"
+                    },
+                    {
+                        "fromNode": 5,
+                        "fromPin": "Value",
+                        "toNode": 1,
+                        "toPin": "Specular"
+                    }
+                ],
+                "nodes": [
+                    {
+                        "id": 1,
+                        "properties": {
+                        },
+                        "title": "Material Output",
+                        "type": "MaterialOutput",
+                        "x": 600,
+                        "y": 180
+                    },
+                    {
+                        "id": 2,
+                        "properties": {
+                            "color": [
+                                0.8627451062202454,
+                                0.8627451062202454,
+                                0.8823529481887817,
+                                1
+                            ],
+                            "name": "BaseColor"
+                        },
+                        "title": "BaseColor",
+                        "type": "ColorParam",
+                        "x": 100,
+                        "y": 100
+                    },
+                    {
+                        "id": 3,
+                        "properties": {
+                            "slot": 6,
+                            "textureName": "BaseMap"
+                        },
+                        "title": "BaseMap",
+                        "type": "Texture2D",
+                        "x": -160,
+                        "y": 100
+                    },
+                    {
+                        "id": 4,
+                        "properties": {
+                        },
+                        "title": "Multiply",
+                        "type": "Multiply",
+                        "x": 360,
+                        "y": 120
+                    },
+                    {
+                        "id": 5,
+                        "properties": {
+                            "name": "Specular",
+                            "value": 0.5
+                        },
+                        "title": "Specular",
+                        "type": "ScalarParam",
+                        "x": 100,
+                        "y": 260
+                    }
+                ],
+                "version": 1
+            },
+            "hasGraph": true,
+            "hlsl": "// =========================================================\n// Generated by PainEngine Material Node Graph\n// =========================================================\n\ncbuffer MaterialParams : register(b1)\n{\n    float4 BaseColor = float4(0.8627f, 0.8627f, 0.8824f, 1.0000f);\n    float Specular = 0.5000f;\n};\n\nTexture2D BaseMap : register(t6);\n\nvoid Surface(MaterialInput i, inout MaterialOutput o)\n{\n    o.Albedo = saturate((BaseMap.Sample(MaterialSampler, i.UV).rgb * BaseColor.rgb));\n    o.SpecularWeight = saturate(Specular);\n}\n"
+        },
+        {
+            "accepted": true,
+            "action": "save",
+            "dirty": false,
+            "error": "",
+            "graph": {
+                "connections": [
+                    {
+                        "fromNode": 3,
+                        "fromPin": "RGB",
+                        "toNode": 4,
+                        "toPin": "A"
+                    },
+                    {
+                        "fromNode": 2,
+                        "fromPin": "RGB",
+                        "toNode": 4,
+                        "toPin": "B"
+                    },
+                    {
+                        "fromNode": 4,
+                        "fromPin": "Out",
+                        "toNode": 1,
+                        "toPin": "Albedo"
+                    },
+                    {
+                        "fromNode": 5,
+                        "fromPin": "Value",
+                        "toNode": 1,
+                        "toPin": "Specular"
+                    }
+                ],
+                "nodes": [
+                    {
+                        "id": 1,
+                        "properties": {
+                        },
+                        "title": "Material Output",
+                        "type": "MaterialOutput",
+                        "x": 600,
+                        "y": 180
+                    },
+                    {
+                        "id": 2,
+                        "properties": {
+                            "color": [
+                                0.8627451062202454,
+                                0.8627451062202454,
+                                0.8823529481887817,
+                                1
+                            ],
+                            "name": "BaseColor"
+                        },
+                        "title": "BaseColor",
+                        "type": "ColorParam",
+                        "x": 100,
+                        "y": 100
+                    },
+                    {
+                        "id": 3,
+                        "properties": {
+                            "slot": 6,
+                            "textureName": "BaseMap"
+                        },
+                        "title": "BaseMap",
+                        "type": "Texture2D",
+                        "x": -160,
+                        "y": 100
+                    },
+                    {
+                        "id": 4,
+                        "properties": {
+                        },
+                        "title": "Multiply",
+                        "type": "Multiply",
+                        "x": 360,
+                        "y": 120
+                    },
+                    {
+                        "id": 5,
+                        "properties": {
+                            "name": "Specular",
+                            "value": 0.5
+                        },
+                        "title": "Specular",
+                        "type": "ScalarParam",
+                        "x": 100,
+                        "y": 260
+                    }
+                ],
+                "version": 1
+            },
+            "hasGraph": true,
+            "hlsl": "// =========================================================\n// Generated by PainEngine Material Node Graph\n// =========================================================\n\ncbuffer MaterialParams : register(b1)\n{\n    float4 BaseColor = float4(0.8627f, 0.8627f, 0.8824f, 1.0000f);\n    float Specular = 0.5000f;\n};\n\nTexture2D BaseMap : register(t6);\n\nvoid Surface(MaterialInput i, inout MaterialOutput o)\n{\n    o.Albedo = saturate((BaseMap.Sample(MaterialSampler, i.UV).rgb * BaseColor.rgb));\n    o.SpecularWeight = saturate(Specular);\n}\n"
+        },
+        {
+            "accepted": true,
+            "action": "save",
+            "dirty": false,
+            "error": "",
+            "graph": {
+                "connections": [
+                    {
+                        "fromNode": 3,
+                        "fromPin": "RGB",
+                        "toNode": 4,
+                        "toPin": "A"
+                    },
+                    {
+                        "fromNode": 2,
+                        "fromPin": "RGB",
+                        "toNode": 4,
+                        "toPin": "B"
+                    },
+                    {
+                        "fromNode": 4,
+                        "fromPin": "Out",
+                        "toNode": 1,
+                        "toPin": "Albedo"
+                    },
+                    {
+                        "fromNode": 5,
+                        "fromPin": "Value",
+                        "toNode": 1,
+                        "toPin": "Specular"
+                    }
+                ],
+                "nodes": [
+                    {
+                        "id": 1,
+                        "properties": {
+                        },
+                        "title": "Material Output",
+                        "type": "MaterialOutput",
+                        "x": 600,
+                        "y": 180
+                    },
+                    {
+                        "id": 2,
+                        "properties": {
+                            "color": [
+                                0.8627451062202454,
+                                0.8627451062202454,
+                                0.8823529481887817,
+                                1
+                            ],
+                            "name": "BaseColor"
+                        },
+                        "title": "BaseColor",
+                        "type": "ColorParam",
+                        "x": 100,
+                        "y": 100
+                    },
+                    {
+                        "id": 3,
+                        "properties": {
+                            "slot": 6,
+                            "textureName": "BaseMap"
+                        },
+                        "title": "BaseMap",
+                        "type": "Texture2D",
+                        "x": -160,
+                        "y": 100
+                    },
+                    {
+                        "id": 4,
+                        "properties": {
+                        },
+                        "title": "Multiply",
+                        "type": "Multiply",
+                        "x": 360,
+                        "y": 120
+                    },
+                    {
+                        "id": 5,
+                        "properties": {
+                            "name": "Specular",
+                            "value": 0.5
+                        },
+                        "title": "Specular",
+                        "type": "ScalarParam",
+                        "x": 100,
+                        "y": 260
+                    }
+                ],
+                "version": 1
+            },
+            "hasGraph": true,
+            "hlsl": "// =========================================================\n// Generated by PainEngine Material Node Graph\n// =========================================================\n\ncbuffer MaterialParams : register(b1)\n{\n    float4 BaseColor = float4(0.8627f, 0.8627f, 0.8824f, 1.0000f);\n    float Specular = 0.5000f;\n};\n\nTexture2D BaseMap : register(t6);\n\nvoid Surface(MaterialInput i, inout MaterialOutput o)\n{\n    o.Albedo = saturate((BaseMap.Sample(MaterialSampler, i.UV).rgb * BaseColor.rgb));\n    o.SpecularWeight = saturate(Specular);\n}\n"
+        }
+    ]
+}

@@ -1,0 +1,286 @@
+Running CoreTests...
+[Test] TestUserPrompt...
+[Test] TestLogger...
+[Info] Hello Info
+[Warning] Careful!
+[Error] Critical error
+[Debug] Thread 0 Msg 0
+[Debug] Thread 0 Msg 1
+[Debug] Thread 0 Msg 2
+[Debug] Thread 0 Msg 3
+[Debug] Thread 0 Msg 4
+[Debug] Thread 2 Msg 0
+[Debug] Thread 2 Msg 1
+[Debug] Thread 0 Msg 5
+[Debug] Thread 2 Msg 2
+[Debug] Thread 2 Msg 3
+[Debug] Thread 2 Msg 4
+[Debug] Thread 2 Msg 5
+[Debug] Thread 2 Msg 6
+[Debug] Thread 2 Msg 7
+[Debug] Thread 2 Msg 8
+[Debug] Thread 0 Msg 6
+[Debug] Thread 0 Msg 7
+[Debug] Thread 0 Msg 8
+[Debug] Thread 1 Msg 0
+[Debug] Thread 1 Msg 1
+[Debug] Thread 1 Msg 2
+[Debug] Thread 1 Msg 3
+[Debug] Thread 1 Msg 4
+[Debug] Thread 1 Msg 5
+[Debug] Thread 2 Msg 9
+[Debug] Thread 1 Msg 6
+[Debug] Thread 2 Msg 10
+[Debug] Thread 1 Msg 7
+[Debug] Thread 2 Msg 11
+[Debug] Thread 1 Msg 8
+[Debug] Thread 2 Msg 12
+[Debug] Thread 1 Msg 9
+[Debug] Thread 2 Msg 13
+[Debug] Thread 2 Msg 14
+[Debug] Thread 3 Msg 0
+[Debug] Thread 2 Msg 15
+[Debug] Thread 0 Msg 9
+[Debug] Thread 2 Msg 16
+[Debug] Thread 0 Msg 10
+[Debug] Thread 2 Msg 17
+[Debug] Thread 0 Msg 11
+[Debug] Thread 2 Msg 18
+[Debug] Thread 0 Msg 12
+[Debug] Thread 2 Msg 19
+[Debug] Thread 3 Msg 1
+[Debug] Thread 2 Msg 20
+[Debug] Thread 3 Msg 2
+[Debug] Thread 2 Msg 21
+[Debug] Thread 1 Msg 10
+[Debug] Thread 2 Msg 22
+[Debug] Thread 1 Msg 11
+[Debug] Thread 2 Msg 23
+[Debug] Thread 1 Msg 12
+[Debug] Thread 2 Msg 24
+[Debug] Thread 3 Msg 3
+[Debug] Thread 2 Msg 25
+[Debug] Thread 0 Msg 13
+[Debug] Thread 1 Msg 13
+[Debug] Thread 1 Msg 14
+[Debug] Thread 3 Msg 4
+[Debug] Thread 1 Msg 15
+[Debug] Thread 2 Msg 26
+[Debug] Thread 1 Msg 16
+[Debug] Thread 0 Msg 14
+[Debug] Thread 1 Msg 17
+[Debug] Thread 0 Msg 15
+[Debug] Thread 1 Msg 18
+[Debug] Thread 0 Msg 16
+[Debug] Thread 1 Msg 19
+[Debug] Thread 0 Msg 17
+[Debug] Thread 1 Msg 20
+[Debug] Thread 2 Msg 27
+[Debug] Thread 1 Msg 21
+[Debug] Thread 2 Msg 28
+[Debug] Thread 1 Msg 22
+[Debug] Thread 2 Msg 29
+[Debug] Thread 1 Msg 23
+[Debug] Thread 2 Msg 30
+[Debug] Thread 1 Msg 24
+[Debug] Thread 1 Msg 25
+[Debug] Thread 0 Msg 18
+[Debug] Thread 1 Msg 26
+[Debug] Thread 2 Msg 31
+[Debug] Thread 1 Msg 27
+[Debug] Thread 2 Msg 32
+[Debug] Thread 0 Msg 19
+[Debug] Thread 2 Msg 33
+[Debug] Thread 0 Msg 20
+[Debug] Thread 2 Msg 34
+[Debug] Thread 0 Msg 21
+[Debug] Thread 2 Msg 35
+[Debug] Thread 0 Msg 22
+[Debug] Thread 1 Msg 28
+[Debug] Thread 3 Msg 5
+[Debug] Thread 1 Msg 29
+[Debug] Thread 1 Msg 30
+[Debug] Thread 0 Msg 23
+[Debug] Thread 0 Msg 24
+[Debug] Thread 3 Msg 6
+[Debug] Thread 0 Msg 25
+[Debug] Thread 1 Msg 31
+[Debug] Thread 0 Msg 26
+[Debug] Thread 1 Msg 32
+[Debug] Thread 0 Msg 27
+[Debug] Thread 3 Msg 7
+[Debug] Thread 0 Msg 28
+[Debug] Thread 3 Msg 8
+[Debug] Thread 3 Msg 9
+[Debug] Thread 3 Msg 10
+[Debug] Thread 3 Msg 11
+[Debug] Thread 3 Msg 12
+[Debug] Thread 1 Msg 33
+[Debug] Thread 2 Msg 36
+[Debug] Thread 1 Msg 34
+[Debug] Thread 0 Msg 29
+[Debug] Thread 1 Msg 35
+[Debug] Thread 0 Msg 30
+[Debug] Thread 1 Msg 36
+[Debug] Thread 3 Msg 13
+[Debug] Thread 2 Msg 37
+[Debug] Thread 2 Msg 38
+[Debug] Thread 0 Msg 31
+[Debug] Thread 2 Msg 39
+[Debug] Thread 0 Msg 32
+[Debug] Thread 2 Msg 40
+[Debug] Thread 3 Msg 14
+[Debug] Thread 1 Msg 37
+[Debug] Thread 3 Msg 15
+[Debug] Thread 1 Msg 38
+[Debug] Thread 3 Msg 16
+[Debug] Thread 3 Msg 17
+[Debug] Thread 3 Msg 18
+[Debug] Thread 3 Msg 19
+[Debug] Thread 0 Msg 33
+[Debug] Thread 3 Msg 20
+[Debug] Thread 1 Msg 39
+[Debug] Thread 2 Msg 41
+[Debug] Thread 0 Msg 34
+[Debug] Thread 2 Msg 42
+[Debug] Thread 0 Msg 35
+[Debug] Thread 2 Msg 43
+[Debug] Thread 1 Msg 40
+[Debug] Thread 3 Msg 21
+[Debug] Thread 3 Msg 22
+[Debug] Thread 3 Msg 23
+[Debug] Thread 3 Msg 24
+[Debug] Thread 1 Msg 41
+[Debug] Thread 0 Msg 36
+[Debug] Thread 0 Msg 37
+[Debug] Thread 2 Msg 44
+[Debug] Thread 0 Msg 38
+[Debug] Thread 2 Msg 45
+[Debug] Thread 0 Msg 39
+[Debug] Thread 2 Msg 46
+[Debug] Thread 1 Msg 42
+[Debug] Thread 2 Msg 47
+[Debug] Thread 3 Msg 25
+[Debug] Thread 0 Msg 40
+[Debug] Thread 0 Msg 41
+[Debug] Thread 1 Msg 43
+[Debug] Thread 0 Msg 42
+[Debug] Thread 2 Msg 48
+[Debug] Thread 3 Msg 26
+[Debug] Thread 3 Msg 27
+[Debug] Thread 3 Msg 28
+[Debug] Thread 0 Msg 43
+[Debug] Thread 3 Msg 29
+[Debug] Thread 2 Msg 49
+[Debug] Thread 1 Msg 44
+[Debug] Thread 1 Msg 45
+[Debug] Thread 3 Msg 30
+[Debug] Thread 0 Msg 44
+[Debug] Thread 1 Msg 46
+[Debug] Thread 1 Msg 47
+[Debug] Thread 1 Msg 48
+[Debug] Thread 0 Msg 45
+[Debug] Thread 1 Msg 49
+[Debug] Thread 3 Msg 31
+[Debug] Thread 3 Msg 32
+[Debug] Thread 0 Msg 46
+[Debug] Thread 3 Msg 33
+[Debug] Thread 0 Msg 47
+[Debug] Thread 3 Msg 34
+[Debug] Thread 0 Msg 48
+[Debug] Thread 3 Msg 35
+[Debug] Thread 3 Msg 36
+[Debug] Thread 0 Msg 49
+[Debug] Thread 3 Msg 37
+[Debug] Thread 3 Msg 38
+[Debug] Thread 3 Msg 39
+[Debug] Thread 3 Msg 40
+[Debug] Thread 3 Msg 41
+[Debug] Thread 3 Msg 42
+[Debug] Thread 3 Msg 43
+[Debug] Thread 3 Msg 44
+[Debug] Thread 3 Msg 45
+[Debug] Thread 3 Msg 46
+[Debug] Thread 3 Msg 47
+[Debug] Thread 3 Msg 48
+[Debug] Thread 3 Msg 49
+[Test] TestCommandRegistry...
+[Error] CommandRegistry: cannot register command with empty id
+[Warning] CommandRegistry: duplicate command registration 'Edit.Test'
+[Warning] CommandRegistry: command cannot execute 'Edit.Disabled'
+[Error] CommandRegistry: command not found 'Edit.Test'
+[Test] TestFileService...
+[Info] FileService: sandbox root set to 'C:/Users/serge/AppData/Local/Temp/CoreTests-XZTdtb'
+[Info] FileService: wrote 26 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-XZTdtb/SubDir/test.txt'
+[Info] FileService: wrote 18 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-XZTdtb/SubDir/test.txt'
+[Info] FileService: deleted 'C:/Users/serge/AppData/Local/Temp/CoreTests-XZTdtb/SubDir/test.txt'
+[Error] FileService: read failed 'C:/Users/serge/AppData/Local/Temp/CoreTests-XZTdtb/SubDir/test.txt': Не удается найти указанный файл.
+[Error] FileService: path '../forbidden.txt' is outside sandbox 'C:/Users/serge/AppData/Local/Temp/CoreTests-XZTdtb'
+[Error] Access denied: path is outside project sandbox (../forbidden.txt)
+[Error] FileService: path '../forbidden.txt' is outside sandbox 'C:/Users/serge/AppData/Local/Temp/CoreTests-XZTdtb'
+[Error] Access denied: path is outside project sandbox (../forbidden.txt)
+[Error] FileService: path '../forbidden.txt' is outside sandbox 'C:/Users/serge/AppData/Local/Temp/CoreTests-XZTdtb'
+[Error] Access denied: path is outside project sandbox
+[Test] TestEditorLocale...
+[Info] SettingsService: Set 'ui/language'
+[Info] SettingsService: Set 'ui/language'
+[Test] TestGizmoMath...
+[Test] TestGizmoGeometry...
+[Test] TestSettingsService...
+[Info] SettingsService: Set 'layout/6027d7610ab2/state'
+[Info] SettingsService: Set 'layout/6027d7610ab2/geometry'
+[Info] SettingsService: Remove 'layout/6027d7610ab2/state'
+[Info] SettingsService: Remove 'layout/6027d7610ab2/geometry'
+[Test] TestMaterialGraph...
+[Test] TestSceneFile...
+[Info] FileService: sandbox root set to 'C:/Users/serge/AppData/Local/Temp/CoreTests-Ryfayx'
+[Info] FileService: wrote 1384 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-Ryfayx/Content/Scenes/Main.scene.json'
+[Error] FileService: read failed 'C:/Users/serge/AppData/Local/Temp/CoreTests-Ryfayx/Content/Missing.scene.json': Не удается найти указанный файл.
+[Info] FileService: wrote 24 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-Ryfayx/Content/Corrupt.scene.json'
+[Test] TestTerminal...
+[Test] TestAssetOps...
+[Info] FileService: sandbox root set to 'C:/Users/serge/AppData/Local/Temp/CoreTests-vrbawJ'
+[Info] FileService: wrote 11 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-vrbawJ/Materials/test.mat'
+[Error] FileService: path '../outside.txt' is outside sandbox 'C:/Users/serge/AppData/Local/Temp/CoreTests-vrbawJ'
+[Info] FileService: created directory 'C:/Users/serge/AppData/Local/Temp/CoreTests-vrbawJ/Textures/Albedo'
+[Error] FileService: path '../evil_dir' is outside sandbox 'C:/Users/serge/AppData/Local/Temp/CoreTests-vrbawJ'
+[Info] FileService: wrote 5 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-vrbawJ/Materials/metal.mat'
+[Error] FileService: path '../outside.mat' is outside sandbox 'C:/Users/serge/AppData/Local/Temp/CoreTests-vrbawJ'
+[Info] FileService: wrote 11 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-vrbawJ/Materials/test_renamed_Copy.mat'
+[Info] FileService: wrote 11 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-vrbawJ/Materials/test_renamed_Copy_1.mat'
+[Info] FileService: wrote 11 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-vrbawJ/Materials/custom_dup.mat'
+[Info] FileService: deleted 'C:/Users/serge/AppData/Local/Temp/CoreTests-vrbawJ/Materials/custom_dup.mat'
+[Error] FileService: path '../outside.txt' is outside sandbox 'C:/Users/serge/AppData/Local/Temp/CoreTests-vrbawJ'
+[Test] TestImportSettings...
+[Error] ImportSettings: JSON parse error: illegal value
+[Error] ImportSettings: missing 'scale' field in JSON, using default 1.0
+[Error] ImportSettings: 'scale' is not a number, using default 1.0
+[Error] ImportSettings: scale 0 is out of allowed range [0.0001, 10000], using default 1.0
+[Error] ImportSettings: scale -5 is out of allowed range [0.0001, 10000], using default 1.0
+[Error] ImportSettings: scale 100000 is out of allowed range [0.0001, 10000], using default 1.0
+[Info] FileService: sandbox root set to 'C:/Users/serge/AppData/Local/Temp/CoreTests-GSEAhy'
+[Info] FileService: wrote 55 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-GSEAhy/Models/Hero/Hero.glb.importsettings.json'
+[Error] FileService: path '../Outside.json' is outside sandbox 'C:/Users/serge/AppData/Local/Temp/CoreTests-GSEAhy'
+[Info] ImportSettings: sidecar not found for 'Models/Missing/none.glb.importsettings.json', using default settings
+[Info] FileService: wrote 25 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-GSEAhy/Models/Corrupt/corrupt.importsettings.json'
+[Error] ImportSettings: JSON parse error: illegal value
+[Info] FileService: wrote 30 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-GSEAhy/Models/Range/range.importsettings.json'
+[Error] ImportSettings: scale -10 is out of allowed range [0.0001, 10000], using default 1.0
+[Error] ImportSettings: cannot save invalid scale -1
+[Info] FileService: created directory 'C:/Users/serge/AppData/Local/Temp/CoreTests-GSEAhy/Content/Models'
+[Info] FileService: wrote 56 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-GSEAhy/Content/Models/Hero/Hero.glb.importsettings.json'
+[Info] FileService: wrote 55 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-GSEAhy/Content/Models/Batch/Tree1.glb.importsettings.json'
+[Info] FileService: wrote 55 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-GSEAhy/Content/Models/Batch/Tree2.glb.importsettings.json'
+[Info] FileService: wrote 55 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-GSEAhy/Content/Models/Batch/Tree3.glb.importsettings.json'
+[Info] ImportSettings: sidecar not found for 'C:/Users/serge/AppData/Local/Temp/CoreTests-GSEAhy/Content/Models/NoSidecar/Chair.glb.importsettings.json', using default settings
+[Info] FileService: wrote 14 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-GSEAhy/Content/Models/Broken/Broken.glb.importsettings.json'
+[Error] ImportSettings: JSON parse error: illegal value
+[Info] FileService: wrote 55 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-GSEAhy/Content/Models/Hero..v2.glb.importsettings.json'
+[Error] ModelImportSidecar: asset path '/Game/../../outside.glb' is outside project sandbox 'C:/Users/serge/AppData/Local/Temp/CoreTests-GSEAhy'
+[Error] ModelImportSidecar: asset path 'C:/Outside/Other.glb' is outside project sandbox 'C:/Users/serge/AppData/Local/Temp/CoreTests-GSEAhy'
+[Info] FileService: wrote 56 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-GSEAhy/Content/Models/Regression/Tree001.glb.importsettings.json'
+[Info] ImportSettings: sidecar not found for 'C:/Users/serge/AppData/Local/Temp/CoreTests-GSEAhy/Content/Models/Regression/NoSidecarModel.glb.importsettings.json', using default settings
+[Info] FileService: wrote 19 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-GSEAhy/Content/Models/Regression/CorruptModel.glb.importsettings.json'
+[Error] ImportSettings: JSON parse error: illegal value
+[Info] FileService: wrote 55 bytes to 'C:/Users/serge/AppData/Local/Temp/CoreTests-GSEAhy/Content/Models/Regression/ReimportModel.glb.importsettings.json'
+CoreTests: 478 checks passed.
