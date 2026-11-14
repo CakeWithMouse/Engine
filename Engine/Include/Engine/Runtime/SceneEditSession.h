@@ -17,6 +17,8 @@
 #include <Engine/Runtime/EditExtensions.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
 
+#include <Engine/AI/World.h>
+
 // Entire object and both Games live in the module containing the generated types.
 // Edit never invokes gameplay hooks. Play owns a separate Game and Scene.
 class SceneEditSession final
@@ -41,10 +43,13 @@ public:
     EngineScriptApi GetScriptApi() noexcept;
     EngineGraphTraceApi GetGraphTraceApi() noexcept;
     EngineAiMachineApi GetAiMachineApi() noexcept;
+    EngineAiDiagnosticsApi GetAiDiagnosticsApi() noexcept;
     EngineAssetImportApi GetAssetImportApi() noexcept;
     SceneEditSession(const SceneEditSession&) = delete;
     SceneEditSession& operator=(const SceneEditSession&) = delete;
 private:
+    std::unique_ptr<Ai::World> diagnosticPreview_;
+    std::string diagnosticSceneKey_;
     ComponentTypeCatalog catalog_;
     GameFactory gameFactory_ = nullptr;
     std::thread::id thread_ = std::this_thread::get_id();

@@ -94,6 +94,10 @@ public:
     void SetAuthoringApi(const EngineAuthoringApi& api) { authoring_ = api; }
     void SetScriptApi(const EngineScriptApi& api) { script_ = api; }
     void SetGraphTraceApi(const EngineGraphTraceApi& api) { graphTrace_ = api; }
+    void SetAiDiagnosticsApi(const EngineAiDiagnosticsApi& api) { aiDiagnostics_ = api; }
+    const EngineAiDiagnosticsApi* AiDiagnosticsApi() const {
+        return host_.getService ? static_cast<const EngineAiDiagnosticsApi*>(host_.getService(host_.user, EngineAiDiagnosticsService, 1)) : (aiDiagnostics_.inspect ? &aiDiagnostics_ : nullptr);
+    }
     void SetAiMachineApi(const EngineAiMachineApi& api) { aiMachine_ = api; }
     // Автоматы ИИ (.fsm): каталог, проверка файла, состояние персонажей в Play — из сервиса runtime или заданные тестом.
     const EngineAiMachineApi* AiMachineApi() const {
@@ -128,6 +132,7 @@ private:
     EngineScriptApi script_{};
     EngineGraphTraceApi graphTrace_{};
     EngineAiMachineApi aiMachine_{};
+    EngineAiDiagnosticsApi aiDiagnostics_{};
     const EngineSceneBatchApi* BatchApi() const {
         if (host_.getService) return static_cast<const EngineSceneBatchApi*>(host_.getService(host_.user, EngineEditorBatchService, 1));
         return batch_.apply ? &batch_ : nullptr;

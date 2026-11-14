@@ -15,6 +15,7 @@
 #include "Logger.h"
 #include "ViewportCommands.h"
 #include "ViewportHeaderBar.h"
+#include "AiDiagnosticsPanel.h"
 #include "UIEditorWindow.h"
 
 #include <QActionGroup>
@@ -123,6 +124,18 @@ void EditorMainWindow::BuildUi()
 
     auto* headerBar = new ViewportHeaderBar(viewportContainer);
     viewport_->AttachHeaderBar(headerBar);
+    auto* aiDock = new QDockWidget(Tr("AI · Диагностика", "AI · Diagnostics"), this);
+    aiDock->setObjectName("AiDiagnosticsDock");
+    aiDock->setWidget(new AiDiagnosticsPanel(host_, viewport_, aiDock));
+    addDockWidget(Qt::RightDockWidgetArea, aiDock);
+    aiDock->hide();
+    auto* aiButton = new QToolButton(headerBar);
+    aiButton->setObjectName("btnAiDiagnostics");aiButton->setText("AI");
+    aiButton->setToolTip(Tr("Навигация, поля и диагностика AI", "Navigation, fields and AI diagnostics"));
+    aiButton->setCheckable(true);
+    static_cast<QHBoxLayout*>(headerBar->layout())->addWidget(aiButton);
+    connect(aiButton, &QToolButton::toggled, aiDock, &QDockWidget::setVisible);
+    connect(aiDock, &QDockWidget::visibilityChanged, aiButton, &QToolButton::setChecked);
 
     viewportLayout->addWidget(headerBar);
     viewportLayout->addWidget(viewport_, 1);

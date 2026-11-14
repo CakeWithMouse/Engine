@@ -1,0 +1,6 @@
+{
+  "name": "AI Diagnostics",
+  "module": "Game.dll",
+  "content": "Content",
+  "startupScene": "Content/Scenes/Main.scene.json"
+}

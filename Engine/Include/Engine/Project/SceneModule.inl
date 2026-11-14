@@ -309,6 +309,11 @@ extern "C" __declspec(dllexport) int __cdecl EngineGetEditExtension(void* contex
         *static_cast<EngineGraphTraceApi*>(output) = static_cast<SceneEditSession*>(context)->GetGraphTraceApi();
         return 1;
     }
+    if (std::strcmp(name, EngineAiDiagnosticsExtension) == 0 && size == sizeof(EngineAiDiagnosticsApi))
+    {
+        *static_cast<EngineAiDiagnosticsApi*>(output) = static_cast<SceneEditSession*>(context)->GetAiDiagnosticsApi();
+        return 1;
+    }
     if (std::strcmp(name, EngineAiMachineExtension) == 0 && size == sizeof(EngineAiMachineApi))
     {
         *static_cast<EngineAiMachineApi*>(output) = static_cast<SceneEditSession*>(context)->GetAiMachineApi();

@@ -249,6 +249,9 @@ public:
     void DebugDrawTrace(const Trace::Ray&,const Trace::Result&,float lifetime=1);
     /** A world-space line for one frame, colour 0xAABBGGRR. Drawn in Play and in standalone games. */
     void DebugDrawLine(const glm::vec3& from, const glm::vec3& to, uint32_t abgr);
+    void SetAiDiagnosticOverlay(std::vector<EngineOverlayLine> lines, std::vector<EngineOverlayTriangle> triangles) {
+        AiDiagnosticLines = std::move(lines); AiDiagnosticTriangles = std::move(triangles);
+    }
     size_t GetFrameDebugLineCount() const { return FrameDebugLines.size(); }
     void ClearDebugTraces();
     size_t GetDebugTraceLineCount();
@@ -742,6 +745,8 @@ protected:
     struct TimedTraceLine {EngineOverlayLine line;double expiry;};
     std::vector<TimedTraceLine> TraceDebugLines;
     std::vector<EngineOverlayLine> FrameDebugLines;
+    std::vector<EngineOverlayLine> AiDiagnosticLines;
+    std::vector<EngineOverlayTriangle> AiDiagnosticTriangles;
     std::vector<EngineOverlayLine> CollectTraceDebugLines();
     std::vector<EngineOverlayLine> PendingOverlayLines;
     float OverlayLineThickness = 1.0f;

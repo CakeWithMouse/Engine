@@ -3256,10 +3256,13 @@ void Game::RenderEditorOverlay()
         std::fflush(stdout);
     }
 
+    auto overlayTriangles = PendingOverlayTriangles;
+    overlayTriangles.insert(overlayTriangles.end(), AiDiagnosticTriangles.begin(), AiDiagnosticTriangles.end());
     auto overlayLines=PendingOverlayLines;
+    overlayLines.insert(overlayLines.end(), AiDiagnosticLines.begin(), AiDiagnosticLines.end());
     auto debugLines=CollectTraceDebugLines();overlayLines.insert(overlayLines.end(),debugLines.begin(),debugLines.end());
     overlayLines.insert(overlayLines.end(),FrameDebugLines.begin(),FrameDebugLines.end());
-    if (overlayLines.empty() && PendingOverlayBillboards.empty() && PendingOverlayTriangles.empty())
+    if (overlayLines.empty() && PendingOverlayBillboards.empty() && overlayTriangles.empty())
     {
         if (logPeriodic) { std::printf("[Info] Overlay: early return (empty lines and billboards)\n"); std::fflush(stdout); }
         return;
@@ -3498,13 +3501,13 @@ void Game::RenderEditorOverlay()
         }
     }
 
-    if (!PendingOverlayTriangles.empty() && OverlayTriangleVS && OverlayTrianglePS && OverlayTriangleLayout)
+    if (!overlayTriangles.empty() && OverlayTriangleVS && OverlayTrianglePS && OverlayTriangleLayout)
     {
         struct TriVertex { float x, y, z; uint32_t col; };
         std::vector<TriVertex> depthTris;
         std::vector<TriVertex> topTris;
 
-        for (const auto& tri : PendingOverlayTriangles)
+        for (const auto& tri : overlayTriangles)
         {
             const bool depthTest = (tri.flags & 1) != 0 && (tri.flags & 2) == 0;
             auto& dst = depthTest ? depthTris : topTris;

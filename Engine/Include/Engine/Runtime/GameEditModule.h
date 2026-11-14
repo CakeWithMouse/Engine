@@ -39,6 +39,7 @@ public:
     const EnginePointLightV2Api& PointLightV2Api() const noexcept { return pointLightV2_; }
     const EngineScriptApi& ScriptApi() const noexcept { return script_; }
     const EngineGraphTraceApi& GraphTraceApi() const noexcept { return graphTrace_; }
+    const EngineAiDiagnosticsApi& AiDiagnosticsApi() const noexcept { return aiDiagnostics_; }
     const EngineAiMachineApi& AiMachineApi() const noexcept { return aiMachine_; }
     const EngineAudioPreviewApi& AudioPreviewApi() const noexcept { return audio_; }
     const EngineAssetImportApi& AssetImportApi() const noexcept { return assetImport_; }
@@ -63,6 +64,7 @@ private:
     EngineScriptApi script_{};
     EngineGraphTraceApi graphTrace_{};
     EngineAiMachineApi aiMachine_{};
+    EngineAiDiagnosticsApi aiDiagnostics_{};
     EngineAudioPreviewApi audio_{};
     EngineAssetImportApi assetImport_{};
     EnginePhysicsApi physics_{};

@@ -730,6 +730,7 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
         if (serviceId == EnginePointLightV2Service && minVersion <= 1 && engine->editModule && engine->editModule->PointLightV2Api().set) return &engine->editModule->PointLightV2Api();
         if (serviceId == EngineScriptService && minVersion <= 1 && engine->editModule && engine->editModule->ScriptApi().set) return &engine->editModule->ScriptApi();
         if (serviceId == EngineGraphTraceService && minVersion <= 1 && engine->editModule && engine->editModule->GraphTraceApi().read) return &engine->editModule->GraphTraceApi();
+        if (serviceId == EngineAiDiagnosticsService && minVersion <= 1 && engine->editModule && engine->editModule->AiDiagnosticsApi().inspect) return &engine->editModule->AiDiagnosticsApi();
         if (serviceId == EngineAiMachineService && minVersion <= 1 && engine->editModule && engine->editModule->AiMachineApi().check) return &engine->editModule->AiMachineApi();
         if(serviceId==EngineAuthoringService && minVersion<=1 && engine->editModule && engine->editModule->AuthoringApi().describe) return &engine->editModule->AuthoringApi();
         if (serviceId == EngineEditorBatchService && minVersion <= 1 && engine->editModule && engine->editModule->BatchApi().apply) return &engine->editModule->BatchApi();

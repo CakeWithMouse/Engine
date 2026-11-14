@@ -57,6 +57,7 @@
     <ClCompile Include="Source\Runtime\SceneEditAudio.cpp" />
     <ClCompile Include="Source\Runtime\SceneEditScripts.cpp" />
     <ClCompile Include="Source\Runtime\SceneEditAi.cpp" />
+    <ClCompile Include="Source\Runtime\SceneEditAiDiagnostics.cpp" />
     <ClCompile Include="Source\Runtime\SceneEditMaterials.cpp" />
     <ClInclude Include="Include\Engine\Components\SpecificComponents\RigidBodyComponent.h" />
     <ClInclude Include="Include\Engine\Runtime\PhysicsEditApi.h" />

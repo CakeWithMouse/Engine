@@ -40,6 +40,8 @@ public:
     /** Removes a soldier, for example when it dies. The instance is hidden. */
     void RemoveMember(size_t member);
     size_t Size() const;
+    /** Borrowed read-only field; inspect on the world thread, never retain across ticks or reload. */
+    const Detail::FlowField* DiagnosticField() const { return field_.get(); }
     const std::vector<Member>& Members() const { return members_; }
     void SetFacing(float yaw) { facing_ = yaw; }
     float Facing() const { return facing_; }

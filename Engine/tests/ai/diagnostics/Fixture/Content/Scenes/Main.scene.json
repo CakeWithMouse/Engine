@@ -1,0 +1,571 @@
+{
+  "version": 3,
+  "name": "AI Diagnostics · validation scene",
+  "objects": [
+    {
+      "id": 1,
+      "name": "Ground",
+      "type": "Primitive.Plane",
+      "parent": 0,
+      "inheritParentScale": true,
+      "transform": {
+        "position": [
+          0,
+          -0.05,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          36,
+          1,
+          30
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "name": "Bounds",
+      "type": "Gameplay.NavVolume",
+      "parent": 0,
+      "inheritParentScale": true,
+      "transform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          32,
+          4,
+          26
+        ]
+      },
+      "projectData": {
+        "version": 1,
+        "mode": 0,
+        "cellSize": 0.75
+      }
+    },
+    {
+      "id": 3,
+      "name": "Wall -7",
+      "type": "Primitive.Cube",
+      "parent": 0,
+      "inheritParentScale": true,
+      "transform": {
+        "position": [
+          0,
+          1,
+          -7
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2,
+          2,
+          8
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "name": "Blocked -7",
+      "type": "Gameplay.NavVolume",
+      "parent": 0,
+      "inheritParentScale": true,
+      "transform": {
+        "position": [
+          0,
+          0,
+          -7
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2,
+          2,
+          8
+        ]
+      },
+      "projectData": {
+        "version": 1,
+        "mode": 1
+      }
+    },
+    {
+      "id": 5,
+      "name": "Wall 6",
+      "type": "Primitive.Cube",
+      "parent": 0,
+      "inheritParentScale": true,
+      "transform": {
+        "position": [
+          0,
+          1,
+          6
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2,
+          2,
+          8
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "name": "Blocked 6",
+      "type": "Gameplay.NavVolume",
+      "parent": 0,
+      "inheritParentScale": true,
+      "transform": {
+        "position": [
+          0,
+          0,
+          6
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2,
+          2,
+          8
+        ]
+      },
+      "projectData": {
+        "version": 1,
+        "mode": 1
+      }
+    },
+    {
+      "id": 7,
+      "name": "Marsh",
+      "type": "Gameplay.NavVolume",
+      "parent": 0,
+      "inheritParentScale": true,
+      "transform": {
+        "position": [
+          -7,
+          0,
+          3
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          7,
+          2,
+          9
+        ]
+      },
+      "projectData": {
+        "version": 1,
+        "mode": 2,
+        "cost": 8
+      }
+    },
+    {
+      "id": 8,
+      "name": "Marsh deep",
+      "type": "Gameplay.NavVolume",
+      "parent": 0,
+      "inheritParentScale": true,
+      "transform": {
+        "position": [
+          -7,
+          0,
+          5
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          3,
+          2,
+          4
+        ]
+      },
+      "projectData": {
+        "version": 1,
+        "mode": 2,
+        "cost": 35
+      }
+    },
+    {
+      "id": 9,
+      "name": "Guard",
+      "type": "Test.DiagnosticGuard",
+      "parent": 0,
+      "inheritParentScale": true,
+      "transform": {
+        "position": [
+          -12,
+          0.4,
+          -7
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": 10,
+      "name": "Soldier 0",
+      "type": "Gameplay.Character",
+      "parent": 0,
+      "inheritParentScale": true,
+      "transform": {
+        "position": [
+          -12,
+          0.2,
+          1
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.65,
+          1.4,
+          0.65
+        ]
+      },
+      "projectData": {
+        "version": 1,
+        "moveSpeed": 0.4
+      }
+    },
+    {
+      "id": 11,
+      "name": "Soldier 1",
+      "type": "Gameplay.Character",
+      "parent": 0,
+      "inheritParentScale": true,
+      "transform": {
+        "position": [
+          -10.5,
+          0.2,
+          1
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.65,
+          1.4,
+          0.65
+        ]
+      },
+      "projectData": {
+        "version": 1,
+        "moveSpeed": 0.4
+      }
+    },
+    {
+      "id": 12,
+      "name": "Soldier 2",
+      "type": "Gameplay.Character",
+      "parent": 0,
+      "inheritParentScale": true,
+      "transform": {
+        "position": [
+          -9,
+          0.2,
+          1
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.65,
+          1.4,
+          0.65
+        ]
+      },
+      "projectData": {
+        "version": 1,
+        "moveSpeed": 0.4
+      }
+    },
+    {
+      "id": 13,
+      "name": "Soldier 3",
+      "type": "Gameplay.Character",
+      "parent": 0,
+      "inheritParentScale": true,
+      "transform": {
+        "position": [
+          -12,
+          0.2,
+          2.5
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.65,
+          1.4,
+          0.65
+        ]
+      },
+      "projectData": {
+        "version": 1,
+        "moveSpeed": 0.4
+      }
+    },
+    {
+      "id": 14,
+      "name": "Soldier 4",
+      "type": "Gameplay.Character",
+      "parent": 0,
+      "inheritParentScale": true,
+      "transform": {
+        "position": [
+          -10.5,
+          0.2,
+          2.5
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.65,
+          1.4,
+          0.65
+        ]
+      },
+      "projectData": {
+        "version": 1,
+        "moveSpeed": 0.4
+      }
+    },
+    {
+      "id": 15,
+      "name": "Soldier 5",
+      "type": "Gameplay.Character",
+      "parent": 0,
+      "inheritParentScale": true,
+      "transform": {
+        "position": [
+          -9,
+          0.2,
+          2.5
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.65,
+          1.4,
+          0.65
+        ]
+      },
+      "projectData": {
+        "version": 1,
+        "moveSpeed": 0.4
+      }
+    },
+    {
+      "id": 16,
+      "name": "Soldier 6",
+      "type": "Gameplay.Character",
+      "parent": 0,
+      "inheritParentScale": true,
+      "transform": {
+        "position": [
+          -12,
+          0.2,
+          4
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.65,
+          1.4,
+          0.65
+        ]
+      },
+      "projectData": {
+        "version": 1,
+        "moveSpeed": 0.4
+      }
+    },
+    {
+      "id": 17,
+      "name": "Soldier 7",
+      "type": "Gameplay.Character",
+      "parent": 0,
+      "inheritParentScale": true,
+      "transform": {
+        "position": [
+          -10.5,
+          0.2,
+          4
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.65,
+          1.4,
+          0.65
+        ]
+      },
+      "projectData": {
+        "version": 1,
+        "moveSpeed": 0.4
+      }
+    },
+    {
+      "id": 18,
+      "name": "Soldier 8",
+      "type": "Gameplay.Character",
+      "parent": 0,
+      "inheritParentScale": true,
+      "transform": {
+        "position": [
+          -9,
+          0.2,
+          4
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.65,
+          1.4,
+          0.65
+        ]
+      },
+      "projectData": {
+        "version": 1,
+        "moveSpeed": 0.4
+      }
+    },
+    {
+      "id": 19,
+      "name": "Target",
+      "type": "Gameplay.AiCharacter",
+      "parent": 0,
+      "inheritParentScale": true,
+      "transform": {
+        "position": [
+          -5,
+          0.3,
+          -6
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.8,
+          1.4,
+          0.8
+        ]
+      },
+      "projectData": {
+        "version": 1,
+        "playerControlled": false,
+        "standardControl": false,
+        "team": 2
+      }
+    },
+    {
+      "id": 20,
+      "name": "Sun",
+      "type": "Light.Directional",
+      "parent": 0,
+      "inheritParentScale": true,
+      "transform": {
+        "position": [
+          0,
+          10,
+          0
+        ],
+        "rotation": [
+          -0.461749,
+          -0.229575,
+          -0.119509,
+          0.856787
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    }
+  ]
+}

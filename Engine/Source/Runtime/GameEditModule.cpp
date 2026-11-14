@@ -103,6 +103,9 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
                 // Debugging only: a broken table switches the trace off instead of rejecting the module.
                 if (trace.version == 1 && trace.context == extensionContext && trace.listObjects && trace.read && trace.readValues) graphTrace_ = trace;
             }
+            EngineAiDiagnosticsApi diagnostic{};
+            if (query && query(extensionContext, EngineAiDiagnosticsExtension, 1, sizeof(diagnostic), &diagnostic))
+                if (diagnostic.version == 1 && diagnostic.context == extensionContext && diagnostic.inspect) aiDiagnostics_ = diagnostic;
             EngineAiMachineApi ai{};
             if (query && query(extensionContext, EngineAiMachineExtension, 1, sizeof(ai), &ai))
             {
@@ -200,6 +203,7 @@ uint32_t GameEditModule::Reload(const std::filesystem::path& module, const std::
         swap(graphTrace_, candidate->graphTrace_); swap(aiMachine_, candidate->aiMachine_);
         swap(assetImport_, candidate->assetImport_);
         swap(physics_, candidate->physics_); swap(physicsObject_, candidate->physicsObject_);
+        swap(aiDiagnostics_, candidate->aiDiagnostics_);
         swap(legacyFactory_, candidate->legacyFactory_); swap(legacy_, candidate->legacy_);
         swap(legacy5Factory_, candidate->legacy5Factory_); swap(legacy5_, candidate->legacy5_);
         // Heap-owned adapter tables move with their DLL, preserving session identity.
