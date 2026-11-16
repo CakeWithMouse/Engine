@@ -10,10 +10,11 @@
 
 ### Чек-лист задач
 - [x] **Задача A (fix(ui)):** Разделители на панели Viewport при дробном DPI. Создан единый виджет `EditorSeparator` (`Editor/UI/EditorSeparator.h`) с отрисовкой через `QPainter` с учетом `devicePixelRatio`: толщина минимум 1 физический пиксель (`std::max(1, qRound(1.0 * dpr))`), выравнивание по физической сетке через логические координаты `QRectF`, динамический цвет темы `borderLight` с обновлением по `SubscribeThemeChanged`. Применен на `ViewportHeaderBar` (`HeaderSep1`, `HeaderSep2`). Написан юнит-тест `EditorSeparatorTests.h` (10 checks PASS) с валидацией рендера в `QImage` при DPR 1.0, 1.25, 1.5, 2.0 (вертикальный и горизонтальный) и валидацией смены темы.
-- [ ] **Задача B (fix(ui)):** Карточки инспектора без подложки (`ScriptCard`, `CameraGuideCard`, `AiMachineCard`).
+- [x] **Задача B (fix(ui)):** Унификация подложки всех карточек инспектора (`CollapsibleCard`, `InspectorCardStyle.h`, `EditorStyles.cpp`). Устранено расхождение селекторов QSS: в `EditorStyles.cpp` добавлены селекторы по динамическому свойству `[collapsibleCard="true"]` и прямым ID карточек (`ScriptCard`, `AiMachineCard`, `CameraGuideCard`). Все карточки вызывают `InspectorCardStyle::ApplyCardStyle(this)`. В `CameraGuideCard` добавлены `RetranslateUi()` и автоподписка на `EditorLocale`. Написан юнит-тест `InspectorCardStyleTests.h` (52 checks PASS), проверяющий рендер фона всех карточек инспектора в Dark (`bgPanel`) и Light темах, отсутствие прозрачных подложек, единые отступы (6, 4, 6, 4), spacing (4) и ширину подписей (80px).
 - [ ] **Задача C (fix(ui)):** Защита от случайного изменения параметров колесиком мыши (`WheelGuard`).
 - [ ] **Задача D (feat(ui)):** Кнопка «Создать» / «Редактировать» в карточке «Материал».
 - [ ] **Задача E (refactor(ui)):** Переработка панели «Навигация и диагностика» (`AiDiagnosticsPanel`).
+- [ ] **Задача F (audit/feat(ui)):** Аудит типов объектов и их компонентов в инспекторе и в меню «Добавить».
 
 ---
 
@@ -60,6 +61,52 @@
   - Цвет берется из активной темы `EditorTheme::Instance().Palette().borderLight` и обновляется автоматически по сигналу `SubscribeThemeChanged`.
   - Разделители `ViewportHeaderBar` переведены на `EditorSeparator` с комфортным размером `setFixedSize(6, 16)` для кликабельности и отступов.
   - Написан юнит-тест `EditorSeparatorTests.h` (10 checks PASS) с валидацией рендера в `QImage` при DPR 1.0, 1.25, 1.5, 2.0 (построчная проверка наличия физических пикселей и толщины) и проверки смены темы Dark <-> Light.
+
+### Разведка B (Подложка всех карточек инспектора)
+- **Факты из кода:**
+  - В `EditorStyles.cpp:295` подложка задавалась селектором `QFrame#CollapsibleCard, QWidget#CollapsibleCard { background-color: %7; border: 1px solid %6; border-radius: 4px; }`.
+  - Карточки `ScriptCard` (`setObjectName("ScriptCard")`), `AiMachineCard` (`setObjectName("AiMachineCard")`), `CameraGuideCard` (`setObjectName("CameraGuideCard")`) переопределяли `objectName`, из-за чего QSS селектор `#CollapsibleCard` переставал с ними совпадать. В результате они рисовались с прозрачным фоном, просвечивая цвет окна инспектора.
+  - В `CameraGuideCard.h` отсутствовал метод `RetranslateUi()` и подписка на `SubscribeLanguageChanged`, что вызывало сбой в `UiSmokeTests` при переключении RU/EN.
+- **Решение и реализация:**
+  - В `InspectorCardStyle.h` добавлен централизованный метод `ApplyCardStyle(QWidget* card)`, устанавливающий динамическое свойство `collapsibleCard = true`.
+  - В `CollapsibleCard.h` вызывается `InspectorCardStyle::ApplyCardStyle(this)`.
+  - В `EditorStyles.cpp` селектор расширен: `QFrame[collapsibleCard="true"], QWidget[collapsibleCard="true"], QFrame#CollapsibleCard, QWidget#CollapsibleCard, #ScriptCard, #AiMachineCard, #CameraGuideCard`.
+  - В `CameraGuideCard.h` добавлены `RetranslateUi()` и подписка на `EditorLocale::Instance().SubscribeLanguageChanged`.
+  - Написан юнит-тест `InspectorCardStyleTests.h` (52 checks PASS), проверяющий рендер тела всех карточек инспектора в Dark и Light темах, соответствие цвета `bgPanel`, различие цветов в разных темах и негативный тест отсутствия подложки у нестилизованного `QFrame`.
+
+### Разведка E (Шаг 0: Панель «Навигация и диагностика»)
+- **Создание и регистрация в коде (`MainWindow.cpp:127-139`):**
+  - Создаётся как `auto* aiDock = new QDockWidget(Tr("AI · Диагностика", "AI · Diagnostics"), this);` (локальная переменная, не член `MainWindow`).
+  - Устанавливается `setObjectName("AiDiagnosticsDock")`.
+  - Добавляется через `addDockWidget(Qt::RightDockWidgetArea, aiDock)` и сразу `aiDock->hide()`.
+  - На шапку вьюпорта кнопка добавлялась грубо: `static_cast<QHBoxLayout*>(headerBar->layout())->addWidget(aiButton)`. При клике `setVisible(toggled)`.
+  - `aiDock` **НЕ** регистрировался в `DockLayoutManager::ApplyDefaultLayout`, **НЕ** вызывался `UnlockDockResizing(aiDock)`, не настраивались `setFeatures` и `setAllowedAreas(Qt::AllDockWidgetAreas)`.
+- **Причины багов:**
+  - *Баг 1 (кнопка ломает интерфейс):* `headerBar->layout()` не предназначен для сторонних кнопок (нарушается сжатие и адаптивное меню шапки). Открытие в `RightDockWidgetArea` сдвигает всю строку `TopDockWidgetArea` (`SceneObjectsDock` + `ViewportDock` + `InspectorDock`), ломая горизонтальные пропорции.
+  - *Баг 2 (пропадает при перетаскивании):* В `AiDiagnosticsPanel.h:34-35` жестко задано `setMinimumWidth(390); setMaximumWidth(460);`. При попытке объединения в таб-группу с инспектором или сценой виджет с жестким `maximumWidth(460)` блокирует таббар и перетаскивание, а отсутствие `setAllowedAreas(Qt::AllDockWidgetAreas)` приводит к невозможности сброса в центральную или нижнюю зоны. В `DockLayoutManager` окно не участвует в сохранении позиций при сбросе.
+  - *Баг 3 (отладочный вид):* В `AiDiagnosticsPanel.h:55, 78` используются сырые `QGroupBox` с рамками, не согласованными с `CollapsibleCard`. Жесткие размеры 390-460px, сырой `QGridLayout` для чекбоксов, константы кириллицы вне `Tr()` в строках 58-60 (из-за чего падает `check.ps1 -Quick`).
+
+### Разведка F (Шаг 0: Аудит типов объектов и карточек инспектора)
+- **Таблица «Тип объекта × Карточки инспектора» в текущем коде (`ObjectInspectorPanel.cpp:443-570`):**
+  | Тип объекта в сцене | Transform | General | Geometry | Material | PointLight / DirLight | Character | Physics | Script | AiMachine | CameraGuide |
+  |---|---|---|---|---|---|---|---|---|---|---|
+  | `Engine.Model` | ДА | ДА | ДА | ДА | НЕТ | НЕТ | **ДА (Баг: везде)** | **ДА (Баг: везде)** | по schema | НЕТ |
+  | `Primitive.*` (Cube/Sphere) | ДА | ДА | ДА | ДА | НЕТ | НЕТ | **ДА (Баг: везде)** | **ДА (Баг: везде)** | по schema | НЕТ |
+  | `Light.Point` | ДА | ДА | НЕТ | НЕТ | ДА | НЕТ | **ДА (Баг: у света)** | **ДА (Баг: у света)** | НЕТ | НЕТ |
+  | `Light.Directional` | ДА | ДА | НЕТ | НЕТ | ДА | НЕТ | **ДА (Баг: у света)** | **ДА (Баг: у света)** | НЕТ | НЕТ |
+  | `Gameplay.Camera` | ДА | ДА | НЕТ | НЕТ | НЕТ | НЕТ | **ДА (Баг: у камеры)** | **ДА** | НЕТ | ДА |
+  | `Empty` / `ProjectObject` | ДА | ДА | НЕТ | НЕТ | НЕТ | НЕТ | **ДА (Баг: в пустом)** | **ДА** | по schema | НЕТ |
+  | `Gameplay.Character` | ДА | ДА | НЕТ | НЕТ | НЕТ | ДА | **ДА** | **ДА** | ДА | НЕТ |
+- **Меню «Добавить» (`SceneObjectsPanel.cpp:175-207`):**
+  - Категории: `Primitives`, `Lights`, `Particles`, `Environment`, `Characters`, `Cameras`, `Project Classes`.
+  - Заполняется из `view.types`, полученных через ABI `ctx.scene.scene.listTypes`.
+  - В меню попадают только типы, зарегистрированные в движке / проекте. Если подменю пустое, оно скрывается (`sub->menuAction()->setVisible(false)`).
+- **Правила исправления F:**
+  - Свет (`Light.Point`, `Light.Directional`): строго Transform, General, Light. Физика, Геометрия, Материал, Скрипт СКРЫТЫ.
+  - Камера (`Gameplay.Camera` или `CameraGuide::IsCamera`): Transform, General, CameraGuide, Скрипт. Физика, Геометрия, Материал СКРЫТЫ.
+  - Пустой объект: Transform, General, Скрипт. Физика, Геометрия, Материал СКРЫТЫ (пока нет меша/коллизии).
+  - Меш / Примитив (`Engine.Model`, `Primitive.*`): Transform, General, Geometry, Material, Physics, Script.
+  - Если в сохранённых данных объекта (`object.hasPhysics`, `object.materialAsset`, `object.modelAsset`) компонент реально присутствует, карточка не скрывается молча.
 
 ---
 

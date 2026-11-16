@@ -41,9 +41,9 @@ public:
                           "меняет дальнюю границу камеры.",
                           "Distance at which the frame is drawn. Does not "
                           "change the camera far clip."));
-    auto* depthLabel = new QLabel(Tr("Глубина схемы", "Guide depth"), Content());
-    InspectorCardStyle::ApplyLabelStyle(depthLabel);
-    form->addRow(depthLabel, depth_);
+    depthLabel_ = new QLabel(Tr("Глубина схемы", "Guide depth"), Content());
+    InspectorCardStyle::ApplyLabelStyle(depthLabel_);
+    form->addRow(depthLabel_, depth_);
     ContentLayout()->addWidget(enabled_);
     ContentLayout()->addLayout(form);
     ContentLayout()->addWidget(full_);
@@ -53,12 +53,12 @@ public:
     summary_->setWordWrap(true);
     summary_->setTextInteractionFlags(Qt::TextSelectableByMouse);
     ContentLayout()->addWidget(summary_);
-    auto *focus =
+    focus_ =
         new QPushButton(Tr("Найти камеру · F", "Frame camera · F"), Content());
-    focus->setObjectName("CameraGuideFocus");
-    focus->setFixedHeight(InspectorCardStyle::kButtonHeight);
-    ContentLayout()->addWidget(focus);
-    connect(focus, &QPushButton::clicked,
+    focus_->setObjectName("CameraGuideFocus");
+    focus_->setFixedHeight(InspectorCardStyle::kButtonHeight);
+    ContentLayout()->addWidget(focus_);
+    connect(focus_, &QPushButton::clicked,
             [] { CommandRegistry::Instance().Execute("Gizmo.FocusSelected"); });
     auto toggle = [this](QCheckBox *box, const char *key, bool fallback) {
       box->setChecked(
@@ -75,6 +75,12 @@ public:
       SettingsService::Instance().SetValue("view/cameraDepth", depth_->value());
       Describe();
     });
+    langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
+      RetranslateUi();
+    });
+  }
+  ~CameraGuideCard() override {
+    if (langSubId_) EditorLocale::Instance().UnsubscribeLanguageChanged(langSubId_);
   }
   void Refresh(const IEditorHost::SceneObject &object,
                const IEditorHost::Snapshot &scene,
@@ -93,6 +99,30 @@ public:
       enabled_->setChecked(
           SettingsService::Instance().GetValue("view/cameras", true).toBool());
     }
+    Describe();
+  }
+
+  void RetranslateUi() {
+    SetTitle(Tr("Обзор камеры", "Camera view"));
+    if (enabled_)
+      enabled_->setText(
+          Tr("Показывать камеры во вьюпорте", "Show cameras in viewport"));
+    if (full_)
+      full_->setText(Tr("Схема до дальней границы", "Draw to far clip"));
+    if (xray_)
+      xray_->setText(Tr("Поверх геометрии", "Draw through geometry"));
+    if (depth_) {
+      depth_->setSuffix(Tr(" м", " m"));
+      depth_->setToolTip(
+          Tr("Расстояние, на котором показан размер кадра. Не "
+             "меняет дальнюю границу камеры.",
+             "Distance at which the frame is drawn. Does not "
+             "change the camera far clip."));
+    }
+    if (depthLabel_)
+      depthLabel_->setText(Tr("Глубина схемы", "Guide depth"));
+    if (focus_)
+      focus_->setText(Tr("Найти камеру · F", "Frame camera · F"));
     Describe();
   }
 
@@ -136,7 +166,10 @@ private:
   }
   CameraGuide::View view_;
   float observerDistance_ = -1;
-  QCheckBox *enabled_, *full_, *xray_;
-  NoWheelDoubleSpinBox *depth_;
-  QLabel *summary_;
+  QCheckBox *enabled_{nullptr}, *full_{nullptr}, *xray_{nullptr};
+  NoWheelDoubleSpinBox *depth_{nullptr};
+  QLabel *depthLabel_{nullptr};
+  QPushButton *focus_{nullptr};
+  QLabel *summary_{nullptr};
+  uint32_t langSubId_{0};
 };

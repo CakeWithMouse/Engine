@@ -32,12 +32,16 @@ inline void Run()
 
     // Provide snapshot with point light and model so cards are populated
     EditorQtHost::Snapshot snap;
+    snap.scripts = true;
     EditorQtHost::SceneObject obj;
     obj.id = 1;
     obj.name = "TestObject";
     obj.type = "Light.Point";
     obj.modelAsset = "/Game/Models/Hero.fbx";
     obj.materialAsset = "/Game/Materials/Hero.mat";
+    obj.scriptAsset = "/Game/Scripts/Test.vscript";
+    obj.propertySchema = R"({"fields":[{"path":"/stateMachine","type":"string"},{"path":"/machineMemory","type":"string"}]})";
+    obj.projectData = R"({"stateMachine":"/Game/AI/Hero.fsm","machineMemory":"{}"})";
     obj.hasPointLight = true;
     obj.pointLight.intensity = 5.0f;
     obj.pointLight.radius = 10.0f;
@@ -47,14 +51,24 @@ inline void Run()
     panel.Refresh(snap, 1, true);
     QApplication::processEvents();
 
-    // 1. Verify all CollapsibleCards have identical content margins and spacing
-    const auto cards = panel.findChildren<QWidget*>(QStringLiteral("CollapsibleCard"));
+    // 1. Verify all CollapsibleCards have identical content margins, spacing, and background styling
+    QList<QWidget*> cards;
+    for (auto* w : panel.findChildren<QWidget*>())
+    {
+        if (w->property("collapsibleCard").toBool())
+        {
+            cards.append(w);
+        }
+    }
     Check(!cards.isEmpty(), "CollapsibleCards found in inspector panel");
-    Check(cards.size() >= 5, "At least 5 CollapsibleCards found");
+    Check(cards.size() >= 8, "All inspector CollapsibleCards found (>= 8)");
     ++checks;
+
+    const QColor darkBg = EditorTheme::Instance().Palette().bgPanel;
 
     for (auto* card : cards)
     {
+        Check(card->property("collapsibleCard").toBool() == true, "card has collapsibleCard property");
         auto* header = card->findChild<QPushButton*>(QStringLiteral("CardHeaderBtn"));
         Check(header != nullptr, "CardHeaderBtn exists in CollapsibleCard");
         Check(header->maximumHeight() == InspectorCardStyle::kHeaderHeight, "CardHeaderBtn height == 22");
@@ -65,6 +79,47 @@ inline void Run()
         Check(layout != nullptr, "Card ContentLayout exists");
         Check(layout->contentsMargins() == InspectorCardStyle::CardMargins(), "Card content margins == (6, 4, 6, 4)");
         Check(layout->spacing() == InspectorCardStyle::kCardSpacing, "Card content spacing == 4");
+
+        // Verify body background styling via render
+        card->resize(260, 60);
+        if (card->layout()) card->layout()->activate();
+        QImage imgDark(260, 60, QImage::Format_ARGB32_Premultiplied);
+        imgDark.fill(Qt::transparent);
+        card->render(&imgDark);
+        const QColor pixelDark = imgDark.pixelColor(3, 30);
+        Check(pixelDark.alpha() > 200, "card body has non-transparent background");
+        Check(pixelDark.rgb() == darkBg.rgb(), "card body background matches theme bgPanel");
+
+        ++checks;
+    }
+
+    // Verify Light theme card background
+    EditorTheme::Instance().SetMode(ThemeMode::Light);
+    QApplication::processEvents();
+    const QColor lightBg = EditorTheme::Instance().Palette().bgPanel;
+    for (auto* card : cards)
+    {
+        card->ensurePolished();
+        QImage imgLight(260, 60, QImage::Format_ARGB32_Premultiplied);
+        imgLight.fill(Qt::transparent);
+        card->render(&imgLight);
+        const QColor pixelLight = imgLight.pixelColor(3, 30);
+        Check(pixelLight.alpha() > 200, "card body has non-transparent background in light theme");
+        Check(pixelLight.rgb() == lightBg.rgb(), "card body background matches light theme bgPanel");
+        Check(pixelLight.rgb() != darkBg.rgb(), "card background changes with theme");
+        ++checks;
+    }
+    EditorTheme::Instance().SetMode(ThemeMode::Dark);
+    QApplication::processEvents();
+
+    // Negative check: verify that a plain unstyled QFrame does not receive card background styling
+    {
+        QFrame unstyledFrame;
+        unstyledFrame.resize(260, 60);
+        QImage unstyledImg(260, 60, QImage::Format_ARGB32_Premultiplied);
+        unstyledImg.fill(Qt::transparent);
+        unstyledFrame.render(&unstyledImg);
+        Check(unstyledImg.pixelColor(10, 30).rgb() != darkBg.rgb(), "unstyled frame does not receive card background styling");
         ++checks;
     }
 

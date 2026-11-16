@@ -17,6 +17,7 @@ public:
         : QFrame(parent), expanded_(expanded), titleText_(title)
     {
         setObjectName(QStringLiteral("CollapsibleCard"));
+        InspectorCardStyle::ApplyCardStyle(this);
 
         auto* mainLayout = new QVBoxLayout(this);
         mainLayout->setContentsMargins(0, 0, 0, 0);

@@ -292,7 +292,11 @@ QStatusBar {
 }
 
 /* Collapsible cards and inspector tokens */
-QFrame#CollapsibleCard, QWidget#CollapsibleCard {
+QFrame#CollapsibleCard, QWidget#CollapsibleCard,
+QFrame[collapsibleCard="true"], QWidget[collapsibleCard="true"],
+QFrame#ScriptCard, QWidget#ScriptCard,
+QFrame#AiMachineCard, QWidget#AiMachineCard,
+QFrame#CameraGuideCard, QWidget#CameraGuideCard {
     background-color: %7;
     border: 1px solid %6;
     border-radius: 4px;
@@ -327,27 +331,29 @@ QLabel#CardFieldLabel {
     font-weight: normal;
 }
 QLabel#CardFieldLabel:disabled,
+QFrame[collapsibleCard="true"] QLabel:disabled,
 QFrame#CollapsibleCard QLabel:disabled {
     color: %12;
 }
-QFrame#CollapsibleCard QLineEdit,
-QFrame#CollapsibleCard QSpinBox,
-QFrame#CollapsibleCard QDoubleSpinBox,
-QFrame#CollapsibleCard QComboBox {
+QFrame[collapsibleCard="true"] QLineEdit, QFrame[collapsibleCard="true"] QSpinBox,
+QFrame[collapsibleCard="true"] QDoubleSpinBox, QFrame[collapsibleCard="true"] QComboBox,
+QFrame#CollapsibleCard QLineEdit, QFrame#CollapsibleCard QSpinBox,
+QFrame#CollapsibleCard QDoubleSpinBox, QFrame#CollapsibleCard QComboBox {
     min-height: 22px;
     max-height: 22px;
     padding: 1px 4px;
     font-size: 11px;
     color: %1;
 }
-QFrame#CollapsibleCard QLineEdit:disabled,
-QFrame#CollapsibleCard QSpinBox:disabled,
-QFrame#CollapsibleCard QDoubleSpinBox:disabled,
-QFrame#CollapsibleCard QComboBox:disabled {
+QFrame[collapsibleCard="true"] QLineEdit:disabled, QFrame[collapsibleCard="true"] QSpinBox:disabled,
+QFrame[collapsibleCard="true"] QDoubleSpinBox:disabled, QFrame[collapsibleCard="true"] QComboBox:disabled,
+QFrame#CollapsibleCard QLineEdit:disabled, QFrame#CollapsibleCard QSpinBox:disabled,
+QFrame#CollapsibleCard QDoubleSpinBox:disabled, QFrame#CollapsibleCard QComboBox:disabled {
     color: %12;
     background-color: %8;
     border-color: %6;
 }
+QFrame[collapsibleCard="true"] QWidget#CardContent QPushButton,
 QFrame#CollapsibleCard QWidget#CardContent QPushButton {
     min-height: 24px;
     max-height: 24px;

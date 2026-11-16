@@ -48,4 +48,12 @@ namespace InspectorCardStyle
             layout->setSpacing(spacing);
         }
     }
+
+    inline void ApplyCardStyle(QWidget* card)
+    {
+        if (card)
+        {
+            card->setProperty("collapsibleCard", true);
+        }
+    }
 }
