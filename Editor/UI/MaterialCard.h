@@ -4,6 +4,7 @@
 #include "CollapsibleCard.h"
 #include "EditorLocale.h"
 #include "EditorTheme.h"
+#include "InspectorCardStyle.h"
 
 #include <QDir>
 #include <QFileInfo>
@@ -118,7 +119,7 @@ private:
         materialAsset_ = new QLineEdit(Content());
         materialAsset_->setReadOnly(true);
         materialAsset_->setObjectName(QStringLiteral("MaterialAsset"));
-        materialAsset_->setFixedHeight(22);
+        materialAsset_->setFixedHeight(InspectorCardStyle::kFieldHeight);
         materialAsset_->setMinimumWidth(0);
         materialAsset_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
         materialAsset_->setPlaceholderText(Tr("по умолчанию", "default"));
@@ -126,12 +127,11 @@ private:
 
         materialActions_ = new QWidget(Content());
         auto* lMatBtns = new QHBoxLayout(materialActions_);
-        lMatBtns->setContentsMargins(0, 0, 0, 0);
-        lMatBtns->setSpacing(4);
+        InspectorCardStyle::ApplyRowLayout(lMatBtns);
 
         editMaterialButton_ = new QPushButton(Tr("Редактировать", "Edit Material"), materialActions_);
         editMaterialButton_->setObjectName(QStringLiteral("EditMaterial"));
-        editMaterialButton_->setFixedHeight(24);
+        editMaterialButton_->setFixedHeight(InspectorCardStyle::kButtonHeight);
         QObject::connect(editMaterialButton_, &QPushButton::clicked, [this] {
             if (onEditMaterial) onEditMaterial(rawMaterialPath_);
         });
@@ -139,7 +139,7 @@ private:
 
         chooseMaterialButton_ = new QPushButton(Tr("Выбрать…", "Browse…"), materialActions_);
         chooseMaterialButton_->setObjectName(QStringLiteral("ChooseMaterial"));
-        chooseMaterialButton_->setFixedHeight(24);
+        chooseMaterialButton_->setFixedHeight(InspectorCardStyle::kButtonHeight);
         QObject::connect(chooseMaterialButton_, &QPushButton::clicked, [this] {
             if (onChooseMaterial) onChooseMaterial();
         });
@@ -147,7 +147,7 @@ private:
 
         clearMaterialButton_ = new QPushButton(Tr("Убрать", "Clear"), materialActions_);
         clearMaterialButton_->setObjectName(QStringLiteral("ClearMaterial"));
-        clearMaterialButton_->setFixedHeight(24);
+        clearMaterialButton_->setFixedHeight(InspectorCardStyle::kButtonHeight);
         QObject::connect(clearMaterialButton_, &QPushButton::clicked, [this] {
             if (onClearMaterial) onClearMaterial();
         });

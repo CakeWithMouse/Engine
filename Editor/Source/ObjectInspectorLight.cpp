@@ -1,5 +1,6 @@
 #include "ObjectInspectorPanel.h"
 #include "CollapsibleCard.h"
+#include "InspectorCardStyle.h"
 #include "NoWheelDoubleSpinBox.h"
 #include "EditorLocale.h"
 #include "IconProvider.h"
@@ -20,7 +21,7 @@ static QWidget* CreateAxisCell(NoWheelDoubleSpinBox* spin, const QString& axisLe
     layout->setSpacing(0);
 
     auto* badge = new QLabel(axisLetter, cell);
-    badge->setFixedSize(16, 22);
+    badge->setFixedSize(16, InspectorCardStyle::kFieldHeight);
     badge->setAlignment(Qt::AlignCenter);
     badge->setStyleSheet(QStringLiteral(
         "background-color: %1; color: white; font-weight: bold; font-size: 10px; "
@@ -29,7 +30,7 @@ static QWidget* CreateAxisCell(NoWheelDoubleSpinBox* spin, const QString& axisLe
     layout->addWidget(badge);
 
     spin->setParent(cell);
-    spin->setFixedHeight(22);
+    spin->setFixedHeight(InspectorCardStyle::kFieldHeight);
     spin->setProperty("axisCell", true);
     layout->addWidget(spin, 1);
     return cell;
@@ -50,7 +51,7 @@ void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
         emit PointLightEditingFinished(selectedId_, CurrentPointLightValue());
     };
     auto* rowTop = new QWidget(cardLight_->Content()); auto* lTop = new QHBoxLayout(rowTop);
-    lTop->setContentsMargins(0, 0, 0, 0); lTop->setSpacing(6);
+    InspectorCardStyle::ApplyRowLayout(lTop);
     lightEnabled_ = new QCheckBox(Tr("Включён", "Enabled"), rowTop);
     lightEnabled_->setObjectName(QStringLiteral("LightEnabled")); lightEnabled_->hide();
     connect(lightEnabled_, &QCheckBox::clicked, this, emitChanged);
@@ -63,7 +64,7 @@ void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
     });
     lTop->addWidget(lightShadows_);
     lightColor_ = new QPushButton(Tr("Выбрать цвет…", "Choose Color…"), rowTop);
-    lightColor_->setObjectName(QStringLiteral("LightColor")); lightColor_->setFixedHeight(24); lightColor_->setIcon(IconProvider::BulbIcon());
+    lightColor_->setObjectName(QStringLiteral("LightColor")); lightColor_->setFixedHeight(InspectorCardStyle::kButtonHeight); lightColor_->setIcon(IconProvider::BulbIcon());
     connect(lightColor_, &QPushButton::clicked, this, [this] {
         if (refreshing_ || selectedId_ == 0) return;
         const QColor cur = QColor::fromRgbF(lightValues_[0]->value(), lightValues_[1]->value(), lightValues_[2]->value());
@@ -79,7 +80,7 @@ void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
     });
     lTop->addWidget(lightColor_, 1); cl->addWidget(rowTop);
     auto* rowRgb = new QWidget(cardLight_->Content()); auto* lRgb = new QHBoxLayout(rowRgb);
-    lRgb->setContentsMargins(0, 0, 0, 0); lRgb->setSpacing(4);
+    InspectorCardStyle::ApplyRowLayout(lRgb);
     const QString rgbL[3] = {QStringLiteral("R"), QStringLiteral("G"), QStringLiteral("B")};
     const QString rgbC[3] = {QStringLiteral("#EF4444"), QStringLiteral("#22C55E"), QStringLiteral("#3B82F6")};
     for (int i = 0; i < 3; ++i) {
@@ -98,11 +99,12 @@ void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
     cl->addWidget(rowRgb);
     auto addFieldRow = [&](int idx, const QString& label, double minV, double maxV, double step) {
         auto* row = new QWidget(cardLight_->Content()); auto* l = new QHBoxLayout(row);
-        l->setContentsMargins(0, 0, 0, 0); l->setSpacing(6);
-        lightRowLabels_[idx] = new QLabel(label, row); lightRowLabels_[idx]->setObjectName(QStringLiteral("CardFieldLabel")); lightRowLabels_[idx]->setFixedWidth(80);
+        InspectorCardStyle::ApplyRowLayout(l);
+        lightRowLabels_[idx] = new QLabel(label, row);
+        InspectorCardStyle::ApplyLabelStyle(lightRowLabels_[idx]);
         l->addWidget(lightRowLabels_[idx]);
         auto* spin = lightValues_[idx] = new NoWheelDoubleSpinBox(row);
-        spin->setObjectName(QStringLiteral("LightValue%1").arg(idx)); spin->setFixedHeight(22); spin->setRange(minV, maxV); spin->setDecimals(2); spin->setSingleStep(step); spin->setKeyboardTracking(false);
+        spin->setObjectName(QStringLiteral("LightValue%1").arg(idx)); spin->setFixedHeight(InspectorCardStyle::kFieldHeight); spin->setRange(minV, maxV); spin->setDecimals(2); spin->setSingleStep(step); spin->setKeyboardTracking(false);
         connect(spin, &QDoubleSpinBox::editingFinished, this, emitChanged); l->addWidget(spin, 1); cl->addWidget(row);
     };
     addFieldRow(3, Tr("Интенсивность", "Intensity"), 0.0, 10000.0, 0.5);

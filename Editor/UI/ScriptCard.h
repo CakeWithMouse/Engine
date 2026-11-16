@@ -2,6 +2,7 @@
 
 #include "CollapsibleCard.h"
 #include "EditorLocale.h"
+#include "InspectorCardStyle.h"
 #include "VariableValuesEditor.h"
 
 #include <QComboBox>
@@ -32,14 +33,13 @@ public:
         asset_ = new QLineEdit(Content());
         asset_->setReadOnly(true);
         asset_->setObjectName(QStringLiteral("ScriptAsset"));
-        asset_->setFixedHeight(22);
+        asset_->setFixedHeight(InspectorCardStyle::kFieldHeight);
         asset_->setPlaceholderText(Tr("нет", "none"));
         layout->addWidget(asset_);
 
         auto* actions = new QWidget(Content());
         auto* row = new QHBoxLayout(actions);
-        row->setContentsMargins(0, 0, 0, 0);
-        row->setSpacing(4);
+        InspectorCardStyle::ApplyRowLayout(row);
         open_ = Button(actions, row, "OpenScript", [this] { if (onOpenScript) onOpenScript(asset_->text()); });
         choose_ = Button(actions, row, "ChooseScript", [this] { if (onChooseScript) onChooseScript(); });
         clear_ = Button(actions, row, "ClearScript", [this] { if (onClearScript) onClearScript(); });
@@ -106,7 +106,7 @@ private:
     {
         auto* button = new QPushButton(parent);
         button->setObjectName(QString::fromLatin1(name));
-        button->setFixedHeight(24);
+        button->setFixedHeight(InspectorCardStyle::kButtonHeight);
         QObject::connect(button, &QPushButton::clicked, std::forward<F>(clicked));
         row->addWidget(button);
         return button;

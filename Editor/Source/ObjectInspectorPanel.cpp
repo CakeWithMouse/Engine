@@ -7,6 +7,7 @@
 #include "GeometryCard.h"
 #include "CameraGuideCard.h"
 #include "CommandRegistry.h"
+#include "InspectorCardStyle.h"
 #include "NoWheelDoubleSpinBox.h"
 #include "EditorLocale.h"
 #include "IconProvider.h"
@@ -168,8 +169,7 @@ void ObjectInspectorPanel::BuildGeneralCard(QVBoxLayout* layout)
 
     auto* rowHeader = new QWidget(cardGeneral_->Content());
     auto* layoutHeader = new QHBoxLayout(rowHeader);
-    layoutHeader->setContentsMargins(0, 0, 0, 0);
-    layoutHeader->setSpacing(6);
+    InspectorCardStyle::ApplyRowLayout(layoutHeader);
 
     typeBadgeLabel_ = new QLabel(QStringLiteral("None"), rowHeader);
     typeBadgeLabel_->setObjectName(QStringLiteral("TypeBadgeLabel"));
@@ -183,17 +183,15 @@ void ObjectInspectorPanel::BuildGeneralCard(QVBoxLayout* layout)
 
     auto* rowName = new QWidget(cardGeneral_->Content());
     auto* lName = new QHBoxLayout(rowName);
-    lName->setContentsMargins(0, 0, 0, 0);
-    lName->setSpacing(6);
+    InspectorCardStyle::ApplyRowLayout(lName);
 
     labelName_ = new QLabel(Tr("Имя", "Name"), rowName);
-    labelName_->setObjectName(QStringLiteral("CardFieldLabel"));
-    labelName_->setFixedWidth(40);
+    InspectorCardStyle::ApplyLabelStyle(labelName_);
     lName->addWidget(labelName_);
 
     objectName_ = new QLineEdit(rowName);
     objectName_->setMaxLength(120);
-    objectName_->setFixedHeight(22);
+    objectName_->setFixedHeight(InspectorCardStyle::kFieldHeight);
     connect(objectName_, &QLineEdit::editingFinished, this, [this] {
         if (refreshing_ || selectedId_ == 0) return;
         emit NameEditingFinished(selectedId_, objectName_->text().trimmed());
@@ -212,14 +210,14 @@ void ObjectInspectorPanel::BuildCharacterCard(QVBoxLayout* layout)
 
     auto* rowSpeed = new QWidget(cardCharacter_->Content());
     auto* lSpeed = new QHBoxLayout(rowSpeed);
-    lSpeed->setContentsMargins(0, 0, 0, 0); lSpeed->setSpacing(6);
+    InspectorCardStyle::ApplyRowLayout(lSpeed);
     characterSpeedLabel_ = new QLabel(Tr("Скорость, ед/с", "Speed, u/s"), rowSpeed);
-    characterSpeedLabel_->setObjectName(QStringLiteral("CardFieldLabel"));
+    InspectorCardStyle::ApplyLabelStyle(characterSpeedLabel_);
     lSpeed->addWidget(characterSpeedLabel_);
 
     characterSpeed_ = new NoWheelDoubleSpinBox(rowSpeed);
     characterSpeed_->setObjectName(QStringLiteral("CharacterSpeed"));
-    characterSpeed_->setFixedHeight(22); characterSpeed_->setRange(0, 10000); characterSpeed_->setKeyboardTracking(false);
+    characterSpeed_->setFixedHeight(InspectorCardStyle::kFieldHeight); characterSpeed_->setRange(0, 10000); characterSpeed_->setKeyboardTracking(false);
     connect(characterSpeed_, &QDoubleSpinBox::editingFinished, this, [this] {
         if (!refreshing_ && selectedId_) emit CharacterSpeedEditingFinished(selectedId_, characterSpeed_->value());
     });
@@ -242,8 +240,7 @@ void ObjectInspectorPanel::BuildPhysicsCard(QVBoxLayout* layout)
 
     auto* rowTop = new QWidget(cardPhysics_->Content());
     auto* lTop = new QHBoxLayout(rowTop);
-    lTop->setContentsMargins(0, 0, 0, 0);
-    lTop->setSpacing(6);
+    InspectorCardStyle::ApplyRowLayout(lTop);
     physicsEnabled_ = new QCheckBox(Tr("Включить физику", "Enable physics"), rowTop);
     physicsEnabled_->setObjectName(QStringLiteral("PhysicsEnabled"));
     connect(physicsEnabled_, &QCheckBox::clicked, this, emitChanged);
@@ -257,15 +254,13 @@ void ObjectInspectorPanel::BuildPhysicsCard(QVBoxLayout* layout)
     auto addComboRow = [&](int labelIndex, const QString& label, QComboBox*& combo) {
         auto* row = new QWidget(cardPhysics_->Content());
         auto* l = new QHBoxLayout(row);
-        l->setContentsMargins(0, 0, 0, 0);
-        l->setSpacing(6);
+        InspectorCardStyle::ApplyRowLayout(l);
         physicsRowLabels_[labelIndex] = new QLabel(label, row);
-        physicsRowLabels_[labelIndex]->setObjectName(QStringLiteral("CardFieldLabel"));
-        physicsRowLabels_[labelIndex]->setFixedWidth(80);
+        InspectorCardStyle::ApplyLabelStyle(physicsRowLabels_[labelIndex]);
         l->addWidget(physicsRowLabels_[labelIndex]);
         combo = new QComboBox(row);
         combo->setObjectName(QStringLiteral("PhysicsCombo%1").arg(labelIndex));
-        combo->setFixedHeight(22);
+        combo->setFixedHeight(InspectorCardStyle::kFieldHeight);
         connect(combo, &QComboBox::currentIndexChanged, this, [emitChanged](int) { emitChanged(); });
         l->addWidget(combo, 1);
         cl->addWidget(row);
@@ -277,15 +272,13 @@ void ObjectInspectorPanel::BuildPhysicsCard(QVBoxLayout* layout)
                           double minV, double maxV, double step) {
         auto* row = new QWidget(cardPhysics_->Content());
         auto* l = new QHBoxLayout(row);
-        l->setContentsMargins(0, 0, 0, 0);
-        l->setSpacing(6);
+        InspectorCardStyle::ApplyRowLayout(l);
         physicsRowLabels_[labelIndex] = new QLabel(label, row);
-        physicsRowLabels_[labelIndex]->setObjectName(QStringLiteral("CardFieldLabel"));
-        physicsRowLabels_[labelIndex]->setFixedWidth(80);
+        InspectorCardStyle::ApplyLabelStyle(physicsRowLabels_[labelIndex]);
         l->addWidget(physicsRowLabels_[labelIndex]);
         spin = new NoWheelDoubleSpinBox(row);
         spin->setObjectName(QStringLiteral("PhysicsValue%1").arg(labelIndex));
-        spin->setFixedHeight(22);
+        spin->setFixedHeight(InspectorCardStyle::kFieldHeight);
         spin->setRange(minV, maxV);
         spin->setDecimals(2);
         spin->setSingleStep(step);

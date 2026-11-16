@@ -11,6 +11,7 @@
 #include "ContentBrowserTypeTests.h"
 #include "GeometryTextureActionTests.h"
 #include "AssetPickerDialogTests.h"
+#include "InspectorCardStyleTests.h"
 #include "EditorTheme.h"
 #include <QApplication>
 #include <iostream>
@@ -31,6 +32,7 @@ int main(int argc, char* argv[])
         InspectorRefreshTests::Run();
         InspectorRefreshTests::RunMouseRefreshJitter();
         InspectorRefreshTests::RunModelReplaceButtonRegression();
+        InspectorCardStyleTests::Run();
         DockRedockTests::Run();
         GeometryTextureActionTests::Run();
         AssetPickerDialogTests::Run();

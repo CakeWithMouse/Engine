@@ -4,6 +4,7 @@
 #include "CollapsibleCard.h"
 #include "EditorLocale.h"
 #include "EditorTheme.h"
+#include "InspectorCardStyle.h"
 
 #include <QDir>
 #include <QFileInfo>
@@ -143,7 +144,7 @@ private:
         modelAsset_ = new QLineEdit(Content());
         modelAsset_->setReadOnly(true);
         modelAsset_->setObjectName(QStringLiteral("ModelAsset"));
-        modelAsset_->setFixedHeight(22);
+        modelAsset_->setFixedHeight(InspectorCardStyle::kFieldHeight);
         modelAsset_->setMinimumWidth(0);
         modelAsset_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
         modelAsset_->setPlaceholderText(Tr("нет модели", "none"));
@@ -151,12 +152,11 @@ private:
 
         auto* btnRow = new QWidget(Content());
         auto* lBtns = new QHBoxLayout(btnRow);
-        lBtns->setContentsMargins(0, 0, 0, 0);
-        lBtns->setSpacing(4);
+        InspectorCardStyle::ApplyRowLayout(lBtns);
 
         chooseModel_ = new QPushButton(Tr("Заменить модель…", "Replace Model…"), btnRow);
         chooseModel_->setObjectName(QStringLiteral("ChooseModel"));
-        chooseModel_->setFixedHeight(24);
+        chooseModel_->setFixedHeight(InspectorCardStyle::kButtonHeight);
         QObject::connect(chooseModel_, &QPushButton::clicked, [this] {
             if (onChooseModel) onChooseModel();
         });

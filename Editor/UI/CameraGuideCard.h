@@ -3,6 +3,7 @@
 #include "CollapsibleCard.h"
 #include "CommandRegistry.h"
 #include "EditorLocale.h"
+#include "InspectorCardStyle.h"
 #include "NoWheelDoubleSpinBox.h"
 #include "SettingsService.h"
 #include <QCheckBox>
@@ -26,8 +27,10 @@ public:
                           Content());
     xray_->setObjectName("CameraGuideXray");
     auto *form = new QFormLayout;
+    InspectorCardStyle::ApplyRowLayout(form);
     depth_ = new NoWheelDoubleSpinBox(Content());
     depth_->setObjectName("CameraGuideDepth");
+    depth_->setFixedHeight(InspectorCardStyle::kFieldHeight);
     depth_->setRange(.01, 1000000);
     depth_->setDecimals(2);
     depth_->setSuffix(Tr(" м", " m"));
@@ -38,7 +41,9 @@ public:
                           "меняет дальнюю границу камеры.",
                           "Distance at which the frame is drawn. Does not "
                           "change the camera far clip."));
-    form->addRow(Tr("Глубина схемы", "Guide depth"), depth_);
+    auto* depthLabel = new QLabel(Tr("Глубина схемы", "Guide depth"), Content());
+    InspectorCardStyle::ApplyLabelStyle(depthLabel);
+    form->addRow(depthLabel, depth_);
     ContentLayout()->addWidget(enabled_);
     ContentLayout()->addLayout(form);
     ContentLayout()->addWidget(full_);
@@ -51,6 +56,7 @@ public:
     auto *focus =
         new QPushButton(Tr("Найти камеру · F", "Frame camera · F"), Content());
     focus->setObjectName("CameraGuideFocus");
+    focus->setFixedHeight(InspectorCardStyle::kButtonHeight);
     ContentLayout()->addWidget(focus);
     connect(focus, &QPushButton::clicked,
             [] { CommandRegistry::Instance().Execute("Gizmo.FocusSelected"); });

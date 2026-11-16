@@ -8,6 +8,7 @@
 #include <functional>
 #include "EditorTheme.h"
 #include "IconProvider.h"
+#include "InspectorCardStyle.h"
 
 class CollapsibleCard : public QFrame
 {
@@ -24,7 +25,7 @@ public:
         headerBtn_ = new QPushButton(this);
         headerBtn_->setObjectName(QStringLiteral("CardHeaderBtn"));
         headerBtn_->setCursor(Qt::PointingHandCursor);
-        headerBtn_->setFixedHeight(22);
+        headerBtn_->setFixedHeight(InspectorCardStyle::kHeaderHeight);
         UpdateHeaderText();
 
         QObject::connect(headerBtn_, &QPushButton::clicked, [this] {
@@ -35,8 +36,8 @@ public:
         content_ = new QWidget(this);
         content_->setObjectName(QStringLiteral("CardContent"));
         contentLayout_ = new QVBoxLayout(content_);
-        contentLayout_->setContentsMargins(6, 4, 6, 4);
-        contentLayout_->setSpacing(4);
+        contentLayout_->setContentsMargins(InspectorCardStyle::CardMargins());
+        contentLayout_->setSpacing(InspectorCardStyle::kCardSpacing);
         mainLayout->addWidget(content_);
 
         content_->setVisible(expanded_);
