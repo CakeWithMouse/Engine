@@ -38,6 +38,10 @@
     <MSBuild Projects="../../Engine/Tools/ComponentGenerator/ComponentGenerator.vcxproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform);PlatformToolset=$(PlatformToolset)" />
     <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(RepositoryRoot)Engine/BuildSupport/New-ProjectSdk.ps1&quot; -Runtime &quot;$(OutDir)Runtime&quot; -Configuration $(Configuration) -PlatformToolset $(PlatformToolset) -Assimp $(EngineEnableAssimp) $(ProjectSdkOptions)" />
   </Target>
+  <Target Name="DeployLauncherAssets" AfterTargets="Build">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)Source/icon_pain_multisize.ico" DestinationFiles="$(OutDir)icon_pain_multisize.ico" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)Source/icon_pain_multisize.ico" DestinationFiles="$(OutDir)Runtime/icon_pain_multisize.ico" SkipUnchangedFiles="true" />
+  </Target>
 
 
   <ItemDefinitionGroup Condition="'$(EngineEnableJolt)'=='true' and '$(Configuration)'=='Debug'"><Link><AdditionalDependencies>$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/debug/lib/Jolt.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>

@@ -33,3 +33,4 @@ BEGIN
 END
 
 301 RCDATA "splash_1920.jpg"
+302 RCDATA "icon_pain_multisize.ico"
