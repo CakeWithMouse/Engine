@@ -13,7 +13,8 @@ public:
     static void UploadIcons(IEditorHost* host, bool force = false);
 
     static QIcon GetIcon(const QString& name, const QColor& color = QColor(), int size = 16);
-    static QPixmap GetPixmap(const QString& name, const QColor& color = QColor(), int size = 16);
+    static QPixmap GetPixmap(const QString& name, const QColor& color = QColor(), int size = 16, qreal dpr = 1.0);
+    static void ClearCache();
 
     // Helpers for Tabler outline icons
     static QIcon PlayIcon(const QColor& color = QColor());

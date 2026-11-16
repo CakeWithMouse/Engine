@@ -1,4 +1,5 @@
 #include "UiTestHelperTests.h"
+#include "HighDpiIconTests.h"
 #include "ImportSettingsDialogTests.h"
 #include "EditImportSettingsTests.h"
 #include "ImportSettingsV2EditTests.h"
@@ -25,6 +26,7 @@ int main(int argc, char* argv[])
     try
     {
         UiTestHelperTests::Run();
+        HighDpiIconTests::Run();
         ImportSettingsDialogTests::Run();
         EditImportSettingsTests::Run();
         ImportSettingsV2EditTests::Run();
