@@ -68,7 +68,7 @@ QJsonValue ValueOf(const QString& text, const QString& type)
 } // namespace
 
 AiMachineEditorWindow::AiMachineEditorWindow(EditorQtHost* host, const QString& machine, QWidget* parent)
-    : QMainWindow(parent, Qt::Window), host_(host), machine_(machine), schema_(std::make_unique<FsmGraphSchema>())
+    : QMainWindow(nullptr, Qt::Window), host_(host), machine_(machine), schema_(std::make_unique<FsmGraphSchema>())
 {
     EditorWindowSetup::ConfigureSubWindow(this, parent);
     setAttribute(Qt::WA_DeleteOnClose);

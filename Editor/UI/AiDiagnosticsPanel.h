@@ -16,6 +16,7 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDoubleSpinBox>
+#include <QFontMetrics>
 #include <QFormLayout>
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -28,12 +29,73 @@
 #include <QPlainTextEdit>
 #include <QPointer>
 #include <QPushButton>
+#include <QResizeEvent>
 #include <QScrollArea>
 #include <QSignalBlocker>
 #include <QTimer>
 #include <QVBoxLayout>
 #include <algorithm>
 #include <array>
+
+class ElidedDescLabel : public QLabel
+{
+public:
+    explicit ElidedDescLabel(const QString& text, QWidget* parent = nullptr)
+        : QLabel(parent), fullText_(text)
+    {
+        setToolTip(fullText_);
+        setWordWrap(false);
+        setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        setFixedHeight(InspectorCardStyle::kFieldHeight);
+        setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        themeSub_ = EditorTheme::Instance().SubscribeThemeChanged([this] {
+            setStyleSheet(QStringLiteral("color: %1;").arg(EditorTheme::Instance().TextSecondary().name()));
+        });
+        setStyleSheet(QStringLiteral("color: %1;").arg(EditorTheme::Instance().TextSecondary().name()));
+        updateText();
+    }
+
+    ~ElidedDescLabel() override
+    {
+        EditorTheme::Instance().UnsubscribeThemeChanged(themeSub_);
+    }
+
+    void setText(const QString& t)
+    {
+        fullText_ = t;
+        setToolTip(t);
+        updateText();
+    }
+
+    const QString& fullText() const { return fullText_; }
+
+protected:
+    void resizeEvent(QResizeEvent* e) override
+    {
+        QLabel::resizeEvent(e);
+        updateText();
+    }
+
+private:
+    void updateText()
+    {
+        if (inUpdateText_) return;
+        inUpdateText_ = true;
+        if (width() <= 0)
+        {
+            QLabel::setText(fullText_);
+            inUpdateText_ = false;
+            return;
+        }
+        QFontMetrics fm(font());
+        QLabel::setText(fm.elidedText(fullText_, Qt::ElideRight, width()));
+        inUpdateText_ = false;
+    }
+
+    QString fullText_;
+    int themeSub_{-1};
+    bool inUpdateText_{false};
+};
 
 // UI owns configuration only. All scene access runs through RunTask on the engine thread.
 class AiDiagnosticsPanel : public QWidget
@@ -82,14 +144,8 @@ public:
 
         // Card 1: Layers
         auto* cardLayers = new CollapsibleCard(Tr("Слои во вьюпорте", "Viewport layers"), body, true);
+        cardLayers->setObjectName(QStringLiteral("AiLayersCard"));
         cardLayers->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        cardLayers->SetInfo(
-            Tr("Слои во вьюпорте", "Viewport layers"),
-            Tr("Легенда слоев:\n• Зеленый — проход\n• Красный — препятствие\n• Желтый — стоимость / тесно\n• A / B — старт и цель\n• Голубой — направление",
-               "Layer legend:\n• Green — walkable\n• Red — obstacle\n• Yellow — cost / clearance\n• A / B — start & goal\n• Cyan — direction")
-        );
-        if (auto* btn = cardLayers->InfoBtn())
-            btn->setObjectName(QStringLiteral("AiLegendInfoButton"));
 
         auto* layerLayout = new QGridLayout;
         layerLayout->setSpacing(InspectorCardStyle::kRowSpacing);
@@ -114,9 +170,12 @@ public:
 
         auto* legendGrid = new QGridLayout;
         legendGrid->setObjectName(QStringLiteral("AiLegendGrid"));
-        legendGrid->setContentsMargins(0, 4, 0, 4);
-        legendGrid->setHorizontalSpacing(6);
-        legendGrid->setVerticalSpacing(3);
+        legendGrid->setContentsMargins(0, InspectorCardStyle::kRowSpacing, 0, InspectorCardStyle::kRowSpacing);
+        legendGrid->setHorizontalSpacing(InspectorCardStyle::kRowSpacing);
+        legendGrid->setVerticalSpacing(InspectorCardStyle::kRowSpacing);
+        legendGrid->setColumnStretch(0, 0);
+        legendGrid->setColumnStretch(1, 0);
+        legendGrid->setColumnStretch(2, 1);
 
         struct LegendRowInfo {
             QColor color;
@@ -124,10 +183,10 @@ public:
             QString desc;
         };
         const std::array<LegendRowInfo, 5> legendRows = {{
-            { NavOverlayColors::Walkable(), Tr("Проход", "Walkable"), Tr("агент может пройти", "agent can pass") },
-            { NavOverlayColors::Obstacle(), Tr("Препятствие", "Obstacle"), Tr("проход закрыт", "path blocked") },
-            { NavOverlayColors::Cost(), Tr("Стоимость", "Cost"), Tr("чем теплее цвет, тем дороже путь", "warmer color means higher cost") },
-            { NavOverlayColors::RouteAB(), Tr("A/B", "A/B"), Tr("старт и цель пробного маршрута", "start and goal of test route") },
+            { NavOverlayColors::Walkable(), Tr("Проход", "Walkable"), Tr("можно пройти", "walkable") },
+            { NavOverlayColors::Obstacle(), Tr("Препятствие", "Obstacle"), Tr("проход закрыт", "blocked") },
+            { NavOverlayColors::Cost(), Tr("Стоимость", "Cost"), Tr("теплее = дороже", "warmer = costly") },
+            { NavOverlayColors::RouteAB(), Tr("A/B", "A/B"), Tr("старт и цель", "start and goal") },
             { NavOverlayColors::Direction(), Tr("Направление", "Direction"), Tr("куда ведёт путь", "where path leads") }
         }};
 
@@ -135,18 +194,20 @@ public:
         {
             auto* swatch = new ColorSwatch(legendRows[i].color, cardLayers->Content());
             swatch->setObjectName(QStringLiteral("AiSwatch%1").arg(i));
-            legendGrid->addWidget(swatch, i, 0, Qt::AlignCenter);
+            legendGrid->addWidget(swatch, i, 0, Qt::AlignLeft | Qt::AlignVCenter);
 
             auto* lblName = new QLabel(legendRows[i].name, cardLayers->Content());
             lblName->setObjectName(QStringLiteral("AiLegendName%1").arg(i));
-            lblName->setStyleSheet(QStringLiteral("font-size: 11px; font-weight: bold;"));
+            lblName->setFixedWidth(InspectorCardStyle::kLabelWidth);
+            lblName->setFixedHeight(InspectorCardStyle::kFieldHeight);
+            lblName->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
             legendGrid->addWidget(lblName, i, 1, Qt::AlignLeft | Qt::AlignVCenter);
 
-            auto* lblDesc = new QLabel(legendRows[i].desc, cardLayers->Content());
+            auto* lblDesc = new ElidedDescLabel(legendRows[i].desc, cardLayers->Content());
             lblDesc->setObjectName(QStringLiteral("AiLegendDesc%1").arg(i));
-            lblDesc->setStyleSheet(QStringLiteral("font-size: 11px; color: rgba(255, 255, 255, 0.7);"));
-            lblDesc->setWordWrap(true);
             legendGrid->addWidget(lblDesc, i, 2, Qt::AlignLeft | Qt::AlignVCenter);
+
+            legendGrid->setRowMinimumHeight(i, InspectorCardStyle::kFieldHeight);
         }
         legend_ = new QLabel(Tr("Проход", "Walkable"), cardLayers->Content());
         legend_->setObjectName(QStringLiteral("AiLegend"));

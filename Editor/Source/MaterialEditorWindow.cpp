@@ -338,7 +338,7 @@ private:
 };
 
 MaterialEditorWindow::MaterialEditorWindow(EditorQtHost* host, const QString& material, QWidget* parent)
-    : QMainWindow(parent, Qt::Window), host_(host), material_(material)
+    : QMainWindow(nullptr, Qt::Window), host_(host), material_(material)
 {
     EditorWindowSetup::ConfigureSubWindow(this, parent);
     setAttribute(Qt::WA_DeleteOnClose, false); // удаляет Shutdown, после отключения превью

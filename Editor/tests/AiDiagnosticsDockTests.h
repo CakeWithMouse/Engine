@@ -7,6 +7,7 @@
 #include "DockLayoutManager.h"
 #include "CommandRegistry.h"
 #include "EditorTheme.h"
+#include "InspectorCardStyle.h"
 #include "SettingsService.h"
 
 #include <QApplication>
@@ -100,16 +101,14 @@ inline void Run()
               "AiLegend has compact legend text");
 
         auto* infoBtnWidget = panel.findChild<QToolButton*>(QStringLiteral("AiLegendInfoButton"));
-        Check(infoBtnWidget != nullptr, "AiLegendInfoButton found");
-        auto* infoBtn = dynamic_cast<InfoButton*>(infoBtnWidget);
-        Check(infoBtn != nullptr, "AiLegendInfoButton is InfoButton");
-        infoBtn->click();
-        QApplication::processEvents();
-        Check(infoBtn->Popup() != nullptr && infoBtn->Popup()->isVisible(), "AiLegendInfoButton popup opens on click");
-        auto* popupText = infoBtn->Popup()->findChild<QLabel*>(QStringLiteral("InfoPopupText"));
-        Check(popupText != nullptr && (popupText->text().contains(QStringLiteral("Зеленый")) || popupText->text().contains(QStringLiteral("Green"))),
-              "InfoPopupText contains layer legend text");
-        infoBtn->Popup()->hide();
+        Check(infoBtnWidget == nullptr, "AiLegendInfoButton removed from cardLayers");
+        auto* cardLayersWidget = panel.findChild<QWidget*>(QStringLiteral("AiLayersCard"));
+        Check(cardLayersWidget != nullptr, "AiLayersCard found");
+        auto* cardLayers = dynamic_cast<CollapsibleCard*>(cardLayersWidget);
+        if (cardLayers)
+        {
+            Check(cardLayers->InfoBtn() == nullptr || !cardLayers->InfoBtn()->isVisible(), "AiLayersCard has no visible InfoButton");
+        }
 
         auto* cellInfo = panel.findChild<QLabel*>(QStringLiteral("AiCellInfo"));
         Check(cellInfo != nullptr, "AiCellInfo found");
@@ -231,6 +230,8 @@ inline void Run()
         Check(detailsEdit->verticalScrollBarPolicy() == Qt::ScrollBarAlwaysOff, "AiDetails has no internal vertical scrollbar");
 
         QList<ColorSwatch*> swatches;
+        QList<QLabel*> names;
+        QList<QLabel*> descs;
         for (int i = 0; i < 5; ++i)
         {
             auto* s = static_cast<ColorSwatch*>(panel->findChild<QWidget*>(QStringLiteral("AiSwatch%1").arg(i)));
@@ -239,11 +240,30 @@ inline void Run()
 
             auto* name = panel->findChild<QLabel*>(QStringLiteral("AiLegendName%1").arg(i));
             Check(name != nullptr && !name->text().isEmpty(), ("AiLegendName" + std::to_string(i) + " not empty").c_str());
+            if (name) names.append(name);
 
             auto* desc = panel->findChild<QLabel*>(QStringLiteral("AiLegendDesc%1").arg(i));
             Check(desc != nullptr && !desc->text().isEmpty(), ("AiLegendDesc" + std::to_string(i) + " not empty").c_str());
+            if (desc) descs.append(desc);
         }
         Check(swatches.size() == 5, "Legend has 5 rows with ColorSwatch");
+        Check(names.size() == 5, "Legend has 5 rows with name labels");
+        Check(descs.size() == 5, "Legend has 5 rows with desc labels");
+
+        // Verify row height, label width, and column alignments
+        const int expectedHeight = InspectorCardStyle::kFieldHeight;
+        const int expectedLabelWidth = InspectorCardStyle::kLabelWidth;
+        const int firstRowXName = names[0]->x();
+        const int firstRowXDesc = descs[0]->x();
+
+        for (int i = 0; i < 5; ++i)
+        {
+            Check(names[i]->height() == expectedHeight, ("AiLegendName" + std::to_string(i) + " has height kFieldHeight").c_str());
+            Check(descs[i]->height() == expectedHeight, ("AiLegendDesc" + std::to_string(i) + " has height kFieldHeight").c_str());
+            Check(names[i]->width() == expectedLabelWidth, ("AiLegendName" + std::to_string(i) + " has width kLabelWidth").c_str());
+            Check(names[i]->x() == firstRowXName, ("AiLegendName" + std::to_string(i) + " has aligned x coord").c_str());
+            Check(descs[i]->x() == firstRowXDesc, ("AiLegendDesc" + std::to_string(i) + " has aligned x coord").c_str());
+        }
 
         for (bool dark : {true, false})
         {
@@ -275,7 +295,7 @@ inline void Run()
             }
         }
         EditorTheme::Instance().SetMode(ThemeMode::Dark);
-        checks += 18;
+        checks += 35;
     }
 
     // 7. Task Y: Standalone editor windows parent and windowFlags verification
@@ -290,22 +310,22 @@ inline void Run()
             QMainWindow* window;
         };
 
-        QMainWindow winMaterial(&mainWindow, Qt::Window);
+        QMainWindow winMaterial(nullptr, Qt::Window);
         winMaterial.setObjectName(QStringLiteral("MaterialEditor"));
         winMaterial.setWindowTitle(QStringLiteral("Material Editor — Test"));
         EditorWindowSetup::ConfigureSubWindow(&winMaterial, &mainWindow);
 
-        QMainWindow winUI(&mainWindow, Qt::Window);
+        QMainWindow winUI(nullptr, Qt::Window);
         winUI.setObjectName(QStringLiteral("UIEditorWindow"));
         winUI.setWindowTitle(QStringLiteral("UI Editor — Test"));
         EditorWindowSetup::ConfigureSubWindow(&winUI, &mainWindow);
 
-        QMainWindow winScript(&mainWindow, Qt::Window);
+        QMainWindow winScript(nullptr, Qt::Window);
         winScript.setObjectName(QStringLiteral("ScriptEditorWindow"));
         winScript.setWindowTitle(QStringLiteral("Script — Test"));
         EditorWindowSetup::ConfigureSubWindow(&winScript, &mainWindow);
 
-        QMainWindow winAiMachine(&mainWindow, Qt::Window);
+        QMainWindow winAiMachine(nullptr, Qt::Window);
         winAiMachine.setObjectName(QStringLiteral("AiMachineEditorWindow"));
         winAiMachine.setWindowTitle(QStringLiteral("AI State Machine — Test"));
         EditorWindowSetup::ConfigureSubWindow(&winAiMachine, &mainWindow);
@@ -320,7 +340,7 @@ inline void Run()
         for (const auto& entry : testWindows)
         {
             auto* win = entry.window;
-            Check(win->parent() == &mainWindow, (entry.name.toStdString() + " parent == mainWindow").c_str());
+            Check(win->parent() == nullptr, (entry.name.toStdString() + " parent == nullptr").c_str());
             Check(win->windowFlags().testFlag(Qt::Window), (entry.name.toStdString() + " has Qt::Window").c_str());
             Check(!win->windowFlags().testFlag(Qt::Tool), (entry.name.toStdString() + " does not have Qt::Tool").c_str());
 
@@ -335,7 +355,29 @@ inline void Run()
                   (entry.name.toStdString() + " status message on minimize").c_str());
             win->hide();
         }
-        checks += 20;
+
+        // Verify closing mainWindow closes child windows
+        mainWindow.show();
+        for (const auto& entry : testWindows)
+        {
+            entry.window->show();
+        }
+        QApplication::processEvents();
+
+        for (const auto& entry : testWindows)
+        {
+            Check(entry.window->isVisible(), (entry.name.toStdString() + " is visible before mainWindow close").c_str());
+        }
+
+        mainWindow.close();
+        QApplication::processEvents();
+
+        for (const auto& entry : testWindows)
+        {
+            Check(!entry.window->isVisible(), (entry.name.toStdString() + " closed when mainWindow closed").c_str());
+        }
+
+        checks += 28;
     }
 
     std::cout << "AiDiagnosticsDock tests: " << checks << " checks passed" << std::endl;

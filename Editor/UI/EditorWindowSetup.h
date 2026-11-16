@@ -30,8 +30,7 @@ protected:
             const bool nowMin = window_->isMinimized();
             if (nowMin && !wasMinimized_)
             {
-                QWidget* host = mainWindow_ ? mainWindow_.data() : window_->parentWidget();
-                if (auto* main = qobject_cast<QMainWindow*>(host))
+                if (auto* main = qobject_cast<QMainWindow*>(mainWindow_.data()))
                 {
                     if (auto* sb = main->statusBar())
                     {
@@ -57,15 +56,40 @@ private:
     bool wasMinimized_{false};
 };
 
+class MainWindowCloseWatcher : public QObject
+{
+public:
+    MainWindowCloseWatcher(QWidget* child, QObject* parent)
+        : QObject(parent), child_(child) {}
+
+protected:
+    bool eventFilter(QObject* obj, QEvent* event) override
+    {
+        if (event->type() == QEvent::Close)
+        {
+            if (child_)
+                child_->close();
+        }
+        return QObject::eventFilter(obj, event);
+    }
+
+private:
+    QPointer<QWidget> child_;
+};
+
 inline void ConfigureSubWindow(QWidget* window, QWidget* mainWindow, const QString& title = QString())
 {
     if (!window)
         return;
 
+    // Window has parent = nullptr so Windows creates a normal taskbar button when minimized
+    window->setParent(nullptr);
+
     Qt::WindowFlags flags = window->windowFlags();
     flags &= ~Qt::WindowType_Mask;
     flags |= Qt::Window;
-    window->setParent(mainWindow, flags);
+    flags &= ~Qt::Tool;
+    window->setWindowFlags(flags);
 
     if (!title.isEmpty())
         window->setWindowTitle(title);
@@ -74,6 +98,23 @@ inline void ConfigureSubWindow(QWidget* window, QWidget* mainWindow, const QStri
         window->setWindowIcon(mainWindow->windowIcon());
     else if (!QApplication::windowIcon().isNull())
         window->setWindowIcon(QApplication::windowIcon());
+
+    QPointer<QWidget> winPtr(window);
+    if (mainWindow)
+    {
+        QObject::connect(mainWindow, &QObject::destroyed, window, [winPtr]() {
+            if (winPtr)
+                winPtr->close();
+        });
+        mainWindow->installEventFilter(new MainWindowCloseWatcher(window, mainWindow));
+    }
+    if (qApp)
+    {
+        QObject::connect(qApp, &QCoreApplication::aboutToQuit, window, [winPtr]() {
+            if (winPtr)
+                winPtr->close();
+        });
+    }
 
     window->installEventFilter(new MinimizeWatcher(window, mainWindow));
 }

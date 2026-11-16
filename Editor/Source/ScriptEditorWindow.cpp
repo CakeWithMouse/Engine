@@ -77,7 +77,7 @@ void ENGINE_MODULE_CALL CollectProblem(void* user, const EngineScriptProblem* pr
 } // namespace
 
 ScriptEditorWindow::ScriptEditorWindow(EditorQtHost* host, const QString& script, QWidget* parent)
-    : QMainWindow(parent, Qt::Window), host_(host), script_(script), schema_(std::make_unique<CodeGraphSchema>())
+    : QMainWindow(nullptr, Qt::Window), host_(host), script_(script), schema_(std::make_unique<CodeGraphSchema>())
 {
     EditorWindowSetup::ConfigureSubWindow(this, parent);
     setAttribute(Qt::WA_DeleteOnClose);

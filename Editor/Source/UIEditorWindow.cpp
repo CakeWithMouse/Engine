@@ -125,7 +125,7 @@ private:
     double scale_=1;bool drag_=false;QPointF start_;UIRect original_;
 };
 
-UIEditorWindow::UIEditorWindow(const QString& file,QWidget* parent) : QMainWindow(parent, Qt::Window),file_(file) {
+UIEditorWindow::UIEditorWindow(const QString& file,QWidget* parent) : QMainWindow(nullptr, Qt::Window),file_(file) {
     EditorWindowSetup::ConfigureSubWindow(this, parent);
     setObjectName("UIEditorWindow");setAttribute(Qt::WA_DeleteOnClose);resize(1200,760);
     auto* tools=addToolBar(QStringLiteral("UI"));

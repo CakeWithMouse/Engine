@@ -1503,6 +1503,7 @@
   2. При сворачивании окна в строке состояния главного окна выводится сообщение: `Tr("Окно «%1» свёрнуто, его можно вернуть из панели задач", "Window '%1' minimized, restore it from taskbar")` на 5 секунд.
   3. Переведены все 4 отдельных окна редактора: `MaterialEditorWindow`, `UIEditorWindow`, `ScriptEditorWindow`, `AiMachineEditorWindow`.
   4. Тесты: в `AiDiagnosticsDockTests.h` добавлены проверки для всех перечисленных окон (`parent == mainWindow`, `testFlag(Qt::Window)`, `!testFlag(Qt::Tool)`, появление сообщения в statusBar при showMinimized).
+- [x] **Полировка UI (fix(ui)):** Top-level окна с parent = nullptr (таскбар Windows) с закрытием по closeEvent главного окна; легенда слоев AI в 3 колонки сеткой без кнопки ?, выравнивание по kLabelWidth/kFieldHeight и elided описание.
 
 ### Backlog
 - Нужно в ABI: экспорт констант цветов навигационного оверлея (проход, препятствие, стоимость, A/B, направление) из движка для синхронизации с палитрой легенды редактора.
