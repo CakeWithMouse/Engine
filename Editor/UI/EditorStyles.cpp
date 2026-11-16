@@ -292,11 +292,9 @@ QStatusBar {
 }
 
 /* Collapsible cards and inspector tokens */
-QFrame#CollapsibleCard, QWidget#CollapsibleCard,
-QFrame[collapsibleCard="true"], QWidget[collapsibleCard="true"],
-QFrame#ScriptCard, QWidget#ScriptCard,
-QFrame#AiMachineCard, QWidget#AiMachineCard,
-QFrame#CameraGuideCard, QWidget#CameraGuideCard {
+QFrame#CollapsibleCard, QWidget#CollapsibleCard, QFrame[collapsibleCard="true"], QWidget[collapsibleCard="true"],
+QFrame#GeneralCard, QFrame#TransformCard, QFrame#GeometryCard, QFrame#MaterialCard, QFrame#LightCard, QFrame#CharacterCard, QFrame#PhysicsCard,
+QFrame#ScriptCard, QWidget#ScriptCard, QFrame#AiMachineCard, QWidget#AiMachineCard, QFrame#CameraGuideCard, QWidget#CameraGuideCard {
     background-color: %7;
     border: 1px solid %6;
     border-radius: 4px;

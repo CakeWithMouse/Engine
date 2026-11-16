@@ -395,9 +395,11 @@ void SceneObjectsPanel::ShowTreeContextMenu(const QPoint& pos)
             const auto& name = type.second;
             const auto label = LocalizedTypeLabel(name, type.first);
             if (name == "Gameplay.PlaySettings") continue;
-            addChildMenu->addAction(label, this, [this, selectedId, name, label] {
+            auto* act = addChildMenu->addAction(label, this, [this, selectedId, name, label] {
                 emit AddChildPrimitiveRequested(selectedId, name, label, SpawnPosition());
             });
+            act->setObjectName(QStringLiteral("CreateChildObject.") + name);
+            act->setData(name);
         }
         menu.addSeparator();
 
@@ -432,11 +434,13 @@ void SceneObjectsPanel::ShowTreeContextMenu(const QPoint& pos)
         addSubMenu->setIcon(IconProvider::PlusIcon());
         for (auto* act : addMenu_->actions())
         {
+            if (!act->isVisible()) continue;
             if (act->menu())
             {
+                if (act->menu()->actions().isEmpty()) continue;
                 auto* sub = addSubMenu->addMenu(act->icon(), act->text());
                 for (auto* subAct : act->menu()->actions())
-                    sub->addAction(subAct);
+                    if (subAct->isVisible()) sub->addAction(subAct);
             }
             else
             {

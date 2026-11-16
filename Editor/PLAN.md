@@ -14,7 +14,7 @@
 - [x] **Задача C (fix(ui)):** Защита от случайного изменения параметров колесиком мыши (`WheelGuard`). Создан централизованный фильтр событий `WheelGuard` (`Editor/UI/WheelGuard.h`), защищающий `QAbstractSpinBox`, `QComboBox` и `QAbstractSlider` от непреднамеренных мутаций значений при скролле панелей. Если элемент не имеет фокуса, `QWheelEvent` блокируется на элементе и транслируется родительскому `QScrollArea`, обеспечивая непрерывную плавную прокрутку. Элементы с фокусом сохраняют возможность управления колесом. `QScrollBar` исключен из перехвата. Реализован механизм исключений для зума вьюпорта (`ViewportWidget`), графов (`MaterialGraphWidget`, `GraphEditorWidget`) и канваса UI. Интегрирован в `EditorApp.cpp`. Написан юнит-тест `WheelGuardTests.h` (20 checks PASS).
 - [x] **Задача D (feat(ui)):** Кнопка «Создать» / «Редактировать» в карточке «Материал». В `MaterialCard.h` реализовано динамическое состояние кнопки действия: если материал не назначен (`materialAsset_.isEmpty()`), кнопка имеет надпись «Создать» (`Tr("Создать", "Create")`), objectName `CreateMaterial` и вызывает создание материала в проекте (`CreateMaterialForSelection()`, создание `.mat` файла и назначение на объект через хост); если материал назначен — надпись «Редактировать» (`Tr("Редактировать", "Edit Material")`), objectName `EditMaterial` и вызов `OpenMaterialEditor`. Добавлены тесты в `InspectorCardStyleTests.h` (6 checks, всего 58 checks PASS).
 - [x] **Задача E (refactor(ui)):** Переработка панели «Навигация и диагностика» (`AiDiagnosticsPanel`). Убрана кнопка с тулбара Viewport. Команда `Tools.ToggleAiDiagnostics` вынесена в меню «Инструменты» (`CommandRegistry`). В меню «Вид» зарегистрировано действие переключения видимости dock-панели (`d->toggleViewAction()`). `AiDiagnosticsDock` сделан полноценным `QDockWidget` с `Qt::AllDockWidgetAreas`, регистрацией в `DockLayoutManager::ApplyDefaultLayout` (табифицируется с инспектором, изначально скрыт, fluid-размеры). Удалены жесткие границы `minimumWidth(390)`/`maximumWidth(460)`. Внутренняя вёрстка `AiDiagnosticsPanel` переведена на 5 `CollapsibleCard` (Слои, Субъект, Проба, Отображение, Детали) со стилизацией `InspectorCardStyle` и отступами. Добавлено сохранение и загрузка настроек через `SettingsService` с валидацией диапазонов (`std::clamp`). Сообщение о недоступности оформлено в аккуратный штатный информационный блок без побочных эффектов. Написан юнит-тест `AiDiagnosticsDockTests.h` (24 checks PASS) на жизненный цикл, tabify, `saveState`/`restoreState` и сброс раскладки.
-- [ ] **Задача F (audit/feat(ui)):** Аудит типов объектов и их компонентов в инспекторе и в меню «Добавить».
+- [x] **Задача F (audit/feat(ui)):** Аудит типов объектов и их компонентов в инспекторе и в меню «Добавить». Каждой карточке присвоен уникальный `objectName` (`GeneralCard`, `TransformCard`, `GeometryCard`, `MaterialCard`, `LightCard`, `CharacterCard`, `PhysicsCard`, `ScriptCard`, `AiMachineCard`, `CameraGuideCard`). Реализована строгая матрица видимости: Свет — только Transform, General, Light (Физика, Геометрия, Материал, Скрипт скрыты); Камера — Transform, General, CameraGuide, Скрипт (Физика, Геометрия, Материал скрыты); Пустой объект — Transform, General, Скрипт (Физика, Геометрия, Материал скрыты); Меш — Transform, General, Geometry, Material, Physics, Script; Персонаж — Transform, General, Character, Physics, Script, AiMachine. Реализована защита от молчаливой потери сохранённых данных (`hasSavedPhysics`, `hasSavedModel`, `hasSavedMaterial`, `hasSavedScript`). В меню «Добавить» и в контекстном меню иерархии проверены рабочие пути (14 создаваемых типов через `api.createObject`, `Gameplay.PlaySettings` исключён), скрыты пустые категории, устранены пустые подменю контекстного меню. Написан юнит-тест `ObjectTypeInspectorTests.h` с матричными тестами видимости по всем типам объектов и аудитом меню «Добавить» (все проверки PASS).
 
 ---
 
@@ -124,12 +124,24 @@
   - Категории: `Primitives`, `Lights`, `Particles`, `Environment`, `Characters`, `Cameras`, `Project Classes`.
   - Заполняется из `view.types`, полученных через ABI `ctx.scene.scene.listTypes`.
   - В меню попадают только типы, зарегистрированные в движке / проекте. Если подменю пустое, оно скрывается (`sub->menuAction()->setVisible(false)`).
-- **Правила исправления F:**
-  - Свет (`Light.Point`, `Light.Directional`): строго Transform, General, Light. Физика, Геометрия, Материал, Скрипт СКРЫТЫ.
-  - Камера (`Gameplay.Camera` или `CameraGuide::IsCamera`): Transform, General, CameraGuide, Скрипт. Физика, Геометрия, Материал СКРЫТЫ.
-  - Пустой объект: Transform, General, Скрипт. Физика, Геометрия, Материал СКРЫТЫ (пока нет меша/коллизии).
-  - Меш / Примитив (`Engine.Model`, `Primitive.*`): Transform, General, Geometry, Material, Physics, Script.
-  - Если в сохранённых данных объекта (`object.hasPhysics`, `object.materialAsset`, `object.modelAsset`) компонент реально присутствует, карточка не скрывается молча.
+- **Решение и реализация F:**
+  - Каждой карточке инспектора присвоен уникальный стабильный `objectName`: `GeneralCard`, `TransformCard`, `GeometryCard`, `MaterialCard`, `LightCard`, `CharacterCard`, `PhysicsCard`, `ScriptCard`, `AiMachineCard`, `CameraGuideCard`.
+  - В `EditorStyles.cpp:295` селекторы обновлены под все ID карточек: `QFrame#GeneralCard, QFrame#TransformCard, QFrame#GeometryCard, QFrame#MaterialCard, QFrame#LightCard, QFrame#CharacterCard, QFrame#PhysicsCard`.
+  - В `ObjectInspectorPanel.cpp` в `Refresh()` реализована матрица видимости:
+    - **Свет (`Light.Point`, `Light.Directional`):** Transform, General, Light видимы; Физика, Геометрия, Материал, Скрипт скрыты.
+    - **Камера (`Gameplay.Camera`, `CameraGuide::IsCamera`):** Transform, General, CameraGuide, Скрипт видимы; Физика, Геометрия, Материал скрыты.
+    - **Пустой объект (`Empty`, логический объект):** Transform, General, Скрипт видимы; Физика, Геометрия, Материал скрыты (пока нет меша или коллизии).
+    - **Меш / Примитив (`Primitive.*`, `Engine.Model`):** Transform, General, Geometry, Material, Physics, Script видимы.
+    - **Персонаж (`Gameplay.Character`):** Transform, General, Character, Physics, Script, AiMachine видимы.
+    - **Сохранение данных:** для пустых/пользовательских объектов при наличии сохранённых компонентов в данных (`hasSavedPhysics`, `hasSavedModel`, `hasSavedMaterial`, `hasSavedScript`) карточки не теряются молча, а отображаются.
+  - В `SceneObjectsPanel.cpp` в `RebuildAddMenu()` и в контекстном меню:
+    - Все 14 типов подключены через `CreateObject` с параметрами. `Gameplay.PlaySettings` исключён из создания сущностей сцены.
+    - Пустые подменю категорий скрываются (`sub->menuAction()->setVisible(false)`). В контекстном меню иерархии исключено добавление пустых субменю.
+    - Действия создания потомка получили уникальный `objectName` (`CreateChildObject.<type>`).
+  - Написан комплексный юнит-тест `ObjectTypeInspectorTests.h` (прогон матрицы всех типов объектов, проверка скрытия/отображения карточек по `objectName`, проверка сохранения пользовательских данных, проверка меню «Добавить» и генерации событий `AddPrimitiveRequested`).
+  - **Backlog:**
+    - Сохранённые компоненты у нетипичных сущностей: при открытии пользовательских сцен, созданных в сторонних редакторах или старых версиях, если у пустого/пользовательского объекта заданы `modelAsset`, `materialAsset` или `physics`, карточки отображаются во избежание потери данных.
+    - Иконка `separator-vertical.svg` отсутствует в наборе Tabler icons репозитория; отрисовка `EditorSeparator` выполнена процедурно через `QPainter`.
 
 ---
 
