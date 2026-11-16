@@ -10,6 +10,8 @@
 #include <QThread>
 #include <QTreeView>
 #include <QPersistentModelIndex>
+#include <QPainter>
+#include <QStyleOptionViewItem>
 #include <cmath>
 #include <cstdio>
 #include <stdexcept>
@@ -99,6 +101,107 @@ inline void RunNative(QWidget* window)
     std::printf("Native ContentBrowser icon tests: PASS\n");
 }
 
+inline void CheckBranchArrowHighDpi()
+{
+    for (qreal dpr : {1.0, 1.5, 2.0})
+    {
+        const int logicalSize = 20;
+        const int physSize = std::max(1, qRound(logicalSize * dpr));
+
+        // 1. Closed branch (chevron-right)
+        QImage closedImage(physSize, physSize, QImage::Format_ARGB32_Premultiplied);
+        closedImage.setDevicePixelRatio(dpr);
+        closedImage.fill(Qt::transparent);
+
+        {
+            QPainter p(&closedImage);
+            QStyleOptionViewItem opt;
+            opt.rect = QRect(0, 0, logicalSize, logicalSize);
+            opt.state = QStyle::State_Children | QStyle::State_Enabled;
+            QApplication::style()->drawPrimitive(QStyle::PE_IndicatorBranch, &opt, &p);
+        }
+
+        int closedInk = 0;
+        int minX = physSize, maxX = 0, minY = physSize, maxY = 0;
+        for (int y = 0; y < physSize; ++y)
+        {
+            for (int x = 0; x < physSize; ++x)
+            {
+                if (closedImage.pixelColor(x, y).alpha() > 20)
+                {
+                    ++closedInk;
+                    minX = std::min(minX, x);
+                    maxX = std::max(maxX, x);
+                    minY = std::min(minY, y);
+                    maxY = std::max(maxY, y);
+                }
+            }
+        }
+        Check(closedInk > 0, "closed branch arrow renders visible pixels");
+        Check(minX > 0 && maxX < physSize - 1, "closed branch arrow not clipped on horizontal bounds");
+        Check(minY > 0 && maxY < physSize - 1, "closed branch arrow not clipped on vertical bounds");
+
+        const int closedW = maxX - minX + 1;
+        const int closedH = maxY - minY + 1;
+        Check(closedW >= qRound(4 * dpr) && closedH >= qRound(7 * dpr),
+              "closed arrow dimensions scale proportionally with DPR");
+
+        // 2. Open branch (chevron-down)
+        QImage openImage(physSize, physSize, QImage::Format_ARGB32_Premultiplied);
+        openImage.setDevicePixelRatio(dpr);
+        openImage.fill(Qt::transparent);
+
+        {
+            QPainter p(&openImage);
+            QStyleOptionViewItem opt;
+            opt.rect = QRect(0, 0, logicalSize, logicalSize);
+            opt.state = QStyle::State_Children | QStyle::State_Open | QStyle::State_Enabled;
+            QApplication::style()->drawPrimitive(QStyle::PE_IndicatorBranch, &opt, &p);
+        }
+
+        int openInk = 0;
+        int openMinX = physSize, openMaxX = 0, openMinY = physSize, openMaxY = 0;
+        for (int y = 0; y < physSize; ++y)
+        {
+            for (int x = 0; x < physSize; ++x)
+            {
+                if (openImage.pixelColor(x, y).alpha() > 20)
+                {
+                    ++openInk;
+                    openMinX = std::min(openMinX, x);
+                    openMaxX = std::max(openMaxX, x);
+                    openMinY = std::min(openMinY, y);
+                    openMaxY = std::max(openMaxY, y);
+                }
+            }
+        }
+        Check(openInk > 0, "open branch arrow renders visible pixels");
+        Check(openMinX > 0 && openMaxX < physSize - 1, "open branch arrow not clipped on horizontal bounds");
+        Check(openMinY > 0 && openMaxY < physSize - 1, "open branch arrow not clipped on vertical bounds");
+        Check(openImage != closedImage, "open and closed branch glyphs are visually distinct");
+
+        // 3. Leaf item (no children) draws nothing
+        QImage leafImage(physSize, physSize, QImage::Format_ARGB32_Premultiplied);
+        leafImage.setDevicePixelRatio(dpr);
+        leafImage.fill(Qt::transparent);
+
+        {
+            QPainter p(&leafImage);
+            QStyleOptionViewItem opt;
+            opt.rect = QRect(0, 0, logicalSize, logicalSize);
+            opt.state = QStyle::State_Enabled;
+            QApplication::style()->drawPrimitive(QStyle::PE_IndicatorBranch, &opt, &p);
+        }
+
+        int leafInk = 0;
+        for (int y = 0; y < physSize; ++y)
+            for (int x = 0; x < physSize; ++x)
+                if (leafImage.pixelColor(x, y).alpha() > 20)
+                    ++leafInk;
+        Check(leafInk == 0, "leaf item without children has no branch indicator ink");
+    }
+}
+
 inline void Run()
 {
     checks = 0;
@@ -134,6 +237,7 @@ inline void Run()
     Check(folder.isValid() && file.isValid(), "file model populated without rebuilding on theme switch");
     view.expand(folder);
     CheckTheme(&view, folder, file);
+    CheckBranchArrowHighDpi();
     std::printf("ContentBrowser icon tests: %d checks passed\n", checks);
 }
 }

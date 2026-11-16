@@ -479,18 +479,5 @@ QComboBox::down-arrow {
 )QSS").arg(borderLight, bgButton, bgButtonHover, arrowUp, arrowDown);
     }
 
-    if (!arrowRight.isEmpty() && !arrowDown.isEmpty()) {
-        qss += QString(R"QSS(
-QTreeView::branch:has-children:!has-siblings:closed,
-QTreeView::branch:closed:has-children:has-siblings {
-    image: url("%1");
-}
-QTreeView::branch:open:has-children:!has-siblings,
-QTreeView::branch:open:has-children:has-siblings {
-    image: url("%2");
-}
-)QSS").arg(arrowRight, arrowDown);
-    }
-
     return qss;
 }
