@@ -852,12 +852,9 @@ void EditorMainWindow::ConnectPanels()
         else CreateScriptForSelection();
     });
 
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseScriptRequested, this, [this]
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseScriptRequested, this, []
     {
-        if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit) return;
-        const QString path = QFileDialog::getOpenFileName(this, Tr("Скрипт из проекта", "Script from the project"),
-            QString::fromUtf8(host_->host().contentRoot), Tr("Визуальные скрипты (*.vscript)", "Visual scripts (*.vscript)"));
-        if (!path.isEmpty()) UseAsset(path);
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignScript"));
     });
 
     // Переменные скрипта у объекта: карточка читает их список из файла скрипта.
@@ -877,20 +874,9 @@ void EditorMainWindow::ConnectPanels()
     });
 
     connect(objectInspectorPanel_, &ObjectInspectorPanel::CreateAiMachineRequested, this, [this] { CreateAiMachineForSelection(); });
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseAiMachineRequested, this, [this]
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseAiMachineRequested, this, []
     {
-        if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit) return;
-        const QString root = QString::fromUtf8(host_->host().contentRoot);
-        const QString path = QFileDialog::getOpenFileName(this, Tr("Автомат ИИ из проекта", "AI state machine from the project"), root,
-                                                          Tr("Автоматы ИИ (*.fsm)", "AI state machines (*.fsm)"));
-        if (path.isEmpty()) return;
-        const QString relative = QDir(root).relativeFilePath(path);
-        if (relative.startsWith(QStringLiteral("..")) || QDir::isAbsolutePath(relative))
-        {
-            AppendLine(Tr("Автомат должен лежать в Content проекта.", "The machine must be inside the project's Content."));
-            return;
-        }
-        SetSelectedProperty(QStringLiteral("/stateMachine"), QStringLiteral("/Game/") + QDir::fromNativeSeparators(relative));
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignAiMachine"));
     });
     connect(objectInspectorPanel_, &ObjectInspectorPanel::OpenAiMachineRequested, this, [this](const QString& machine)
     {

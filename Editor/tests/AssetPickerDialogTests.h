@@ -245,6 +245,63 @@ inline void Run()
         check(sizedTop == sizedRight, "Uniform margin: top equals right");
     }
 
+    // 8. UI, Script, and AiMachine asset kinds (Task U)
+    {
+        QTemporaryDir temp;
+        check(temp.isValid(), "Temporary directory for UI/Script/AI picker created");
+        const QString root = temp.path();
+        QDir(root).mkpath(QStringLiteral("UI"));
+        QDir(root).mkpath(QStringLiteral("Scripts"));
+        QDir(root).mkpath(QStringLiteral("AI"));
+
+        auto touch = [](const QString& path) {
+            QFile f(path);
+            f.open(QIODevice::WriteOnly);
+            f.write("content");
+            f.close();
+        };
+
+        touch(root + QStringLiteral("/UI/MainMenu.ui"));
+        touch(root + QStringLiteral("/Scripts/Movement.vscript"));
+        touch(root + QStringLiteral("/AI/Patrol.fsm"));
+
+        // UI Picker
+        {
+            AssetPickerDialog picker(EditorCore::AssetKind::UI, root);
+            check(picker.ListWidget() != nullptr, "UI picker list exists");
+            check(picker.ListWidget()->count() == 1, "UI picker lists only .ui assets");
+            check(picker.windowTitle() == Tr("Выбор интерфейса", "Choose Interface"), "UI picker title");
+            check(picker.ListWidget()->item(0)->text() == QStringLiteral("MainMenu.ui"), "UI item name");
+        }
+
+        // Script Picker
+        {
+            AssetPickerDialog picker(EditorCore::AssetKind::Script, root);
+            check(picker.ListWidget() != nullptr, "Script picker list exists");
+            check(picker.ListWidget()->count() == 1, "Script picker lists only .vscript assets");
+            check(picker.windowTitle() == Tr("Выбор скрипта", "Choose Script"), "Script picker title");
+            check(picker.ListWidget()->item(0)->text() == QStringLiteral("Movement.vscript"), "Script item name");
+        }
+
+        // AI Machine Picker
+        {
+            AssetPickerDialog picker(EditorCore::AssetKind::AiMachine, root);
+            check(picker.ListWidget() != nullptr, "AI picker list exists");
+            check(picker.ListWidget()->count() == 1, "AI picker lists only .fsm assets");
+            check(picker.windowTitle() == Tr("Выбор автомата ИИ", "Choose AI State Machine"), "AI picker title");
+            check(picker.ListWidget()->item(0)->text() == QStringLiteral("Patrol.fsm"), "AI item name");
+
+            AssetPickerDialog::SetExecHookForTesting([](AssetPickerDialog* dlg) {
+                dlg->ListWidget()->setCurrentRow(0);
+                dlg->accept();
+                return QDialog::Accepted;
+            });
+            check(picker.exec() == QDialog::Accepted, "AI picker test hook accepts");
+            check(picker.SelectedVirtualPath() == QStringLiteral("/Game/AI/Patrol.fsm"), "Selected virtual path formatted");
+            AssetPickerDialog::SetExecHookForTesting(nullptr);
+        }
+    }
+
     std::printf("AssetPickerDialog tests: %d checks passed\n", checks);
 }
 

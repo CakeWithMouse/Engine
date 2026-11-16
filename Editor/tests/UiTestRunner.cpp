@@ -33,10 +33,10 @@ int main(int argc, char* argv[])
         InspectorRefreshTests::RunModelReplaceButtonRegression();
         DockRedockTests::Run();
         GeometryTextureActionTests::Run();
+        AssetPickerDialogTests::Run();
         ViewportBillboardTests::Run();
         ContentBrowserTests::Run();
         ContentBrowserTypeTests::RunStandalone();
-        AssetPickerDialogTests::Run();
         UiSmokeTests::Run();
         return 0;
     }
