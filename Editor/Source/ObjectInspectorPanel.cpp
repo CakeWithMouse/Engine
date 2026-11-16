@@ -36,9 +36,7 @@ ObjectInspectorPanel::ObjectInspectorPanel(QWidget* parent)
 {
     BuildUi();
     RetranslateUi();
-    langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
-        RetranslateUi();
-    });
+    langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] { RetranslateUi(); });
     themeSubId_ = EditorTheme::Instance().SubscribeThemeChanged([this] {
         if (lightColor_) lightColor_->setIcon(IconProvider::BulbIcon());
     });
@@ -211,9 +209,7 @@ void ObjectInspectorPanel::BuildCharacterCard(QVBoxLayout* layout)
 {
     cardCharacter_ = new CollapsibleCard(Tr("Персонаж", "Character"), this, true);
     cardCharacter_->setObjectName(QStringLiteral("CharacterCard"));
-    cardCharacter_->SetInfo(Tr("Персонаж", "Character"),
-                            Tr("Параметры контроллера персонажа (скорость перемещения).",
-                               "Character controller parameters (movement speed)."));
+    cardCharacter_->SetInfo(Tr("Персонаж", "Character"), Tr("Параметры контроллера персонажа: скорость перемещения.", "Character controller parameters: movement speed."));
     characterInspector_ = cardCharacter_;
     auto* cl = cardCharacter_->ContentLayout();
 
@@ -241,9 +237,7 @@ void ObjectInspectorPanel::BuildPhysicsCard(QVBoxLayout* layout)
 {
     cardPhysics_ = new CollapsibleCard(Tr("Физика", "Physics"), this, true);
     cardPhysics_->setObjectName(QStringLiteral("PhysicsCard"));
-    cardPhysics_->SetInfo(Tr("Физика", "Physics"),
-                          Tr("Физические свойства твердого тела (симуляция Jolt Physics в режиме Play).\nФорма коллизии, масса, трение и упругость.",
-                             "Rigid body physics properties (Jolt Physics simulation in Play mode).\nCollision shape, mass, friction, and restitution."));
+    cardPhysics_->SetInfo(Tr("Физика", "Physics"), Tr("Физические свойства твердого тела — симуляция Jolt Physics в режиме Play.\nФорма коллизии, масса, трение и упругость.", "Rigid body physics properties: Jolt Physics simulation in Play mode.\nCollision shape, mass, friction, and restitution."));
     physicsInspector_ = cardPhysics_;
     auto* cl = cardPhysics_->ContentLayout();
     auto emitChanged = [this] {
@@ -279,13 +273,7 @@ void ObjectInspectorPanel::BuildPhysicsCard(QVBoxLayout* layout)
         cl->addWidget(row);
     };
     addComboRow(0, Tr("Тип тела", "Body type"), physicsBodyType_);
-    physicsBodyType_->addItems({Tr("Статичное", "Static"), Tr("Динамическое", "Dynamic"),
-                                Tr("Кинематическое", "Kinematic")});
-    physicsBodyType_->setCurrentIndex(1);
-
     addComboRow(1, Tr("Форма коллизии", "Collision shape"), physicsShape_);
-    physicsShape_->addItems({Tr("Куб", "Box"), Tr("Сфера", "Sphere"), Tr("Капсула", "Capsule")});
-    physicsShape_->setCurrentIndex(0);
 
     auto addSpinRow = [&](int labelIndex, const QString& label, NoWheelDoubleSpinBox*& spin,
                           double minV, double maxV, double step) {
@@ -298,10 +286,8 @@ void ObjectInspectorPanel::BuildPhysicsCard(QVBoxLayout* layout)
         spin = new NoWheelDoubleSpinBox(row);
         spin->setObjectName(QStringLiteral("PhysicsValue%1").arg(labelIndex));
         spin->setFixedHeight(InspectorCardStyle::kFieldHeight);
-        spin->setRange(minV, maxV);
-        spin->setDecimals(2);
-        spin->setSingleStep(step);
-        spin->setKeyboardTracking(false);
+        spin->setRange(minV, maxV); spin->setDecimals(2);
+        spin->setSingleStep(step); spin->setKeyboardTracking(false);
         connect(spin, &QDoubleSpinBox::editingFinished, this, emitChanged);
         l->addWidget(spin, 1);
         cl->addWidget(row);
@@ -318,27 +304,9 @@ void ObjectInspectorPanel::RetranslateUi()
 {
     if (noSelectionLabel_) noSelectionLabel_->setText(Tr("Объект не выбран", "No object selected"));
     if (cardGeneral_) cardGeneral_->SetTitle(Tr("Общие", "General"));
-    if (cardLight_)
-    {
-        cardLight_->SetTitle(Tr("Свет", "Light"));
-        cardLight_->SetInfo(Tr("Свет", "Light"),
-                            Tr("Параметры источника света (цвет, яркость, радиус затухания, тени).",
-                               "Light source parameters (color, intensity, attenuation radius, shadows)."));
-    }
-    if (cardCharacter_)
-    {
-        cardCharacter_->SetTitle(Tr("Персонаж", "Character"));
-        cardCharacter_->SetInfo(Tr("Персонаж", "Character"),
-                                Tr("Параметры контроллера персонажа (скорость перемещения).",
-                                   "Character controller parameters (movement speed)."));
-    }
-    if (cardPhysics_)
-    {
-        cardPhysics_->SetTitle(Tr("Физика", "Physics"));
-        cardPhysics_->SetInfo(Tr("Физика", "Physics"),
-                              Tr("Физические свойства твердого тела (симуляция Jolt Physics в режиме Play).\nФорма коллизии, масса, трение и упругость.",
-                                 "Rigid body physics properties (Jolt Physics simulation in Play mode).\nCollision shape, mass, friction, and restitution."));
-    }
+    if (cardLight_) cardLight_->SetTitle(Tr("Свет", "Light"));
+    if (cardCharacter_) cardCharacter_->SetTitle(Tr("Персонаж", "Character"));
+    if (cardPhysics_) cardPhysics_->SetTitle(Tr("Физика", "Physics"));
     if (cardTransform_) cardTransform_->RetranslateUi();
     if (cardGeometry_) cardGeometry_->RetranslateUi();
     if (cardMaterial_) cardMaterial_->RetranslateUi();

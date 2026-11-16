@@ -102,9 +102,9 @@ public:
     {
         SetTitle(Tr("Материал", "Material"));
         SetInfo(Tr("Материал", "Material"),
-                Tr("Материал объекта (.mat).\nПозволяет настроить шейдеры, текстуры и параметры отражения поверхности.",
-                   "Object material (.mat).\nConfigures shaders, textures, and surface reflection parameters."));
-        if (labelMatTitle_) labelMatTitle_->setText(Tr("Слот материала (.mat)", "Material Slot (.mat)"));
+                Tr("Материал объекта [.mat].\nПозволяет настроить шейдеры, текстуры и параметры отражения поверхности.",
+                   "Object material [.mat].\nConfigures shaders, textures, and surface reflection parameters."));
+        if (labelMatTitle_) labelMatTitle_->setText(Tr("Слот материала [.mat]", "Material Slot [.mat]"));
         if (materialAsset_) materialAsset_->setPlaceholderText(Tr("по умолчанию", "default"));
         const bool hasMat = !rawMaterialPath_.isEmpty();
         if (editMaterialButton_)
@@ -124,12 +124,12 @@ private:
     void BuildCard()
     {
         SetInfo(Tr("Материал", "Material"),
-                Tr("Материал объекта (.mat).\nПозволяет настроить шейдеры, текстуры и параметры отражения поверхности.",
-                   "Object material (.mat).\nConfigures shaders, textures, and surface reflection parameters."));
+                Tr("Материал объекта [.mat].\nПозволяет настроить шейдеры, текстуры и параметры отражения поверхности.",
+                   "Object material [.mat].\nConfigures shaders, textures, and surface reflection parameters."));
 
         auto* cl = ContentLayout();
 
-        labelMatTitle_ = new QLabel(Tr("Слот материала (.mat)", "Material Slot (.mat)"), Content());
+        labelMatTitle_ = new QLabel(Tr("Слот материала [.mat]", "Material Slot [.mat]"), Content());
         labelMatTitle_->setObjectName(QStringLiteral("CardSectionLabel"));
         cl->addWidget(labelMatTitle_);
 

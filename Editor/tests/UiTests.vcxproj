@@ -125,6 +125,7 @@
         <ClInclude Include="ViewportBillboardTests.h"/>
         <ClInclude Include="UiSmokeTests.h"/>
         <ClInclude Include="..\UI\InfoButton.h"/>
+        <ClInclude Include="CrossTypeInfoButtonTests.h"/>
     </ItemGroup>
 
     <ItemGroup>

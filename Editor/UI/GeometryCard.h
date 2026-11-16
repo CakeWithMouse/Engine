@@ -122,7 +122,7 @@ public:
         SetInfo(Tr("Геометрия", "Geometry"),
                 Tr("Поддерживаемые форматы моделей: .obj, .fbx, .glb.\nДля процедурных примитивов замена геометрии заблокирована.",
                    "Supported model formats: .obj, .fbx, .glb.\nGeometry replacement is blocked for procedural primitives."));
-        if (labelModelTitle_) labelModelTitle_->setText(Tr("Модель (.obj / .fbx / .glb)", "Model (.obj / .fbx / .glb)"));
+        if (labelModelTitle_) labelModelTitle_->setText(Tr("Модель [.obj / .fbx / .glb]", "Model [.obj / .fbx / .glb]"));
         if (modelAsset_)
         {
             if (isPrimitive_)
@@ -144,7 +144,7 @@ private:
 
         auto* cl = ContentLayout();
 
-        labelModelTitle_ = new QLabel(Tr("Модель (.obj / .fbx / .glb)", "Model (.obj / .fbx / .glb)"), Content());
+        labelModelTitle_ = new QLabel(Tr("Модель [.obj / .fbx / .glb]", "Model [.obj / .fbx / .glb]"), Content());
         labelModelTitle_->setObjectName(QStringLiteral("CardSectionLabel"));
         cl->addWidget(labelModelTitle_);
 

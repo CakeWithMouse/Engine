@@ -26,7 +26,7 @@ public:
         : CollapsibleCard(Tr("Скрипт", "Script"), parent, true)
     {
         auto* layout = ContentLayout();
-        label_ = new QLabel(Tr("Визуальный скрипт (.vscript)", "Visual script (.vscript)"), Content());
+        label_ = new QLabel(Tr("Визуальный скрипт [.vscript]", "Visual script [.vscript]"), Content());
         label_->setObjectName(QStringLiteral("CardSectionLabel"));
         layout->addWidget(label_);
 
@@ -85,9 +85,9 @@ public:
     {
         SetTitle(Tr("Скрипт", "Script"));
         SetInfo(Tr("Скрипт", "Script"),
-                Tr("Визуальный скрипт логики объекта (.vscript).\nПозволяет настраивать поведение и переопределять переменные объекта.",
-                   "Visual script for object logic (.vscript).\nAllows customizing behavior and overriding per-object variables."));
-        label_->setText(Tr("Визуальный скрипт (.vscript)", "Visual script (.vscript)"));
+                Tr("Визуальный скрипт логики объекта [.vscript].\nПозволяет настраивать поведение и переопределять переменные объекта.",
+                   "Visual script for object logic [.vscript].\nAllows customizing behavior and overriding per-object variables."));
+        label_->setText(Tr("Визуальный скрипт [.vscript]", "Visual script [.vscript]"));
         asset_->setPlaceholderText(Tr("нет", "none"));
         choose_->setText(Tr("Выбрать…", "Browse…"));
         clear_->setText(Tr("Убрать", "Clear"));

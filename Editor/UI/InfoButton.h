@@ -207,9 +207,7 @@ public:
 
     void RetranslateUi()
     {
-        setToolTip(EditorLocale::Instance().Language() == EditorLanguage::Ru
-            ? QStringLiteral("Справка")
-            : QStringLiteral("Help"));
+        setToolTip(Tr("Справка", "Help"));
         if (popupLabel_) popupLabel_->setText(CurrentText());
         if (titleLabel_ && !title_.isEmpty()) titleLabel_->setText(title_);
     }

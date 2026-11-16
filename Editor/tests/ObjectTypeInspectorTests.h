@@ -9,8 +9,12 @@
 #include "ScriptCard.h"
 #include "AiMachineCard.h"
 #include "CameraGuideCard.h"
+#include "InfoButton.h"
 #include <QApplication>
+#include <QGuiApplication>
+#include <QKeyEvent>
 #include <QMenu>
+#include <QScreen>
 #include <QAction>
 #include <iostream>
 #include <stdexcept>
