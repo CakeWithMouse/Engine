@@ -3,6 +3,7 @@
 #include "AiDiagnosticsPanel.h"
 #include "ColorSwatch.h"
 #include "NavOverlayColors.h"
+#include "EditorWindowSetup.h"
 #include "DockLayoutManager.h"
 #include "CommandRegistry.h"
 #include "EditorTheme.h"
@@ -275,6 +276,66 @@ inline void Run()
         }
         EditorTheme::Instance().SetMode(ThemeMode::Dark);
         checks += 18;
+    }
+
+    // 7. Task Y: Standalone editor windows parent and windowFlags verification
+    {
+        QMainWindow mainWindow;
+        mainWindow.setObjectName(QStringLiteral("EditorMainWindow"));
+        auto* statusBar = mainWindow.statusBar();
+        Check(statusBar != nullptr, "statusBar exists");
+
+        struct TestWindowEntry {
+            QString name;
+            QMainWindow* window;
+        };
+
+        QMainWindow winMaterial(&mainWindow, Qt::Window);
+        winMaterial.setObjectName(QStringLiteral("MaterialEditor"));
+        winMaterial.setWindowTitle(QStringLiteral("Material Editor — Test"));
+        EditorWindowSetup::ConfigureSubWindow(&winMaterial, &mainWindow);
+
+        QMainWindow winUI(&mainWindow, Qt::Window);
+        winUI.setObjectName(QStringLiteral("UIEditorWindow"));
+        winUI.setWindowTitle(QStringLiteral("UI Editor — Test"));
+        EditorWindowSetup::ConfigureSubWindow(&winUI, &mainWindow);
+
+        QMainWindow winScript(&mainWindow, Qt::Window);
+        winScript.setObjectName(QStringLiteral("ScriptEditorWindow"));
+        winScript.setWindowTitle(QStringLiteral("Script — Test"));
+        EditorWindowSetup::ConfigureSubWindow(&winScript, &mainWindow);
+
+        QMainWindow winAiMachine(&mainWindow, Qt::Window);
+        winAiMachine.setObjectName(QStringLiteral("AiMachineEditorWindow"));
+        winAiMachine.setWindowTitle(QStringLiteral("AI State Machine — Test"));
+        EditorWindowSetup::ConfigureSubWindow(&winAiMachine, &mainWindow);
+
+        std::vector<TestWindowEntry> testWindows = {
+            { QStringLiteral("MaterialEditor"), &winMaterial },
+            { QStringLiteral("UIEditorWindow"), &winUI },
+            { QStringLiteral("ScriptEditorWindow"), &winScript },
+            { QStringLiteral("AiMachineEditorWindow"), &winAiMachine }
+        };
+
+        for (const auto& entry : testWindows)
+        {
+            auto* win = entry.window;
+            Check(win->parent() == &mainWindow, (entry.name.toStdString() + " parent == mainWindow").c_str());
+            Check(win->windowFlags().testFlag(Qt::Window), (entry.name.toStdString() + " has Qt::Window").c_str());
+            Check(!win->windowFlags().testFlag(Qt::Tool), (entry.name.toStdString() + " does not have Qt::Tool").c_str());
+
+            win->show();
+            QApplication::processEvents();
+            win->showMinimized();
+            QApplication::processEvents();
+            Check(statusBar->currentMessage().contains(win->windowTitle()),
+                  (entry.name.toStdString() + " title in statusBar on minimize").c_str());
+            Check(statusBar->currentMessage().contains(QStringLiteral("свёрнуто")) ||
+                  statusBar->currentMessage().contains(QStringLiteral("minimized")),
+                  (entry.name.toStdString() + " status message on minimize").c_str());
+            win->hide();
+        }
+        checks += 20;
     }
 
     std::cout << "AiDiagnosticsDock tests: " << checks << " checks passed" << std::endl;

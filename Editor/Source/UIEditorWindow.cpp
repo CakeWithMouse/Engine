@@ -1,6 +1,7 @@
 #define NOMINMAX
 #include "UIEditorWindow.h"
 #include "EditorLocale.h"
+#include "EditorWindowSetup.h"
 #include <Engine/UI/UIMarkup.h>
 #include <QTreeWidget>
 #include <QSplitter>
@@ -124,7 +125,8 @@ private:
     double scale_=1;bool drag_=false;QPointF start_;UIRect original_;
 };
 
-UIEditorWindow::UIEditorWindow(const QString& file,QWidget* parent) : QMainWindow(parent),file_(file) {
+UIEditorWindow::UIEditorWindow(const QString& file,QWidget* parent) : QMainWindow(parent, Qt::Window),file_(file) {
+    EditorWindowSetup::ConfigureSubWindow(this, parent);
     setObjectName("UIEditorWindow");setAttribute(Qt::WA_DeleteOnClose);resize(1200,760);
     auto* tools=addToolBar(QStringLiteral("UI"));
     saveAction_=tools->addAction(Tr("Сохранить", "Save"),this,[this]{Save();});saveAction_->setShortcut(QKeySequence::Save);saveAction_->setObjectName("UISave");

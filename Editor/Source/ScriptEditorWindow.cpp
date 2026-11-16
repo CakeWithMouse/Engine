@@ -1,5 +1,6 @@
 #include "ScriptEditorWindow.h"
 #include "EditorLocale.h"
+#include "EditorWindowSetup.h"
 #include "ScriptGraphWidget.h"
 #include "ScriptMessages.h"
 #include "Graph/GraphSchemaRegistry.h"
@@ -76,8 +77,9 @@ void ENGINE_MODULE_CALL CollectProblem(void* user, const EngineScriptProblem* pr
 } // namespace
 
 ScriptEditorWindow::ScriptEditorWindow(EditorQtHost* host, const QString& script, QWidget* parent)
-    : QMainWindow(parent), host_(host), script_(script), schema_(std::make_unique<CodeGraphSchema>())
+    : QMainWindow(parent, Qt::Window), host_(host), script_(script), schema_(std::make_unique<CodeGraphSchema>())
 {
+    EditorWindowSetup::ConfigureSubWindow(this, parent);
     setAttribute(Qt::WA_DeleteOnClose);
     setObjectName(QStringLiteral("ScriptEditorWindow"));
     setWindowTitle(Tr("Скрипт — %1", "Script — %1").arg(QFileInfo(script).fileName()));

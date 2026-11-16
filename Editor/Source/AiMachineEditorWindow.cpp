@@ -1,5 +1,6 @@
 #include "AiMachineEditorWindow.h"
 #include "EditorLocale.h"
+#include "EditorWindowSetup.h"
 #include "FsmGraphWidget.h"
 #include "Graph/GraphSchemaRegistry.h"
 
@@ -67,8 +68,9 @@ QJsonValue ValueOf(const QString& text, const QString& type)
 } // namespace
 
 AiMachineEditorWindow::AiMachineEditorWindow(EditorQtHost* host, const QString& machine, QWidget* parent)
-    : QMainWindow(parent), host_(host), machine_(machine), schema_(std::make_unique<FsmGraphSchema>())
+    : QMainWindow(parent, Qt::Window), host_(host), machine_(machine), schema_(std::make_unique<FsmGraphSchema>())
 {
+    EditorWindowSetup::ConfigureSubWindow(this, parent);
     setAttribute(Qt::WA_DeleteOnClose);
     setObjectName(QStringLiteral("AiMachineEditorWindow"));
     setWindowTitle(Tr("Автомат ИИ — %1", "AI State Machine — %1").arg(QFileInfo(machine).fileName()));

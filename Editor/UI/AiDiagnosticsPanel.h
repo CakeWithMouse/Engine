@@ -147,13 +147,10 @@ public:
             lblDesc->setStyleSheet(QStringLiteral("font-size: 11px; color: rgba(255, 255, 255, 0.7);"));
             lblDesc->setWordWrap(true);
             legendGrid->addWidget(lblDesc, i, 2, Qt::AlignLeft | Qt::AlignVCenter);
-
-            if (i == 0)
-            {
-                legend_ = lblName;
-                legend_->setObjectName(QStringLiteral("AiLegend"));
-            }
         }
+        legend_ = new QLabel(Tr("Проход", "Walkable"), cardLayers->Content());
+        legend_->setObjectName(QStringLiteral("AiLegend"));
+        legend_->hide();
         cardLayers->ContentLayout()->addLayout(legendGrid);
         layout->addWidget(cardLayers);
 
