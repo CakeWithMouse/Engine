@@ -138,7 +138,27 @@ void EditorMainWindow::BuildToolsMenu()
         }
     });
 
+    CommandRegistry::Instance().RegisterCommand({
+        QStringLiteral("Tools.ToggleAiDiagnostics"),
+        QStringLiteral("Navigation and Diagnostics"),
+        QString(),
+        QStringLiteral("Toggle AI navigation and diagnostics dock panel"),
+        [this](const CommandContext&) {
+            if (aiDiagnosticsDock_) {
+                aiDiagnosticsDock_->setVisible(!aiDiagnosticsDock_->isVisible());
+                if (aiDiagnosticsDock_->isVisible()) {
+                    aiDiagnosticsDock_->raise();
+                }
+            }
+            return true;
+        },
+        nullptr
+    });
+
     toolsMenu_ = menuBar()->addMenu(Tr("Инструменты", "Tools"));
+    toolsMenu_->addAction(Tr("Навигация и диагностика", "Navigation and Diagnostics"), this, [] {
+        CommandRegistry::Instance().Execute(QStringLiteral("Tools.ToggleAiDiagnostics"));
+    });
     uiSubMenu_ = toolsMenu_->addMenu(Tr("Интерфейс (UI)", "Interface (UI)"));
     actCreateUI_ = uiSubMenu_->addAction(Tr("Создать интерфейс…", "Create UI…"), this, [this] {
         CommandRegistry::Instance().Execute(QStringLiteral("UI.Create"));

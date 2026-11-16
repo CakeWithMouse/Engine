@@ -124,18 +124,18 @@ void EditorMainWindow::BuildUi()
 
     auto* headerBar = new ViewportHeaderBar(viewportContainer);
     viewport_->AttachHeaderBar(headerBar);
-    auto* aiDock = new QDockWidget(Tr("AI · Диагностика", "AI · Diagnostics"), this);
-    aiDock->setObjectName("AiDiagnosticsDock");
-    aiDock->setWidget(new AiDiagnosticsPanel(host_, viewport_, aiDock));
-    addDockWidget(Qt::RightDockWidgetArea, aiDock);
-    aiDock->hide();
-    auto* aiButton = new QToolButton(headerBar);
-    aiButton->setObjectName("btnAiDiagnostics");aiButton->setText("AI");
-    aiButton->setToolTip(Tr("Навигация, поля и диагностика AI", "Navigation, fields and AI diagnostics"));
-    aiButton->setCheckable(true);
-    static_cast<QHBoxLayout*>(headerBar->layout())->addWidget(aiButton);
-    connect(aiButton, &QToolButton::toggled, aiDock, &QDockWidget::setVisible);
-    connect(aiDock, &QDockWidget::visibilityChanged, aiButton, &QToolButton::setChecked);
+    aiDiagnosticsDock_ = new QDockWidget(Tr("Навигация и диагностика", "Navigation and Diagnostics"), this);
+    aiDiagnosticsDock_->setObjectName(QStringLiteral("AiDiagnosticsDock"));
+    aiDiagnosticsDock_->setAllowedAreas(Qt::AllDockWidgetAreas);
+    aiDiagnosticsDock_->setFeatures(
+        QDockWidget::DockWidgetMovable |
+        QDockWidget::DockWidgetFloatable |
+        QDockWidget::DockWidgetClosable
+    );
+    aiDiagnosticsDock_->setWidget(new AiDiagnosticsPanel(host_, viewport_, aiDiagnosticsDock_));
+    addDockWidget(Qt::RightDockWidgetArea, aiDiagnosticsDock_);
+    aiDiagnosticsDock_->hide();
+    DockLayoutManager::UnlockDockResizing(aiDiagnosticsDock_);
 
     viewportLayout->addWidget(headerBar);
     viewportLayout->addWidget(viewport_, 1);
@@ -262,7 +262,7 @@ void EditorMainWindow::BuildUi()
 
     QMenu* viewMenu = viewMenu_;
 
-    for (QDockWidget* d : {static_cast<QDockWidget*>(viewportDock_), static_cast<QDockWidget*>(consoleDock_), static_cast<QDockWidget*>(fileDock_), static_cast<QDockWidget*>(sceneObjectsDock_), static_cast<QDockWidget*>(inspectorDock_)})
+    for (QDockWidget* d : {static_cast<QDockWidget*>(viewportDock_), static_cast<QDockWidget*>(consoleDock_), static_cast<QDockWidget*>(fileDock_), static_cast<QDockWidget*>(sceneObjectsDock_), static_cast<QDockWidget*>(inspectorDock_), static_cast<QDockWidget*>(aiDiagnosticsDock_)})
         if (d) viewMenu->addAction(d->toggleViewAction());
 
     statsLabel_ = new QLabel(this);
@@ -661,6 +661,8 @@ void EditorMainWindow::ShowViewportContextMenu(const QPoint& globalPos)
 
     if (inspectorDock_)
         menu.addAction(inspectorDock_->toggleViewAction());
+    if (aiDiagnosticsDock_)
+        menu.addAction(aiDiagnosticsDock_->toggleViewAction());
 
     menu.exec(globalPos);
 }
@@ -1577,7 +1579,7 @@ void EditorMainWindow::ApplySavedOrInitialLayout()
     }
     else
     {
-        for (auto* dock : {static_cast<QDockWidget*>(viewportDock_), static_cast<QDockWidget*>(sceneObjectsDock_), static_cast<QDockWidget*>(inspectorDock_), static_cast<QDockWidget*>(fileDock_), static_cast<QDockWidget*>(consoleDock_)})
+        for (auto* dock : {static_cast<QDockWidget*>(viewportDock_), static_cast<QDockWidget*>(sceneObjectsDock_), static_cast<QDockWidget*>(inspectorDock_), static_cast<QDockWidget*>(fileDock_), static_cast<QDockWidget*>(consoleDock_), static_cast<QDockWidget*>(aiDiagnosticsDock_)})
         {
             if (dock) DockLayoutManager::UnlockDockResizing(dock);
         }
@@ -1586,7 +1588,7 @@ void EditorMainWindow::ApplySavedOrInitialLayout()
 
 void EditorMainWindow::ApplyDefaultLayout()
 {
-    DockLayoutManager::ApplyDefaultLayout(this, viewportDock_, sceneObjectsDock_, inspectorDock_, fileDock_, consoleDock_);
+    DockLayoutManager::ApplyDefaultLayout(this, viewportDock_, sceneObjectsDock_, inspectorDock_, fileDock_, consoleDock_, aiDiagnosticsDock_);
 }
 
 QString EditorMainWindow::ProjectPath() const

@@ -189,6 +189,7 @@ private:
 
     QDockWidget* sceneObjectsDock_ = nullptr;
     QDockWidget* inspectorDock_ = nullptr;
+    QDockWidget* aiDiagnosticsDock_ = nullptr;
 
     SceneObjectsPanel* sceneObjectsPanel_ = nullptr;
     ObjectInspectorPanel* objectInspectorPanel_ = nullptr;

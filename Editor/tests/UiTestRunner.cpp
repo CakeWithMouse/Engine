@@ -15,6 +15,7 @@
 #include "InspectorCardStyleTests.h"
 #include "EditorSeparatorTests.h"
 #include "WheelGuardTests.h"
+#include "AiDiagnosticsDockTests.h"
 #include "EditorTheme.h"
 #include <QApplication>
 #include <iostream>
@@ -51,6 +52,7 @@ int main(int argc, char* argv[])
     runSuite(EditorSeparatorTests::Run, "EditorSeparatorTests");
     runSuite(WheelGuardTests::Run, "WheelGuardTests");
     runSuite(DockRedockTests::Run, "DockRedockTests");
+    runSuite(AiDiagnosticsDockTests::Run, "AiDiagnosticsDockTests");
     runSuite(GeometryTextureActionTests::Run, "GeometryTextureActionTests");
     runSuite(AssetPickerDialogTests::Run, "AssetPickerDialogTests");
     runSuite(ViewportBillboardTests::Run, "ViewportBillboardTests");
