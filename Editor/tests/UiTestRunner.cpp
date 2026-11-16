@@ -14,6 +14,7 @@
 #include "AssetPickerDialogTests.h"
 #include "InspectorCardStyleTests.h"
 #include "EditorSeparatorTests.h"
+#include "WheelGuardTests.h"
 #include "EditorTheme.h"
 #include <QApplication>
 #include <iostream>
@@ -48,6 +49,7 @@ int main(int argc, char* argv[])
     runSuite(InspectorRefreshTests::RunModelReplaceButtonRegression, "InspectorRefreshTests::RunModelReplaceButtonRegression");
     runSuite(InspectorCardStyleTests::Run, "InspectorCardStyleTests");
     runSuite(EditorSeparatorTests::Run, "EditorSeparatorTests");
+    runSuite(WheelGuardTests::Run, "WheelGuardTests");
     runSuite(DockRedockTests::Run, "DockRedockTests");
     runSuite(GeometryTextureActionTests::Run, "GeometryTextureActionTests");
     runSuite(AssetPickerDialogTests::Run, "AssetPickerDialogTests");

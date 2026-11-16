@@ -7,6 +7,7 @@
 #include "IEditorHost.h"
 #include "QtHost.h"
 #include "EditorTheme.h"
+#include "WheelGuard.h"
 #include "../Core/CommandRegistry.h"
 #include "../Core/EditorLocale.h"
 #include <QApplication>
@@ -38,6 +39,7 @@ namespace
         app.setQuitOnLastWindowClosed(false);
         app.setApplicationName(QStringLiteral("Engine Editor"));
         EditorTheme::Apply(app);
+        WheelGuard::Instance().Install(&app);
 
         const QString appDir = QCoreApplication::applicationDirPath();
         std::vector<QString> iconCandidates = {

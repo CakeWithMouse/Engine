@@ -11,7 +11,7 @@
 ### Чек-лист задач
 - [x] **Задача A (fix(ui)):** Разделители на панели Viewport при дробном DPI. Создан единый виджет `EditorSeparator` (`Editor/UI/EditorSeparator.h`) с отрисовкой через `QPainter` с учетом `devicePixelRatio`: толщина минимум 1 физический пиксель (`std::max(1, qRound(1.0 * dpr))`), выравнивание по физической сетке через логические координаты `QRectF`, динамический цвет темы `borderLight` с обновлением по `SubscribeThemeChanged`. Применен на `ViewportHeaderBar` (`HeaderSep1`, `HeaderSep2`). Написан юнит-тест `EditorSeparatorTests.h` (10 checks PASS) с валидацией рендера в `QImage` при DPR 1.0, 1.25, 1.5, 2.0 (вертикальный и горизонтальный) и валидацией смены темы.
 - [x] **Задача B (fix(ui)):** Унификация подложки всех карточек инспектора (`CollapsibleCard`, `InspectorCardStyle.h`, `EditorStyles.cpp`). Устранено расхождение селекторов QSS: в `EditorStyles.cpp` добавлены селекторы по динамическому свойству `[collapsibleCard="true"]` и прямым ID карточек (`ScriptCard`, `AiMachineCard`, `CameraGuideCard`). Все карточки вызывают `InspectorCardStyle::ApplyCardStyle(this)`. В `CameraGuideCard` добавлены `RetranslateUi()` и автоподписка на `EditorLocale`. Написан юнит-тест `InspectorCardStyleTests.h` (52 checks PASS), проверяющий рендер фона всех карточек инспектора в Dark (`bgPanel`) и Light темах, отсутствие прозрачных подложек, единые отступы (6, 4, 6, 4), spacing (4) и ширину подписей (80px).
-- [ ] **Задача C (fix(ui)):** Защита от случайного изменения параметров колесиком мыши (`WheelGuard`).
+- [x] **Задача C (fix(ui)):** Защита от случайного изменения параметров колесиком мыши (`WheelGuard`). Создан централизованный фильтр событий `WheelGuard` (`Editor/UI/WheelGuard.h`), защищающий `QAbstractSpinBox`, `QComboBox` и `QAbstractSlider` от непреднамеренных мутаций значений при скролле панелей. Если элемент не имеет фокуса, `QWheelEvent` блокируется на элементе и транслируется родительскому `QScrollArea`, обеспечивая непрерывную плавную прокрутку. Элементы с фокусом сохраняют возможность управления колесом. `QScrollBar` исключен из перехвата. Реализован механизм исключений для зума вьюпорта (`ViewportWidget`), графов (`MaterialGraphWidget`, `GraphEditorWidget`) и канваса UI. Интегрирован в `EditorApp.cpp`. Написан юнит-тест `WheelGuardTests.h` (20 checks PASS).
 - [ ] **Задача D (feat(ui)):** Кнопка «Создать» / «Редактировать» в карточке «Материал».
 - [ ] **Задача E (refactor(ui)):** Переработка панели «Навигация и диагностика» (`AiDiagnosticsPanel`).
 - [ ] **Задача F (audit/feat(ui)):** Аудит типов объектов и их компонентов в инспекторе и в меню «Добавить».
@@ -73,6 +73,18 @@
   - В `EditorStyles.cpp` селектор расширен: `QFrame[collapsibleCard="true"], QWidget[collapsibleCard="true"], QFrame#CollapsibleCard, QWidget#CollapsibleCard, #ScriptCard, #AiMachineCard, #CameraGuideCard`.
   - В `CameraGuideCard.h` добавлены `RetranslateUi()` и подписка на `EditorLocale::Instance().SubscribeLanguageChanged`.
   - Написан юнит-тест `InspectorCardStyleTests.h` (52 checks PASS), проверяющий рендер тела всех карточек инспектора в Dark и Light темах, соответствие цвета `bgPanel`, различие цветов в разных темах и негативный тест отсутствия подложки у нестилизованного `QFrame`.
+
+### Разведка C (Защита от случайного изменения параметров колесиком мыши)
+- **Факты из кода:**
+  - Ранее существовал локальный класс `NoWheelDoubleSpinBox.h`, который переопределял `wheelEvent` через `event->ignore()`.
+  - Он защищал только часть спинбоксов и не распространялся на `QComboBox` (`physicsBodyType_`, `physicsShape_`, `units_` и т.д.), `QSpinBox` и `QSlider`. При вертикальной прокрутке инспектора случайное попадание курсора на выпадающие списки или слайдеры меняло их значения на лету.
+- **Решение и реализация:**
+  - Создан легковесный класс `WheelGuard` (`Editor/UI/WheelGuard.h`) — фильтр событий для `QApplication`.
+  - Класс фильтрует события `QEvent::Wheel` для целевых виджетов ввода (`QAbstractSpinBox`, `QComboBox`, `QAbstractSlider`), исключая `QScrollBar`.
+  - Если виджет не имеет фокуса (`!HasFocus(w)`), `WheelGuard` игнорирует событие на виджете и через `QApplication::sendEvent` транслирует его в `parentWidget()`, позволяя `QScrollArea` прокручиваться без изменения значений в полях.
+  - Если виджет получил фокус кликом/табом, колесо работает штатно.
+  - Явные исключения (`IsExempt`): навигация камеры во вьюпорте (`ViewportWidget`, `Viewport`), холсты нодовых редакторов (`MaterialGraphWidget`, `GraphEditorWidget`, `GraphCanvas`), редактор интерфейса (`UIEditorCanvas`), а также виджеты с динамическим свойством `wheelGuardExempt`.
+  - Написан юнит-тест `WheelGuardTests.h` (20 checks PASS), проверяющий распознавание guarded-виджетов, сохранение работы `QScrollBar`, фильтрацию на unfocused виджетах, трансляцию в родительский виджет, работу при наличии фокуса и проверку исключений зума.
 
 ### Разведка E (Шаг 0: Панель «Навигация и диагностика»)
 - **Создание и регистрация в коде (`MainWindow.cpp:127-139`):**
