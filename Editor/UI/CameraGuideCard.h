@@ -59,8 +59,10 @@ public:
     summary_->setTextInteractionFlags(Qt::TextSelectableByMouse);
     lSummary->addWidget(summary_, 1);
     infoBtn_ = new InfoButton(
-        QStringLiteral("Справка по схеме камеры:\n• Зелёная рамка — ближняя плоскость (Near clip).\n• Жёлтая рамка — срез схемы (Guide slice).\n• Стрелка — направление взгляда.\n\nЕсли направление задано плоскостью, вращение объекта не влияет на взгляд."),
-        QStringLiteral("Camera guide help:\n• Green frame: near clip.\n• Amber frame: guide slice.\n• Arrow: view direction.\n\nWhen view plane overrides direction, object rotation does not affect view."),
+        Tr("Справка по схеме камеры:\n• Зелёная рамка — ближняя плоскость Near clip.\n• Жёлтая рамка — срез схемы Guide slice.\n• Стрелка — направление взгляда.\n\nЕсли направление задано плоскостью, вращение объекта не влияет на взгляд.",
+           "Camera guide help:\n• Green frame — near clip.\n• Amber frame — guide slice.\n• Arrow — view direction.\n\nWhen view plane overrides direction, object rotation does not affect view."),
+        Tr("Camera guide help:\n• Green frame — near clip.\n• Amber frame — guide slice.\n• Arrow — view direction.\n\nWhen view plane overrides direction, object rotation does not affect view.",
+           "Camera guide help:\n• Green frame — near clip.\n• Amber frame — guide slice.\n• Arrow — view direction.\n\nWhen view plane overrides direction, object rotation does not affect view."),
         summaryRow
     );
     infoBtn_->setObjectName(QStringLiteral("CameraGuideInfo"));
@@ -138,8 +140,10 @@ public:
       focus_->setText(Tr("Найти камеру · F", "Frame camera · F"));
     if (infoBtn_) {
       infoBtn_->SetInfoText(
-          QStringLiteral("Справка по схеме камеры:\n• Зелёная рамка — ближняя плоскость (Near clip).\n• Жёлтая рамка — срез схемы (Guide slice).\n• Стрелка — направление взгляда.\n\nЕсли направление задано плоскостью, вращение объекта не влияет на взгляд."),
-          QStringLiteral("Camera guide help:\n• Green frame: near clip.\n• Amber frame: guide slice.\n• Arrow: view direction.\n\nWhen view plane overrides direction, object rotation does not affect view."));
+          Tr("Справка по схеме камеры:\n• Зелёная рамка — ближняя плоскость Near clip.\n• Жёлтая рамка — срез схемы Guide slice.\n• Стрелка — направление взгляда.\n\nЕсли направление задано плоскостью, вращение объекта не влияет на взгляд.",
+             "Camera guide help:\n• Green frame — near clip.\n• Amber frame — guide slice.\n• Arrow — view direction.\n\nWhen view plane overrides direction, object rotation does not affect view."),
+          Tr("Camera guide help:\n• Green frame — near clip.\n• Amber frame — guide slice.\n• Arrow — view direction.\n\nWhen view plane overrides direction, object rotation does not affect view.",
+             "Camera guide help:\n• Green frame — near clip.\n• Amber frame — guide slice.\n• Arrow — view direction.\n\nWhen view plane overrides direction, object rotation does not affect view."));
     }
     Describe();
   }
