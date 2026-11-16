@@ -3,6 +3,8 @@
 #include "ObjectInspectorPanel.h"
 #include "CollapsibleCard.h"
 #include "InspectorCardStyle.h"
+#include "CameraGuideCard.h"
+#include "InfoButton.h"
 
 #include <QApplication>
 #include <QLabel>
@@ -215,6 +217,24 @@ inline void Run()
         auto* createAgain = matCard.findChild<QPushButton*>(QStringLiteral("CreateMaterial"));
         Check(createAgain != nullptr, "cleared MaterialCard has CreateMaterial button");
         Check(createAgain->text().contains(QStringLiteral("Создать")) || createAgain->text().contains(QStringLiteral("Create")), "cleared button text is Create");
+        checks += 6;
+    }
+
+    // 5. Test CameraGuideCard InfoButton (Task N)
+    {
+        CameraGuideCard camCard;
+        camCard.resize(260, 200);
+        auto* toolBtn = camCard.findChild<QToolButton*>(QStringLiteral("CameraGuideInfo"));
+        Check(toolBtn != nullptr, "CameraGuideCard has CameraGuideInfo tool button");
+        auto* infoBtn = dynamic_cast<InfoButton*>(toolBtn);
+        Check(infoBtn != nullptr, "CameraGuideCard has CameraGuideInfo InfoButton");
+        Check(infoBtn->objectName() == QStringLiteral("CameraGuideInfo"), "CameraGuideInfo objectName is correct");
+        Check(infoBtn->CurrentText().contains(QStringLiteral("Зелёная")) || infoBtn->CurrentText().contains(QStringLiteral("Green")),
+              "CameraGuideInfo contains guide color explanation");
+        auto* summary = camCard.findChild<QLabel*>(QStringLiteral("CameraGuideSummary"));
+        Check(summary != nullptr, "CameraGuideSummary exists");
+        Check(!summary->text().contains(QStringLiteral("Зелёная рамка")),
+              "CameraGuideSummary does not contain static legend text (moved to InfoButton)");
         checks += 6;
     }
 

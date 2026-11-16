@@ -3,11 +3,13 @@
 #include "CollapsibleCard.h"
 #include "CommandRegistry.h"
 #include "EditorLocale.h"
+#include "InfoButton.h"
 #include "InspectorCardStyle.h"
 #include "NoWheelDoubleSpinBox.h"
 #include "SettingsService.h"
 #include <QCheckBox>
 #include <QFormLayout>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QSignalBlocker>
 
@@ -48,11 +50,22 @@ public:
     ContentLayout()->addLayout(form);
     ContentLayout()->addWidget(full_);
     ContentLayout()->addWidget(xray_);
-    summary_ = new QLabel(Content());
+    auto* summaryRow = new QWidget(Content());
+    auto* lSummary = new QHBoxLayout(summaryRow);
+    InspectorCardStyle::ApplyRowLayout(lSummary);
+    summary_ = new QLabel(summaryRow);
     summary_->setObjectName("CameraGuideSummary");
     summary_->setWordWrap(true);
     summary_->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    ContentLayout()->addWidget(summary_);
+    lSummary->addWidget(summary_, 1);
+    infoBtn_ = new InfoButton(
+        QStringLiteral("Справка по схеме камеры:\n• Зелёная рамка — ближняя плоскость (Near clip).\n• Жёлтая рамка — срез схемы (Guide slice).\n• Стрелка — направление взгляда.\n\nЕсли направление задано плоскостью, вращение объекта не влияет на взгляд."),
+        QStringLiteral("Camera guide help:\n• Green frame: near clip.\n• Amber frame: guide slice.\n• Arrow: view direction.\n\nWhen view plane overrides direction, object rotation does not affect view."),
+        summaryRow
+    );
+    infoBtn_->setObjectName(QStringLiteral("CameraGuideInfo"));
+    lSummary->addWidget(infoBtn_, 0, Qt::AlignTop);
+    ContentLayout()->addWidget(summaryRow);
     focus_ =
         new QPushButton(Tr("Найти камеру · F", "Frame camera · F"), Content());
     focus_->setObjectName("CameraGuideFocus");
@@ -123,6 +136,11 @@ public:
       depthLabel_->setText(Tr("Глубина схемы", "Guide depth"));
     if (focus_)
       focus_->setText(Tr("Найти камеру · F", "Frame camera · F"));
+    if (infoBtn_) {
+      infoBtn_->SetInfoText(
+          QStringLiteral("Справка по схеме камеры:\n• Зелёная рамка — ближняя плоскость (Near clip).\n• Жёлтая рамка — срез схемы (Guide slice).\n• Стрелка — направление взгляда.\n\nЕсли направление задано плоскостью, вращение объекта не влияет на взгляд."),
+          QStringLiteral("Camera guide help:\n• Green frame: near clip.\n• Amber frame: guide slice.\n• Arrow: view direction.\n\nWhen view plane overrides direction, object rotation does not affect view."));
+    }
     Describe();
   }
 
@@ -154,14 +172,6 @@ private:
       text += Tr("\nДо плоскости Y=0 по взгляду: %1 м",
                  "\nAlong view to plane Y=0: %1 m")
                   .arg(-view_.position.y / view_.forward.y, 0, 'f', 2);
-    text += Tr(
-        "\nЗелёная рамка — Near. Жёлтая — срез схемы. Стрелка — направление "
-        "взгляда.",
-        "\nGreen frame: near clip. Amber: guide slice. Arrow: view direction.");
-    if (view_.plane)
-      text += Tr("\nНаправление задано плоскостью; поворот объекта не влияет "
-                 "на взгляд.",
-                 "\nView plane overrides the object's rotation.");
     summary_->setText(text);
   }
   CameraGuide::View view_;
@@ -171,5 +181,6 @@ private:
   QLabel *depthLabel_{nullptr};
   QPushButton *focus_{nullptr};
   QLabel *summary_{nullptr};
+  InfoButton *infoBtn_{nullptr};
   uint32_t langSubId_{0};
 };
