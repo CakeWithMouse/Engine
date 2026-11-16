@@ -345,10 +345,81 @@ inline void RunAddMenuTests()
     }
 }
 
+inline void RunPhysicsColliderTests()
+{
+    std::cout << "[Test] Running ObjectTypeInspectorTests::PhysicsCollider..." << std::endl;
+
+    ObjectInspectorPanel inspector;
+    inspector.resize(320, 600);
+
+    auto* bodyCombo = inspector.findChild<QComboBox*>(QStringLiteral("PhysicsCombo0"));
+    auto* shapeCombo = inspector.findChild<QComboBox*>(QStringLiteral("PhysicsCombo1"));
+    Check(bodyCombo != nullptr, "PhysicsCombo0 (body type) found");
+    Check(shapeCombo != nullptr, "PhysicsCombo1 (collision shape) found");
+
+    // Must have items on startup without manual language switch
+    Check(bodyCombo->count() >= 3, "PhysicsCombo0 has at least 3 items on startup");
+    Check(shapeCombo->count() >= 3, "PhysicsCombo1 has at least 3 items on startup");
+
+    // Provide snapshot with Mesh object with physics enabled
+    EditorQtHost::Snapshot snap;
+    EditorQtHost::SceneObject obj;
+    obj.id = 42;
+    obj.name = "PhysicsObj";
+    obj.type = "Mesh";
+    obj.hasPhysics = true;
+    obj.physics.enabled = 1;
+    obj.physics.bodyType = 1; // Dynamic
+    obj.physics.shapeType = 0; // Box
+    snap.objects.push_back(obj);
+    snap.selected = 42;
+
+    inspector.Refresh(snap, 42, true);
+    QApplication::processEvents();
+
+    Check(shapeCombo->currentIndex() == 0, "Initial shape index is 0 (Box)");
+    Check(bodyCombo->currentIndex() == 1, "Initial body type index is 1 (Dynamic)");
+
+    // Test changing collider shape
+    uint64_t emittedId = 0;
+    InspectorPhysicsValue emittedPhysics{};
+    QObject::connect(&inspector, &ObjectInspectorPanel::PhysicsEditingFinished,
+                     [&](quint64 id, const InspectorPhysicsValue& val) {
+                         emittedId = id;
+                         emittedPhysics = val;
+                     });
+
+    shapeCombo->setCurrentIndex(1); // Sphere
+    Check(emittedId == 42, "PhysicsEditingFinished emitted with correct object id");
+    Check(emittedPhysics.shapeType == 1, "Emitted physics shape changed to 1 (Sphere)");
+
+    bodyCombo->setCurrentIndex(0); // Static
+    Check(emittedPhysics.bodyType == 0, "Emitted physics bodyType changed to 0 (Static)");
+
+    // Engine updates snapshot with new physics values
+    snap.objects[0].physics.shapeType = 1;
+    snap.objects[0].physics.bodyType = 0;
+    inspector.Refresh(snap, 42, true);
+
+    // Test language change preserves selection
+    EditorLocale::Instance().SetLanguage(EditorLanguage::En);
+    QApplication::processEvents();
+    Check(shapeCombo->currentIndex() == 1, "Shape index preserved after EN language change");
+    Check(bodyCombo->currentIndex() == 0, "Body type index preserved after EN language change");
+    Check(shapeCombo->currentText() == QStringLiteral("Sphere"), "Shape text updated to EN Sphere");
+
+    EditorLocale::Instance().SetLanguage(EditorLanguage::Ru);
+    QApplication::processEvents();
+    Check(shapeCombo->currentIndex() == 1, "Shape index preserved after RU language change");
+    Check(bodyCombo->currentIndex() == 0, "Body type index preserved after RU language change");
+    Check(shapeCombo->currentText() == QStringLiteral("Сфера"), "Shape text updated to RU Сфера");
+}
+
 inline void Run()
 {
     RunMatrixTests();
     RunAddMenuTests();
+    RunPhysicsColliderTests();
     std::cout << "ObjectTypeInspectorTests: all checks passed." << std::endl;
 }
 

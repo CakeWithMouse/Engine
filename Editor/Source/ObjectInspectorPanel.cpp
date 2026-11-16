@@ -35,6 +35,7 @@ ObjectInspectorPanel::ObjectInspectorPanel(QWidget* parent)
     : QWidget(parent)
 {
     BuildUi();
+    RetranslateUi();
     langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
         RetranslateUi();
     });
@@ -278,7 +279,13 @@ void ObjectInspectorPanel::BuildPhysicsCard(QVBoxLayout* layout)
         cl->addWidget(row);
     };
     addComboRow(0, Tr("Тип тела", "Body type"), physicsBodyType_);
+    physicsBodyType_->addItems({Tr("Статичное", "Static"), Tr("Динамическое", "Dynamic"),
+                                Tr("Кинематическое", "Kinematic")});
+    physicsBodyType_->setCurrentIndex(1);
+
     addComboRow(1, Tr("Форма коллизии", "Collision shape"), physicsShape_);
+    physicsShape_->addItems({Tr("Куб", "Box"), Tr("Сфера", "Sphere"), Tr("Капсула", "Capsule")});
+    physicsShape_->setCurrentIndex(0);
 
     auto addSpinRow = [&](int labelIndex, const QString& label, NoWheelDoubleSpinBox*& spin,
                           double minV, double maxV, double step) {
