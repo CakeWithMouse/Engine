@@ -1,8 +1,96 @@
 # План разработки PainEngine Editor v2
-> **Ветка:** `fix/editor-ui-bugfix`  
+> **Ветка:** `fix/editor-ui-polish`  
 > **Архитектор:** Юрий  
 > **Инженер-исполнитель:** Antigravity  
 > **Протокол:** `engine-work-protocol`
+
+---
+
+## Сессия fix/editor-ui-polish (Задачи M, U, K, H)
+
+### Чек-лист задач
+- [ ] **Задача M (fix(ui)):** Растягивание панели при длинном имени в карточке «Геометрия». Устранение расширения карточки/инспектора, middle-elide пути, тултип с полным путем, юнит-тест в UiTests (200 символов не меняют sizeHint).
+- [ ] **Задача U (feat(ui)):** Единый пикер ресурсов проекта. Расширение `AssetKind` (UI, Script, AiMachine), перевод открытия UI (`UI.OpenEditor`), скрипта и автомата ИИ на `AssetPickerDialog`, системный диалог только для внешнего импорта.
+- [ ] **Задача K (refactor(ui)):** Единый стиль карточек инспектора. Общие константы и хелперы карточки (`InspectorCardStyle.h`), унификация отступов (6,4,6,4), spacing (4), ширины меток (80px), высоты строк (22px/24px) без изменения логики, юнит-тест.
+- [ ] **Задача H (fix(ui)):** Высокое качество SVG-иконок на 2K/High-DPI. Рендеринг `QSvgRenderer` в пиксмап `size * dpr` с `setDevicePixelRatio`, поддержка dpr 1.0/1.5/2.0 в `IconProvider`, юнит-тест на физический размер.
+
+---
+
+## Эталон тестов (Baseline ветки fix/editor-ui-polish @ e7bcbcd)
+
+| Тест / Скрипт | Результат (эталон) | Примечание |
+|---|---|---|
+| Сборка `EditorModule` (Debug) | **PASS** | 0 ошибок, 8 warnings C4996 (`QMenu::addAction` legacy) |
+| `Editor/tests/CoreTests.exe` | **1105/1105 PASS** | 1105 checks passed |
+| `Editor/tests/HostTests.exe` | **159/159 PASS** | 159 checks passed |
+| `Editor/tests/UiTests.exe` | **FAIL (Красная база main)** | 123 checks pass до падения в `ViewportBillboardTests.h:216` (`game camera tint from dark palette`: коммит `314b991` изменил предикат камеры на `CameraGuide::IsCamera(obj) && obj.gameplayKind != 2`, перехватив `Gameplay.Camera` с `gameplayKind == 0` до ветки `iconGameCamera`). |
+| `Editor/tools/check.ps1 -Quick` | **FAIL (Красная база main)** | FAIL: Hardcoded Cyrillic detected outside Tr() in `Editor/UI/AiDiagnosticsPanel.h:58-60` (126 characters, коммит `0947535`). |
+
+---
+
+## Разведка (Шаг 0 по задачам M, U, K, H)
+
+### Разведка M (Карточка «Геометрия» vs «Материал»)
+- **Факты из кода:**
+  - В `GeometryCard.h:144-149` поле модели — `QLineEdit* modelAsset_` (объект `ModelAsset`, 22px). В `MaterialCard.h:117-122` — `QLineEdit* materialAsset_` (объект `MaterialAsset`, 22px).
+  - В `GeometryCard.h:30` при `SetModelData` вызывается `modelAsset_->setText(rel)` напрямую полным путём без усечения/элайда. Тултип на существующем файле очищается в `QString()` (`GeometryCard.h:49, 57`), поэтому полный путь недоступен в тултипе. `modelAsset_` не имеет `minimumWidth(0)` / `sizePolicy(Ignored)`.
+  - В `GeometryCard.h:151-164` ряд кнопок `btnRow` содержит всего 1 кнопку `ChooseModel` («Заменить модель…»), тогда как в `MaterialCard.h:124-153` ряд `materialActions_` содержит 3 кнопки (`Edit`, `Browse`, `Clear`), что задает другую минимальную ширину.
+  - При установке имени пути длиной 200 символов `QLineEdit` без явного сброса `minimumWidth` и без элайда не показывает сокращение и не дает подсказки.
+- **План исправления M:**
+  - Создание общего хелпера `EditorUI::FormatAssetPath(QLineEdit* edit, const QString& fullPath, const QString& displayPath, int targetWidth = 220)`.
+  - Элайд посередине: `QFontMetrics(edit->font()).elidedText(displayPath, Qt::ElideMiddle, targetWidth)`.
+  - Защита размеров: `edit->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed)` и `edit->setMinimumWidth(0)`.
+  - Если путь сокращен (`elided != displayPath`), тултип содержит полный путь `fullPath`. Если файл отсутствует на диске — тултип ошибки.
+  - Внутреннее хранение сырого полного пути `rawPath_` для надежных коллбэков.
+
+### Разведка U (Единый пикер ресурсов)
+- **а) Редактор UI:**
+  - `HudTools.cpp:84`: `UI.OpenEditor` вызывает `QFileDialog::getOpenFileName(this, Tr("Интерфейс", "Interface"), root, "UI (*.ui)")`. Это внутренний ресурс проекта!
+  - `HudTools.cpp:30`: `CreateUI()` вызывает `QFileDialog::getSaveFileName(this, Tr("Новый интерфейс", "New Interface"), ...)` — создание нового файла на диске (остается системным диалогом сохранения).
+  - `HudTools.cpp:46`: `ShowHudSettings()` строит самодельный комбобокс через `QDirIterator it(root, {"*.ui"})`.
+  - `UIEditorWindow.cpp`: в текущей версии редактор разметки настраивает только цвета (через `QColorDialog`), геометрию (спинбоксы) и текст. Внутренних пикеров картинок/шрифтов в инспекторе UI еще нет.
+- **б) Места выбора ресурсов по всему Editor/:**
+  - `ImportCommands.cpp:202`: `Scene.ReplaceModel` — уже использует `AssetPickerDialog(AssetKind::Model)`.
+  - `ImportCommands.cpp:234`: `Scene.AssignMaterial` — уже использует `AssetPickerDialog(AssetKind::Material)`.
+  - `MaterialTextureTools.cpp:295`: выбор текстуры в слоте — уже использует `AssetPickerDialog(AssetKind::Texture)`.
+  - `MainWindow.cpp:858`: выбор визуального скрипта `OnChooseScript` — вызывает `QFileDialog::getOpenFileName` в каталоге `Content/Scripts`. Требуется `AssetPickerDialog(AssetKind::Script)`.
+  - `MainWindow.cpp:884`: выбор автомата ИИ `OnChooseAiMachine` — вызывает `QFileDialog::getOpenFileName` в каталоге `Content/AI`. Требуется `AssetPickerDialog(AssetKind::AiMachine)`.
+  - `HudTools.cpp:84`: открытие UI-файла `UI.OpenEditor` — вызывает `QFileDialog::getOpenFileName`. Требуется `AssetPickerDialog(AssetKind::UI)`.
+  - Внешний импорт (ОС -> проект): `ImportCommands.cpp:60, 392`, `AssetTools.cpp:48, 79` — файлы снаружи проекта, системный диалог `QFileDialog` обоснованно сохраняется.
+  - Сохранение файлов на диск: `MainWindow.cpp:1039` (`SaveSceneAs`), `HudTools.cpp:30` (`CreateUI`) — системный `getSaveFileName` сохраняется.
+
+### Разведка K (Стиль карточек инспектора)
+- **Таблица инспектора по коду:**
+  | Карточка | Файл:строка | Заголовок | Раскладка строк | Отступы/Spacing | Ширина подписей | Высота строк |
+  |---|---|---|---|---|---|---|
+  | `TransformCard` | `TransformCard.h:16` | «Трансформация» / `CollapsibleCard` | `QGridLayout` (X, Y, Z ячейки) | `contentLayout_` (6, 4, 6, 4), spacing 4 | 16 px (`CardFieldLabel`) | 22 px spinbox |
+  | `GeometryCard` | `GeometryCard.h:15` | «Геометрия» / `CollapsibleCard` | `QVBoxLayout` (`CardSectionLabel`, `modelAsset_`, `btnRow`) | `contentLayout_` (6, 4, 6, 4), spacing 4; `btnRow` (0,0,0,0) | На всю ширину | 22 px edit, 24 px btn |
+  | `MaterialCard` | `MaterialCard.h:15` | «Материал» / `CollapsibleCard` | `QVBoxLayout` (`CardSectionLabel`, `materialAsset_`, `materialActions_`) | `contentLayout_` (6, 4, 6, 4), spacing 4; actions (0,0,0,0) | На всю ширину | 22 px edit, 24 px btns |
+  | `PointLight` | `ObjectInspectorLight.cpp:38` | «Точечный свет» / `CollapsibleCard` (`cardLight_`) | `QHBoxLayout` построчно | `contentLayout_` (6, 4, 6, 4), spacing 4; строки (0,0,0,0), spacing 4 | 72 px фикс (`lightRowLabels_`) | 22 px spinboxes |
+  | `PhysicsCard` | `ObjectInspectorPanel.cpp:233` | «Физика» / `CollapsibleCard` (`cardPhysics_`) | `QHBoxLayout` построчно | `contentLayout_` (6, 4, 6, 4), spacing 4; строки (0,0,0,0), spacing 4 | 80 px фикс (`physicsRowLabels_`) | 22 px edits/combos |
+  | `ScriptCard` | `ScriptCard.h:21` | «Скрипт» / `CollapsibleCard` | `QVBoxLayout` + `VariableValuesEditor` | `contentLayout_` (6, 4, 6, 4), spacing 4; actions (0,0,0,0) | 80 px в `VariableValuesEditor` | 22 px edits, 24 px btns |
+  | `AiMachineCard` | `AiMachineCard.h:16` | «Автомат ИИ» / `CollapsibleCard` | `QVBoxLayout` | `contentLayout_` (6, 4, 6, 4), spacing 4; actions (0,0,0,0) | На всю ширину | 22 px edit, 24 px btns |
+  | `CameraGuideCard` | `CameraGuideCard.h:13` | «Обзор камеры» / `CollapsibleCard` | `QFormLayout` | `contentLayout_` (6, 4, 6, 4), spacing 4 | По `QFormLayout` | 22 px spinbox |
+  | `CharacterCard` | `ObjectInspectorPanel.cpp:207` | «ИИ-персонаж» / `CollapsibleCard` | `QHBoxLayout` построчно | `contentLayout_` (6, 4, 6, 4), spacing 4 | 80 px фикс | 22 px spinbox |
+  | `GeneralCard` | `ObjectInspectorPanel.cpp:164` | «Общие параметры» / `CollapsibleCard` | `QHBoxLayout` / `QVBoxLayout` | `contentLayout_` (6, 4, 6, 4), spacing 4 | 80 px фикс | 22 px edit |
+- **Вывод по K:**
+  - Базовые отступы контента у всех карточек унифицированы через `CollapsibleCard` (6, 4, 6, 4, spacing 4).
+  - Карточки `Physics` (80px) и `PointLight` (72px) имели расхождение в ширине колонки подписей (72px vs 80px).
+  - Выносим `InspectorCardStyle.h` с едиными константами: `kLabelWidth = 80px`, `kFieldHeight = 22px`, `kButtonHeight = 24px`, `kContentMargins = QMargins(6, 4, 6, 4)`, `kSpacing = 4px`.
+
+### Разведка H (SVG-иконки на 2K)
+- **Факты из кода:**
+  - `IconProvider.cpp:73`: `QPixmap pix(size, size);` создает пиксмап в логических пикселях (16x16).
+  - `IconProvider.cpp:76-81`: `QSvgRenderer::render(&painter)` рисует в этот 16x16 буфер. `pix.setDevicePixelRatio(dpr)` отсутствует.
+  - `IconProvider.cpp:113-116`: в `QIcon` добавляются только пиксмапы размера 16x16.
+  - На экранах с коэффициентом масштабирования 1.5 (2K при 150%) или 2.0 (4K при 200%) Qt масштабирует растровый пиксмап 16x16 с потерей резкости.
+- **План исправления H:**
+  - Рендерить `QPixmap` физического размера `std::round(size * dpr)`.
+  - Устанавливать `pix.setDevicePixelRatio(dpr)`.
+  - Добавлять в `QIcon` пиксмапы для стандартных DPR (1.0, 1.5, 2.0), либо формировать четкий пиксмап с учетом текущего DPI приложения.
+  - Написать тест, проверяющий физический размер возвращаемого `QPixmap` при DPR 1.0, 1.5, 2.0.
+
+---
 
 ---
 
