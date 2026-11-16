@@ -169,6 +169,26 @@ inline void Run()
     checkButtonHeight(QStringLiteral("AiMachineClear"));
     checkButtonHeight(QStringLiteral("LightColor"));
 
+    // 4. Test MaterialCard Create vs Edit button dynamic toggle (Task D)
+    {
+        MaterialCard matCard;
+        matCard.resize(260, 100);
+        auto* btn = matCard.findChild<QPushButton*>(QStringLiteral("CreateMaterial"));
+        Check(btn != nullptr, "initial MaterialCard has CreateMaterial button");
+        Check(btn->text().contains(QStringLiteral("Создать")) || btn->text().contains(QStringLiteral("Create")), "initial button text is Create");
+
+        matCard.SetData(QStringLiteral("/Game/Materials/Custom.mat"), false);
+        auto* editBtn = matCard.findChild<QPushButton*>(QStringLiteral("EditMaterial"));
+        Check(editBtn != nullptr, "assigned MaterialCard has EditMaterial button");
+        Check(editBtn->text().contains(QStringLiteral("Редактировать")) || editBtn->text().contains(QStringLiteral("Edit")), "assigned button text is Edit Material");
+
+        matCard.Clear();
+        auto* createAgain = matCard.findChild<QPushButton*>(QStringLiteral("CreateMaterial"));
+        Check(createAgain != nullptr, "cleared MaterialCard has CreateMaterial button");
+        Check(createAgain->text().contains(QStringLiteral("Создать")) || createAgain->text().contains(QStringLiteral("Create")), "cleared button text is Create");
+        checks += 6;
+    }
+
     std::cout << "InspectorCardStyle tests: " << checks << " checks passed" << std::endl;
 }
 

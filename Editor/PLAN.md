@@ -12,7 +12,8 @@
 - [x] **Задача A (fix(ui)):** Разделители на панели Viewport при дробном DPI. Создан единый виджет `EditorSeparator` (`Editor/UI/EditorSeparator.h`) с отрисовкой через `QPainter` с учетом `devicePixelRatio`: толщина минимум 1 физический пиксель (`std::max(1, qRound(1.0 * dpr))`), выравнивание по физической сетке через логические координаты `QRectF`, динамический цвет темы `borderLight` с обновлением по `SubscribeThemeChanged`. Применен на `ViewportHeaderBar` (`HeaderSep1`, `HeaderSep2`). Написан юнит-тест `EditorSeparatorTests.h` (10 checks PASS) с валидацией рендера в `QImage` при DPR 1.0, 1.25, 1.5, 2.0 (вертикальный и горизонтальный) и валидацией смены темы.
 - [x] **Задача B (fix(ui)):** Унификация подложки всех карточек инспектора (`CollapsibleCard`, `InspectorCardStyle.h`, `EditorStyles.cpp`). Устранено расхождение селекторов QSS: в `EditorStyles.cpp` добавлены селекторы по динамическому свойству `[collapsibleCard="true"]` и прямым ID карточек (`ScriptCard`, `AiMachineCard`, `CameraGuideCard`). Все карточки вызывают `InspectorCardStyle::ApplyCardStyle(this)`. В `CameraGuideCard` добавлены `RetranslateUi()` и автоподписка на `EditorLocale`. Написан юнит-тест `InspectorCardStyleTests.h` (52 checks PASS), проверяющий рендер фона всех карточек инспектора в Dark (`bgPanel`) и Light темах, отсутствие прозрачных подложек, единые отступы (6, 4, 6, 4), spacing (4) и ширину подписей (80px).
 - [x] **Задача C (fix(ui)):** Защита от случайного изменения параметров колесиком мыши (`WheelGuard`). Создан централизованный фильтр событий `WheelGuard` (`Editor/UI/WheelGuard.h`), защищающий `QAbstractSpinBox`, `QComboBox` и `QAbstractSlider` от непреднамеренных мутаций значений при скролле панелей. Если элемент не имеет фокуса, `QWheelEvent` блокируется на элементе и транслируется родительскому `QScrollArea`, обеспечивая непрерывную плавную прокрутку. Элементы с фокусом сохраняют возможность управления колесом. `QScrollBar` исключен из перехвата. Реализован механизм исключений для зума вьюпорта (`ViewportWidget`), графов (`MaterialGraphWidget`, `GraphEditorWidget`) и канваса UI. Интегрирован в `EditorApp.cpp`. Написан юнит-тест `WheelGuardTests.h` (20 checks PASS).
-- [ ] **Задача D (feat(ui)):** Кнопка «Создать» / «Редактировать» в карточке «Материал».
+- [x] **Задача D (feat(ui)):** Кнопка «Создать» / «Редактировать» в карточке «Материал». В `MaterialCard.h` реализовано динамическое состояние кнопки действия: если материал не назначен (`materialAsset_.isEmpty()`), кнопка имеет надпись «Создать» (`Tr("Создать", "Create")`), objectName `CreateMaterial` и вызывает создание материала в проекте (`CreateMaterialForSelection()`, создание `.mat` файла и назначение на объект через хост); если материал назначен — надпись «Редактировать» (`Tr("Редактировать", "Edit Material")`), objectName `EditMaterial` и вызов `OpenMaterialEditor`. Добавлены тесты в `InspectorCardStyleTests.h` (6 checks, всего 58 checks PASS).
+- [ ] **Задача E (refactor(ui)):** Переработка панели «Навигация и диагностика» (`AiDiagnosticsPanel`).
 - [ ] **Задача E (refactor(ui)):** Переработка панели «Навигация и диагностика» (`AiDiagnosticsPanel`).
 - [ ] **Задача F (audit/feat(ui)):** Аудит типов объектов и их компонентов в инспекторе и в меню «Добавить».
 
@@ -85,6 +86,17 @@
   - Если виджет получил фокус кликом/табом, колесо работает штатно.
   - Явные исключения (`IsExempt`): навигация камеры во вьюпорте (`ViewportWidget`, `Viewport`), холсты нодовых редакторов (`MaterialGraphWidget`, `GraphEditorWidget`, `GraphCanvas`), редактор интерфейса (`UIEditorCanvas`), а также виджеты с динамическим свойством `wheelGuardExempt`.
   - Написан юнит-тест `WheelGuardTests.h` (20 checks PASS), проверяющий распознавание guarded-виджетов, сохранение работы `QScrollBar`, фильтрацию на unfocused виджетах, трансляцию в родительский виджет, работу при наличии фокуса и проверку исключений зума.
+
+### Разведка D (Кнопка «Создать» / «Редактировать» в карточке «Материал»)
+- **Факты из кода:**
+  - В `MaterialCard.h` кнопка всегда называлась «Редактировать» (`objectName = "EditMaterial"`), даже когда поле материала было пустым.
+  - При этом рабочий путь до движка существовал: в `MainWindow.cpp:841-847` при клике по пустой строке вызывался `CreateMaterialForSelection()`, создающий новый `.mat` файл в `Content/Materials`, отправляющий команду `EditorCommand::SetMaterial` на выделенный объект и открывающий `MaterialEditorWindow`.
+- **Решение и реализация:**
+  - В `MaterialCard.h` кнопка действия переведена на динамическое состояние:
+    - При отсутствии материала (`material.isEmpty()`): текст `Tr("Создать", "Create")`, `objectName = "CreateMaterial"`.
+    - При назначенном материале: текст `Tr("Редактировать", "Edit Material")`, `objectName = "EditMaterial"`.
+  - При очистке (`Clear()`) кнопка возвращается в состояние «Создать».
+  - В `InspectorCardStyleTests.h` добавлены тесты переключения текста и objectName (начальное пустое -> Create, назначенное -> Edit, сброс -> Create).
 
 ### Разведка E (Шаг 0: Панель «Навигация и диагностика»)
 - **Создание и регистрация в коде (`MainWindow.cpp:127-139`):**

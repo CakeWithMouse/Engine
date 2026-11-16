@@ -40,6 +40,10 @@ public:
         EditorUI::FormatAssetPath(materialAsset_, material, material);
         clearMaterialButton_->setEnabled(!material.isEmpty());
 
+        const bool hasMat = !material.isEmpty();
+        editMaterialButton_->setText(hasMat ? Tr("Редактировать", "Edit Material") : Tr("Создать", "Create"));
+        editMaterialButton_->setObjectName(hasMat ? QStringLiteral("EditMaterial") : QStringLiteral("CreateMaterial"));
+
         if (!material.isEmpty() && !contentRoot.isEmpty())
         {
             const QString rel = material.startsWith(QStringLiteral("/Game/")) ? material.mid(6) : material;
@@ -85,7 +89,9 @@ public:
         rawMaterialPath_.clear();
         materialAsset_->clear();
         materialAsset_->setToolTip(QString());
-        editMaterialButton_->setEnabled(false);
+        editMaterialButton_->setText(Tr("Создать", "Create"));
+        editMaterialButton_->setObjectName(QStringLiteral("CreateMaterial"));
+        editMaterialButton_->setEnabled(true);
         clearMaterialButton_->setEnabled(false);
         cachedMaterialPath_.clear();
         cachedMaterialExists_ = true;
@@ -97,7 +103,11 @@ public:
         SetTitle(Tr("Материал", "Material"));
         if (labelMatTitle_) labelMatTitle_->setText(Tr("Слот материала (.mat)", "Material Slot (.mat)"));
         if (materialAsset_) materialAsset_->setPlaceholderText(Tr("по умолчанию", "default"));
-        if (editMaterialButton_) editMaterialButton_->setText(Tr("Редактировать", "Edit Material"));
+        const bool hasMat = !rawMaterialPath_.isEmpty();
+        if (editMaterialButton_)
+        {
+            editMaterialButton_->setText(hasMat ? Tr("Редактировать", "Edit Material") : Tr("Создать", "Create"));
+        }
         if (chooseMaterialButton_) chooseMaterialButton_->setText(Tr("Выбрать…", "Browse…"));
         if (clearMaterialButton_) clearMaterialButton_->setText(Tr("Убрать", "Clear"));
     }
@@ -129,8 +139,8 @@ private:
         auto* lMatBtns = new QHBoxLayout(materialActions_);
         InspectorCardStyle::ApplyRowLayout(lMatBtns);
 
-        editMaterialButton_ = new QPushButton(Tr("Редактировать", "Edit Material"), materialActions_);
-        editMaterialButton_->setObjectName(QStringLiteral("EditMaterial"));
+        editMaterialButton_ = new QPushButton(Tr("Создать", "Create"), materialActions_);
+        editMaterialButton_->setObjectName(QStringLiteral("CreateMaterial"));
         editMaterialButton_->setFixedHeight(InspectorCardStyle::kButtonHeight);
         QObject::connect(editMaterialButton_, &QPushButton::clicked, [this] {
             if (onEditMaterial) onEditMaterial(rawMaterialPath_);
