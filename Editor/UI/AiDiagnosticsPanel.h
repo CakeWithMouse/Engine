@@ -45,33 +45,47 @@ public:
         setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
 
         auto* outer = new QVBoxLayout(this);
-        outer->setContentsMargins(4, 4, 4, 4);
-        outer->setSpacing(4);
-
-        enabled_ = new QCheckBox(Tr("Показывать диагностику AI", "Show AI diagnostics"), this);
-        enabled_->setObjectName(QStringLiteral("AiEnabled"));
-        outer->addWidget(enabled_);
-
-        source_ = new QLabel(Tr("Слои выключены", "Layers off"), this);
-        source_->setObjectName(QStringLiteral("AiSourceStatus"));
-        source_->setWordWrap(true);
-        source_->setStyleSheet(QStringLiteral("font-size: 11px; padding: 3px 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.05);"));
-        outer->addWidget(source_);
+        outer->setContentsMargins(0, 0, 0, 0);
+        outer->setSpacing(0);
 
         auto* scroll = new QScrollArea(this);
-        scroll->setWidgetResizable(true); scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff); scroll->setFrameShape(QFrame::NoFrame);
-        outer->addWidget(scroll, 1);
+        scroll->setObjectName(QStringLiteral("AiDiagnosticsScrollArea"));
+        scroll->setWidgetResizable(true);
+        scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        scroll->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        scroll->setFrameShape(QFrame::NoFrame);
+        outer->addWidget(scroll);
 
         auto* body = new QWidget(scroll);
-        body->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+        body->setObjectName(QStringLiteral("AiDiagnosticsScrollContent"));
+        body->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         scroll->setWidget(body);
 
         auto* layout = new QVBoxLayout(body);
-        layout->setContentsMargins(0, 0, 0, 0);
+        layout->setContentsMargins(4, 4, 4, 4);
         layout->setSpacing(4);
+
+        enabled_ = new QCheckBox(Tr("Показывать диагностику AI", "Show AI diagnostics"), body);
+        enabled_->setObjectName(QStringLiteral("AiEnabled"));
+        layout->addWidget(enabled_);
+
+        source_ = new QLabel(Tr("Слои выключены", "Layers off"), body);
+        source_->setObjectName(QStringLiteral("AiSourceStatus"));
+        source_->setWordWrap(true);
+        source_->setStyleSheet(QStringLiteral("font-size: 11px; padding: 6px 10px; border-radius: 4px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);"));
+        layout->addWidget(source_);
 
         // Card 1: Layers
         auto* cardLayers = new CollapsibleCard(Tr("Слои во вьюпорте", "Viewport layers"), body, true);
+        cardLayers->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        cardLayers->SetInfo(
+            Tr("Слои во вьюпорте", "Viewport layers"),
+            Tr("Легенда слоев:\n• Зеленый — проход\n• Красный — препятствие\n• Желтый — стоимость / тесно\n• A / B — старт и цель\n• Голубой — направление",
+               "Layer legend:\n• Green — walkable\n• Red — obstacle\n• Yellow — cost / clearance\n• A / B — start & goal\n• Cyan — direction")
+        );
+        if (auto* btn = cardLayers->InfoBtn())
+            btn->setObjectName(QStringLiteral("AiLegendInfoButton"));
+
         auto* layerLayout = new QGridLayout;
         layerLayout->setSpacing(InspectorCardStyle::kRowSpacing);
         layerLayout->setContentsMargins(0, 0, 0, 0);
@@ -93,32 +107,17 @@ public:
         }
         cardLayers->ContentLayout()->addLayout(layerLayout);
 
-        auto* legendRow = new QWidget(cardLayers->Content());
-        legendRow->setObjectName(QStringLiteral("AiLegendRow"));
-        auto* lRowLayout = new QHBoxLayout(legendRow);
-        lRowLayout->setContentsMargins(0, 2, 0, 2);
-        lRowLayout->setSpacing(6);
-
-        legend_ = new QLabel(legendRow);
+        legend_ = new QLabel(cardLayers->Content());
         legend_->setObjectName(QStringLiteral("AiLegend"));
         legend_->setText(Tr("● Проход  ● Препятствие  ● Стоимость  ● A/B  ● Направление",
                             "● Walkable  ● Blocked  ● Cost  ● A/B  ● Direction"));
         legend_->setStyleSheet(QStringLiteral("font-size: 11px;"));
-        lRowLayout->addWidget(legend_, 1);
-
-        auto* infoBtn = new InfoButton(
-            Tr("Легенда слоев:\n• Зеленый — проход\n• Красный — препятствие\n• Желтый — стоимость / тесно\n• A / B — старт и цель\n• Голубой — направление",
-               "Layer legend:\n• Green — walkable\n• Red — obstacle\n• Yellow — cost / clearance\n• A / B — start & goal\n• Cyan — direction"),
-            Tr("Layer legend:\n• Green — walkable\n• Red — obstacle\n• Yellow — cost / clearance\n• A / B — start & goal\n• Cyan — direction",
-               "Layer legend:\n• Green — walkable\n• Red — obstacle\n• Yellow — cost / clearance\n• A / B — start & goal\n• Cyan — direction"),
-            legendRow);
-        infoBtn->setObjectName(QStringLiteral("AiLegendInfoButton"));
-        lRowLayout->addWidget(infoBtn);
-        cardLayers->ContentLayout()->addWidget(legendRow);
+        cardLayers->ContentLayout()->addWidget(legend_);
         layout->addWidget(cardLayers);
 
         // Card 2: Subject
         auto* cardSubject = new CollapsibleCard(Tr("Объект диагностики", "Diagnostic subject"), body, true);
+        cardSubject->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         auto* af = new QFormLayout;
         InspectorCardStyle::ApplyRowLayout(af);
 
@@ -145,6 +144,7 @@ public:
 
         // Card 3: Probe
         auto* cardProbe = new CollapsibleCard(Tr("Проба навигации · XZ", "Navigation probe · XZ"), body, false);
+        cardProbe->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         auto* pf = new QFormLayout;
         InspectorCardStyle::ApplyRowLayout(pf);
 
@@ -183,6 +183,7 @@ public:
 
         // Card 4: Display
         auto* cardDisplay = new CollapsibleCard(Tr("Отображение", "Display"), body, false);
+        cardDisplay->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         auto* vf = new QFormLayout;
         InspectorCardStyle::ApplyRowLayout(vf);
 
@@ -203,6 +204,7 @@ public:
         // Card 5: Details
         auto* cardDetails = new CollapsibleCard(Tr("Состояние · задачи · память · история", "State · Tasks · Memory · History"), body, true);
         cardDetails->setObjectName(QStringLiteral("AiDetailsCard"));
+        cardDetails->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
         cell_ = new QLabel(Tr("Клетка: наведите курсор во вьюпорте", "Cell: hover viewport"), cardDetails->Content());
         cell_->setObjectName(QStringLiteral("AiCellInfo"));
@@ -226,6 +228,7 @@ public:
         details_->setObjectName(QStringLiteral("AiDetails"));
         details_->setReadOnly(true);
         details_->setMinimumHeight(150);
+        details_->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
         details_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
         details_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
         cardDetails->ContentLayout()->addWidget(details_);
@@ -450,7 +453,7 @@ private:
             details_->clear();
             return;
         }
-        source_->setStyleSheet(QStringLiteral("font-size: 11px; padding: 3px 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.05);"));
+        source_->setStyleSheet(QStringLiteral("font-size: 11px; padding: 6px 10px; border-radius: 4px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);"));
         auto r = QJsonDocument::fromJson(data).object();
         const auto src = r["source"].toString();
         if (src == "off")

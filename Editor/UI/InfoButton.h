@@ -151,6 +151,7 @@ public:
     }
 
     const QString& Title() const { return title_; }
+    const QString& CurrentTitle() const { return title_; }
 
     void ShowPopup()
     {

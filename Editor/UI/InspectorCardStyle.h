@@ -4,6 +4,8 @@
 #include <QLabel>
 #include <QWidget>
 #include <QLayout>
+#include <QHBoxLayout>
+#include "InfoButton.h"
 
 namespace InspectorCardStyle
 {
@@ -55,5 +57,28 @@ namespace InspectorCardStyle
         {
             card->setProperty("collapsibleCard", true);
         }
+    }
+
+    inline InfoButton* AddInfoToRow(QHBoxLayout* row, const QString& text, const QString& title = QString())
+    {
+        if (!row) return nullptr;
+        auto* infoBtn = new InfoButton(row->parentWidget());
+        infoBtn->setObjectName(QStringLiteral("RowInfoButton"));
+        if (!title.isEmpty())
+            infoBtn->SetInfoText(title, text, text);
+        else
+            infoBtn->SetInfoText(text, text);
+        row->addWidget(infoBtn, 0, Qt::AlignVCenter);
+        return infoBtn;
+    }
+
+    inline InfoButton* AddInfoToRow(QHBoxLayout* row, const QString& ruText, const QString& enText, const QString& title)
+    {
+        if (!row) return nullptr;
+        auto* infoBtn = new InfoButton(row->parentWidget());
+        infoBtn->setObjectName(QStringLiteral("RowInfoButton"));
+        infoBtn->SetInfoText(title, ruText, enText);
+        row->addWidget(infoBtn, 0, Qt::AlignVCenter);
+        return infoBtn;
     }
 }

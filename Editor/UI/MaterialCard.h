@@ -101,6 +101,9 @@ public:
     void RetranslateUi()
     {
         SetTitle(Tr("Материал", "Material"));
+        SetInfo(Tr("Материал", "Material"),
+                Tr("Материал объекта (.mat).\nПозволяет настроить шейдеры, текстуры и параметры отражения поверхности.",
+                   "Object material (.mat).\nConfigures shaders, textures, and surface reflection parameters."));
         if (labelMatTitle_) labelMatTitle_->setText(Tr("Слот материала (.mat)", "Material Slot (.mat)"));
         if (materialAsset_) materialAsset_->setPlaceholderText(Tr("по умолчанию", "default"));
         const bool hasMat = !rawMaterialPath_.isEmpty();
@@ -120,6 +123,10 @@ public:
 private:
     void BuildCard()
     {
+        SetInfo(Tr("Материал", "Material"),
+                Tr("Материал объекта (.mat).\nПозволяет настроить шейдеры, текстуры и параметры отражения поверхности.",
+                   "Object material (.mat).\nConfigures shaders, textures, and surface reflection parameters."));
+
         auto* cl = ContentLayout();
 
         labelMatTitle_ = new QLabel(Tr("Слот материала (.mat)", "Material Slot (.mat)"), Content());

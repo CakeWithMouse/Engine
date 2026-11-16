@@ -4,6 +4,7 @@
 #include "CollapsibleCard.h"
 #include "InspectorCardStyle.h"
 #include "CameraGuideCard.h"
+#include "AiDiagnosticsPanel.h"
 #include "InfoButton.h"
 
 #include <QApplication>
@@ -220,7 +221,7 @@ inline void Run()
         checks += 6;
     }
 
-    // 5. Test CameraGuideCard InfoButton (Task N)
+    // 5. Test CameraGuideCard InfoButton and Metrics Card (Task R)
     {
         CameraGuideCard camCard;
         camCard.resize(260, 200);
@@ -231,10 +232,66 @@ inline void Run()
         Check(infoBtn->objectName() == QStringLiteral("CameraGuideInfo"), "CameraGuideInfo objectName is correct");
         Check(infoBtn->CurrentText().contains(QStringLiteral("Зелёная")) || infoBtn->CurrentText().contains(QStringLiteral("Green")),
               "CameraGuideInfo contains guide color explanation");
+
+        // Verify click on InfoButton does NOT toggle card expansion
+        Check(camCard.IsExpanded() == true, "CameraGuideCard is expanded initially");
+        infoBtn->click();
+        Check(camCard.IsExpanded() == true, "Click on InfoButton does NOT collapse card");
+
+        // Verify metrics card exists and is collapsed by default
+        auto* metrics = camCard.MetricsCard();
+        Check(metrics != nullptr, "CameraGuideCard has MetricsCard");
+        Check(metrics->objectName() == QStringLiteral("CameraGuideMetricsCard"), "MetricsCard objectName is correct");
+        Check(!metrics->IsExpanded(), "CameraGuideMetricsCard is collapsed by default");
+
+        // Verify metric value labels exist
+        const QStringList metricValNames = {
+            QStringLiteral("CameraGuideProjection"),
+            QStringLiteral("CameraGuideNearFar"),
+            QStringLiteral("CameraGuideFrame"),
+            QStringLiteral("CameraGuideTicks"),
+            QStringLiteral("CameraGuideObserver"),
+            QStringLiteral("CameraGuidePlane")
+        };
+        for (const auto& mName : metricValNames)
+        {
+            auto* lbl = metrics->findChild<QLabel*>(mName);
+            Check(lbl != nullptr, (mName + " metric label found").toLatin1().constData());
+            ++checks;
+        }
+
+        // Verify old multi-line summary label was removed
         auto* summary = camCard.findChild<QLabel*>(QStringLiteral("CameraGuideSummary"));
-        Check(summary != nullptr, "CameraGuideSummary exists");
-        Check(!summary->text().contains(QStringLiteral("Зелёная рамка")),
-              "CameraGuideSummary does not contain static legend text (moved to InfoButton)");
+        Check(summary == nullptr, "CameraGuideSummary was removed in favor of metrics card");
+        checks += 8;
+    }
+
+    // 6. Test InspectorCardStyle::AddInfoToRow helper (Task R)
+    {
+        QWidget dummy;
+        auto* row = new QHBoxLayout(&dummy);
+        auto* btn = InspectorCardStyle::AddInfoToRow(row, QStringLiteral("Текст справки"), QStringLiteral("Заголовок"));
+        Check(btn != nullptr, "AddInfoToRow returned InfoButton");
+        Check(btn->objectName() == QStringLiteral("RowInfoButton"), "RowInfoButton has correct objectName");
+        Check(btn->CurrentTitle() == QStringLiteral("Заголовок"), "RowInfoButton has correct title");
+        Check(btn->CurrentText() == QStringLiteral("Текст справки"), "RowInfoButton has correct text");
+        checks += 4;
+    }
+
+    // 7. Test AiDiagnosticsPanel scroll area and card layout (Task R)
+    {
+        AiDiagnosticsPanel aiPanel(nullptr, nullptr);
+        aiPanel.resize(320, 600);
+        auto* scroll = aiPanel.findChild<QScrollArea*>(QStringLiteral("AiDiagnosticsScrollArea"));
+        Check(scroll != nullptr, "AiDiagnosticsPanel has QScrollArea wrapping content");
+        Check(scroll->widgetResizable() == true, "QScrollArea is widgetResizable");
+        auto* content = aiPanel.findChild<QWidget*>(QStringLiteral("AiDiagnosticsScrollContent"));
+        Check(content != nullptr, "QScrollArea contains scroll content widget");
+        auto* detailsCard = aiPanel.findChild<QWidget*>(QStringLiteral("AiDetailsCard"));
+        Check(detailsCard != nullptr, "AiDetailsCard exists in scroll content");
+        auto* cellDetails = aiPanel.findChild<QWidget*>(QStringLiteral("AiCellDetails"));
+        Check(cellDetails != nullptr, "AiCellDetails widget exists");
+        Check(!cellDetails->isVisible(), "AiCellDetails is hidden when cursor is not hovering");
         checks += 6;
     }
 
