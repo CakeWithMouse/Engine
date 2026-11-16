@@ -32,10 +32,10 @@ int main(int argc, char* argv[])
         InspectorRefreshTests::RunMouseRefreshJitter();
         InspectorRefreshTests::RunModelReplaceButtonRegression();
         DockRedockTests::Run();
+        GeometryTextureActionTests::Run();
         ViewportBillboardTests::Run();
         ContentBrowserTests::Run();
         ContentBrowserTypeTests::RunStandalone();
-        GeometryTextureActionTests::Run();
         AssetPickerDialogTests::Run();
         UiSmokeTests::Run();
         return 0;

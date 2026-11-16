@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AssetPathDisplay.h"
 #include "CollapsibleCard.h"
 #include "EditorLocale.h"
 #include "EditorTheme.h"
@@ -34,15 +35,16 @@ public:
 
     void SetData(const QString& material, bool hasPointLight, const QString& contentRoot = QString(), bool forceCheck = false)
     {
-        materialAsset_->setText(material);
+        rawMaterialPath_ = material;
+        EditorUI::FormatAssetPath(materialAsset_, material, material);
         clearMaterialButton_->setEnabled(!material.isEmpty());
 
         if (!material.isEmpty() && !contentRoot.isEmpty())
         {
+            const QString rel = material.startsWith(QStringLiteral("/Game/")) ? material.mid(6) : material;
             if (forceCheck || material != cachedMaterialPath_)
             {
                 cachedMaterialPath_ = material;
-                const QString rel = material.startsWith(QStringLiteral("/Game/")) ? material.mid(6) : material;
                 cachedMaterialExists_ = QFileInfo::exists(QDir(contentRoot).filePath(rel));
             }
             if (!cachedMaterialExists_)
@@ -55,7 +57,6 @@ public:
             else
             {
                 materialAsset_->setStyleSheet(QString());
-                materialAsset_->setToolTip(QString());
                 editMaterialButton_->setEnabled(true);
                 editMaterialButton_->setToolTip(QString());
             }
@@ -65,7 +66,6 @@ public:
             cachedMaterialPath_.clear();
             cachedMaterialExists_ = true;
             materialAsset_->setStyleSheet(QString());
-            materialAsset_->setToolTip(QString());
             editMaterialButton_->setEnabled(!hasPointLight);
             editMaterialButton_->setToolTip(material.isEmpty()
                 ? Tr("Создать материал в Content/Materials, назначить его объекту и открыть редактор",
@@ -81,13 +81,14 @@ public:
 
     void Clear()
     {
+        rawMaterialPath_.clear();
         materialAsset_->clear();
+        materialAsset_->setToolTip(QString());
         editMaterialButton_->setEnabled(false);
         clearMaterialButton_->setEnabled(false);
         cachedMaterialPath_.clear();
         cachedMaterialExists_ = true;
         materialAsset_->setStyleSheet(QString());
-        materialAsset_->setToolTip(QString());
     }
 
     void RetranslateUi()
@@ -118,6 +119,8 @@ private:
         materialAsset_->setReadOnly(true);
         materialAsset_->setObjectName(QStringLiteral("MaterialAsset"));
         materialAsset_->setFixedHeight(22);
+        materialAsset_->setMinimumWidth(0);
+        materialAsset_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
         materialAsset_->setPlaceholderText(Tr("по умолчанию", "default"));
         cl->addWidget(materialAsset_);
 
@@ -130,7 +133,7 @@ private:
         editMaterialButton_->setObjectName(QStringLiteral("EditMaterial"));
         editMaterialButton_->setFixedHeight(24);
         QObject::connect(editMaterialButton_, &QPushButton::clicked, [this] {
-            if (onEditMaterial) onEditMaterial(materialAsset_->text());
+            if (onEditMaterial) onEditMaterial(rawMaterialPath_);
         });
         lMatBtns->addWidget(editMaterialButton_);
 
@@ -159,5 +162,6 @@ private:
     QPushButton* clearMaterialButton_ = nullptr;
     QLabel* labelMatTitle_ = nullptr;
     QString cachedMaterialPath_;
+    QString rawMaterialPath_;
     bool cachedMaterialExists_ = true;
 };

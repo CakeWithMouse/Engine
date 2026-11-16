@@ -9,7 +9,7 @@
 ## Сессия fix/editor-ui-polish (Задачи M, U, K, H)
 
 ### Чек-лист задач
-- [ ] **Задача M (fix(ui)):** Растягивание панели при длинном имени в карточке «Геометрия». Устранение расширения карточки/инспектора, middle-elide пути, тултип с полным путем, юнит-тест в UiTests (200 символов не меняют sizeHint).
+- [x] **Задача M (fix(ui)):** Растягивание панели при длинном имени в карточке «Геометрия». Выделен хелпер `EditorUI::FormatAssetPath` (`Editor/UI/AssetPathDisplay.h`), применен в `GeometryCard.h` и `MaterialCard.h`: `sizePolicy(Ignored, Fixed)`, `minimumWidth(0)`, `elidedText(..., Qt::ElideMiddle)`, при обрезании тултип содержит полный путь, `MaterialCard` сохраняет сырой путь для `onEditMaterial`. Юнит-тесты в `GeometryTextureActionTests.h` (38 checks PASS): 200 символов не меняют sizeHint/ширину карточек, текст обрезан, тултип с полным путем.
 - [ ] **Задача U (feat(ui)):** Единый пикер ресурсов проекта. Расширение `AssetKind` (UI, Script, AiMachine), перевод открытия UI (`UI.OpenEditor`), скрипта и автомата ИИ на `AssetPickerDialog`, системный диалог только для внешнего импорта.
 - [ ] **Задача K (refactor(ui)):** Единый стиль карточек инспектора. Общие константы и хелперы карточки (`InspectorCardStyle.h`), унификация отступов (6,4,6,4), spacing (4), ширины меток (80px), высоты строк (22px/24px) без изменения логики, юнит-тест.
 - [ ] **Задача H (fix(ui)):** Высокое качество SVG-иконок на 2K/High-DPI. Рендеринг `QSvgRenderer` в пиксмап `size * dpr` с `setDevicePixelRatio`, поддержка dpr 1.0/1.5/2.0 в `IconProvider`, юнит-тест на физический размер.

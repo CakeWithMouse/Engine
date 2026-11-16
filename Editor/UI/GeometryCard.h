@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AssetPathDisplay.h"
 #include "CollapsibleCard.h"
 #include "EditorLocale.h"
 #include "EditorTheme.h"
@@ -27,7 +28,7 @@ public:
         primitiveType_.clear();
 
         const QString rel = model.startsWith(QStringLiteral("/Game/")) ? model.mid(6) : model;
-        modelAsset_->setText(rel);
+        EditorUI::FormatAssetPath(modelAsset_, model, rel);
         chooseModel_->setEnabled(canChooseModel);
         chooseModel_->setToolTip(canChooseModel ? QString() : Tr("Замена модели недоступна", "Model replacement unavailable"));
 
@@ -46,7 +47,6 @@ public:
             else
             {
                 modelAsset_->setStyleSheet(QString());
-                modelAsset_->setToolTip(QString());
             }
         }
         else
@@ -54,7 +54,6 @@ public:
             cachedModelPath_.clear();
             cachedModelExists_ = true;
             modelAsset_->setStyleSheet(QString());
-            modelAsset_->setToolTip(QString());
         }
     }
 
@@ -145,6 +144,8 @@ private:
         modelAsset_->setReadOnly(true);
         modelAsset_->setObjectName(QStringLiteral("ModelAsset"));
         modelAsset_->setFixedHeight(22);
+        modelAsset_->setMinimumWidth(0);
+        modelAsset_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
         modelAsset_->setPlaceholderText(Tr("нет модели", "none"));
         cl->addWidget(modelAsset_);
 
