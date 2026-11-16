@@ -6,6 +6,17 @@
 
 ---
 
+## Сессия fix/editor-ui-polish (Задачи A, B, C, D, E)
+
+### Чек-лист задач
+- [x] **Задача A (fix(ui)):** Разделители на панели Viewport при дробном DPI. Создан единый виджет `EditorSeparator` (`Editor/UI/EditorSeparator.h`) с отрисовкой через `QPainter` с учетом `devicePixelRatio`: толщина минимум 1 физический пиксель (`std::max(1, qRound(1.0 * dpr))`), выравнивание по физической сетке через логические координаты `QRectF`, динамический цвет темы `borderLight` с обновлением по `SubscribeThemeChanged`. Применен на `ViewportHeaderBar` (`HeaderSep1`, `HeaderSep2`). Написан юнит-тест `EditorSeparatorTests.h` (10 checks PASS) с валидацией рендера в `QImage` при DPR 1.0, 1.25, 1.5, 2.0 (вертикальный и горизонтальный) и валидацией смены темы.
+- [ ] **Задача B (fix(ui)):** Карточки инспектора без подложки (`ScriptCard`, `CameraGuideCard`, `AiMachineCard`).
+- [ ] **Задача C (fix(ui)):** Защита от случайного изменения параметров колесиком мыши (`WheelGuard`).
+- [ ] **Задача D (feat(ui)):** Кнопка «Создать» / «Редактировать» в карточке «Материал».
+- [ ] **Задача E (refactor(ui)):** Переработка панели «Навигация и диагностика» (`AiDiagnosticsPanel`).
+
+---
+
 ## Сессия fix/editor-ui-polish (Задачи M, U, K, H)
 
 ### Чек-лист задач
@@ -23,8 +34,32 @@
 | Сборка `EditorModule` (Debug) | **PASS** | 0 ошибок, 8 warnings C4996 (`QMenu::addAction` legacy) |
 | `Editor/tests/CoreTests.exe` | **1105/1105 PASS** | 1105 checks passed |
 | `Editor/tests/HostTests.exe` | **159/159 PASS** | 159 checks passed |
-| `Editor/tests/UiTests.exe` | **FAIL (Красная база main)** | 123 checks pass до падения в `ViewportBillboardTests.h:216` (`game camera tint from dark palette`: коммит `314b991` изменил предикат камеры на `CameraGuide::IsCamera(obj) && obj.gameplayKind != 2`, перехватив `Gameplay.Camera` с `gameplayKind == 0` до ветки `iconGameCamera`). |
+| `Editor/tests/UiTests.exe` | **744 PASS, 1 FAIL (Красная база main)** | 744 checks passed (15 helper + 37 high-dpi + 38 import dialog + 18 edit import + 5 v2 + 15 delete + 8 refresh + 1 jitter + 4 model replace + 38 card style + 10 separator + 7 redock + 38 geom + 57 picker + 19 content icon + 77 content type + 419 smoke). 1 сбой в `ViewportBillboardTests.h:216` (`game camera tint from dark palette`: коммит `314b991` изменил предикат камеры на `CameraGuide::IsCamera(obj) && obj.gameplayKind != 2`, перехватив `Gameplay.Camera` с `gameplayKind == 0` до ветки `iconGameCamera`). |
 | `Editor/tools/check.ps1 -Quick` | **FAIL (Красная база main)** | FAIL: Hardcoded Cyrillic detected outside Tr() in `Editor/UI/AiDiagnosticsPanel.h:58-60` (126 characters, коммит `0947535`). |
+
+---
+
+## Разведка (Задачи A, B, C, D, E)
+
+### Разведка A (Разделители на панели Viewport)
+- **Факты из кода:**
+  - В `Editor/UI/ViewportHeaderBar.h:67-71, 84-88` разделители создавались как `QFrame` с `setFrameShape(QFrame::VLine)` и `setFixedSize(1, 16)`:
+    ```cpp
+    auto* sep1 = new QFrame(this);
+    sep1->setFrameShape(QFrame::VLine);
+    sep1->setFixedSize(1, 16);
+    sep1->setObjectName(QStringLiteral("HeaderSep1"));
+    ```
+  - В QSS цвет для `HeaderSep1`/`HeaderSep2` явно не задавался. Стандартный `QFrame::VLine` рисует 3D/sunken рамку с отступами. При ширине 1 логический пиксель `contentsRect()` виджета равен 0.
+  - При дробных `devicePixelRatio` (1.25, 1.5) 1 логический пиксель преобразуется в 1.25 или 1.5 физических пикселей. В зависимости от четности позиции виджета и субпиксельного округления в растровом пайплайне Qt линия либо вырождается в 0 физических пикселей (пропадает), либо размывается.
+  - Поиск иконок Tabler: в `Editor/Resources/icons` и во всем репозитории иконка `separator-vertical.svg` отсутствует (в наличии только 9 иконок: bulb, camera, chevron-down/right, cube, refresh, sun, user, video). Занесено в Backlog.
+- **Решение и реализация:**
+  - Создан специализированный легковесный виджет `EditorSeparator` (`Editor/UI/EditorSeparator.h`) с поддержкой ориентаций `Qt::Vertical` и `Qt::Horizontal`.
+  - В `paintEvent` вычисляется точная физическая геометрия: `physThickness = std::max(1, std::min(physDim, qRound(1.0 * dpr)))`, координаты выравниваются по физической сетке по центру `(physDim - physThickness) / 2`.
+  - Отрисовка выполняется через `painter.fillRect(QRectF(...), borderLight)` с отключенным сглаживанием (`Antialiasing = false`). Гарантируется толщина ровно не менее 1 физического пикселя без субпиксельного размытия.
+  - Цвет берется из активной темы `EditorTheme::Instance().Palette().borderLight` и обновляется автоматически по сигналу `SubscribeThemeChanged`.
+  - Разделители `ViewportHeaderBar` переведены на `EditorSeparator` с комфортным размером `setFixedSize(6, 16)` для кликабельности и отступов.
+  - Написан юнит-тест `EditorSeparatorTests.h` (10 checks PASS) с валидацией рендера в `QImage` при DPR 1.0, 1.25, 1.5, 2.0 (построчная проверка наличия физических пикселей и толщины) и проверки смены темы Dark <-> Light.
 
 ---
 
