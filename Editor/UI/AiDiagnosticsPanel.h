@@ -1,11 +1,13 @@
 #pragma once
 
 #include "CollapsibleCard.h"
+#include "ColorSwatch.h"
 #include "CommandRegistry.h"
 #include "EditorLocale.h"
 #include "GizmoGeometry.h"
 #include "InfoButton.h"
 #include "InspectorCardStyle.h"
+#include "NavOverlayColors.h"
 #include "NoWheelDoubleSpinBox.h"
 #include "QtHost.h"
 #include "SettingsService.h"
@@ -37,6 +39,8 @@
 class AiDiagnosticsPanel : public QWidget
 {
 public:
+    static constexpr int kMinDetailsCardHeight = 120;
+
     AiDiagnosticsPanel(EditorQtHost* host, QWidget* viewport, QWidget* parent = nullptr)
         : QWidget(parent), host_(host), viewport_(viewport)
     {
@@ -73,6 +77,7 @@ public:
         source_->setObjectName(QStringLiteral("AiSourceStatus"));
         source_->setWordWrap(true);
         source_->setStyleSheet(QStringLiteral("font-size: 11px; padding: 6px 10px; border-radius: 4px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);"));
+        source_->setVisible(false);
         layout->addWidget(source_);
 
         // Card 1: Layers
@@ -107,12 +112,49 @@ public:
         }
         cardLayers->ContentLayout()->addLayout(layerLayout);
 
-        legend_ = new QLabel(cardLayers->Content());
-        legend_->setObjectName(QStringLiteral("AiLegend"));
-        legend_->setText(Tr("● Проход  ● Препятствие  ● Стоимость  ● A/B  ● Направление",
-                            "● Walkable  ● Blocked  ● Cost  ● A/B  ● Direction"));
-        legend_->setStyleSheet(QStringLiteral("font-size: 11px;"));
-        cardLayers->ContentLayout()->addWidget(legend_);
+        auto* legendGrid = new QGridLayout;
+        legendGrid->setObjectName(QStringLiteral("AiLegendGrid"));
+        legendGrid->setContentsMargins(0, 4, 0, 4);
+        legendGrid->setHorizontalSpacing(6);
+        legendGrid->setVerticalSpacing(3);
+
+        struct LegendRowInfo {
+            QColor color;
+            QString name;
+            QString desc;
+        };
+        const std::array<LegendRowInfo, 5> legendRows = {{
+            { NavOverlayColors::Walkable(), Tr("Проход", "Walkable"), Tr("агент может пройти", "agent can pass") },
+            { NavOverlayColors::Obstacle(), Tr("Препятствие", "Obstacle"), Tr("проход закрыт", "path blocked") },
+            { NavOverlayColors::Cost(), Tr("Стоимость", "Cost"), Tr("чем теплее цвет, тем дороже путь", "warmer color means higher cost") },
+            { NavOverlayColors::RouteAB(), Tr("A/B", "A/B"), Tr("старт и цель пробного маршрута", "start and goal of test route") },
+            { NavOverlayColors::Direction(), Tr("Направление", "Direction"), Tr("куда ведёт путь", "where path leads") }
+        }};
+
+        for (int i = 0; i < 5; ++i)
+        {
+            auto* swatch = new ColorSwatch(legendRows[i].color, cardLayers->Content());
+            swatch->setObjectName(QStringLiteral("AiSwatch%1").arg(i));
+            legendGrid->addWidget(swatch, i, 0, Qt::AlignCenter);
+
+            auto* lblName = new QLabel(legendRows[i].name, cardLayers->Content());
+            lblName->setObjectName(QStringLiteral("AiLegendName%1").arg(i));
+            lblName->setStyleSheet(QStringLiteral("font-size: 11px; font-weight: bold;"));
+            legendGrid->addWidget(lblName, i, 1, Qt::AlignLeft | Qt::AlignVCenter);
+
+            auto* lblDesc = new QLabel(legendRows[i].desc, cardLayers->Content());
+            lblDesc->setObjectName(QStringLiteral("AiLegendDesc%1").arg(i));
+            lblDesc->setStyleSheet(QStringLiteral("font-size: 11px; color: rgba(255, 255, 255, 0.7);"));
+            lblDesc->setWordWrap(true);
+            legendGrid->addWidget(lblDesc, i, 2, Qt::AlignLeft | Qt::AlignVCenter);
+
+            if (i == 0)
+            {
+                legend_ = lblName;
+                legend_->setObjectName(QStringLiteral("AiLegend"));
+            }
+        }
+        cardLayers->ContentLayout()->addLayout(legendGrid);
         layout->addWidget(cardLayers);
 
         // Card 2: Subject
@@ -205,6 +247,11 @@ public:
         auto* cardDetails = new CollapsibleCard(Tr("Состояние · задачи · память · история", "State · Tasks · Memory · History"), body, true);
         cardDetails->setObjectName(QStringLiteral("AiDetailsCard"));
         cardDetails->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        cardDetails->setMinimumHeight(kMinDetailsCardHeight);
+        cardDetails->SetToggledCallback([cardDetails](bool exp) {
+            cardDetails->setMinimumHeight(exp ? kMinDetailsCardHeight : 0);
+            cardDetails->updateGeometry();
+        });
 
         cell_ = new QLabel(Tr("Клетка: наведите курсор во вьюпорте", "Cell: hover viewport"), cardDetails->Content());
         cell_->setObjectName(QStringLiteral("AiCellInfo"));
@@ -229,10 +276,12 @@ public:
         details_->setReadOnly(true);
         details_->setMinimumHeight(150);
         details_->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
-        details_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        details_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        details_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         details_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
         cardDetails->ContentLayout()->addWidget(details_);
         layout->addWidget(cardDetails);
+        UpdateDetailsGeometry();
 
         layout->addStretch();
 
@@ -274,6 +323,26 @@ public:
 
     QSize sizeHint() const override { return QSize(320, 600); }
     QSize minimumSizeHint() const override { return QSize(40, 30); }
+
+    void resizeEvent(QResizeEvent* event) override
+    {
+        QWidget::resizeEvent(event);
+        UpdateDetailsGeometry();
+    }
+
+    void UpdateDetailsGeometry()
+    {
+        if (!details_ || !details_->document()) return;
+        const int viewportW = details_->viewport()->width();
+        details_->document()->setTextWidth(viewportW > 0 ? viewportW : 280);
+        const int docH = static_cast<int>(std::ceil(details_->document()->size().height()));
+        const int neededH = (std::max)(150, docH + 16);
+        if (details_->minimumHeight() != neededH)
+        {
+            details_->setMinimumHeight(neededH);
+            details_->updateGeometry();
+        }
+    }
 
     void Poll()
     {
@@ -447,36 +516,56 @@ private:
     {
         if (status != EngineSceneOk)
         {
+            source_->setVisible(true);
             source_->setText(Tr("Диагностика недоступна: модуль игры собран без поддержки AI. Соберите проект через run-editor.ps1 (без флага -Fast).",
                                 "Diagnostics unavailable: game module was built without AI support. Build project via run-editor.ps1 (without -Fast flag)."));
             source_->setStyleSheet(QStringLiteral("font-size: 11px; padding: 6px 10px; border-radius: 4px; background: rgba(230, 160, 40, 0.15); border: 1px solid rgba(230, 160, 40, 0.35); color: #e6a028;"));
             details_->clear();
+            UpdateDetailsGeometry();
             return;
         }
-        source_->setStyleSheet(QStringLiteral("font-size: 11px; padding: 6px 10px; border-radius: 4px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);"));
         auto r = QJsonDocument::fromJson(data).object();
         const auto src = r["source"].toString();
         if (src == "off")
         {
+            source_->setVisible(false);
             source_->setText(Tr("Слои выключены", "Layers off"));
             details_->clear();
+            UpdateDetailsGeometry();
             return;
         }
 
-        QString label = src == "preview"  ? Tr("EDIT · Предпросмотр NavVolume", "EDIT · NavVolume preview")
-                        : src == "paused" ? Tr("ПАУЗА · Данные AI", "PAUSED · AI data")
-                                          : Tr("PLAY · Данные AI", "PLAY · AI data");
-        if (!r["configured"].toBool())
-            label += Tr("\nНет границ навигации: добавьте NavVolume в режиме «Границы».",
-                        "\nNo navigation bounds: add a Bounds NavVolume.");
+        if (src == "preview")
+        {
+            source_->setVisible(true);
+            source_->setStyleSheet(QStringLiteral("font-size: 11px; padding: 8px 10px; border-radius: 4px; background: rgba(80, 140, 220, 0.12); border: 1px solid rgba(80, 140, 220, 0.3);"));
+            QString banner = QStringLiteral("<b style='font-size: 11px;'>") +
+                             Tr("EDIT · Режим границ NavVolume", "EDIT · NavVolume Bounds Mode") +
+                             QStringLiteral("</b><br>");
+            if (!r["configured"].toBool())
+            {
+                banner += Tr("Нет границ навигации: добавьте NavVolume в режиме «Границы».",
+                             "No navigation bounds: add a Bounds NavVolume.");
+            }
+            else
+            {
+                banner += Tr("Сетка навигации: %1 × %2 · %3 м · r = %4 м",
+                             "Navigation grid: %1 × %2 · cell %3 m · r = %4 m")
+                              .arg(r["width"].toInt()).arg(r["height"].toInt())
+                              .arg(r["cellSize"].toDouble()).arg(r["radius"].toDouble());
+            }
+            if (r["stride"].toInt() > 1)
+            {
+                banner += QStringLiteral("<br>") +
+                          Tr("Прореживание: каждая %1-я клетка. Приблизьте область.",
+                             "Sampling every %1 cells. Reduce the area.").arg(r["stride"].toInt());
+            }
+            if (!pick_) source_->setText(banner);
+        }
         else
-            label += QString("\n%1 × %2 · %3 m · r = %4 m")
-                         .arg(r["width"].toInt()).arg(r["height"].toInt())
-                         .arg(r["cellSize"].toDouble()).arg(r["radius"].toDouble());
-        if (r["stride"].toInt() > 1)
-            label += Tr("\nПрореживание: каждая %1-я клетка. Приблизьте область.",
-                        "\nSampling every %1 cells. Reduce the area.").arg(r["stride"].toInt());
-        if (!pick_) source_->setText(label);
+        {
+            source_->setVisible(false);
+        }
 
         const auto newUnits = r["units"].toArray();
         bool unitsChanged = units_->count() != newUnits.size() + 1;
@@ -540,7 +629,11 @@ private:
         const QString details = r["details"].toString(
             Tr("Выберите AI-персонажа в сцене или отряд в списке. Состояния, задачи и память доступны в Play.",
                "Select an AI character or squad. States, tasks and memory are available in Play."));
-        if (details_->toPlainText() != details) details_->setPlainText(details);
+        if (details_->toPlainText() != details)
+        {
+            details_->setPlainText(details);
+            UpdateDetailsGeometry();
+        }
     }
 
     EditorQtHost* host_{nullptr};

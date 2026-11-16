@@ -1,6 +1,8 @@
 #pragma once
 
 #include "AiDiagnosticsPanel.h"
+#include "ColorSwatch.h"
+#include "NavOverlayColors.h"
 #include "DockLayoutManager.h"
 #include "CommandRegistry.h"
 #include "EditorTheme.h"
@@ -207,6 +209,72 @@ inline void Run()
         Check(aiDock->isHidden(), "ApplyDefaultLayout sets AiDiagnosticsDock hidden by default");
         Check(!aiDock->isFloating(), "ApplyDefaultLayout sets AiDiagnosticsDock non-floating");
         checks += 2;
+    }
+
+    // 6. Task X: Details card height, no internal scroll, 5-row legend with ColorSwatch rendering
+    {
+        QMainWindow window;
+        window.resize(320, 600);
+        auto* panel = new AiDiagnosticsPanel(nullptr, nullptr, &window);
+        window.setCentralWidget(panel);
+        window.show();
+        QApplication::processEvents();
+
+        auto* detailsCard = panel->findChild<QWidget*>(QStringLiteral("AiDetailsCard"));
+        Check(detailsCard != nullptr, "AiDetailsCard found");
+        Check(detailsCard->height() >= AiDiagnosticsPanel::kMinDetailsCardHeight, "detailsCard height >= kMinDetailsCardHeight (120)");
+        Check(detailsCard->height() >= detailsCard->sizeHint().height(), "detailsCard height >= sizeHint().height()");
+
+        auto* detailsEdit = panel->findChild<QPlainTextEdit*>(QStringLiteral("AiDetails"));
+        Check(detailsEdit != nullptr, "AiDetails found");
+        Check(detailsEdit->verticalScrollBarPolicy() == Qt::ScrollBarAlwaysOff, "AiDetails has no internal vertical scrollbar");
+
+        QList<ColorSwatch*> swatches;
+        for (int i = 0; i < 5; ++i)
+        {
+            auto* s = static_cast<ColorSwatch*>(panel->findChild<QWidget*>(QStringLiteral("AiSwatch%1").arg(i)));
+            Check(s != nullptr, ("AiSwatch" + std::to_string(i) + " found").c_str());
+            if (s) swatches.append(s);
+
+            auto* name = panel->findChild<QLabel*>(QStringLiteral("AiLegendName%1").arg(i));
+            Check(name != nullptr && !name->text().isEmpty(), ("AiLegendName" + std::to_string(i) + " not empty").c_str());
+
+            auto* desc = panel->findChild<QLabel*>(QStringLiteral("AiLegendDesc%1").arg(i));
+            Check(desc != nullptr && !desc->text().isEmpty(), ("AiLegendDesc" + std::to_string(i) + " not empty").c_str());
+        }
+        Check(swatches.size() == 5, "Legend has 5 rows with ColorSwatch");
+
+        for (bool dark : {true, false})
+        {
+            EditorTheme::Instance().SetMode(dark ? ThemeMode::Dark : ThemeMode::Light);
+            panel->update();
+            QApplication::processEvents();
+
+            std::vector<QColor> colors;
+            for (int i = 0; i < swatches.size(); ++i)
+            {
+                auto* sw = swatches[i];
+                QImage img(sw->size(), QImage::Format_ARGB32);
+                img.fill(Qt::transparent);
+                sw->render(&img);
+                QColor center = img.pixelColor(sw->width() / 2, sw->height() / 2);
+                Check(center.alpha() > 200, "swatch center pixel is opaque");
+                Check(std::abs(center.red() - sw->Color().red()) <= 5 &&
+                      std::abs(center.green() - sw->Color().green()) <= 5 &&
+                      std::abs(center.blue() - sw->Color().blue()) <= 5,
+                      "swatch center pixel matches expected color");
+                colors.push_back(center);
+            }
+            for (size_t i = 0; i < colors.size(); ++i)
+            {
+                for (size_t j = i + 1; j < colors.size(); ++j)
+                {
+                    Check(colors[i] != colors[j], "swatch colors pairwise distinct");
+                }
+            }
+        }
+        EditorTheme::Instance().SetMode(ThemeMode::Dark);
+        checks += 18;
     }
 
     std::cout << "AiDiagnosticsDock tests: " << checks << " checks passed" << std::endl;
