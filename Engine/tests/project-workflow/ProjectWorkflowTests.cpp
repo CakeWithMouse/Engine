@@ -301,7 +301,7 @@ int wmain(int argc, wchar_t** argv)
                 edited.transform.position[0] == -2, "invalid mutations preserve authored light");
             Check(api.saveScene(api.context, project.startupScene.u8string().c_str(), error, sizeof(error)) == EngineSceneOk, "save authored scene");
             const auto saved = SceneDocument::Read(project.startupScene);
-            Check(saved.components.size() == 18, "all objects persisted including gameplay types");
+            Check(saved.components.size() == 4 + types.size(), "all objects persisted including gameplay types");
             for (const auto& o : saved.components) if (o.name == "Light.Point")
                 Check(o.pointLight && o.pointLight->color.y == 0.8f && o.pointLight->radius == 12, "JSON persists light properties");
             Check(api.control(api.context, EnginePlay) == EngineSceneOk, "play authored scene");

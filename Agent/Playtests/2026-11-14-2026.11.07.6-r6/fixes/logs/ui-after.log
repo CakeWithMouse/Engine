@@ -1,0 +1,24 @@
+[Test] Running UiTestHelperTests...
+UiTestHelperTests: 15 checks passed.
+[Test] Running ImportSettingsDialogTests...
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+ImportSettingsDialogTests: 22 checks passed.
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Test] Running UiSmokeTests...
+[ToolBarFacts] initial tb geom=0,0 640x36, margins=(0,0,0,0), layoutMargins=(6,6,6,6), PM_ToolBarFrameWidth=6, PM_ItemMargin=0, PM_ItemSpacing=4
+[ToolBarFacts] configured tb height=36, btn height=28, topMargin=4, bottomMargin=4
+[Info] SettingsService: Set 'ui/language'
+[Info] SettingsService: Set 'ui/language'
+[SpinDiag] Dark grab size: 100x22
+[SpinDiag] Dark contrasting pixels in button zone: 26
+[Info] SettingsService: Set 'ui/theme_mode'
+[SpinDiag] Light grab size: 100x22
+[SpinDiag] Light contrasting pixels in button zone: 42
+[Info] SettingsService: Set 'ui/theme_mode'
+UiSmokeTests: 245 checks passed (90 Cyrillic strings in RU mode).

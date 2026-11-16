@@ -1,0 +1,465 @@
+[
+  {
+    "evidence_paths": [
+      "evidence/class-wizard.request.json",
+      "evidence/class-wizard.result.json",
+      "evidence/class-wizard.log"
+    ],
+    "actual": "Actual project.class-wizard accepted CityEconomyRules as Object, generated CityEconomyRules.h/.cpp and reported AddClass arguments and completion dialog.",
+    "status": "passed",
+    "expected": "Choose Object class in the class wizard, accept it, and create the generated header/source files.",
+    "feature_id": "class-wizard"
+  },
+  {
+    "evidence_paths": [
+      "evidence/build-failed.result.json",
+      "evidence/build-failed.log",
+      "evidence/build-success-escalated.result.json"
+    ],
+    "actual": "Injected #error CITY_ROLLBACK_PROBE produced buildSucceeded=false, replaced=false, windowEnabled=true and the failure dialog says previous DLL retained; later clean rebuild produced a distinct module path.",
+    "status": "passed",
+    "expected": "A C++ compile failure leaves the prior project module active and reports failed build without replacement.",
+    "feature_id": "failed-build-rollback"
+  },
+  {
+    "evidence_paths": [
+      "evidence/reload-city.request.json",
+      "evidence/reload-city.result.json",
+      "evidence/reload-city.log",
+      "evidence/build-success-escalated.result.json"
+    ],
+    "actual": "Started with baseline DLL and used newly compiled candidate with ProjectGame behavior changed from CityControls to CityControlsContinuation. replaced=true; original and reloaded snapshots retain Market/Lamp/Lot/Tower/Roof/Monument/Market 2; runtime object changes to CityControlsContinuation; click adds House_1 after reload.",
+    "status": "passed",
+    "expected": "Reload genuinely different newly built code while preserving the edited scene; observable new code and gameplay still work.",
+    "feature_id": "hot-reload"
+  },
+  {
+    "evidence_paths": [
+      "evidence/scene-city-final.request.json",
+      "evidence/scene-city-final.result.json"
+    ],
+    "actual": "Market cube, Lamp sphere, Lot plane, Tower cylinder, Roof cone, Monument pyramid were all accepted and present in final saved/reloaded scene.",
+    "status": "passed",
+    "expected": "Create all six named built-in primitives in one custom scene and observe each type.",
+    "feature_id": "scene-primitives"
+  },
+  {
+    "evidence_paths": [
+      "evidence/scene-city-final.result.json"
+    ],
+    "actual": "Lamp parent ID points to Market and its local position remains [2.25,0,0] while Market position is [2.25,0,0]; implied world x is 4.5. This commandlet returns local transforms only; no explicit world-transform observation.",
+    "status": "partial",
+    "expected": "Parent a child and verify local and computed world transform.",
+    "feature_id": "scene-hierarchy"
+  },
+  {
+    "evidence_paths": [
+      "evidence/class-wizard.result.json",
+      "evidence/scene-object.request.json",
+      "evidence/scene-object.result.json"
+    ],
+    "actual": "Generated CityEconomyRules from the class wizard, then created and duplicated it as ZoningRules / ZoningRules 2; the saved and reloaded scene preserved the custom type and objects.",
+    "status": "passed",
+    "expected": "Generate and instantiate a user ENGINE_OBJECT through its project adapter; duplicate and save/load it.",
+    "feature_id": "scene-object"
+  },
+  {
+    "evidence_paths": [
+      "evidence/scene-city-final.result.json",
+      "evidence/scene-object.result.json"
+    ],
+    "actual": "Primitive and custom ENGINE_OBJECT duplicates both received distinct IDs and names and survived save/load. This fixture had no object-reference fields, so remapping was not exercised.",
+    "status": "partial",
+    "expected": "Duplicate an object and verify its references are remapped to cloned objects.",
+    "feature_id": "scene-clone"
+  },
+  {
+    "evidence_paths": [
+      "evidence/scene-city-final.request.json",
+      "evidence/scene-city-final.result.json",
+      "evidence/CityWorkshop.scene.json",
+      "evidence/city-cycle-first.request.json",
+      "evidence/city-cycle-first.result.json",
+      "evidence/city-cycle-first.log",
+      "evidence/city-cycle-second.request.json",
+      "evidence/city-cycle-second.result.json",
+      "evidence/city-cycle-second.log"
+    ],
+    "actual": "CityWorkshop survived Save/New/Load with all scene edits. On the rebuilt private game module, Play created one house at 400 credits, saved it, created a second house after income, then loaded the saved state back to one house/400 credits; income continued to 410. A second process loaded the same slot to one house/400 credits and income continued to 410.",
+    "status": "passed",
+    "expected": "Save a non-empty scene, clear the editor with New, and reload it with hierarchy and objects intact.",
+    "feature_id": "scene-save-load"
+  },
+  {
+    "evidence_paths": [
+      "evidence/scene-city-final.request.json",
+      "evidence/scene-city-final.result.json",
+      "evidence/Project.json"
+    ],
+    "actual": "Real Set Startup Scene QAction returned status 0; Project.json startupScene is Content/Scenes/CityWorkshop.scene.json.",
+    "status": "passed",
+    "expected": "Set Startup Scene from a saved scene inside project Content and read the manifest path.",
+    "feature_id": "scene-startup"
+  },
+  {
+    "evidence_paths": [
+      "evidence/scene-city-final.request.json",
+      "evidence/scene-city-final.result.json"
+    ],
+    "actual": "Scene started with New, saved as Content/Scenes/CityWorkshop.scene.json, cleared with New, then loaded with all created objects.",
+    "status": "passed",
+    "expected": "Create a new scene, Save As to a distinct scene path, New, then load the saved copy.",
+    "feature_id": "scene-new-save-as"
+  },
+  {
+    "evidence_paths": [
+      "evidence/scene-city-final.result.json"
+    ],
+    "actual": "Market and Lamp group moved from x=0 to 2.25; Undo returned both to 0; Redo restored both to 2.25.",
+    "status": "passed",
+    "expected": "Undo and redo a grouped move and observe position reversal/restoration.",
+    "feature_id": "scene-undo"
+  },
+  {
+    "evidence_paths": [
+      "evidence/scene-city-final.request.json",
+      "evidence/scene-city-final.result.json"
+    ],
+    "actual": "Selection reported two IDs; move changed both Market and Lamp x positions by +2.25.",
+    "status": "passed",
+    "expected": "Select two objects together and move them as a group.",
+    "feature_id": "scene-groups"
+  },
+  {
+    "evidence_paths": [
+      "evidence/scene-city-final.request.json",
+      "evidence/scene-city-final.result.json"
+    ],
+    "actual": "Host-backed select action returned selected IDs for two named objects. This scenario did not exercise viewport picking, marquee or focus.",
+    "status": "partial",
+    "expected": "Use viewport picking, hierarchy selection, marquee and focus to select/focus scene objects.",
+    "feature_id": "scene-select"
+  },
+  {
+    "evidence_paths": [
+      "evidence/scene-recovery-write.request.json",
+      "evidence/scene-recovery-write.result.json",
+      "evidence/scene-recovery-load.request.json",
+      "evidence/scene-recovery-load.result.json"
+    ],
+    "actual": "After process exit, second project.scene invocation recovered RecoveryBeacon with status 0; recovery candidate count returned to 0.",
+    "status": "passed",
+    "expected": "Write a dirty scene recovery snapshot, exit the editor process, and recover it in a new process.",
+    "feature_id": "scene-recovery"
+  },
+  {
+    "evidence_paths": [
+      "evidence/import-dialog.request.json",
+      "evidence/import-dialog.result.json",
+      "evidence/import-dialog.png",
+      "evidence/import-cancel.request.json",
+      "evidence/import-cancel.result.json",
+      "evidence/import-cancel.png"
+    ],
+    "actual": "Accept returned preset scales [1,.1,.01], focused scale input, sidecar .01 and spawned model scale [.01,.01,.01]. Cancel returned accepted=false, no asset/sidecar and before/after scene arrays equal.",
+    "status": "passed",
+    "expected": "Real import settings dialog exposes the scale presets; accept writes sidecar and spawned scale; cancel has no import side effect.",
+    "feature_id": "import-scale-dialog-presets"
+  },
+  {
+    "evidence_paths": [
+      "evidence/scene-slots.request.json",
+      "evidence/scene-slots.result.json",
+      "evidence/SlotEditContinuation.scene.json"
+    ],
+    "expected": "Edit a reflected per-slot asset property; undo/redo; save and reload the value.",
+    "feature_id": "scene-properties",
+    "actual": "TwinMaterialSuzanne /materialSlots/1 changed from Material_1 to Material_0, Undo restored Material_1, Redo restored Material_0, and Save/New/Load retained the new value.",
+    "status": "passed"
+  },
+  {
+    "evidence_paths": [
+      "evidence/material-assign.request.json",
+      "evidence/material-assign.result.json"
+    ],
+    "expected": "Assign one material to a model, undo, redo, clear the override and save.",
+    "feature_id": "material-assign",
+    "actual": "TwinMaterialSuzanne override switched to CesiumMan Material_0; Undo cleared, Redo restored it; explicit empty path cleared the override again and scene saved.",
+    "status": "passed"
+  },
+  {
+    "evidence_paths": [
+      "evidence/snap.request.json",
+      "evidence/snap.result.json",
+      "evidence/center-snap.request.json",
+      "evidence/center-snap.result.json"
+    ],
+    "expected": "Snap vector and viewport drag delta to the requested .25 grid.",
+    "feature_id": "scene-snapping",
+    "actual": "gizmo.snap returned [0.75,-1,2.25] from [0.63,-1.12,2.26]; gizmo.center with initial [.1,.2,-.1] returned [.85,-.8,2.15].",
+    "status": "passed"
+  },
+  {
+    "evidence_paths": [
+      "evidence/scene-slots.request.json",
+      "evidence/scene-slots.result.json"
+    ],
+    "expected": "Use SDK and Inspector to change a material slot and verify Undo/Redo.",
+    "feature_id": "material-slot-edit",
+    "actual": "SDK/host property path for slot 1 changed, undo/redo and persistence passed. The specific Inspector widget interaction was not exercised by project.scene.",
+    "status": "partial"
+  },
+  {
+    "status": "passed",
+    "feature_id": "material-graph-write-failure",
+    "actual": "Real MaterialEditorWindow returned `dirty=true` after the locked revert and graph stayed identical to the applied graph. After releasing the lock, Revert restored the saved graph and HLSL exactly and dirty=false; invalid AI text was rejected. dialogs contains the access-denied backup/retry message.",
+    "expected": "A locked sidecar prevents graph rollback without destroying the editable graph; retry restores the last saved graph/HLSL and dirty becomes false.",
+    "evidence_paths": [
+      "evidence/material-write-failure.request.json",
+      "evidence/material-write-failure.result.json",
+      "evidence/material-write-failure.png"
+    ]
+  },
+  {
+    "status": "passed",
+    "feature_id": "model-blend",
+    "actual": "Blender 5.2.3 exported MarketFacade.blend to MarketFacade.glb through the importer. Runtime import placed Engine.Model with one mesh/3 indices, created Material_0.mat and a BaseColor_0.png texture.",
+    "expected": "Create a Blender 4.2+ scene with UV mesh and packed base-color texture, import the .blend through engine conversion.",
+    "evidence_paths": [
+      "evidence/blend-source_MarketFacade.blend",
+      "evidence/make-market-facade.py",
+      "evidence/blend-create.log",
+      "evidence/blend-import.request.json",
+      "evidence/blend-import.result.json",
+      "evidence/blend-import_Content_Models_MarketFacade_MarketFacade.glb",
+      "evidence/blend-import_Content_Models_MarketFacade_Materials_Material_0.mat",
+      "evidence/blend-import_Content_Models_MarketFacade_Textures_BaseColor_0.png"
+    ]
+  },
+  {
+    "status": "passed",
+    "feature_id": "texture-import",
+    "actual": "Import generated Material_0.mat with BaseMap ../Textures/BaseColor_0.png and copied the packed 439-byte PNG to /Game/Models/MarketFacade/Textures/BaseColor_0.png; the placed model returned Material_0.mat as its material.",
+    "expected": "Import a model with packed image texture and inspect generated material reference and copied texture in project Content.",
+    "evidence_paths": [
+      "evidence/blend-import.request.json",
+      "evidence/blend-import.result.json",
+      "evidence/blend-import_Content_Models_MarketFacade_Materials_Material_0.mat",
+      "evidence/blend-import_Content_Models_MarketFacade_Textures_BaseColor_0.png",
+      "evidence/blend-import_Content_Models_MarketFacade_MarketFacade.glb.import.json"
+    ]
+  },
+  {
+    "expected": "Generate a stable tangent with handedness for a normal UV triangle and negative handedness for a mirrored triangle.",
+    "actual": "mesh.tangents returned [1,0,0,1] for the normal UV face and [0,1,0,-1] for the mirrored UV face.",
+    "evidence_paths": [
+      "evidence/tangent-cpu-normal-mirror.request.json",
+      "evidence/tangent-cpu-normal-mirror.result.json"
+    ],
+    "status": "passed",
+    "feature_id": "mesh-tangents"
+  },
+  {
+    "expected": "A triangle with identical UVs reports the fallback tangent basis with w=0.",
+    "actual": "All three vertices returned [0,1,0,0]; w=0 signals derivative fallback.",
+    "evidence_paths": [
+      "evidence/tangent-cpu-degenerate.request.json",
+      "evidence/tangent-cpu-degenerate.result.json"
+    ],
+    "status": "passed",
+    "feature_id": "tangent-degenerate"
+  },
+  {
+    "expected": "NormalFromMap pixel shader output should visibly change with the tangent basis/mirror UV inputs.",
+    "actual": "Custom HLSL uses NormalFromMap and readback changed from [255,128,127] with basis [+1,0,0,+1] to [0,128,127] with mirrored UV basis [-1,0,0,-1]; images/hash captured on RTX 4070 Laptop GPU.",
+    "evidence_paths": [
+      "evidence/render-mesh-two-sided.request.json",
+      "evidence/render-mesh-two-sided.result.json",
+      "evidence/render-mesh-mirror-two-sided.request.json",
+      "evidence/render-mesh-mirror-two-sided.result.json",
+      "evidence/tangent-two-sided-base.bmp",
+      "evidence/tangent-mirror-two-sided.bmp",
+      "evidence/NormalTangentProbe.hlsl"
+    ],
+    "status": "passed",
+    "feature_id": "tangent-gpu"
+  },
+  {
+    "expected": "Reflecting X changes +U but keeps the world direction of +V unchanged; reflecting Z reverses +V.",
+    "actual": "Final current-runtime replay: base V=[128,128,0], negative X=[127,127,0] (V preserved), negative Z=[127,127,255] (V reversed); negative-X post-SaveGame return SHA-256 matches the pre-save frame. The original pre-fix V inversion remains in the before request/result/images.",
+    "evidence_paths": [
+      "evidence/render-mesh-v.request.json",
+      "evidence/render-mesh-v.result.json",
+      "evidence/tangent-v-base.bmp",
+      "evidence/tangent-v-negx.bmp",
+      "evidence/tangent-v-negz.bmp",
+      "evidence/render-mesh-v-after2.request.json",
+      "evidence/render-mesh-v-after2.result.json",
+      "evidence/tangent-v-base-after2.bmp",
+      "evidence/tangent-v-negx-after2.bmp",
+      "evidence/tangent-v-negz-after2.bmp",
+      "evidence/tangent-v-save-after2.bmp",
+      "evidence/tangent-v-save-after2.json"
+    ],
+    "status": "passed",
+    "feature_id": "tangent-world-reflection"
+  },
+  {
+    "expected": "Capture and restore a negatively-scaled mesh with tangent basis and normal-map appearance unchanged after the round trip.",
+    "actual": "Negative-X frame pre-save and post-SaveGame images have identical SHA-256 and center RGB [0,127,128]; restored=true and basis is unchanged.",
+    "evidence_paths": [
+      "evidence/render-mesh-two-sided.result.json",
+      "evidence/tangent-two-sided-negx.bmp",
+      "evidence/tangent-two-sided-return.bmp",
+      "evidence/tangent-two-sided-save.json"
+    ],
+    "status": "passed",
+    "feature_id": "tangent-savegame"
+  },
+  {
+    "expected": "Import a UV-mapped textured model, assign its BaseMap, and inspect the texture mapped on the placed object.",
+    "actual": "Packed BLEND import produced UV-mapped GLB and Material_0.mat with BaseMap path; separate UV normal-map probe rendered, but imported model itself was not rendered/inspected yet.",
+    "evidence_paths": [
+      "evidence/blend-import.result.json",
+      "evidence/blend-import_Content_Models_MarketFacade_Materials_Material_0.mat",
+      "evidence/render-mesh-two-sided.result.json"
+    ],
+    "status": "partial",
+    "feature_id": "imported-uv"
+  },
+  {
+    "expected": "Edit the actual project HUD text in UI Editor, save, activate a newly built game module and confirm the gameplay button remains usable.",
+    "status": "passed",
+    "feature_id": "hud-editor",
+    "evidence_paths": [
+      "evidence/hud-edit.request.json",
+      "evidence/hud-edit.result.json",
+      "evidence/CityHudContinuation.ui",
+      "evidence/hud-reload.request.json",
+      "evidence/hud-reload.result.json",
+      "evidence/hud-reload.clicks.log",
+      "evidence/hud-reload.console.log"
+    ],
+    "actual": "ui.edit-text changed buildHouse to “New House | 100 credits” and saved CityHudContinuation.ui. project.reload-input activated the distinct continuation DLL; its click log shows build_ui_click and the game still created House_1."
+  },
+  {
+    "expected": "A project-defined render hook is invoked by the runtime on an actual frame with valid graphics device/context.",
+    "status": "passed",
+    "feature_id": "render-host",
+    "evidence_paths": [
+      "evidence/ProjectGame.cpp",
+      "evidence/ProjectGame.h",
+      "evidence/light-sky-game.request.json",
+      "evidence/render-host-hook.result.json",
+      "evidence/render-host-hook.console.log",
+      "evidence/render-host-hook.log",
+      "evidence/render-host-hook.bmp"
+    ],
+    "actual": "Private ProjectGame overrides all public Draw variants and delegates to Game. The selected forward hook logged calls 1 to 6 with device=1 and context=1 on gameplay frames; project.input returned a 640x480 frame dump. This tested the forward path selected by the project render configuration."
+  },
+  {
+    "expected": "Use runtime-provided project services from a private game session and confirm host/editor API availability.",
+    "status": "passed",
+    "feature_id": "host-services",
+    "evidence_paths": [
+      "evidence/render-host-hook.console.log",
+      "evidence/hud-reload.console.log",
+      "evidence/hud-reload.clicks.log",
+      "evidence/render-host-hook.result.json"
+    ],
+    "actual": "project.input log reports Viewport overlay service FOUND (version 3); the private project uses EngineModuleVfs::Resolve to read /Game/Config/city-settings.txt and logs district=harbor. The same project frame confirms an active D3D context. VFS reported local implementation in this commandlet session, so this does not claim the VFS host-service route."
+  },
+  {
+    "expected": "Simplify an authored grounded primitive with custom parameters, verify reduced triangle count and validity, and retain a negative placement control.",
+    "status": "passed",
+    "feature_id": "mesh-tools",
+    "evidence_paths": [
+      "evidence/mesh-simplify-city-grounded.request.json",
+      "evidence/mesh-simplify-city-grounded.result.json",
+      "evidence/mesh-simplify-city-grounded.log",
+      "evidence/mesh-simplify-ground-control.request.json",
+      "evidence/mesh-simplify-ground-control.result.json"
+    ],
+    "actual": "Own 24x14 sphere parameters ratio=.45,error=.12,offset=[0,1.5,0]: source 624 triangles→reduced 279, both usable, zero drift. Offset [0,0,0] is correctly rejected as Pivot is not on ground; this is the expected negative control."
+  },
+  {
+    "expected": "Broken assigned material yields the diagnostic fallback; repairing its shader restores a usable rendered material on the same model.",
+    "status": "passed",
+    "feature_id": "material-errors",
+    "evidence_paths": [
+      "evidence/material-fallback.request.json",
+      "evidence/material-error-invalid.hlsl",
+      "evidence/material-error-fallback.log",
+      "evidence/material-error-fallback.result.json",
+      "evidence/material-error-fallback.bmp",
+      "evidence/BrokenCity.hlsl",
+      "evidence/BrokenCity.mat",
+      "evidence/material-error-repaired.log",
+      "evidence/material-error-repaired.result.json",
+      "evidence/material-error-repaired.bmp"
+    ],
+    "actual": "On the imported Suzanne instance, invalid HLSL produced explicit compiler diagnostics plus the magenta/black error checker in the captured game frame. Replacing it with valid unlit green HLSL returned a solid green model in the next process frame. The scene still reports the same assigned /Game/Materials/BrokenCity.mat path."
+  },
+  {
+    "expected": "Create a scene with a DirectionalLight, then remove/disable it and compare real gameplay frames.",
+    "status": "passed",
+    "feature_id": "light-sun",
+    "evidence_paths": [
+      "evidence/light-sky-startup.request.json",
+      "evidence/light-sky-startup.result.json",
+      "evidence/LightSkyProbe.scene.json",
+      "evidence/light-sky-game.request.json",
+      "evidence/light-sky-game.result.json",
+      "evidence/light-sky-game.bmp",
+      "evidence/LightDisabled.bmp",
+      "evidence/LightNoSun.bmp"
+    ],
+    "actual": "Own LightSkyProbe created a DirectionalLight with projectData intensity=3, enabled/shadows=true, plus a cube and ground. The lit frame shows a white cube; `LightDisabled.scene` keeps the same objects and disables the light, making the cube black; `LightNoSun.scene` removes it and matches the unlit result. These are visual renderer observations, not a CPU-only light test."
+  },
+  {
+    "expected": "Assign two public procedural cubemaps to a single Environment.Sky, observe both, then clear the map and observe the procedural gradient return.",
+    "status": "passed",
+    "feature_id": "sky",
+    "evidence_paths": [
+      "evidence/ProjectGame.cpp",
+      "evidence/ProjectGame.h",
+      "evidence/LightSkyProbe.scene.json",
+      "evidence/sky-space.log",
+      "evidence/sky-space.result.json",
+      "evidence/sky-space.bmp",
+      "evidence/sky-studio.log",
+      "evidence/sky-studio.result.json",
+      "evidence/sky-studio.bmp",
+      "evidence/sky-remove.log",
+      "evidence/sky-remove.result.json",
+      "evidence/sky-remove.bmp"
+    ],
+    "actual": "Private ProjectGame calls CreateProceduralCubeMap(32) and the public SkyboxComponent::SetCubeMap on its sole CitySky. Logs show successful creation/assignment for Space and Studio; GPU frames visibly differ (space nebula/stars versus warm studio), and SetCubeMap(nullptr) at gameplay tick 4 returns the blue BasicSky gradient in frame 6."
+  },
+  {
+    "expected": "Accept finite float parameters during real material rendering, reject overflow without rendering invalid shader data; independently exercise texture-register boundaries in the graph.",
+    "status": "passed",
+    "feature_id": "material-register-numeric-validation",
+    "evidence_paths": [
+      "evidence/NumericValid.request.json",
+      "evidence/NumericValid.result.json",
+      "evidence/NumericValid.bmp",
+      "evidence/NumericProbe_NumericValid.mat",
+      "evidence/NumericProbe_NumericProbe.hlsl",
+      "evidence/NumericT127.request.json",
+      "evidence/NumericT127.result.json",
+      "evidence/NumericProbe_NumericT127.mat",
+      "evidence/NumericJsonInf.request.json",
+      "evidence/NumericJsonInf.result.json",
+      "evidence/material-slots-121.request.json",
+      "evidence/material-slots-121.result.json",
+      "evidence/material-slots-121.log",
+      "evidence/material-slots-122.request.json",
+      "evidence/material-slots-122.result.json",
+      "evidence/material-slots-122.log",
+      "evidence/GraphSlotStress_GraphSlotStress.mat.graph.json",
+      "evidence/GraphSlotStress_GraphSlotStress.hlsl"
+    ],
+    "actual": "render.mesh accepts T32=1e32,T127=1e30 and returns center RGB [255,255,64]; 1e127 is rejected as not a finite float, and JSON 1e999 is rejected at parsing. Separate real MaterialEditor AI graph accepts/applies/saves 121 unique Texture2D nodes with 121 unique registers (t32 request relocates to t33, negative request clamps to t6, t32 never used); a 122nd node is rejected with “maximum 121” and the previous 3-node graph remains unchanged."
+  }
+]

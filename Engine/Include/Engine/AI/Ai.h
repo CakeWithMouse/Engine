@@ -12,4 +12,5 @@
 #include <Engine/AI/World.h>
 #include <Engine/AI/SmartObject.h>
 #include <Engine/AI/AiCharacter.h>
+#include <Engine/AI/MachineFile.h>
 #include <Engine/SaveGame/SaveArchive.h>   // for SerializeSaveGame of custom controllers

@@ -1,0 +1,42 @@
+{
+  "hitConfirmed": true,
+  "ok": true,
+  "frames": 129,
+  "steps": 11,
+  "events": [
+    {
+      "key": null,
+      "down": null
+    },
+    {
+      "key": null,
+      "down": null
+    },
+    {
+      "key": null,
+      "down": null
+    },
+    {
+      "key": null,
+      "down": null
+    }
+  ],
+  "finalObjects": [
+    "Ground",
+    "Warm Light",
+    "Cool Light",
+    "Throw lane",
+    "Bucket base",
+    "Bucket left wall",
+    "Bucket right wall",
+    "Bucket front wall",
+    "Bucket back wall",
+    "Sky",
+    "Throw ledger",
+    "Trash sun",
+    "Trash view",
+    "Trash camera rig",
+    "Multi-material item 1",
+    "Hit sparks"
+  ]
+}

@@ -18,6 +18,8 @@ namespace SceneAssets
     void ValidateMaterialPath(std::string_view path);
     // A readable .mat file (its shader is compiled later, by the game that draws it).
     void ValidateMaterial(std::string_view path);
+    // Empty, or an existing .vscript inside /Game. The graph itself is checked when Play compiles it.
+    void ValidateScript(std::string_view path);
     // Imported defaults are only for placement. Scene restore supplies its own saved material.
     std::unique_ptr<GameComponent> CreateModel(const std::string& path, bool useImportedMaterial = true);
     void Apply(GameComponent& object, const std::string& model, const std::string& texture,

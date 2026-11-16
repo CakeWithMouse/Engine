@@ -1,0 +1,11 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  HlslGraphCompiler.cpp
+  MaterialEditorWindow.cpp
+  MaterialGraphWidget.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Editor.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Editor.exp
+  Создание кода
+  Создание кода завершено
+  EditorModule.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Editor.dll
+

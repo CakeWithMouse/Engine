@@ -550,6 +550,12 @@ size_t FlowFieldCache::Cells() const
 std::shared_ptr<const FlowField> FlowFieldCache::Request(const NavGrid& grid, glm::vec2 goal, float radius,
                                                          glm::vec2 areaMin, glm::vec2 areaMax, float margin)
 {
+    return Request(grid, goal, radius, areaMin, areaMax, margin, -1);
+}
+
+std::shared_ptr<const FlowField> FlowFieldCache::Request(const NavGrid& grid, glm::vec2 goal, float radius,
+                                                         glm::vec2 areaMin, glm::vec2 areaMax, float margin, float goalTolerance)
+{
     const float step = 0.5f * grid.CellSize();
     const float classRadius = std::ceil(std::max(radius, 0.01f) / step) * step;
     const auto coarse = [&](glm::vec2 p) { return glm::ivec2(glm::floor((p - grid.Origin()) / coarseCell)); };
@@ -569,6 +575,9 @@ std::shared_ptr<const FlowField> FlowFieldCache::Request(const NavGrid& grid, gl
     {
         const auto& f = fields_[i];
         if (f->version != grid.Version() || f->radius != classRadius || coarse(f->goal) != coarse(goal)) continue;
+        if (goalTolerance >= 0 && glm::length(f->goal - snapped) > goalTolerance) continue;
+        // Sharing a coarse cell must not redirect an order to the other side of a wall.
+        if (!grid.CanWalkStraight(f->goal, snapped, classRadius)) continue;
         const bool covers = f->low.x <= low.x && f->low.y <= low.y && f->low.x + f->size.x > high.x && f->low.y + f->size.y > high.y;
         if (!covers)
         {

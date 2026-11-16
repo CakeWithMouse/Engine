@@ -1,0 +1,48 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "drawCalls": 85,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\results\\transparency-crowd-perspective-0.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        4,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 85,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\results\\transparency-crowd-perspective-0.6.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        4,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 85,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\results\\transparency-crowd-perspective-1.4.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        4,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        }
+    ],
+    "ok": true
+}

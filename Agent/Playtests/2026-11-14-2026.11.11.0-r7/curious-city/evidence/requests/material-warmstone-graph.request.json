@@ -1,0 +1,31 @@
+{
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Project.json",
+  "material": "/Game/Materials/WarmStone.mat",
+  "steps": [
+    {
+      "action": "enable"
+    },
+    {
+      "action": "save"
+    },
+    {
+      "action": "preset",
+      "index": 2
+    },
+    {
+      "action": "apply"
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "action": "redo"
+    },
+    {
+      "action": "save"
+    },
+    {
+      "action": "revert"
+    }
+  ]
+}

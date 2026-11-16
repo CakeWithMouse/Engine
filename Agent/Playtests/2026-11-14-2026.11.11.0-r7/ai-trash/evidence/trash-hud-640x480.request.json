@@ -1,0 +1,26 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\ai-trash\\TrashGameUpgraded\\Project.json",
+  "steps": [
+    {
+      "action": "play",
+      "kind": "control"
+    },
+    {
+      "width": 640,
+      "height": 480,
+      "kind": "resize"
+    },
+    {
+      "enabled": true,
+      "kind": "focus"
+    },
+    {
+      "count": 420,
+      "kind": "frames"
+    },
+    {
+      "action": "stop",
+      "kind": "control"
+    }
+  ]
+}

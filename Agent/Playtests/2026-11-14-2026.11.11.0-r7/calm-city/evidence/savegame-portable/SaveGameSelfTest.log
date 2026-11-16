@@ -1,0 +1,5 @@
+process=save request=accepted positionX=5.600000 route=left score=42
+process=save result=saved advancedX=4.100000 scoreMutated=99 request=load-accepted
+process=save result=loaded loadedX=5.600000 continuedX=5.450000 score=42 PASS
+process=new request=load-accepted
+process=new result=loaded loadedX=5.600000 continuedX=5.450000 score=42 PASS

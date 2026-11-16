@@ -1,0 +1,99 @@
+{
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/calm-city/AIPlayground/Project.json",
+  "steps": [
+    {
+      "directory": "/Game/AI",
+      "action": "create-file",
+      "name": "CalmRoutine"
+    },
+    {
+      "action": "variables",
+      "values": [
+        {
+          "value": [
+            0,
+            0,
+            -8
+          ],
+          "name": "Home",
+          "type": "vec3"
+        },
+        {
+          "value": [
+            0,
+            0,
+            0
+          ],
+          "name": "LastSeen",
+          "type": "vec3"
+        },
+        {
+          "name": "Target",
+          "type": "object"
+        }
+      ]
+    },
+    {
+      "action": "settings",
+      "value": {
+        "thinkInterval": 0.15,
+        "lastSeenKey": "LastSeen",
+        "targetKey": "Target"
+      }
+    },
+    {
+      "properties": {
+        "name": "WaitBeacon",
+        "tasks": [
+          {
+            "seconds": 1.2,
+            "type": "Ai.Wait"
+          }
+        ]
+      },
+      "action": "state",
+      "node": 1
+    },
+    {
+      "x": 320,
+      "y": 20,
+      "action": "add",
+      "properties": {
+        "name": "Circle",
+        "tasks": [
+          {
+            "seconds": 2.0,
+            "type": "Ai.Wait"
+          }
+        ]
+      },
+      "type": "Fsm.State"
+    },
+    {
+      "properties": {
+        "delay": 0.1,
+        "priority": 3,
+        "trigger": "completed"
+      },
+      "action": "link",
+      "to": 2,
+      "from": 1
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "action": "redo"
+    },
+    {
+      "action": "save"
+    },
+    {
+      "action": "reopen"
+    },
+    {
+      "action": "check",
+      "image": "E:/Engine/Engine/build/playtests/20261114-r7/calm-city/results/ai-graph.png"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "bucket": "codex",
+  "windowDurationMins": 10080,
+  "resetsAt": 1794928912,
+  "overallBaselineUsedPercent": 42,
+  "phaseStartUsedPercent": 52,
+  "checkpoints": [
+    {
+      "usedPercent": 52,
+      "phase": "r4 start: box selection and group attack"
+    },
+    {
+      "phase": "STRATEGY-016 fixed; AI57/57; SDK rebuilt for developer retest",
+      "usedPercent": 53
+    },
+    {
+      "usedPercent": 54,
+      "phase": "Selection controls passed; separate gameplay combat retest underway"
+    },
+    {
+      "usedPercent": 55,
+      "phase": "Final clean archive build, Play victory and Runtime60 completed"
+    }
+  ],
+  "note": "Account-wide rounded usage, not exact thread usage. User previously authorized continuing to complete coverage. Only the same strategy developer runs this bounded feature step.",
+  "finalUsedPercent": 55,
+  "observedPhaseDelta": 3,
+  "observedOverallDelta": 13
+}

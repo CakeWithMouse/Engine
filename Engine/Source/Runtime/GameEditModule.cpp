@@ -89,10 +89,54 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
             {
                 if (plV2.version == 1 && plV2.set) pointLightV2_ = plV2;
             }
+            EngineScriptApi script{};
+            if (query && query(extensionContext, EngineScriptExtension, 1, sizeof(script), &script))
+            {
+                if (script.version != 1 || script.context != extensionContext || !script.describe || !script.get || !script.set ||
+                    !script.check || !script.readProblems || !script.getVariables || !script.setVariables)
+                    throw std::runtime_error("Invalid script API");
+                script_ = script;
+            }
+            EngineGraphTraceApi trace{};
+            if (query && query(extensionContext, EngineGraphTraceExtension, 1, sizeof(trace), &trace))
+            {
+                // Debugging only: a broken table switches the trace off instead of rejecting the module.
+                if (trace.version == 1 && trace.context == extensionContext && trace.listObjects && trace.read && trace.readValues) graphTrace_ = trace;
+            }
+            EngineAiDiagnosticsApi diagnostic{};
+            if (query && query(extensionContext, EngineAiDiagnosticsExtension, 1, sizeof(diagnostic), &diagnostic))
+                if (diagnostic.version == 1 && diagnostic.context == extensionContext && diagnostic.inspect) aiDiagnostics_ = diagnostic;
+            EngineAiMachineApi ai{};
+            if (query && query(extensionContext, EngineAiMachineExtension, 1, sizeof(ai), &ai))
+            {
+                // Editor support only: a broken table switches it off instead of rejecting the module.
+                if (ai.version == 1 && ai.context == extensionContext && ai.describe && ai.check && ai.listUnits && ai.readStates &&
+                    ai.readMemory && ai.readHistory)
+                    aiMachine_ = ai;
+            }
             EngineAudioPreviewApi audio{};
             if (query && query(extensionContext, EngineAudioPreviewExtension, 1, sizeof(audio), &audio))
             {
                 if (audio.version == 1 && audio.context && audio.play && audio.stop) audio_ = audio;
+            }
+            EngineAssetImportApi assetImport{};
+            if (query && query(extensionContext, EngineAssetImportExtension, 1, sizeof(assetImport), &assetImport))
+            {
+                if (assetImport.version == 1 && assetImport.context == extensionContext && assetImport.importWithOptions)
+                    assetImport_ = assetImport;
+            }
+            EnginePhysicsApi physics{};
+            if (query && query(extensionContext, EnginePhysicsExtension, 1, sizeof(physics), &physics))
+            {
+                if (physics.version == 1 && physics.context && physics.read && physics.write && physics.available)
+                    physics_ = physics;
+            }
+            EnginePhysicsObjectApi physicsObject{};
+            if (query && query(extensionContext, EnginePhysicsObjectExtension, 1, sizeof(physicsObject), &physicsObject))
+            {
+                if (physicsObject.version == 1 && physicsObject.context && physicsObject.read &&
+                    physicsObject.write && physicsObject.available)
+                    physicsObject_ = physicsObject;
             }
         }
         if (!projectContent.empty())
@@ -155,6 +199,11 @@ uint32_t GameEditModule::Reload(const std::filesystem::path& module, const std::
         swap(projectData_, candidate->projectData_); swap(selection_, candidate->selection_); swap(batch_, candidate->batch_); swap(authoring_, candidate->authoring_);
         swap(viewportInput_, candidate->viewportInput_); swap(cursor_, candidate->cursor_); swap(camera_, candidate->camera_);
         swap(overlay_, candidate->overlay_); swap(audio_, candidate->audio_);
+        swap(pointLightV2_, candidate->pointLightV2_); swap(script_, candidate->script_);
+        swap(graphTrace_, candidate->graphTrace_); swap(aiMachine_, candidate->aiMachine_);
+        swap(assetImport_, candidate->assetImport_);
+        swap(physics_, candidate->physics_); swap(physicsObject_, candidate->physicsObject_);
+        swap(aiDiagnostics_, candidate->aiDiagnostics_);
         swap(legacyFactory_, candidate->legacyFactory_); swap(legacy_, candidate->legacy_);
         swap(legacy5Factory_, candidate->legacy5Factory_); swap(legacy5_, candidate->legacy5_);
         // Heap-owned adapter tables move with their DLL, preserving session identity.

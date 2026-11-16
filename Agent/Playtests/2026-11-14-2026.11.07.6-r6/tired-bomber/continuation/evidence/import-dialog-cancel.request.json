@@ -1,0 +1,13 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\BomberContinue\\Project.json",
+  "source": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\BomberContinue\\Content\\Models\\blend-suzanne-multiple\\blend-suzanne-multiple.glb",
+  "dialog": {
+    "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\import-dialog-cancel.png",
+    "presets": [
+      "Preset1",
+      "Preset01",
+      "Preset001"
+    ],
+    "action": "cancel"
+  }
+}

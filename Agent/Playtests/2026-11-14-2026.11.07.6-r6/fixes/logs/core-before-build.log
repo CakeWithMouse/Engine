@@ -1,0 +1,13 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  MOC FileService.h
+  CoreTests.cpp
+  FileService.cpp
+  AssetOps.cpp
+  SceneFile.cpp
+  ImportSettings.cpp
+  ModelImportSidecar.cpp
+  moc_FileService.cpp
+  CoreTests.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\CoreTests.exe
+

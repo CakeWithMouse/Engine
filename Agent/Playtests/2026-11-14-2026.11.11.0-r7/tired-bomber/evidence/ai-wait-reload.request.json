@@ -1,0 +1,44 @@
+{
+  "machine": "/Game/AI/Guard.fsm",
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber/AiTutorialScriptProject/Project.json",
+  "steps": [
+    {
+      "properties": {
+        "name": "Caught",
+        "tasks": [
+          {
+            "target": "Player",
+            "type": "Ai.LookAt"
+          },
+          {
+            "seconds": 0.15,
+            "type": "Ai.Wait"
+          }
+        ]
+      },
+      "action": "state",
+      "node": 11
+    },
+    {
+      "action": "save"
+    },
+    {
+      "action": "reopen",
+      "machine": "/Game/AI/Guard.fsm"
+    },
+    {
+      "action": "check"
+    },
+    {
+      "action": "play"
+    },
+    {
+      "count": 240,
+      "action": "frames",
+      "dt": 0.025
+    },
+    {
+      "action": "stop"
+    }
+  ]
+}

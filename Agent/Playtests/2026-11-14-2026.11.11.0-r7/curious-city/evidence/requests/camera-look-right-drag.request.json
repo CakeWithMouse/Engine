@@ -1,0 +1,24 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Project.json",
+  "steps": [
+    {
+      "action": "frames",
+      "count": 1
+    },
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\frames\\camera-look-right-drag.png",
+      "scope": "main",
+      "fromX": 0.5,
+      "toY": 0.43,
+      "toX": 0.62,
+      "action": "viewport-drag",
+      "moves": 10,
+      "fromY": 0.5,
+      "button": "right"
+    },
+    {
+      "action": "frames",
+      "count": 1
+    }
+  ]
+}

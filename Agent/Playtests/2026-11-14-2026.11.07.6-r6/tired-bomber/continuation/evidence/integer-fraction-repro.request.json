@@ -1,0 +1,8 @@
+{
+  "slices": 24.5,
+  "ratio": 0.4,
+  "error": 0.1,
+  "stacks": 12,
+  "radius": 1,
+  "allowSloppy": true
+}

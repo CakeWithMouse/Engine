@@ -1,0 +1,101 @@
+{
+    "dialogs": [
+        "Property is not editable"
+    ],
+    "ok": true,
+    "recoveryCandidates": [
+    ],
+    "steps": [
+        {
+            "action": "property",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "Property is not editable",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Persisted",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 6
+        },
+        {
+            "action": "save",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Persisted",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "startup",
+            "manifest": {
+                "content": "Content",
+                "module": "Game.dll",
+                "name": "Authoring",
+                "startupScene": "Content/Scenes/Continuation.scene.json"
+            },
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Persisted",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "status": 0
+        }
+    ]
+}

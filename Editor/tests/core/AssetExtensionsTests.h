@@ -2,8 +2,11 @@
 
 #include "../../Core/AssetExtensions.h"
 
+#include <QDir>
+#include <QFile>
 #include <QString>
 #include <QStringList>
+#include <QTemporaryDir>
 #include <cstdio>
 #include <cstdlib>
 
@@ -100,6 +103,43 @@ inline void Run(int& outChecks)
           "Unknown asset kind is rejected (editor shows a clear error)");
     check(ReimportSourceMatches(QStringLiteral("/Game/Models/A.FBX"), QStringLiteral("C:/Source/B.Obj")),
           "ReimportSourceMatches is case-insensitive");
+
+    // ListProjectAssets tests
+    {
+        QTemporaryDir temp;
+        check(temp.isValid(), "Temporary directory created for asset listing test");
+        const QString root = temp.path();
+
+        QDir(root).mkpath(QStringLiteral("Models/Sub"));
+        QDir(root).mkpath(QStringLiteral("Textures"));
+
+        auto touch = [](const QString& filePath) {
+            QFile f(filePath);
+            f.open(QIODevice::WriteOnly);
+            f.write("test");
+            f.close();
+        };
+
+        touch(root + QStringLiteral("/Models/Hero.glb"));
+        touch(root + QStringLiteral("/Models/Sub/Tree.fbx"));
+        touch(root + QStringLiteral("/Models/Hero.glb.importsettings.json"));
+        touch(root + QStringLiteral("/Textures/Albedo.png"));
+        touch(root + QStringLiteral("/RootModel.obj"));
+
+        const auto models = ListProjectAssets(root, AssetKind::Model);
+        check(models.size() == 3, "ListProjectAssets returns exactly 3 models (ignoring textures and sidecars)");
+        check(models[0].relativePath == QStringLiteral("Models/Hero.glb"), "First model relative path sorted");
+        check(models[0].virtualPath == QStringLiteral("/Game/Models/Hero.glb"), "First model virtual path");
+        check(models[0].fileName == QStringLiteral("Hero.glb"), "First model file name");
+        check(models[1].relativePath == QStringLiteral("Models/Sub/Tree.fbx"), "Subdirectory model relative path");
+        check(models[2].relativePath == QStringLiteral("RootModel.obj"), "Root model relative path");
+
+        const auto textures = ListProjectAssets(root, AssetKind::Texture);
+        check(textures.size() == 1, "ListProjectAssets returns 1 texture");
+        check(textures[0].virtualPath == QStringLiteral("/Game/Textures/Albedo.png"), "Texture virtual path");
+
+        check(ListProjectAssets(QString(), AssetKind::Model).empty(), "Empty content root returns empty list");
+    }
 
     outChecks += checks;
     std::printf("AssetExtensionsTests: %d checks passed.\n", checks);

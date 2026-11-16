@@ -1,0 +1,25 @@
+{
+    "arguments": [
+        "-Name",
+        "BomberCrewController",
+        "-Kind",
+        "Character",
+        "-Base",
+        "Character",
+        "-BaseHeader",
+        "Engine/Components/Character.h"
+    ],
+    "console": "[04:30:27.482] C++: AddClass -Name BomberCrewController -Kind Character -Base Character -BaseHeader Engine/Components/Character.h",
+    "dialogs": [
+        "Созданы .h и .cpp в Source. Соберите проект, чтобы класс появился в редакторе."
+    ],
+    "generated": {
+        ".cpp": "#include \"BomberCrewController.h\"\nvoid BomberCrewController::BeginPlay() { Character::BeginPlay(); }\nvoid BomberCrewController::Tick(float deltaTime) { Character::Tick(deltaTime); }\n",
+        ".h": "#pragma once\n#include <Engine/Components/ComponentAnnotations.h>\n#include \"Engine/Components/Character.h\"\nENGINE_COMPONENT(\"BomberCrewController\")\nclass BomberCrewController : public Character\n{\npublic:\n    BomberCrewController() = default;\n    void BeginPlay() override;\n    void Tick(float deltaTime) override;\n};\n"
+    },
+    "ok": true,
+    "replaced": false,
+    "windowEnabled": true,
+    "wizardAccepted": true,
+    "wizardError": ""
+}

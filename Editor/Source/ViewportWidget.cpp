@@ -58,10 +58,12 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
         // Keep this independent of focus (including Play and inactive windows).
         if (attached_ && !isResizing_ && (PhysW() != lastSentW_ || PhysH() != lastSentH_))
             RequestResize();
-        if (!attached_ || !hasFocus() || !isActiveWindow()) return;
-        SendCursor(mapFromGlobal(QCursor::pos()), true); // refresh after Play/resume, resize and DPI changes
+        if (!attached_) return;
+        const bool activeInput = hasFocus() && isActiveWindow();
+        if (activeInput) SendCursor(mapFromGlobal(QCursor::pos()), true); // refresh after Play/resume, resize and DPI changes
         if (state != EditorQtHost::Edit && host_->HasScene()) return;
 
+        if (activeInput)
         {
             const float speed = dt * (keys_.contains(Qt::Key_Shift) ? 4.0f : 1.0f);
 

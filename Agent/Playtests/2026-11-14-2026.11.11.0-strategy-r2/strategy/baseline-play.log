@@ -1,0 +1,5489 @@
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+FontAtlas: 161 glyphs at 14 px in a 512x128 atlas.
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 640x480
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 121: AntialiasingMode = 1 (FXAA), bb = 640x480
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 241: AntialiasingMode = 1 (FXAA), bb = 640x480
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 361: AntialiasingMode = 1 (FXAA), bb = 640x480
+[Info] D3D backbuffer screenshot saved: E:\Engine\Agent\Playtests\2026-11-14-2026.11.11.0-strategy-r2\strategy\baseline-play.bmp (640x480)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "frames": 432,
+    "ok": true,
+    "steps": [
+        {
+            "camera": {
+                "height": 480,
+                "projection": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "width": 640
+            },
+            "kind": "control",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "HallLight",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        6,
+                        1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Floor",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.550000011920929,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        7,
+                        0.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "WallLeft",
+                    "parent": 0,
+                    "position": [
+                        -3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "WallRight",
+                    "parent": 0,
+                    "position": [
+                        3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "CrateStop",
+                    "parent": 0,
+                    "position": [
+                        -2.9000000953674316,
+                        0.44999998807907104,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.4000000059604645,
+                        2,
+                        1.7999999523162842
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ExitMarker",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.05000000074505806,
+                        9.5
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2,
+                        0.10000000149011612,
+                        0.20000000298023224
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "SupplyCrate",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.699999988079071,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1.7999999523162842,
+                        1.399999976158142,
+                        1.399999976158142
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Squad1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "SquadVisual1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Squad2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "SquadVisual2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Squad3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "SquadVisual3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "CorridorGuard",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.6499999761581421,
+                        6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fieldOfView": 120,
+                        "fov": 60,
+                        "hearingRadius": 0,
+                        "lookSensitivity": 0.004999999888241291,
+                        "machineMemory": "",
+                        "moveSpeed": 1.600000023841858,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "sightRadius": 0,
+                        "standardControl": true,
+                        "stateMachine": "CorridorGuard",
+                        "team": 2,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "GuardVisual",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.6499999761581421,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.800000011920929,
+                        1.2000000476837158,
+                        0.550000011920929
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 16,
+                    "material": "",
+                    "name": "TacticalHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ],
+            "viewportRequested": [
+                640,
+                480
+            ]
+        },
+        {
+            "camera": {
+                "height": 480,
+                "projection": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "width": 640
+            },
+            "kind": "focus",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "HallLight",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        6,
+                        1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Floor",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.550000011920929,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        7,
+                        0.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "WallLeft",
+                    "parent": 0,
+                    "position": [
+                        -3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "WallRight",
+                    "parent": 0,
+                    "position": [
+                        3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "CrateStop",
+                    "parent": 0,
+                    "position": [
+                        -2.9000000953674316,
+                        0.44999998807907104,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.4000000059604645,
+                        2,
+                        1.7999999523162842
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ExitMarker",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.05000000074505806,
+                        9.5
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2,
+                        0.10000000149011612,
+                        0.20000000298023224
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "SupplyCrate",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.699999988079071,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1.7999999523162842,
+                        1.399999976158142,
+                        1.399999976158142
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Squad1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "SquadVisual1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Squad2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "SquadVisual2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Squad3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "SquadVisual3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "CorridorGuard",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.6499999761581421,
+                        6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fieldOfView": 120,
+                        "fov": 60,
+                        "hearingRadius": 0,
+                        "lookSensitivity": 0.004999999888241291,
+                        "machineMemory": "",
+                        "moveSpeed": 1.600000023841858,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "sightRadius": 0,
+                        "standardControl": true,
+                        "stateMachine": "CorridorGuard",
+                        "team": 2,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "GuardVisual",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.6499999761581421,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.800000011920929,
+                        1.2000000476837158,
+                        0.550000011920929
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 16,
+                    "material": "",
+                    "name": "TacticalHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ],
+            "viewportRequested": [
+                640,
+                480
+            ]
+        },
+        {
+            "camera": {
+                "height": 480,
+                "projection": [
+                    0.06818182021379471,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.09090909361839294,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.01001000963151455,
+                    0,
+                    0,
+                    0,
+                    -0.0010010009864345193,
+                    1
+                ],
+                "width": 640
+            },
+            "kind": "frames",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "HallLight",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        6,
+                        1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Floor",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.550000011920929,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        7,
+                        0.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "WallLeft",
+                    "parent": 0,
+                    "position": [
+                        -3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "WallRight",
+                    "parent": 0,
+                    "position": [
+                        3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "CrateStop",
+                    "parent": 0,
+                    "position": [
+                        -2.9000000953674316,
+                        0.44999998807907104,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.4000000059604645,
+                        2,
+                        1.7999999523162842
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ExitMarker",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.05000000074505806,
+                        9.5
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2,
+                        0.10000000149011612,
+                        0.20000000298023224
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "SupplyCrate",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.699999988079071,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1.7999999523162842,
+                        1.399999976158142,
+                        1.399999976158142
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Squad1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "SquadVisual1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Squad2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "SquadVisual2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Squad3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "SquadVisual3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "CorridorGuard",
+                    "parent": 0,
+                    "position": [
+                        0.25600001215934753,
+                        0.6499999761581421,
+                        6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fieldOfView": 120,
+                        "fov": 60,
+                        "hearingRadius": 0,
+                        "lookSensitivity": 0.004999999888241291,
+                        "machineMemory": "",
+                        "moveSpeed": 1.600000023841858,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "sightRadius": 0,
+                        "standardControl": true,
+                        "stateMachine": "CorridorGuard",
+                        "team": 2,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0.5971955060958862,
+                        0,
+                        0.8020957112312317
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "GuardVisual",
+                    "parent": 0,
+                    "position": [
+                        0.23040001094341278,
+                        0.75,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.800000011920929,
+                        1.2000000476837158,
+                        0.550000011920929
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 16,
+                    "material": "",
+                    "name": "TacticalHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ],
+            "viewportRequested": [
+                640,
+                480
+            ]
+        },
+        {
+            "camera": {
+                "height": 480,
+                "projection": [
+                    0.06818182021379471,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.09090909361839294,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.01001000963151455,
+                    0,
+                    0,
+                    0,
+                    -0.0010010009864345193,
+                    1
+                ],
+                "width": 640
+            },
+            "kind": "key",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "HallLight",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        6,
+                        1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Floor",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.550000011920929,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        7,
+                        0.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "WallLeft",
+                    "parent": 0,
+                    "position": [
+                        -3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "WallRight",
+                    "parent": 0,
+                    "position": [
+                        3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "CrateStop",
+                    "parent": 0,
+                    "position": [
+                        -2.9000000953674316,
+                        0.44999998807907104,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.4000000059604645,
+                        2,
+                        1.7999999523162842
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ExitMarker",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.05000000074505806,
+                        9.5
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2,
+                        0.10000000149011612,
+                        0.20000000298023224
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "SupplyCrate",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.699999988079071,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1.7999999523162842,
+                        1.399999976158142,
+                        1.399999976158142
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Squad1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "SquadVisual1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Squad2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "SquadVisual2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Squad3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "SquadVisual3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "CorridorGuard",
+                    "parent": 0,
+                    "position": [
+                        0.25600001215934753,
+                        0.6499999761581421,
+                        6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fieldOfView": 120,
+                        "fov": 60,
+                        "hearingRadius": 0,
+                        "lookSensitivity": 0.004999999888241291,
+                        "machineMemory": "",
+                        "moveSpeed": 1.600000023841858,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "sightRadius": 0,
+                        "standardControl": true,
+                        "stateMachine": "CorridorGuard",
+                        "team": 2,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0.5971955060958862,
+                        0,
+                        0.8020957112312317
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "GuardVisual",
+                    "parent": 0,
+                    "position": [
+                        0.23040001094341278,
+                        0.75,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.800000011920929,
+                        1.2000000476837158,
+                        0.550000011920929
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 16,
+                    "material": "",
+                    "name": "TacticalHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ],
+            "viewportRequested": [
+                640,
+                480
+            ]
+        },
+        {
+            "camera": {
+                "height": 480,
+                "projection": [
+                    0.06818182021379471,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.09090909361839294,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.01001000963151455,
+                    0,
+                    0,
+                    0,
+                    -0.0010010009864345193,
+                    1
+                ],
+                "width": 640
+            },
+            "kind": "frames",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "HallLight",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        6,
+                        1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Floor",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.550000011920929,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        7,
+                        0.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "WallLeft",
+                    "parent": 0,
+                    "position": [
+                        -3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "WallRight",
+                    "parent": 0,
+                    "position": [
+                        3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "CrateStop",
+                    "parent": 0,
+                    "position": [
+                        -2.9000000953674316,
+                        0.44999998807907104,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.4000000059604645,
+                        2,
+                        1.7999999523162842
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ExitMarker",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.05000000074505806,
+                        9.5
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2,
+                        0.10000000149011612,
+                        0.20000000298023224
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "SupplyCrate",
+                    "parent": 0,
+                    "position": [
+                        -0.05900219455361366,
+                        0.7011800408363342,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1.7999999523162842,
+                        1.399999976158142,
+                        1.399999976158142
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Squad1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "SquadVisual1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Squad2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "SquadVisual2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Squad3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "SquadVisual3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "CorridorGuard",
+                    "parent": 0,
+                    "position": [
+                        0.2815999984741211,
+                        0.6499999761581421,
+                        6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fieldOfView": 120,
+                        "fov": 60,
+                        "hearingRadius": 0,
+                        "lookSensitivity": 0.004999999888241291,
+                        "machineMemory": "",
+                        "moveSpeed": 1.600000023841858,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "sightRadius": 0,
+                        "standardControl": true,
+                        "stateMachine": "CorridorGuard",
+                        "team": 2,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0.6472719311714172,
+                        0,
+                        0.7622591853141785
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "GuardVisual",
+                    "parent": 0,
+                    "position": [
+                        0.25600001215934753,
+                        0.75,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.800000011920929,
+                        1.2000000476837158,
+                        0.550000011920929
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 16,
+                    "material": "",
+                    "name": "TacticalHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ],
+            "viewportRequested": [
+                640,
+                480
+            ]
+        },
+        {
+            "camera": {
+                "height": 480,
+                "projection": [
+                    0.06818182021379471,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.09090909361839294,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.01001000963151455,
+                    0,
+                    0,
+                    0,
+                    -0.0010010009864345193,
+                    1
+                ],
+                "width": 640
+            },
+            "kind": "key",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "HallLight",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        6,
+                        1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Floor",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.550000011920929,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        7,
+                        0.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "WallLeft",
+                    "parent": 0,
+                    "position": [
+                        -3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "WallRight",
+                    "parent": 0,
+                    "position": [
+                        3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "CrateStop",
+                    "parent": 0,
+                    "position": [
+                        -2.9000000953674316,
+                        0.44999998807907104,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.4000000059604645,
+                        2,
+                        1.7999999523162842
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ExitMarker",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.05000000074505806,
+                        9.5
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2,
+                        0.10000000149011612,
+                        0.20000000298023224
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "SupplyCrate",
+                    "parent": 0,
+                    "position": [
+                        -0.05900219455361366,
+                        0.7011800408363342,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1.7999999523162842,
+                        1.399999976158142,
+                        1.399999976158142
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Squad1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "SquadVisual1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Squad2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "SquadVisual2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Squad3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "SquadVisual3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "CorridorGuard",
+                    "parent": 0,
+                    "position": [
+                        0.2815999984741211,
+                        0.6499999761581421,
+                        6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fieldOfView": 120,
+                        "fov": 60,
+                        "hearingRadius": 0,
+                        "lookSensitivity": 0.004999999888241291,
+                        "machineMemory": "",
+                        "moveSpeed": 1.600000023841858,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "sightRadius": 0,
+                        "standardControl": true,
+                        "stateMachine": "CorridorGuard",
+                        "team": 2,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0.6472719311714172,
+                        0,
+                        0.7622591853141785
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "GuardVisual",
+                    "parent": 0,
+                    "position": [
+                        0.25600001215934753,
+                        0.75,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.800000011920929,
+                        1.2000000476837158,
+                        0.550000011920929
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 16,
+                    "material": "",
+                    "name": "TacticalHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ],
+            "viewportRequested": [
+                640,
+                480
+            ]
+        },
+        {
+            "camera": {
+                "height": 480,
+                "projection": [
+                    0.06818182021379471,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.09090909361839294,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.01001000963151455,
+                    0,
+                    0,
+                    0,
+                    -0.0010010009864345193,
+                    1
+                ],
+                "width": 640
+            },
+            "kind": "frames",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "HallLight",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        6,
+                        1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Floor",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.550000011920929,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        7,
+                        0.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "WallLeft",
+                    "parent": 0,
+                    "position": [
+                        -3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "WallRight",
+                    "parent": 0,
+                    "position": [
+                        3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "CrateStop",
+                    "parent": 0,
+                    "position": [
+                        -2.9000000953674316,
+                        0.44999998807907104,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.4000000059604645,
+                        2,
+                        1.7999999523162842
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ExitMarker",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.05000000074505806,
+                        9.5
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2,
+                        0.10000000149011612,
+                        0.20000000298023224
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "SupplyCrate",
+                    "parent": 0,
+                    "position": [
+                        -1.8063805103302002,
+                        0.7374277114868164,
+                        1.9984992742538452
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        -1.8171544979850296e-06,
+                        -9.831322955733413e-08,
+                        1
+                    ],
+                    "scale": [
+                        1.7999999523162842,
+                        1.399999976158142,
+                        1.399999976158142
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Squad1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "SquadVisual1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Squad2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "SquadVisual2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Squad3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "SquadVisual3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "CorridorGuard",
+                    "parent": 0,
+                    "position": [
+                        1.8175990581512451,
+                        0.6499999761581421,
+                        6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fieldOfView": 120,
+                        "fov": 60,
+                        "hearingRadius": 0,
+                        "lookSensitivity": 0.004999999888241291,
+                        "machineMemory": "",
+                        "moveSpeed": 1.600000023841858,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "sightRadius": 0,
+                        "standardControl": true,
+                        "stateMachine": "CorridorGuard",
+                        "team": 2,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0.7071068286895752,
+                        0,
+                        0.7071068286895752
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "GuardVisual",
+                    "parent": 0,
+                    "position": [
+                        1.791999101638794,
+                        0.75,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.800000011920929,
+                        1.2000000476837158,
+                        0.550000011920929
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 16,
+                    "material": "",
+                    "name": "TacticalHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ],
+            "viewportRequested": [
+                640,
+                480
+            ]
+        },
+        {
+            "camera": {
+                "height": 480,
+                "projection": [
+                    0.06818182021379471,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.09090909361839294,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.01001000963151455,
+                    0,
+                    0,
+                    0,
+                    -0.0010010009864345193,
+                    1
+                ],
+                "width": 640
+            },
+            "kind": "key",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "HallLight",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        6,
+                        1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Floor",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.550000011920929,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        7,
+                        0.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "WallLeft",
+                    "parent": 0,
+                    "position": [
+                        -3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "WallRight",
+                    "parent": 0,
+                    "position": [
+                        3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "CrateStop",
+                    "parent": 0,
+                    "position": [
+                        -2.9000000953674316,
+                        0.44999998807907104,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.4000000059604645,
+                        2,
+                        1.7999999523162842
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ExitMarker",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.05000000074505806,
+                        9.5
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2,
+                        0.10000000149011612,
+                        0.20000000298023224
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "SupplyCrate",
+                    "parent": 0,
+                    "position": [
+                        -1.8063805103302002,
+                        0.7374277114868164,
+                        1.9984992742538452
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        -1.8171544979850296e-06,
+                        -9.831322955733413e-08,
+                        1
+                    ],
+                    "scale": [
+                        1.7999999523162842,
+                        1.399999976158142,
+                        1.399999976158142
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Squad1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "SquadVisual1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Squad2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "SquadVisual2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Squad3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "SquadVisual3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "CorridorGuard",
+                    "parent": 0,
+                    "position": [
+                        1.8175990581512451,
+                        0.6499999761581421,
+                        6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fieldOfView": 120,
+                        "fov": 60,
+                        "hearingRadius": 0,
+                        "lookSensitivity": 0.004999999888241291,
+                        "machineMemory": "",
+                        "moveSpeed": 1.600000023841858,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "sightRadius": 0,
+                        "standardControl": true,
+                        "stateMachine": "CorridorGuard",
+                        "team": 2,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0.7071068286895752,
+                        0,
+                        0.7071068286895752
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "GuardVisual",
+                    "parent": 0,
+                    "position": [
+                        1.791999101638794,
+                        0.75,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.800000011920929,
+                        1.2000000476837158,
+                        0.550000011920929
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 16,
+                    "material": "",
+                    "name": "TacticalHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ],
+            "viewportRequested": [
+                640,
+                480
+            ]
+        },
+        {
+            "camera": {
+                "height": 480,
+                "projection": [
+                    0.06818182021379471,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.09090909361839294,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.01001000963151455,
+                    0,
+                    0,
+                    0,
+                    -0.0010010009864345193,
+                    1
+                ],
+                "width": 640
+            },
+            "kind": "frames",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "HallLight",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        6,
+                        1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Floor",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.550000011920929,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        7,
+                        0.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "WallLeft",
+                    "parent": 0,
+                    "position": [
+                        -3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "WallRight",
+                    "parent": 0,
+                    "position": [
+                        3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "CrateStop",
+                    "parent": 0,
+                    "position": [
+                        -2.9000000953674316,
+                        0.44999998807907104,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.4000000059604645,
+                        2,
+                        1.7999999523162842
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ExitMarker",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.05000000074505806,
+                        9.5
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2,
+                        0.10000000149011612,
+                        0.20000000298023224
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "SupplyCrate",
+                    "parent": 0,
+                    "position": [
+                        -1.806379795074463,
+                        0.7375192642211914,
+                        1.9983936548233032
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        -1.8171544979850296e-06,
+                        -9.831322955733413e-08,
+                        1
+                    ],
+                    "scale": [
+                        1.7999999523162842,
+                        1.399999976158142,
+                        1.399999976158142
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Squad1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.6499999761581421,
+                        11.280012130737305
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "SquadVisual1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.75,
+                        11.280012130737305
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Squad2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "SquadVisual2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Squad3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "SquadVisual3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "CorridorGuard",
+                    "parent": 0,
+                    "position": [
+                        -1.3336801528930664,
+                        0.6499999761581421,
+                        6.462303638458252
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fieldOfView": 120,
+                        "fov": 60,
+                        "hearingRadius": 0,
+                        "lookSensitivity": 0.004999999888241291,
+                        "machineMemory": "",
+                        "moveSpeed": 1.600000023841858,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "sightRadius": 0,
+                        "standardControl": true,
+                        "stateMachine": "CorridorGuard",
+                        "team": 2,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        -0.01796906441450119,
+                        0,
+                        0.999838650226593
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "GuardVisual",
+                    "parent": 0,
+                    "position": [
+                        -1.3327603340148926,
+                        0.75,
+                        6.436720371246338
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.800000011920929,
+                        1.2000000476837158,
+                        0.550000011920929
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 16,
+                    "material": "",
+                    "name": "TacticalHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ],
+            "viewportRequested": [
+                640,
+                480
+            ]
+        },
+        {
+            "camera": {
+                "height": 480,
+                "projection": [
+                    0.06818182021379471,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.09090909361839294,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.01001000963151455,
+                    0,
+                    0,
+                    0,
+                    -0.0010010009864345193,
+                    1
+                ],
+                "width": 640
+            },
+            "kind": "key",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "HallLight",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        6,
+                        1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Floor",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.550000011920929,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        7,
+                        0.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "WallLeft",
+                    "parent": 0,
+                    "position": [
+                        -3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "WallRight",
+                    "parent": 0,
+                    "position": [
+                        3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "CrateStop",
+                    "parent": 0,
+                    "position": [
+                        -2.9000000953674316,
+                        0.44999998807907104,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.4000000059604645,
+                        2,
+                        1.7999999523162842
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ExitMarker",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.05000000074505806,
+                        9.5
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2,
+                        0.10000000149011612,
+                        0.20000000298023224
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "SupplyCrate",
+                    "parent": 0,
+                    "position": [
+                        -1.806379795074463,
+                        0.7375192642211914,
+                        1.9983936548233032
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        -1.8171544979850296e-06,
+                        -9.831322955733413e-08,
+                        1
+                    ],
+                    "scale": [
+                        1.7999999523162842,
+                        1.399999976158142,
+                        1.399999976158142
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Squad1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.6499999761581421,
+                        11.280012130737305
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "SquadVisual1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.75,
+                        11.280012130737305
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Squad2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "SquadVisual2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Squad3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "SquadVisual3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "CorridorGuard",
+                    "parent": 0,
+                    "position": [
+                        -1.3336801528930664,
+                        0.6499999761581421,
+                        6.462303638458252
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fieldOfView": 120,
+                        "fov": 60,
+                        "hearingRadius": 0,
+                        "lookSensitivity": 0.004999999888241291,
+                        "machineMemory": "",
+                        "moveSpeed": 1.600000023841858,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "sightRadius": 0,
+                        "standardControl": true,
+                        "stateMachine": "CorridorGuard",
+                        "team": 2,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        -0.01796906441450119,
+                        0,
+                        0.999838650226593
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "GuardVisual",
+                    "parent": 0,
+                    "position": [
+                        -1.3327603340148926,
+                        0.75,
+                        6.436720371246338
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.800000011920929,
+                        1.2000000476837158,
+                        0.550000011920929
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 16,
+                    "material": "",
+                    "name": "TacticalHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ],
+            "viewportRequested": [
+                640,
+                480
+            ]
+        },
+        {
+            "camera": {
+                "height": 480,
+                "projection": [
+                    0.06818182021379471,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.09090909361839294,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.01001000963151455,
+                    0,
+                    0,
+                    0,
+                    -0.0010010009864345193,
+                    1
+                ],
+                "width": 640
+            },
+            "kind": "frames",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "HallLight",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        6,
+                        1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Floor",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.550000011920929,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        7,
+                        0.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "WallLeft",
+                    "parent": 0,
+                    "position": [
+                        -3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "WallRight",
+                    "parent": 0,
+                    "position": [
+                        3.4000000953674316,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.3499999940395355,
+                        2.5,
+                        22
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "CrateStop",
+                    "parent": 0,
+                    "position": [
+                        -2.9000000953674316,
+                        0.44999998807907104,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.4000000059604645,
+                        2,
+                        1.7999999523162842
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ExitMarker",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.05000000074505806,
+                        9.5
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2,
+                        0.10000000149011612,
+                        0.20000000298023224
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "SupplyCrate",
+                    "parent": 0,
+                    "position": [
+                        -1.806379795074463,
+                        0.7375192642211914,
+                        1.9983936548233032
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        -1.8171544979850296e-06,
+                        -9.831322955733413e-08,
+                        1
+                    ],
+                    "scale": [
+                        1.7999999523162842,
+                        1.399999976158142,
+                        1.399999976158142
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Squad1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.6499999761581421,
+                        11.280012130737305
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "SquadVisual1",
+                    "parent": 0,
+                    "position": [
+                        -1.5,
+                        0.75,
+                        11.280012130737305
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Squad2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "SquadVisual2",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Squad3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.6499999761581421,
+                        -6
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 3,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "SquadVisual3",
+                    "parent": 0,
+                    "position": [
+                        1.5,
+                        0.75,
+                        -6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.6200000047683716,
+                        1.100000023841858,
+                        0.44999998807907104
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "CorridorGuard",
+                    "parent": 0,
+                    "position": [
+                        -1.3345999717712402,
+                        0.6499999761581421,
+                        6.487886905670166
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fieldOfView": 120,
+                        "fov": 60,
+                        "hearingRadius": 0,
+                        "lookSensitivity": 0.004999999888241291,
+                        "machineMemory": "",
+                        "moveSpeed": 1.600000023841858,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": false,
+                        "sightRadius": 0,
+                        "standardControl": true,
+                        "stateMachine": "CorridorGuard",
+                        "team": 2,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        -0.01796906813979149,
+                        0,
+                        0.999838650226593
+                    ],
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "GuardVisual",
+                    "parent": 0,
+                    "position": [
+                        -1.3336801528930664,
+                        0.75,
+                        6.462303638458252
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.800000011920929,
+                        1.2000000476837158,
+                        0.550000011920929
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 16,
+                    "material": "",
+                    "name": "TacticalHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ],
+            "viewportRequested": [
+                640,
+                480
+            ]
+        },
+        {
+            "camera": {
+                "height": 480,
+                "projection": [
+                    0.06818182021379471,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.09090909361839294,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.01001000963151455,
+                    0,
+                    0,
+                    0,
+                    -0.0010010009864345193,
+                    1
+                ],
+                "width": 640
+            },
+            "kind": "control",
+            "objects": [
+            ],
+            "viewportRequested": [
+                640,
+                480
+            ]
+        }
+    ]
+}

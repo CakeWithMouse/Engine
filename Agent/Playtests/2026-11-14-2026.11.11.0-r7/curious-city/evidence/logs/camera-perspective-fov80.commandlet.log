@@ -1,0 +1,1047 @@
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 640x480
+[Info] D3D backbuffer screenshot saved: E:\Engine\Engine\build\playtests\20261114-r7\curious-city\camera-settings-80\frames\play.bmp (640x480)
+[ResizeDiag] ViewportResize executed: total=1 size=1280x720
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "frames": 7,
+    "ok": true,
+    "steps": [
+        {
+            "camera": {
+                "height": 480,
+                "projection": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "width": 640
+            },
+            "kind": "control",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        20,
+                        1,
+                        20
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "CuriousPlayer",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 80,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": true,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Gameplay.Player"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "CityControls",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "CuriousCity.Interaction"
+                }
+            ],
+            "viewportRequested": [
+                640,
+                480
+            ]
+        },
+        {
+            "camera": {
+                "height": 480,
+                "projection": [
+                    0.893815279006958,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1.1917537450790405,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1.0000100135803223,
+                    1,
+                    0,
+                    0,
+                    -0.10000099986791611,
+                    0
+                ],
+                "width": 640
+            },
+            "kind": "focus",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        20,
+                        1,
+                        20
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "CuriousPlayer",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 80,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": true,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Gameplay.Player"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "CityControls",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "CuriousCity.Interaction"
+                }
+            ],
+            "viewportRequested": [
+                640,
+                480
+            ]
+        },
+        {
+            "camera": {
+                "height": 480,
+                "projection": [
+                    0.893815279006958,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1.1917537450790405,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1.0000100135803223,
+                    1,
+                    0,
+                    0,
+                    -0.10000099986791611,
+                    0
+                ],
+                "width": 640
+            },
+            "kind": "frames",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        20,
+                        1,
+                        20
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "CuriousPlayer",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 80,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": true,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Gameplay.Player"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "CityControls",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "CuriousCity.Interaction"
+                }
+            ],
+            "viewportRequested": [
+                640,
+                480
+            ]
+        },
+        {
+            "camera": {
+                "height": 480,
+                "projection": [
+                    0.893815279006958,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1.1917537450790405,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1.0000100135803223,
+                    1,
+                    0,
+                    0,
+                    -0.10000099986791611,
+                    0
+                ],
+                "width": 640
+            },
+            "kind": "resize",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        20,
+                        1,
+                        20
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "CuriousPlayer",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 80,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": true,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Gameplay.Player"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "CityControls",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "CuriousCity.Interaction"
+                }
+            ],
+            "viewportRequested": [
+                1280,
+                720
+            ]
+        },
+        {
+            "camera": {
+                "height": 720,
+                "projection": [
+                    0.6703614592552185,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1.1917537450790405,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1.0000100135803223,
+                    1,
+                    0,
+                    0,
+                    -0.10000099986791611,
+                    0
+                ],
+                "width": 1280
+            },
+            "kind": "frames",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        20,
+                        1,
+                        20
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "CuriousPlayer",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 80,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": true,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Gameplay.Player"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "CityControls",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "CuriousCity.Interaction"
+                }
+            ],
+            "viewportRequested": [
+                1280,
+                720
+            ]
+        },
+        {
+            "camera": {
+                "height": 720,
+                "projection": [
+                    0.6703614592552185,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1.1917537450790405,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1.0000100135803223,
+                    1,
+                    0,
+                    0,
+                    -0.10000099986791611,
+                    0
+                ],
+                "width": 1280
+            },
+            "kind": "control",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        20,
+                        1,
+                        20
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Cube",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "CuriousPlayer",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 80,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": true,
+                        "standardControl": true,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Gameplay.Player"
+                }
+            ],
+            "viewportRequested": [
+                1280,
+                720
+            ]
+        }
+    ]
+}

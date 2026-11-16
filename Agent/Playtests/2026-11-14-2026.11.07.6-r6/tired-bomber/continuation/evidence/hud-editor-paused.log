@@ -1,0 +1,5 @@
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+{
+    "ok": true,
+    "saved": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Label name=\"score\" anchor=\"TopLeft\" rect=\"16 16 200 30\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Paused — R to resume\" color=\"#ffffffff\" align=\"left\"/>\n</UI>\n"
+}

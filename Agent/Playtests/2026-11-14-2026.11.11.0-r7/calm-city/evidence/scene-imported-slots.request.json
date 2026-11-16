@@ -1,0 +1,40 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\CalmCityUpgraded\\Project.json",
+  "steps": [
+    {
+      "action": "new"
+    },
+    {
+      "action": "model",
+      "path": "/Game/Models/ScaleCity/CityCalibration2.glb",
+      "name": "ImportedUVProbe"
+    },
+    {
+      "action": "select",
+      "target": "ImportedUVProbe"
+    },
+    {
+      "action": "property",
+      "target": "ImportedUVProbe",
+      "path": "/materialSlots/1",
+      "value": "/Game/Materials/WarmStone.mat"
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "action": "redo"
+    },
+    {
+      "action": "save",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\results\\ImportedUV.scene.json"
+    },
+    {
+      "action": "new"
+    },
+    {
+      "action": "load",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\results\\ImportedUV.scene.json"
+    }
+  ]
+}

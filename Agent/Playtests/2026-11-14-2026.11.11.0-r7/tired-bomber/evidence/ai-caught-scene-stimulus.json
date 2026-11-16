@@ -1,0 +1,17 @@
+{
+  "fsmMachine": "/Game/AI/Guard.fsm",
+  "project": "AiTutorialScriptProject/Project.json",
+  "scene": "Content/Scenes/Main.scene.json",
+  "temporaryChanges": [
+    {
+      "position": [
+        -6,
+        0.9,
+        -8
+      ],
+      "objectName": "Игрок",
+      "objectId": 13
+    }
+  ],
+  "expected": "Player within guard sight; guard transitions through Chase/Caught/Report and Player.vscript OnCaught sets Player back to [0,0.9,10]."
+}

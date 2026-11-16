@@ -1,0 +1,16 @@
+{
+  "machine": "/Game/AI/Guard.fsm",
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber/AiTutorialScriptProject/Project.json",
+  "steps": [
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber/ai-invalid.png",
+      "action": "check"
+    },
+    {
+      "action": "play"
+    },
+    {
+      "action": "stop"
+    }
+  ]
+}

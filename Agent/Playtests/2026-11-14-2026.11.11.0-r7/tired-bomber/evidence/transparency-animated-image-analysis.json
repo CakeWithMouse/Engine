@@ -1,0 +1,122 @@
+{
+  "frames": {
+    "near-640-t0.bmp": {
+      "width": 640,
+      "height": 480,
+      "backgroundRGB": [
+        0,
+        0,
+        51
+      ],
+      "nonBackgroundPixels": 77284,
+      "bbox": [
+        181,
+        101,
+        459,
+        379
+      ],
+      "centerRGB": [
+        127,
+        0,
+        77
+      ]
+    },
+    "near-640-t06.bmp": {
+      "width": 640,
+      "height": 480,
+      "backgroundRGB": [
+        0,
+        0,
+        51
+      ],
+      "nonBackgroundPixels": 77006,
+      "bbox": [
+        198,
+        101,
+        475,
+        379
+      ],
+      "centerRGB": [
+        127,
+        0,
+        77
+      ]
+    },
+    "near-1280-t06.bmp": {
+      "width": 1280,
+      "height": 720,
+      "backgroundRGB": [
+        0,
+        0,
+        51
+      ],
+      "nonBackgroundPixels": 173056,
+      "bbox": [
+        457,
+        152,
+        873,
+        568
+      ],
+      "centerRGB": [
+        127,
+        0,
+        77
+      ]
+    },
+    "far-640-t12.bmp": {
+      "width": 640,
+      "height": 480,
+      "backgroundRGB": [
+        0,
+        0,
+        51
+      ],
+      "nonBackgroundPixels": 27556,
+      "bbox": [
+        242,
+        157,
+        408,
+        323
+      ],
+      "centerRGB": [
+        127,
+        0,
+        77
+      ]
+    },
+    "far-1280-t18.bmp": {
+      "width": 1280,
+      "height": 720,
+      "backgroundRGB": [
+        0,
+        0,
+        51
+      ],
+      "nonBackgroundPixels": 62250,
+      "bbox": [
+        523,
+        235,
+        772,
+        485
+      ],
+      "centerRGB": [
+        127,
+        0,
+        77
+      ]
+    }
+  },
+  "near640AnimationChangedPixels": 14294,
+  "near640T0CenterExpectedRedOverBlue": [
+    128,
+    0,
+    76
+  ],
+  "near640T0CenterActual": [
+    127,
+    0,
+    77
+  ],
+  "orderColorErrorMax": 1,
+  "visibleColorOrdering": "red front over blue rear; channels show red>blue"
+}

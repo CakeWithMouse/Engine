@@ -1,4 +1,5 @@
 #include "MaterialTextureTools.h"
+#include "EditorTheme.h"
 
 #include <QComboBox>
 #include <QDialogButtonBox>
@@ -98,9 +99,11 @@ int NextTextureRegister(const QString& source)
 
 QPixmap SlotImage(const QString& path, const QString& file, int size)
 {
+    const auto& theme = EditorTheme::Instance();
+    const auto& pal = theme.Palette();
     const QImage image = path.isEmpty() ? QImage() : MaterialTextures::Thumbnail(file, size);
     QPixmap pixmap(size, size);
-    pixmap.fill(path.isEmpty() ? QColor(Qt::white) : image.isNull() ? QColor(70, 30, 30) : QColor(40, 40, 40));
+    pixmap.fill(path.isEmpty() ? pal.bgPanel : pal.bgDarkest);
     QPainter painter(&pixmap);
     if (!image.isNull())
     {
@@ -108,7 +111,7 @@ QPixmap SlotImage(const QString& path, const QString& file, int size)
     }
     else if (!path.isEmpty())
     {
-        painter.setPen(Qt::white);
+        painter.setPen(pal.textDisabled);
         painter.drawText(pixmap.rect(), Qt::AlignCenter, QStringLiteral("?")); // файл пропал или не читается
     }
     return pixmap;
@@ -346,100 +349,6 @@ void MaterialTextureSlot::dropEvent(QDropEvent* event)
     event->setDropAction(Qt::CopyAction);
     event->accept();
     if (dropped) dropped(file);
-}
-
-MaterialTexturePicker::MaterialTexturePicker(const QString& contentRoot, const QString& current, const QString& slot, QWidget* parent)
-    : QDialog(parent)
-{
-    setObjectName(QStringLiteral("MaterialTexturePicker"));
-    setWindowTitle(QStringLiteral("Текстура: %1").arg(slot));
-    resize(640, 480);
-
-    auto* layout = new QVBoxLayout(this);
-    auto* search = new QLineEdit(this);
-    search->setObjectName(QStringLiteral("MaterialTextureSearch"));
-    search->setPlaceholderText(QStringLiteral("Поиск по имени"));
-    layout->addWidget(search);
-
-    list_ = new QListWidget(this);
-    list_->setObjectName(QStringLiteral("MaterialTextureList"));
-    list_->setViewMode(QListView::IconMode);
-    list_->setResizeMode(QListView::Adjust);
-    list_->setMovement(QListView::Static);
-    list_->setIconSize({96, 96});
-    list_->setGridSize({124, 132});
-    list_->setWordWrap(true);
-    layout->addWidget(list_, 1);
-
-    auto* none = new QListWidgetItem(QIcon(SlotImage({}, {}, 96)), QStringLiteral("Нет текстуры"), list_);
-    list_->setCurrentItem(none);
-
-    QStringList files;
-    for (QDirIterator it(contentRoot, TextureFilters, QDir::Files, QDirIterator::Subdirectories); it.hasNext();)
-        files.push_back(it.next());
-    std::sort(files.begin(), files.end(), [](const QString& a, const QString& b) {
-        return QFileInfo(a).fileName().compare(QFileInfo(b).fileName(), Qt::CaseInsensitive) < 0;
-    });
-    const QDir content(contentRoot);
-    const QString selected = current.isEmpty() ? QString() : QFileInfo(current).absoluteFilePath();
-    for (const QString& file : files)
-    {
-        auto* item = new QListWidgetItem(QFileInfo(file).fileName(), list_);
-        item->setData(Qt::UserRole, file);
-        item->setToolTip(content.relativeFilePath(file));
-        if (QFileInfo(file).absoluteFilePath().compare(selected, Qt::CaseInsensitive) == 0) list_->setCurrentItem(item);
-    }
-
-    auto* bottom = new QHBoxLayout;
-    auto* import = new QPushButton(QStringLiteral("Импортировать файл…"), this);
-    import->setObjectName(QStringLiteral("MaterialTextureImport"));
-    import->setToolTip(QStringLiteral("Файл вне проекта будет скопирован в Content/Textures"));
-    bottom->addWidget(import);
-    bottom->addStretch(1);
-    auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
-    bottom->addWidget(buttons);
-    layout->addLayout(bottom);
-
-    const auto accepted = [this] {
-        if (const auto* item = list_->currentItem())
-        {
-            selected_ = item->data(Qt::UserRole).toString();
-            accept();
-        }
-    };
-    connect(buttons, &QDialogButtonBox::accepted, this, accepted);
-    connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
-    connect(list_, &QListWidget::itemActivated, this, accepted);
-    connect(import, &QPushButton::clicked, this, [this] { Import(); });
-    connect(search, &QLineEdit::textChanged, this, [this](const QString& text) {
-        for (int i = 1; i < list_->count(); ++i)
-            list_->item(i)->setHidden(!list_->item(i)->text().contains(text, Qt::CaseInsensitive));
-    });
-
-    // По одной миниатюре за такт: большой проект не держит окно закрытым на время декодирования.
-    thumbnails_ = new QTimer(this);
-    connect(thumbnails_, &QTimer::timeout, this, [this] { LoadNextThumbnail(); });
-    thumbnails_->start(0);
-}
-
-void MaterialTexturePicker::LoadNextThumbnail()
-{
-    if (nextThumbnail_ >= list_->count())
-    {
-        thumbnails_->stop();
-        return;
-    }
-    auto* item = list_->item(nextThumbnail_++);
-    const QString file = item->data(Qt::UserRole).toString();
-    item->setIcon(QIcon(SlotImage(file, file, 96)));
-}
-
-void MaterialTexturePicker::Import()
-{
-    const QString file = QFileDialog::getOpenFileName(this, QStringLiteral("Импорт текстуры"), {}, QString::fromUtf8(TextureDialogFilter));
-    if (file.isEmpty()) return;
-    selected_ = file;
-    accept();
 }
 
 MaterialAddTextureDialog::MaterialAddTextureDialog(const QString& source, QWidget* parent)

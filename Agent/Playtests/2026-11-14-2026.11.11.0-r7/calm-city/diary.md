@@ -1,0 +1,11 @@
+# Calm City r7 diary
+
+- Read the r7 plan, `try-engine`, `fix-engine-after-developers`, AI-FSM specification, and tutorial before starting. Owned 32 legacy checks plus four AI editor checks; only worked under this persona’s r7 report and scratch folders.
+- Copied the previous working Calm City project into the r7 scratch area, created a fresh project, enabled C++, and upgraded the old project copy. Original r5/r6 projects remained untouched. The r7 copy is pinned to 2026.11.11.0.
+- Built the isolated project against the final private .11.11.0 Runtime/SDK (`Engine.lib` SHA-256 `87F34A76ABF802F85264E20AF0897C85BE3B18C32D77E12DBDD91CAAE18B6527`). Final project build and validation completed at `CalmCityUpgraded/Binaries/Release/2f5b468a6dd740d88e3950f350ff4a29`.
+- Ran native AI card, graph, state/transition dialogs and write-failure/retry flows with save/reopen. All four assigned AI rows now have concrete result JSON, screenshots and logs.
+- Ran point-shadow slots/zero intensity, point-light shadow/material A/B, pixel-threshold LOD transition, 121-frame camera cascade-fit, opaque/masked/translucent blend oracle, crossing-plane transparency oracle, viewport resizing, and fixed-camera VAT time A/B/return in Forward and Deferred.
+- Imported a UV-chart GLB at scale 0.01, reimported it, edited actual Inspector material slots with Undo/Redo, rendered the imported UVs and compared imported point-shadow on/off frames. SaveGame was exercised in same-process and new-process runs from a relocated project root.
+- The initial relocation attempt exposed a project-local `__FILE__` path dependency for SaveData/frame/audio logs. Replaced it with `EngineModuleVfs::Resolve("/Game")`, rebuilt, and verified that the relocated process wrote its save and frames beside the relocated Content root. This was a Calm City project defect, not an Engine defect.
+- A separate no-code fixture showed zero Source files and no `Project.code.json` before enable. Its extra enable attempt selected SDK 2026.11.11.1 while locked to .11.11.0 and was rejected. The clean fresh create/enable flow is independently captured in the existing `FreshCalmCity` exit/log files.
+- Evidence paths in `evidence.json` were checked for existence. The source-only archive excludes Engine SDK/runtime, binaries, intermediates and save data.

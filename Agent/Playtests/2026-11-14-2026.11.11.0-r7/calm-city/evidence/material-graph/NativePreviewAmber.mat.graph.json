@@ -1,0 +1,55 @@
+{
+    "connections": [
+        {
+            "fromNode": 2,
+            "fromPin": "RGB",
+            "toNode": 1,
+            "toPin": "Albedo"
+        },
+        {
+            "fromNode": 3,
+            "fromPin": "Value",
+            "toNode": 1,
+            "toPin": "Specular"
+        }
+    ],
+    "nodes": [
+        {
+            "id": 1,
+            "properties": {
+            },
+            "title": "Output",
+            "type": "MaterialOutput",
+            "x": 520,
+            "y": 100
+        },
+        {
+            "id": 2,
+            "properties": {
+                "color": [
+                    1,
+                    0.36000609397888184,
+                    0.03500419482588768,
+                    1
+                ],
+                "name": "NativePreviewAmber"
+            },
+            "title": "NativePreviewAmber",
+            "type": "ColorParam",
+            "x": 160,
+            "y": 120
+        },
+        {
+            "id": 3,
+            "properties": {
+                "name": "Gloss",
+                "value": 0.25
+            },
+            "title": "Gloss",
+            "type": "ScalarParam",
+            "x": 160,
+            "y": 300
+        }
+    ],
+    "version": 1
+}

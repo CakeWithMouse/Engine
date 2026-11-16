@@ -1,0 +1,181 @@
+{
+  "engineVersion": "2026.11.11.0",
+  "persona": "ai-trash",
+  "features": [
+    {
+      "feature_id": "create-nocode",
+      "actual": "Launcher create exit 0. Inventory shows Project.json and Engine.lock.json, Source=false and Game.vcxproj=false; isolated store resolves to this role scratch.",
+      "engineVersion": "2026.11.11.0",
+      "expected": "Create a fresh no-code project under the role-private engine store; no Source or Game.vcxproj before enable.",
+      "evidence_paths": [
+        "evidence/fresh-nocode-create.exit.txt",
+        "evidence/fresh-nocode-inventory.json",
+        "evidence/fresh-nocode-Project.json",
+        "evidence/fresh-nocode-Engine.lock.json",
+        "evidence/private-store-EngineVersion.json"
+      ],
+      "status": "passed"
+    },
+    {
+      "feature_id": "enable-cpp",
+      "actual": "Launcher enable exit 0; CodeBuild.log completed and generated Project.code.json for SDK 2026.11.11.0.",
+      "engineVersion": "2026.11.11.0",
+      "expected": "Enable C++ on a separate fresh project with the pinned .11.11.0 SDK and create a buildable module.",
+      "evidence_paths": [
+        "evidence/fresh-enable-create.exit.txt",
+        "evidence/fresh-enable.exit.txt",
+        "evidence/fresh-enable-CodeBuild.log",
+        "evidence/fresh-enable-Project.code.json",
+        "evidence/Sdk.json"
+      ],
+      "status": "passed"
+    },
+    {
+      "feature_id": "compatibility",
+      "actual": "Upgrade exit 0; UpgradeReport sourceProject points to r6 and originalPreserved=true. New project Engine.lock pins .11.11.0.",
+      "engineVersion": "2026.11.11.0",
+      "expected": "Upgrade the real r6 working project into a new r7 project copy while preserving the source.",
+      "evidence_paths": [
+        "evidence/upgrade.exit.txt",
+        "evidence/upgrade.stdout.txt",
+        "evidence/upgrade.stderr.txt",
+        "evidence/UpgradeReport.json",
+        "evidence/Engine.lock.json",
+        "evidence/Project.json"
+      ],
+      "status": "passed"
+    },
+    {
+      "feature_id": "build-activate",
+      "actual": "ProjectTools Release rebuild exit 0; Project.code SDK is .11.11.0 with the new active module; launcher --check-project exit 0. Engine.lib SHA-256 87F34A76ABF802F85264E20AF0897C85BE3B18C32D77E12DBDD91CAAE18B6527.",
+      "engineVersion": "2026.11.11.0",
+      "expected": "Rebuild and validate the upgraded C++ game with the current explicit Runtime SDK.",
+      "evidence_paths": [
+        "evidence/game-build.log",
+        "evidence/game-build.exit.txt",
+        "evidence/Project.code.json",
+        "evidence/project-check.log",
+        "evidence/project-check.exit.txt",
+        "evidence/Sdk.json",
+        "evidence/project-check.stdout.txt",
+        "evidence/project-check.stderr.txt",
+        "evidence/ai-trash-r7-source.sha256.txt"
+      ],
+      "status": "passed"
+    },
+    {
+      "feature_id": "input",
+      "actual": "project.input sent Right followed by Space into the actual game. ThrowLedger changed 0/0→1/0 after the toss and 1/1 after 100 frames; projectile path ended in a registered hit. The separate aim delta was not independently measured.",
+      "engineVersion": "2026.11.11.0",
+      "expected": "Send key input through the real game loop; Space launches a trash item and a hit increments the score ledger.",
+      "evidence_paths": [
+        "evidence/main-input.request.json",
+        "evidence/main-input.result.json",
+        "evidence/main-input.log",
+        "evidence/main-input.exit.txt"
+      ],
+      "status": "passed"
+    },
+    {
+      "feature_id": "savegame-scene",
+      "actual": "Save captured elapsed=0.483334s; load process restored elapsed=0.500000s, throws=1/hits=0, then resumed to hits=1. Both processes exit 0; serialized round-current save is retained.",
+      "engineVersion": "2026.11.11.0",
+      "expected": "Save an in-flight throw in one Runtime process, load it in a fresh process, then observe its completion and score.",
+      "evidence_paths": [
+        "evidence/main-game-save.log",
+        "evidence/main-game-save.exit.txt",
+        "evidence/main-game-load.log",
+        "evidence/main-game-load.exit.txt",
+        "evidence/main-RoundSaveTest-after-save.log",
+        "evidence/main-RoundSaveTest-after-load.log",
+        "evidence/round-current.save.json",
+        "evidence/trash-round-save-load.bmp"
+      ],
+      "status": "passed"
+    },
+    {
+      "feature_id": "ai-graph-edit",
+      "actual": "State dialog renamed WalkToBin to WalkAlongBin; transition dialog set delay=0.04/priority=2. Both modal operations, Save, and Reopen returned status 0; the saved FSM contains the changes and no validation problems.",
+      "engineVersion": "2026.11.11.0",
+      "expected": "Edit a state and transition in the real FSM editor dialogs, save and reopen, retaining the values.",
+      "evidence_paths": [
+        "evidence/ai-side-play.request.json",
+        "evidence/ai-side-play.result.json",
+        "evidence/ai-side-play.log",
+        "evidence/ai-side-play.exit.txt",
+        "evidence/ai-state-dialog.png",
+        "evidence/ai-link-dialog.png",
+        "evidence/TrashSorter.fsm",
+        "evidence/TrashAIPractice.scene.json",
+        "evidence/ai-trash-r7-verification-summary.json"
+      ],
+      "status": "passed"
+    },
+    {
+      "feature_id": "ai-runtime-debug",
+      "actual": "After 120 frames, activePath=WalkAlongBin; history records WalkAlongBin→ReturnToStart succeeded and next activation. Character moved from (-4,0.5,3) to (-2.8225,0.5,3). Functional snapshot passed; D3D visual of this AI character remains unverified.",
+      "engineVersion": "2026.11.11.0",
+      "expected": "Play the side-scene FSM and observe an active state, a transition, and a corresponding character transform change.",
+      "visual_status": "unverified",
+      "evidence_paths": [
+        "evidence/ai-side-play.result.json",
+        "evidence/ai-side-play.log",
+        "evidence/TrashSorter.fsm",
+        "evidence/TrashAIPractice.scene.json",
+        "evidence/ai-trash-r7-verification-summary.json"
+      ],
+      "status": "passed"
+    }
+  ],
+  "workflows": [
+    {
+      "evidence_paths": [
+        "evidence/RoundSaveTest.log",
+        "evidence/trash-three-items.bmp",
+        "evidence/main-game-types.log",
+        "evidence/main-game-types.exit.txt",
+        "evidence/trash-three-items-before-hud-fix.bmp",
+        "evidence/trash-hud-1000x600.bmp",
+        "evidence/trash-hud-1000x600.request.json",
+        "evidence/trash-hud-1000x600.result.json",
+        "evidence/trash-hud-1000x600.verified.txt",
+        "evidence/trash-hud-1000x600.exit.txt",
+        "evidence/trash-hud-1000x600.log",
+        "evidence/trash-hud-640x480.bmp",
+        "evidence/trash-hud-640x480.request.json",
+        "evidence/trash-hud-640x480.result.json",
+        "evidence/trash-hud-640x480.verified.txt",
+        "evidence/trash-hud-640x480.exit.txt",
+        "evidence/trash-hud-640x480.log",
+        "evidence/RunHudResolutionCapture.ps1"
+      ],
+      "actual": "Three kinds were launched: imported box hit, soda and paper struck obstacles; total 1 hit/2 misses. The HUD aim hint was shortened after the before image showed it extending beyond the panel. In two actual Main-game runs, the complete `Aim: ... | L/R; T/Space toss` hint fits inside the panel at viewport/BMP sizes 1000x600 and 640x480. No physics engine behavior is claimed.",
+      "workflow_id": "small-gameplay-fragment",
+      "expected": "Preserve a small toss→collision→score loop and inspect the actual game HUD.",
+      "status": "passed"
+    },
+    {
+      "evidence_paths": [
+        "ai-trash-r7-source.zip",
+        "evidence/source-archive-rebuild/archive-files.txt",
+        "evidence/source-archive-rebuild/fresh-extraction-inventory.txt",
+        "evidence/source-archive-rebuild/build.log",
+        "evidence/source-archive-rebuild/build.exit.txt",
+        "evidence/source-archive-rebuild/run.log",
+        "evidence/source-archive-rebuild/run.exit.txt",
+        "evidence/ai-trash-r7-source.sha256.txt",
+        "evidence/source-archive-hud-fix/archive-files.txt",
+        "evidence/source-archive-hud-fix/fresh-extraction-inventory.txt",
+        "evidence/source-archive-hud-fix/build.log",
+        "evidence/source-archive-hud-fix/build.exit.txt",
+        "evidence/source-archive-hud-fix/run.log",
+        "evidence/source-archive-hud-fix/run.exit.txt",
+        "evidence/ai-trash-r7-source-before-hud-fix.zip"
+      ],
+      "actual": "Updated source-only ZIP has 46 files, including FSM side fixture, Game.sln/Game.vcxproj and project metadata; no binary/build/store/save outputs. Fresh extracted build and 20-frame run both exit 0 against .11.11.0. Updated archive SHA-256 is 8AC62D2F619FE83A1D8430611D19C1BA27167F16400E3B6F107D79A256CECBC1.",
+      "workflow_id": "source-archive-rebuild",
+      "expected": "Fresh extraction has no build outputs, then rebuild and launch with an explicit matching Runtime.",
+      "status": "passed"
+    }
+  ]
+}

@@ -1,0 +1,850 @@
+{
+  "persona": "tired-bomber",
+  "status": "in-progress",
+  "notes": [
+    "r7 compatibility copy rebuilt against .11 and smoke-launched; source remains pristine.",
+    "ai.editor bad/fixed validation request/result and live AI timeline captured. Other AI/runtime features remain open.",
+    "AI live state/history evidence is positive for ordinary patrol; hidden editor key route did not trigger tutorial key graph, recorded as a limit rather than engine defect.",
+    "FSM file write lock caused actual save failure; reopened after release showed changed SHA and thinkInterval 0.25, confirming successful retry.",
+    "AI input test was corrected to keep E down across two frames; tutorial noise/Investigate/movement and separate CanSee/Chase/Caught/OnCaught/player-reset sequence both succeeded.",
+    "Audio observer requires visible Runtime: hidden process captured zero; visible Play2D produced measurable coded tone. Clean independent Play3D near/far captures show little attenuation; recorded partial and sent root reproducible evidence. Stream stop observed below baseline after tail.",
+    "Play3D startup timing A/B isolated: first spatial update only in first PreUpdate after ~1.2s; manually calling AudioEngine::Update immediately produces near audible/far silent attenuation, supporting the startup transient hypothesis. Root will patch/SDK rebuild; role will repeat without manual call.",
+    "Independent raycast hit/miss and perspective center/off-center matrix probes run against v7 EngineCommandlets; no shared regression suites used.",
+    "R7-BUG-004 fix independently verified with two startup near/far pairs and a controlled warm pair after frame10; explicit listener/emitter coordinates, QPC and raw loopback captures show near audible/far2000 silent, baseline/tail zero.",
+    "Native project.scene CRUD and real Qt editor scene transform/select probes added: create-delete Undo restored ID1 across save/load; negative nonuniform transform persisted after save/reopen; click/hierarchy/focus worked, marquee remains unavailable.",
+    "SaveGame scene API round trip (separate processes) retained the full scene object list, asset references and edited Ground transform; not counted as full feature due to absent nested parent-child/custom component. Duplicate test observed parent-only duplicate; child/reference graph cloning remains unverified.",
+    "Own parameterized D3D diagnostics probe added: perspective camera distances 5/15/40 selected LOD0/1/2 with panel lines and valid completed frame counters; capture saved. This is a fixture InstancedMesh, not the project component or resize workflow.",
+    "Native editor Ctrl-toggle independently confirmed multi-selection [Warm Light id2, ProbeSun id6]; marquee remains unavailable per UI implementation review.",
+    "Own three-layer transparency camera-order test passed: opposite camera sides reversed nearest layer, center pixel stayed within 6/255 of independent source-over oracle.",
+    "Scene clone completed through group selection: ids remapped 1/2→3/4 and cloned child parent remapped to cloned parent; local pose and graph persisted after Save/Load. Scene-select feature covered actual viewport click, Ctrl-toggle, hierarchy and FocusSelected.",
+    "Private SDK hierarchy experiment compiled with the explicit current Runtime SDK and executed 3 hidden frames: world position matched independent expectation within 2.4e-7. Clone group relationship remaps parent ID on save/load; custom reference-target remap remains open.",
+    "Own SDK Runtime now verifies hierarchy world transform both before and after separate-process SaveGame; custom ProjectComponent and imported model asset survived. Derived Game version-1 section restored and continued advancing elapsed time. Same-ray collision filters demonstrated channel target change and ignore-list miss.",
+    "Same transparency scene rendered at three actual D3D backbuffer sizes and both render modes. BMP sizes match request; same-FOV fractional screen ray changes with aspect and returns on 4:3. Forward/Deferred pixel coverage and center color agree.",
+    "Public GameSubsystem::SerializeSaveGame was exercised with versioned TiredBomber.Score tick/time state; separate process restored exact values and continued. Time scale ratio and pause/no-tick/resume were observed through host frames and scene snapshots.",
+    "Own cross-plane intersection test passed from opposite camera azimuths; independent per-pixel plane intersection/source-over oracle reported 0 wrong samples out of 1079 and maximum error 1/255.",
+    "CompletedFrameStats probe verified invalid/index0 before first frame; indices advanced per render; minimized zero-size window preserved the last completed index; Pause rendered without simulation PreUpdate, and Resume read the advanced completed frame index. Point-shadow crowd LOD switched out/back while depth map hashes and probes remained stable.",
+    "Point-shadow-cubes fixture clarification: the receiver is itself an opaque cube, has default material and casts shadows by the public CastsShadow() rule; the explicit Caster is a second opaque mesh. Both point lights have distinct cubes and independent toggle/slot results.",
+    "Scene codec and clone reference checks now use a real project-defined BomberReferenceProbe with version-2 project data; duplicate owner/target remapped reference id2→4, and save/load preserved the cloned pair and custom values.",
+    "Native editor.scene v9 on an isolated copy captured real coordinate-space toggle false→true→false and actual viewport resize. Viewport/camera reports 611x443→802x443→555x343; projection aspect tracks each size.",
+    "Own project.input probe verified focus-gated K events, UI priority over Game, pop to Game, disconnect suppression and successful rebind.",
+    "Project HUD is selected by Content/ProjectHud.txt and rendered in the actual game frame. Runtime label/bar update, 1.5 overfill rendering clamp, button click, and anchor positions at 640x480/1280x720 were captured.",
+    "Follow-up HUD check captured actual 640x480 and 1280x720 game frames, confirmed Cyrillic text and all anchors visually at both sizes. A fresh no-assignment Content tree loaded zero ProjectHud and its frame contains no custom HUD.",
+    "Trace debug now has numeric hit/normal/line-count evidence and an inspected D3D frame showing the active bomb ray and hit segment.",
+    "R7-BUG-005 independent Editor Play retry passed on newly rebuilt .11 SDK SHA87F34A76…B6527: zero, half, and double time produced expected delta and Player motion; Pause held position, Resume continued.",
+    "Own cascade stability experiment and skeletal/VAT transparency LOD/resize captures passed with numeric CPU/image oracles; no remaining not-tested feature IDs."
+  ],
+  "head": "main 6899a6a + local integration",
+  "features": [
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/scene-create-delete.request.json",
+        "evidence/scene-create-delete.result.json",
+        "evidence/scene-create-delete.log",
+        "evidence/role-scene-delete.scene.json"
+      ],
+      "feature_id": "scene-create-delete",
+      "expected": "Create a known type, find it by name/type in scene snapshot, delete, confirm absent, undo and confirm same data/ID restored; separate object and type in a second isolated scene.",
+      "actual": "Own project.scene run: created Primitive.Cube RoleDeleteProbe (id 1), snapshot confirmed type/name, delete removed it, Undo restored the same id/type/name, then save and reload preserved it. All six steps returned status 0."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/sdk-savegame-hierarchy.request.json",
+        "evidence/hierarchy-save-final.stdout.log",
+        "evidence/hierarchy-load-final.stdout.log",
+        "evidence/save-subsystem.stdout.log",
+        "evidence/load-subsystem.stdout.log",
+        "evidence/sdk-probe-build-6.log",
+        "evidence/ProjectGame-sdk-probes.cpp",
+        "evidence/round-1.save.json"
+      ],
+      "feature_id": "scene-hierarchy",
+      "expected": "Parent a child under translated/rotated/scaled parent; compare local pose and transformed world point against independently calculated expectation; save/load and repeat.",
+      "actual": "Compiled own SDK fixture used a registered ProjectComponent parent at (10,0,0), Z rotation 90°, scale (2,3,1), and child local (1,0,0); GetWorldPosition=(10,2,0), independent expected=(10,2,0), error 2.38e-7. A separate-process SaveGame roundtrip restored parent id16, child id17 with childParent=16, customProjectComponent=true and imported model path; world pose/error matched identically."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/editor-transform-negative.request.json",
+        "evidence/editor-transform-negative.result.json",
+        "evidence/editor-transform-negative.log",
+        "evidence/role-scene-transform-2.scene.json",
+        "evidence/editor-scene-v9.request.json",
+        "evidence/editor-scene-v9.result.json",
+        "evidence/editor-scene-v9.log"
+      ],
+      "feature_id": "scene-transform",
+      "expected": "Apply nonuniform and negative scale, Euler rotation, translation in local/world mode; query world pose and save/reopen exact values.",
+      "actual": "Real Editor edited and saved Ground position, Euler rotation and nonuniform/negative scale; reopened snapshot retained values. In native editor.scene v9, selected Cube; real Gizmo.ToggleCoordinateSpace snapshots changed false→true→false, proving both coordinate modes switch. Native viewport drag changed its transform and Undo restored it; all action statuses 0."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/scene-codec-clone.request.json",
+        "evidence/scene-codec-clone.result.json",
+        "evidence/scene-codec-clone.log",
+        "evidence/role-codec-clone.scene.json",
+        "evidence/ProjectComponent-codec.h",
+        "evidence/ProjectComponent-codec.cpp",
+        "evidence/scene-codec-save-final.stdout.log",
+        "evidence/scene-codec-load-final.stdout.log",
+        "evidence/scene-codec-sdk-build-final.log",
+        "evidence/round-1.save.json"
+      ],
+      "feature_id": "scene-codec",
+      "expected": "Add a project component with versioned custom data/reference fields; write scene, reopen in a fresh process, verify type, field version, values and reference target.",
+      "actual": "Own project component BomberReferenceProbe exposes version-2 project data {score,target}. project.scene set score=84.5 and target id2; duplicating selected owner+target produced ids3/4 with the cloned owner target remapped to4. Save/load retained both original and cloned data/reference pairs. Separate Runtime SaveGame processes also reloaded type, version2, score73.25 and valid target ProjectComponent id15."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/scene-codec-clone.request.json",
+        "evidence/scene-codec-clone.result.json",
+        "evidence/scene-codec-clone.log",
+        "evidence/role-codec-clone.scene.json",
+        "evidence/ProjectComponent-codec.h",
+        "evidence/ProjectComponent-codec.cpp"
+      ],
+      "feature_id": "scene-clone",
+      "expected": "Duplicate a parent+child/reference graph; assert new IDs and cloned reference targets the cloned object; save/load the clone graph.",
+      "actual": "Group duplicate included BomberReferenceProbe owner id1 referencing target id2. Clone created new owner id3 and target id4, and custom reference remapped from2→4. Score84.5/version2 and parent/identity data persisted after save/load."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/editor-scene-transform.request.json",
+        "evidence/editor-scene-transform.result.json",
+        "evidence/editor-scene-transform.log",
+        "evidence/editor-ctrl-toggle-2.request.json",
+        "evidence/editor-ctrl-toggle-2.result.json",
+        "evidence/editor-ctrl-toggle-2.log",
+        "evidence/editor-ctrl-toggle-2.png"
+      ],
+      "feature_id": "scene-select",
+      "expected": "Use actual viewport click, hierarchy row, Ctrl-toggle group selection and focus action; assert selected IDs and focus camera/object after each. Marquee is outside the implemented selection contract.",
+      "actual": "Native window: hierarchy-click selected Warm Light id2; viewport click selected ProbeSun id6; Ctrl viewport click returned selectedIds [2,6]; FocusSelected accepted and adjusted the camera. Marquee selection is not implemented in the current viewport and is not included in the verified click/Ctrl-toggle/hierarchy/focus contract."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/time-probe.request.json",
+        "evidence/time-probe.stdout.log",
+        "evidence/time-pause-input-2.request.json",
+        "evidence/time-pause-input-2.result.json",
+        "evidence/time-pause-input-2.log",
+        "evidence/ProjectGame-sdk-probes.cpp",
+        "evidence/sdk-probe-build-6.log",
+        "evidence/editor-timescale.request.json",
+        "evidence/editor-timescale-0.result.json",
+        "evidence/editor-timescale-0.log",
+        "evidence/editor-timescale-0.5.result.json",
+        "evidence/editor-timescale-0.5.log",
+        "evidence/editor-timescale-2.result.json",
+        "evidence/editor-timescale-2.log",
+        "evidence/editor-timescale-analysis.json",
+        "evidence/editor-timescale-build-metadata.json",
+        "evidence/editor-timescale-sdk-build.log",
+        "evidence/ProjectGame-editor-timescale-probe.cpp"
+      ],
+      "feature_id": "time",
+      "expected": "Log ticks and accumulated simulation time at time scales 0.5/2.0; compare ratios, then pause across rendered frames and assert no simulation ticks/time.",
+      "actual": "Legacy standalone check remains: 20 frames at .5 produced .166667s; next 20 at2 produced .666667s (4x); separate pause/resume held scene position through60 paused frames and resumed movement. Independent r7 EditorQtHost Play now also verified on SDK Engine.lib SHA87F34A76…B6527. Constant-scale runs over the same host schedule: scale0 returned dt=0 and accumulated=0 at game frames30/60, Player z stayed5 throughout; .5 returned dt=.008, accumulated .24 then .48, Player z5→3.800001, stayed fixed during pause, then→2.600002; scale2 returned dt=.032, accumulated .96 then1.92, Player z5→.200000→pause-stable→−4.600000. .5 and2 movement/time ratios are 4x; all three fresh Editor Play scenarios exited0."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/input-probe.request.json",
+        "evidence/input-probe.result.json",
+        "evidence/input-probe.log",
+        "evidence/sdk-probe-build-retry.log"
+      ],
+      "feature_id": "input",
+      "expected": "Exercise public input bindings and subscriptions with context priority/consumption, focus lifecycle, UI context pop, disconnect, and rebind through actual project.input key events.",
+      "actual": "Private rebuilt Bomber registered K in Game(priority10) and UI(priority20), both consume. Without focus key was not delivered; after explicit focus, first K press reached UI only (cancelled=false), a later press after UI context pop reached Game only; after disconnect, no callback; after Game subscription rebind, callback fired. This distinguishes focus prerequisite from missing delivery."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/editor-scene-v9.request.json",
+        "evidence/editor-scene-v9.result.json",
+        "evidence/editor-scene-v9.log",
+        "evidence/camera-640-center.request.json",
+        "evidence/camera-640-center.result.json",
+        "evidence/camera-640-center.log",
+        "evidence/camera-640-offcenter.request.json",
+        "evidence/camera-640-offcenter.result.json",
+        "evidence/camera-640-offcenter.log",
+        "evidence/camera-1280-center.request.json",
+        "evidence/camera-1280-center.result.json",
+        "evidence/camera-1280-center.log",
+        "evidence/camera-1280-offcenter.request.json",
+        "evidence/camera-1280-offcenter.result.json",
+        "evidence/camera-1280-offcenter.log",
+        "evidence/camera-resize-640.request.json",
+        "evidence/camera-resize-640.result.json",
+        "evidence/camera-resize-1280.request.json",
+        "evidence/camera-resize-1280.result.json"
+      ],
+      "feature_id": "camera-perspective",
+      "expected": "Perspective center and off-center rays at 640×480 and 1280×720; compare origin/direction to camera basis/FOV and confirm resize preserves projection.",
+      "actual": "Own hidden project renders and native Editor viewport were measured at differing viewports. Live resize changed viewport/camera projection from 611x443 to 802x443 then 555x343; camera dimensions equal actual viewport, and projection[5]/projection[0] matches each aspect. Independent screen-ray checks at two aspect ratios also showed off-center ray direction change and return at original aspect."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/trace-hit.request.json",
+        "evidence/trace-hit.result.json",
+        "evidence/trace-hit.log",
+        "evidence/trace-miss.request.json",
+        "evidence/trace-miss.result.json",
+        "evidence/trace-miss.log"
+      ],
+      "feature_id": "trace-world",
+      "expected": "Cast ray and segment through known cube/plane; assert Hit/Miss, nearest distance, point and normal against geometry.",
+      "actual": "Own v7 trace.raycast commandlet: ray origin(0,0,5) direction(0,0,-1) through known triangle hit at distance=5, point=(0,0,0), normal=(0,0,1); translated x=3 control missed. Both calls exit 0."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/trace-filter-sdk.request.json",
+        "evidence/trace-filter-sdk.stdout.log",
+        "evidence/ProjectGame-sdk-probes.cpp",
+        "evidence/sdk-probe-build-5.log"
+      ],
+      "feature_id": "trace-filter",
+      "expected": "A/B same query with include/exclude collision mask and ignored component; assert target changes only when filtered, with an unfiltered control.",
+      "actual": "Same downward ray with channel1 hit Ground id1 and channel2 hit unit id7. Repeating channel2 while ignoring component id7 produced status Miss and component id0. Runtime exited successfully."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/trace-debug.request.json",
+        "evidence/trace-debug.result.json",
+        "evidence/trace-debug.log",
+        "evidence/trace-debug-active-bomb.bmp",
+        "evidence/sdk-tracedebug-build.log"
+      ],
+      "feature_id": "trace-debug",
+      "expected": "Enable ray/normal visualization; render new BMP and assert counters/lines and hit normal correspond to known collider.",
+      "actual": "Own Runtime probe emitted a downward exact-geometry ray against the known unit: Hit component7 at (-6,0.72,-2), normal≈(0,1,0), 5 debug segments; at frame80, active bomb ray hit floor id1 at distance6.976 and DebugDrawTrace count=21. Hidden D3D BMP visibly shows red/green ray to floor with the bomb; the prior UI debug overlay was disabled for this capture. Commandlet/runtime calls exited 0."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/hud-project.request.json",
+        "evidence/hud-project.result.json",
+        "evidence/hud-project.log",
+        "evidence/BomberRole.ui",
+        "evidence/ProjectHud.txt",
+        "evidence/hud-project-640.bmp",
+        "evidence/hud-project-1280.bmp",
+        "evidence/hud-probe-build-final.log",
+        "evidence/ProjectGame-HUD-Probe.cpp",
+        "evidence/hud-runtime-1280.stdout.log",
+        "evidence/hud-runtime-1280.stderr.log",
+        "evidence/hud-no-assignment.Project.json",
+        "evidence/hud-no-assignment-frame.bmp",
+        "evidence/hud-no-assignment.stdout.log",
+        "evidence/hud-no-assignment.stderr.log"
+      ],
+      "feature_id": "hud-project",
+      "expected": "Assign a `.ui` asset through actual project setting, open Game, assert loaded asset/element IDs and visible frame; remove assignment and verify no stale HUD.",
+      "actual": "A project-local Content/ProjectHud.txt selected UI/BomberRole.ui. Runtime loaded the markup (loaded=1, no parse errors), updated the Cyrillic status Label/Bar, and the Button callback fired exactly once. A fresh second project with no assignment returned loaded=0 and rendered no custom HUD, confirming opt-out has no stale element. Both runs exited 0."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/hud-project.request.json",
+        "evidence/hud-project.result.json",
+        "evidence/hud-project.log",
+        "evidence/BomberRole.ui",
+        "evidence/ProjectHud.txt",
+        "evidence/hud-project-640.bmp",
+        "evidence/hud-project-1280.bmp",
+        "evidence/hud-probe-build-final.log",
+        "evidence/ProjectGame-HUD-Probe.cpp",
+        "evidence/hud-runtime-1280.stdout.log",
+        "evidence/hud-runtime-1280.stderr.log",
+        "evidence/hud-no-assignment.Project.json",
+        "evidence/hud-no-assignment-frame.bmp",
+        "evidence/hud-no-assignment.stdout.log",
+        "evidence/hud-no-assignment.stderr.log"
+      ],
+      "feature_id": "hud-elements",
+      "expected": "Build Panel + Label + Bar + Button; verify text, min/max/value/clamp, click event and rendered pixels.",
+      "actual": "Real project HUD contained Panel, Cyrillic Label, Bar, and interactive Button. SetLabelText/SetBarFill returned true; button input produced fire-click count=1. Fill raw 1.5, but rendered Bar was clamped to its track width (220px) by the renderer; screenshot confirms no overflow."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/hud-project.request.json",
+        "evidence/hud-project.result.json",
+        "evidence/hud-project.log",
+        "evidence/BomberRole.ui",
+        "evidence/ProjectHud.txt",
+        "evidence/hud-project-640.bmp",
+        "evidence/hud-project-1280.bmp",
+        "evidence/hud-probe-build-final.log",
+        "evidence/ProjectGame-HUD-Probe.cpp",
+        "evidence/hud-runtime-1280.stdout.log",
+        "evidence/hud-runtime-1280.stderr.log",
+        "evidence/hud-no-assignment.Project.json",
+        "evidence/hud-no-assignment-frame.bmp",
+        "evidence/hud-no-assignment.stdout.log",
+        "evidence/hud-no-assignment.stderr.log"
+      ],
+      "feature_id": "hud-layout",
+      "expected": "Four-corner anchors and centered element at 640×480/1280×720 with Cyrillic text; compare expected pixel bounds and screenshots.",
+      "actual": "Rendered game BMPs at actual backbuffer sizes 640x480 and 1280x720 were both inspected. They show the Cyrillic status label, 100% fill confined to the 220px Bar track despite raw fill=1.5, top-left panel, top-right orange marker, centered magenta marker, bottom-left cyan marker and bottom-right FIRE button. Measured bounds match anchors at both sizes: TR(584,16)→(1224,16); BL(16,440)→(16,680); center(300,228)→(620,348); BR(474,428)→(1114,668)."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/upgrade.result.json",
+        "evidence/BomberUpgradedR7.UpgradeReport.json",
+        "evidence/upgrade-build.result.json",
+        "evidence/BomberUpgradedR7.Project.code.json",
+        "evidence/BomberUpgradedR7.build.log",
+        "evidence/upgrade-check.result.json",
+        "evidence/upgrade-smoke.result.json"
+      ],
+      "feature_id": "compatibility",
+      "expected": "Preserve pristine r5 copy/hash; upgrade copy, verify lock .11, buildId/fingerprint and custom module, then smoke only rebuilt copy; compare source file hashes.",
+      "actual": "Pristine r5 copy remained unchanged; .11 launcher upgraded and explicitly rebuilt private copy (SDK .11, buildId and DLL fingerprint recorded), check exit 0, rebuilt custom module runtime smoke exit 0."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/forward-resize.request.json",
+        "evidence/forward-resize.result.json",
+        "evidence/forward-resize.log",
+        "evidence/forward-resize-0.bmp",
+        "evidence/deferred-resize.request.json",
+        "evidence/deferred-resize.result.json",
+        "evidence/deferred-resize.log",
+        "evidence/deferred-resize-0.bmp",
+        "evidence/render-resize-modes-summary.json"
+      ],
+      "feature_id": "render-modes",
+      "expected": "Same fixed scene/camera rendered in Forward and Deferred; capture both and compare nonblack pixel coverage plus adapter/frame stats.",
+      "actual": "Same three translucent layers/material/camera ran in Forward and Deferred on the same NVIDIA adapter. At 640×480, both center pixels were RGB (127,64,38), both differed from corner background at 113,288 pixels; draw calls 116 vs 117. Images and request/result logs captured. Both mode requests use the same isolated Layer.mat fixture; replay requests in the report point to its captured source."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/forward-resize.request.json",
+        "evidence/forward-resize.result.json",
+        "evidence/forward-resize.log",
+        "evidence/forward-resize-0.bmp",
+        "evidence/forward-resize-1.bmp",
+        "evidence/forward-resize-2.bmp",
+        "evidence/camera-resize-640.result.json",
+        "evidence/camera-resize-1280.result.json",
+        "evidence/camera-resize-800.result.json",
+        "evidence/render-resize-modes-summary.json"
+      ],
+      "feature_id": "render-resize",
+      "expected": "Resize live viewport through 640×480→1280×720→800×600; assert actual backbuffer size, aspect rays and completed frame counters after each.",
+      "actual": "Own hidden D3D viewport rendered the same perspective scene at 640×480, 1280×720 and 800×600; BMP dimensions and frame dump logs match each requested backbuffer size, all frames had 116 draw calls. Same-FOV screen-ray queries at 75% width/50% height returned direction x=.3592,z=-.9333 (640×480), x=.4566,z=-.8897 (1280×720), then x=.3592,z=-.9333 (800×600), matching independent aspect/FOV expectation. This verified viewport-size output and aspect response."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/diagnostics-runtime.log",
+        "evidence/diagnostics-runtime.stderr.log",
+        "evidence/diagnostics-build.log",
+        "evidence/diagnostics-ProjectGame.cpp",
+        "evidence/diagnostics-ProjectGame.h",
+        "evidence/diagnostics-before.bmp",
+        "evidence/diagnostics-cube.bmp",
+        "evidence/diagnostics-cube-batch.bmp",
+        "evidence/diagnostics-all.bmp",
+        "evidence/diagnostics-removed.bmp"
+      ],
+      "feature_id": "diagnostics",
+      "expected": "Add/remove one cube, one instanced batch and one particle system; compare per-frame DrawCalls/Instances/Dispatches and frame dump before/after.",
+      "actual": "Own private Bomber runtime added MeshComponent Cube id16, InstancedMeshComponent id17 with 3 instances, and ParticleSystemComponent id18 with 256 particles, then removed all three. Valid completed-frame counters: baseline (draws90, instances121, dispatches0, visible10); cube (94,125,0,11); cube+batch (97,134,0,12); particles active (49,341,38,13); after removal exactly returned to baseline (90,121,0,10). Captured five 1000x500 BMP frames; the cube and green three-instance batch are visible in their corresponding images, and the particle stage has actual dispatch activity. DrawCalls fell by48 with the particle system active, so report the measured counters without interpreting that as a draw-call improvement. Private Runtime exited0. Source-based inference for the observed draw-count drop: Engine/Source/MainGame/BaseGameClass/Game.cpp selects depth peeling only when every transparent draw has a material transparency pixel shader; the added ParticleSystemComponent has no such per-material shader, likely switching the queue to the sorted fallback. This is a source-informed explanation, not a separately isolated render-mode measurement in this probe."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/sdk-savegame-hierarchy.request.json",
+        "evidence/save-subsystem.stdout.log",
+        "evidence/load-subsystem.stdout.log",
+        "evidence/round-1.save.json",
+        "evidence/ProjectGame-sdk-probes.cpp"
+      ],
+      "feature_id": "savegame-scene",
+      "expected": "Save a two-level scene with transformed child, built-in and custom component, reload in another process and compare IDs/parent/poses/asset paths.",
+      "actual": "Real derived game SaveGame wrote a slot in one hidden Runtime process and restored in a second. It restored a parent/child ProjectComponent hierarchy, built-in game objects and imported model; ids 16/17, child→parent relation, custom component type, model asset and world pose were verified."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/sdk-savegame-hierarchy.request.json",
+        "evidence/save-subsystem.stdout.log",
+        "evidence/load-subsystem.stdout.log",
+        "evidence/round-1.save.json",
+        "evidence/ProjectGame-sdk-probes.cpp",
+        "evidence/ProjectGame-sdk-probes.h",
+        "evidence/sdk-probe-build-6.log"
+      ],
+      "feature_id": "savegame-derived",
+      "expected": "Serialize a derived component versioned field and subsystem score; process restart and assert both restore plus continue updating.",
+      "actual": "Own ProjectGame version-1 TiredBomber.Round serializes elapsed/bomb timer/hits/misses/target/unit count and component references. Own BomberSessionDiagnostics GameSubsystem added version-1 TiredBomber.Score {ticks,elapsed} via public GameSubsystem::SerializeSaveGame; process A saved at tick20 elapsed0.333333, process B logged restored tick20/elapsed0.333333, advanced to tick40/0.666667 and saved again. This verifies derived game + subsystem score state and continuation."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/completed-frame-probe.request.json",
+        "evidence/completed-frame-probe.result.json",
+        "evidence/completed-frame-probe.log",
+        "evidence/completed-frame-sdk-build.log",
+        "evidence/ProjectGame-sdk-probes.cpp"
+      ],
+      "feature_id": "completed-frame",
+      "expected": "Log `valid/frameIndex/counters` before first render and from every `PreUpdate`; assert previous completed frame advances once and zero-size minimized frame does not fabricate.",
+      "actual": "Own compiled SDK probe logged CompletedFrameStats from each PreUpdate. First was valid=false/index0; indices advanced one per render through 1,2,3. After OnWindowResized(0,0,true), six observations stayed valid/index3. Restoring 640×480 advanced indices 4,5,6. During 60 host paused frames no game PreUpdate ran; after Resume the next observation was index67, then 68."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/lod-panel-runtime.log",
+        "evidence/lod-panel-runtime.stderr.log",
+        "evidence/lod-panel-build.log",
+        "evidence/lod-panel-ProjectGame.cpp",
+        "evidence/lod-panel-ProjectGame.h",
+        "evidence/lod-panel-2-far-24m.bmp",
+        "evidence/lod-panel-2-mid-8m.bmp",
+        "evidence/lod-panel-2-cull-1280x720.bmp"
+      ],
+      "feature_id": "lod-panel",
+      "expected": "Target a known LOD component, show panel, step camera across bucket and cull thresholds, resize, assert panel text/buckets and frame screenshots.",
+      "actual": "Own private current-SDK Bomber runtime targeted its project InstancedMeshComponent Bomber.Markers.LOD, selected it in the real F8 panel, and captured actual game frames. At camera Y=24 it drew 11/13 instances, all LOD2, distance range24.6..46.5; at Y=8 it drew 11/13, all LOD1, range10.0..40.8. At Y=60 with draw-distance60 it reported 0/13 drawn and 12 distance-culled (one explicitly hidden instance); the real diagnostic panel showed Draw limit60 and all LOD counts zero. After OnWindowResized(1280,720), runtime BMP is 1280x720 and the panel/component counts persist. All three images were visually inspected; runtime and private project build exited0."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/point-shadow-cubes.request.json",
+        "evidence/point-shadow-cubes.result.json",
+        "evidence/point-shadow-cubes.log",
+        "evidence/point-shadow-cubes-0.bmp",
+        "evidence/point-shadow-cubes-1.bmp",
+        "evidence/point-shadow-cubes-2.bmp",
+        "evidence/point-shadow-summary.json",
+        "evidence/PointShadowDiagnostics.h",
+        "evidence/GameComponents.CastsShadow.cpp"
+      ],
+      "feature_id": "point-shadow-cubes",
+      "expected": "Two differently placed point lights and two casters; capture/read back both cube maps, toggle each light independently and assert its own map changes.",
+      "actual": "The actual commandlet scene has two distinct default opaque MeshComponents: Receiver floor cube (position [2,-0.15,0], scale [24,0.3,16]) and Caster cube. GameComponent::CastsShadow() returns true when there is no material disabling shadows and the component is neither transparent nor skybox; both satisfy this. Two differently positioned point lights produced separate six-face cube hashes/occupied texels. Disabling each light independently removed its own slot; the remaining light retained its exact cube hashes. Both caster objects are present in the scene; per-object shadow contribution was not separately isolated."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/shadow-cascade-fit.request.json",
+        "evidence/shadow-cascade-fit.stdout.log",
+        "evidence/shadow-cascade-fit.stderr.log",
+        "evidence/shadow-cascade-fit.analysis.json",
+        "evidence/analyze-shadow-cascade.py",
+        "evidence/ProjectGame-cascade-probe.cpp",
+        "evidence/sdk-cascade-final2-build.log",
+        "evidence/shadow-cascade-build-metadata.json"
+      ],
+      "feature_id": "shadow-cascade-fit",
+      "expected": "Sweep camera translation/orbit across texel boundaries; record cascade bounds/snap/blend and assert stable snapped bounds for sub-texel moves, changed bounds for larger move.",
+      "actual": "Private game Runtime on Engine.lib SHA87F34A76…B6527 used the public cascade0 sphere/matrix/splits/shadow params after actual render frames. Stable radius=11.0575, map size=2048 (ShadowParams.w=1/2048), splits=8/28/100; independent CPU estimate 2r/2048=.0107984m/texel. SceneCamera moves x=.05→.051 (<half texel, .001m) left all16 matrix entries bit-identical; x=.051→1.05 (~92.5 estimated texels) changed snapped projection translation by .07910155; returning to .051 restored the exact matrix. Script asserts these deltas and constant sphere radius; Runtime exit0."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/audio-play2d-visible.runtime.stdout.log",
+        "evidence/audio-play2d-visible.capture.json",
+        "evidence/audio-play2d-visible.wav",
+        "evidence/audio-play2d.analysis.json",
+        "evidence/audio-build.log"
+      ],
+      "feature_id": "audio-play2d",
+      "expected": "Capture shared-mode WASAPI loopback around unique coded mono tone; assert matched-filter peak/correlation and RMS above baseline during Play2D.",
+      "actual": "Private rebuilt Bomber used public AudioEngine LoadSound+looping Play2D on a 997Hz mono 48kHz coded tone (loaded=1, accepted=1); visible Runtime exit 0, Realtek loopback 120×100ms; baseline correlation 0, 48 active windows mean quadrature matched amplitude 0.06094, mean RMS 0.04594, post-play max RMS 0. Captured waveform distinguishes this tone from unrelated audio."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/audio-play3d-near-clean.runtime.stdout.log",
+        "evidence/audio-play3d-far-clean.runtime.stdout.log",
+        "evidence/audio-play3d-far2000-clean.runtime.stdout.log",
+        "evidence/audio-play3d-near-clean.capture.json",
+        "evidence/audio-play3d-far-clean.capture.json",
+        "evidence/audio-play3d-far2000-clean.capture.json",
+        "evidence/audio-play3d-near-clean.wav",
+        "evidence/audio-play3d-far-clean.wav",
+        "evidence/audio-play3d-far2000-clean.wav",
+        "evidence/audio-play3d-near-clean.analysis.json",
+        "evidence/audio-play3d-far-clean.analysis.json",
+        "evidence/audio-play3d-far2000-clean.analysis.json",
+        "evidence/audio-build-far200.log",
+        "evidence/audio-build-far2000.log",
+        "evidence/audio-build-first-spatial-update.log",
+        "evidence/audio-play3d-near-spatial.runtime.stdout.log",
+        "evidence/audio-play3d-far-spatial.runtime.stdout.log",
+        "evidence/audio-play3d-near-spatial.capture.json",
+        "evidence/audio-play3d-far-spatial.capture.json",
+        "evidence/audio-play3d-near-spatial.wav",
+        "evidence/audio-play3d-far-spatial.wav",
+        "evidence/audio-play3d-near-spatial.analysis.json",
+        "evidence/audio-play3d-far-spatial.analysis.json",
+        "evidence/AudioProbe.ProjectGame.cpp",
+        "evidence/audio-build-postfix.log",
+        "evidence/audio-build-warm.log",
+        "evidence/audio-play3d-near-postfix-1.runtime.stdout.log",
+        "evidence/audio-play3d-far-postfix-1.runtime.stdout.log",
+        "evidence/audio-play3d-near-postfix-2.runtime.stdout.log",
+        "evidence/audio-play3d-far-postfix-2.runtime.stdout.log",
+        "evidence/audio-play3d-near-postfix-1.capture.json",
+        "evidence/audio-play3d-far-postfix-1.capture.json",
+        "evidence/audio-play3d-near-postfix-1.wav",
+        "evidence/audio-play3d-far-postfix-1.wav",
+        "evidence/audio-play3d-near-postfix-1.analysis.json",
+        "evidence/audio-play3d-far-postfix-1.analysis.json",
+        "evidence/audio-play3d-near-postfix-2.analysis.json",
+        "evidence/audio-play3d-far-postfix-2.analysis.json",
+        "evidence/audio-play3d-near-warm.runtime.stdout.log",
+        "evidence/audio-play3d-far-warm.runtime.stdout.log",
+        "evidence/audio-play3d-near-warm.capture.json",
+        "evidence/audio-play3d-far-warm.capture.json",
+        "evidence/audio-play3d-near-warm.wav",
+        "evidence/audio-play3d-far-warm.wav",
+        "evidence/audio-play3d-near-warm.analysis.json",
+        "evidence/audio-play3d-far-warm.analysis.json",
+        "evidence/AudioProbe.ProjectGame.cpp"
+      ],
+      "feature_id": "audio-play3d",
+      "expected": "Same coded source/gain/listener, run near and far emitter in independent windows; matched-filter RMS near > far by fixed threshold, baseline noise bounded.",
+      "actual": "R7-BUG-004 independently confirmed fixed by the private SDK game build. Two no-workaround startup pairs: near2m emitted a spatially attenuated coded signal, far2000m was silent; QPC showed first game PreUpdate ~1.2s after Play3D. Steady-state frame10 pair explicitly logs the current listener/player (0,24,0): near2m emitter=(0,24,2), Play3D accepted; 14 active 100ms windows, matched amplitude .04066/RMS .0311. Far2000 emitter=(0,24,2000) accepted but 0 active 997Hz match. Both had zero baseline correlation and zero post-tail RMS. This confirms distance falloff after the voice is spatially initialized before Start; a test-only warm start isolates steady attenuation."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/audio-stream-clean.runtime.stdout.log",
+        "evidence/audio-stream-clean.capture.json",
+        "evidence/audio-stream-clean.wav",
+        "evidence/audio-stream-clean.analysis.json",
+        "evidence/audio-build-far200.log"
+      ],
+      "feature_id": "audio-stream",
+      "expected": "Capture multiple loop windows while streaming coded WAV; assert correlation in each window, then call StopStream and assert signal drops to baseline after buffer-tail window.",
+      "actual": "Actual AudioEngine PlayStream loop (handle=1) ran from visible Runtime; stop invoked at frame 180. Independent 997Hz loopback correlation was present in 40 successive 100ms windows (2.3–6.2s); measured tail RMS after 9s was 0, baseline correlation 0. Stop tail drained to endpoint baseline."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/shadow-lod-switch-clean.request.json",
+        "evidence/shadow-lod-switch-clean.result.json",
+        "evidence/shadow-lod-switch-clean.log",
+        "evidence/shadow-lod-switch-clean-0.bmp",
+        "evidence/shadow-lod-switch-clean-1.bmp",
+        "evidence/shadow-lod-switch-clean-2.bmp",
+        "evidence/point-shadow-summary.json"
+      ],
+      "feature_id": "point-shadow-lod-transition",
+      "expected": "Move camera across a known screen-size boundary and back; assert selected LOD changes/restores and shadow map contains/restores caster data.",
+      "actual": "One animated VAT/crowd caster at fixed time0, camera distance 8.94→74.95→8.94, selected perLod [1,0,0]→[0,0,1]→[1,0,0]. All six point-shadow face hashes and occupied texels remained identical; depth probes (true,true,false) remained stable, confirming the caster map persists across LOD switch and return."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/transparency-camera-sorting.request.json",
+        "evidence/transparency-camera-sorting.result.json",
+        "evidence/transparency-camera-sorting.log",
+        "evidence/Layer.hlsl",
+        "evidence/Layer.mat",
+        "evidence/transparency-sort-nearred.bmp",
+        "evidence/transparency-sort-nearblue.bmp",
+        "evidence/transparency-camera-sorting-pixels.json"
+      ],
+      "feature_id": "transparency-camera-sorting",
+      "expected": "Use three alpha layers with known colors at distinct depths; capture camera order A/B and compare selected pixels against sorted source-over compositing values.",
+      "actual": "Own D3D test used red/green/blue translucent mesh layers (alpha .5, distinct z). Camera from -Z measured center RGB (127,64,38) vs independent source-over (128,64,32); from +Z measured (32,64,133) vs (32,64,128), max channel error <=6/255. Reversing the camera changes nearest layer and channel dominance as expected. Both renders completed; same scene/material was used."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/transparency-cross.request.json",
+        "evidence/transparency-cross.result.json",
+        "evidence/transparency-cross.log",
+        "evidence/Cross.hlsl",
+        "evidence/Cross.mat",
+        "evidence/transparency-cross-30.bmp",
+        "evidence/transparency-cross-plus30.bmp",
+        "evidence/analyze-transparency-cross.py",
+        "evidence/transparency-cross-analysis.json"
+      ],
+      "feature_id": "transparency-intersections",
+      "expected": "Render crossed and self-intersecting translucent quads; orbit at fixed angles and compare overlap pixels with a CPU source-over oracle.",
+      "actual": "Own D3D test rendered two intersecting translucent planes at yaw −45°/＋45° with red/blue UV branches, from camera azimuth −30° and +30°. Independent per-pixel ray/plane source-over oracle compared 540 and 539 interior samples; zero pixels exceeded 8/255 error and max error was 1. Both frames completed with 50 draw calls."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/transparency-animated-request.json",
+        "evidence/transparency-animated-result.json",
+        "evidence/transparency-animated-commandlet.log",
+        "evidence/transparency-animated-image-analysis.json",
+        "evidence/transparency-animated-analyze-images.py",
+        "evidence/transparency-animated-Layer.mat",
+        "evidence/transparency-animated-Layer.hlsl",
+        "evidence/transparency-animated-near-640-t0.bmp",
+        "evidence/transparency-animated-near-640-t06.bmp",
+        "evidence/transparency-animated-near-1280-t06.bmp",
+        "evidence/transparency-animated-far-640-t12.bmp",
+        "evidence/transparency-animated-far-1280-t18.bmp"
+      ],
+      "feature_id": "transparency-animated-lod-resize",
+      "expected": "Capture skeletal and VAT casters at two camera distances around LOD switch and two viewport sizes; verify nonempty frames, expected motion silhouettes and stable translucent order.",
+      "actual": "Own v10 hidden D3D test used real skeletal plane and crowd/VAT plane with same translucent material, z-separated .5m. Camera z−6/distance6 selected crowd LOD[1,0,0]; z−10/distance10 selected [0,1,0], crossing its8m threshold. Each distance was captured at640x480 and1280x720; all five BMPs have exact expected dimensions and non-background pixels. Same near camera/640 frame at animation t0 vs.0.6 changed 14,294 pixels and shifted silhouette bbox x181..459→198..475. Center RGB stayed(127,0,77) at every frame versus independent red-front-over-blue source-over expected(128,0,76), max error1; visual inspection confirmed the colored overlap at both sizes/distances. Commandlet exit0."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/ai-validation-bad.request.json",
+        "evidence/ai-validation-bad.result.json",
+        "evidence/ai-validation-bad.stderr.log",
+        "evidence/ai-validation-good.request.json",
+        "evidence/ai-validation-good.result.json",
+        "evidence/ai-validation-good.log"
+      ],
+      "feature_id": "ai-validation",
+      "expected": "Bad Wait node 11 produces node-specific error and blocks Play; fixing seconds enables successful Play.",
+      "actual": "Real hidden ai.editor dialog/window + runtime extension: invalid Guard node 11 Wait seconds=-0.5 reports node-specific problem; Play controlStatus=6 and remains stopped. Restored seconds=1.5: no problems, Play controlStatus=0, after 120×0.025 s live Guard transitioned Patrol/GoToA→LookAroundA→GoToB with timestamped history; Stop cleared active live units. Commandlet exit 0 for both cases."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/ai-input-timing.request.json",
+        "evidence/ai-input-timing.result.json",
+        "evidence/ai-input-timing.log",
+        "evidence/ai-caught.request.json",
+        "evidence/ai-caught.result.json",
+        "evidence/ai-caught.log",
+        "evidence/ai-caught-scene-stimulus.json"
+      ],
+      "feature_id": "ai-runtime-debug",
+      "expected": "Play runtime extension reports active AI path, memory and history across Noise/vision-driven state changes; visible actor behavior agrees.",
+      "actual": "Actual hidden MainWindow/AI editor Play/frame/API probe: after 20 warm-up frames, E down held across 2 frames then released; Player.vscript printed Noise and set Guard NoiseAt=(0,0.9,10), AI history recorded event Noise and active path Investigate, Guard position moved from (-8,0.9,-8) to (-5.337,0.9,0.404). With a private scene variant placing Player at (-6,0.9,-8), 240 frames produced AI CanSee→Chase→Caught→Report; query showed Player.vscript reset Player to (0,0.9,10)."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/ai-input-timing.request.json",
+        "evidence/ai-input-timing.result.json",
+        "evidence/ai-input-timing.log",
+        "evidence/ai-caught.request.json",
+        "evidence/ai-caught.result.json",
+        "evidence/ai-caught.log",
+        "evidence/ai-caught-scene-stimulus.json"
+      ],
+      "feature_id": "ai-script-link",
+      "expected": "E event changes guard memory, enters Investigate and moves it; CallScriptEvent OnCaught causes a distinct player-script effect.",
+      "actual": "Actual script execution, not event acceptance only: E→MakeNoise emitted the tutorial Print, wrote Guard NoiseAt, sent Noise, and produced Investigate plus movement. In near-player test, Caught→Report called OnCaught; runtime log printed the script message and scene query verified Player position reset from (-6,0.9,-8) to (0,0.9,10)."
+    },
+    {
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/ai-file-retry.request.json",
+        "evidence/ai-file-retry.result.json",
+        "evidence/ai-file-retry.log",
+        "evidence/ai-wait-reload.request.json",
+        "evidence/ai-wait-reload.result.json",
+        "evidence/ai-wait-reload.log"
+      ],
+      "feature_id": "ai-file-reload",
+      "expected": "FSM save/reopen, failed write/retry and changed wait behavior after file edit are verified through actual editor and second Play.",
+      "actual": "Read-lock caused actual access-denied save (disk hash/settings unchanged), then unlocked retry succeeded and reopen observed SHA/new thinkInterval. Editor changed Caught Ai.Wait seconds 1.5→0.15, saved and reopened file with no check errors; second Play recorded Chase→Caught at 2.25 then Caught→Report at 2.50 (0.25 s including frame quantization), versus original 1.5 s interval in earlier catch run; OnCaught reset the Player."
+    },
+    {
+      "status": "passed",
+      "previous_status": "partial",
+      "feature_id": "skeletal",
+      "engineVersion": "2026.11.11.0",
+      "expected": "Load an imported animated skeletal model; set two or more known pose times, capture visible geometry with changed pixels, then reset to the original pose and compare baseline.",
+      "actual": "Own extracted Bomber project loaded /Game/Models/CesiumMan.glb (19 bones, one 2-second clip) through SkeletalMeshComponent. With TimeScale=0, public SetAnimationTime plus Tick(0) evaluated and rendered t=0, .25, .50, then reset to t=0. Weighted bone-palette checksum was 1523.28→2179.48→2395.4→1523.28. In the character ROI (450,220)-(570,390), t=.25 and .50 changed 3141 and 3235 pixels (>6/255); reset changed0 pixels from baseline. Four D3D game frames were visually inspected; runtime exit0.",
+      "evidence_paths": [
+        "evidence/graphics-followup.request.json",
+        "evidence/skeletal-followup-runtime.log",
+        "evidence/skeletal-followup-runtime.stderr.log",
+        "evidence/skeletal-followup-baseline-t0.bmp",
+        "evidence/skeletal-followup-pose-t025.bmp",
+        "evidence/skeletal-followup-pose-t050.bmp",
+        "evidence/skeletal-followup-reset-t0.bmp",
+        "evidence/analyze-graphics-followup.py",
+        "evidence/graphics-followup-analysis.json",
+        "evidence/graphics-followup-ProjectGame.cpp",
+        "evidence/graphics-followup-build.log"
+      ]
+    },
+    {
+      "status": "passed",
+      "previous_status": "partial",
+      "feature_id": "instances",
+      "engineVersion": "2026.11.11.0",
+      "expected": "In a real InstancedMeshComponent with at least three copies, move one copy and hide a different copy; observe position/visibility APIs, component and completed-frame counts, affected frame pixels, and restoration to baseline.",
+      "actual": "Own Bomber.Markers.LOD contains13 actual instances. At frozen background state baseline showed11/13 drawn (index0 was already explicitly hidden; one was frustum-culled). Moved index2 from(-4.8,.2,-6) to(3,.2,-2): public position returned the destination and the actual frame ROI changed126 pixels, bbox x433..440/y185..211; component stayed11/13. Then hid distinct index4: visible flag became false, component count fell11→10/13 and completed InstancesDrawn121→118; the frame changed211 pixels, bbox529..537/y101..128. Restored index2/index4 and baseline counts and image returned exactly (0 changed pixels); runtime exit0. Four captures were visually inspected.",
+      "evidence_paths": [
+        "evidence/graphics-followup.request.json",
+        "evidence/instances-followup-runtime.log",
+        "evidence/instances-followup-runtime.stderr.log",
+        "evidence/instances-followup-baseline.bmp",
+        "evidence/instances-followup-moved-one.bmp",
+        "evidence/instances-followup-moved-and-hidden.bmp",
+        "evidence/instances-followup-restored.bmp",
+        "evidence/analyze-graphics-followup.py",
+        "evidence/graphics-followup-analysis.json",
+        "evidence/graphics-followup-ProjectGame.cpp",
+        "evidence/graphics-followup-build.log"
+      ]
+    },
+    {
+      "status": "passed",
+      "previous_status": "partial",
+      "feature_id": "lod",
+      "engineVersion": "2026.11.11.0",
+      "expected": "Use a known mesh LOD component with configured thresholds; move camera across multiple LOD buckets and back; compare selected perLOD counts, actual output pixels and return-to-baseline.",
+      "actual": "Own Bomber.Markers.LOD has three generated mesh LODs from SetAutoLod(.5,.25), thresholds9/17 and 13 instances. At cameraY24 it drew11/13 all LOD2 [0,0,11]; atY8 all LOD1 [0,11,0]; atY3 [8,3,0] across LOD0/1; returning toY24 restored [0,0,11], drawCalls90, sceneInstances121 and the pixel crop exactly (0 changed pixels). Distance24→8 and24→3 each changed >17k pixels in the inspected frame ROI. Real selected-component F8 panel and four game captures were visually inspected; runtime exit0.",
+      "evidence_paths": [
+        "evidence/graphics-followup.request.json",
+        "evidence/lod-followup-runtime.log",
+        "evidence/lod-followup-runtime.stderr.log",
+        "evidence/lod-followup-far-y24.bmp",
+        "evidence/lod-followup-mid-y8.bmp",
+        "evidence/lod-followup-near-y3.bmp",
+        "evidence/lod-followup-return-y24.bmp",
+        "evidence/analyze-graphics-followup.py",
+        "evidence/graphics-followup-analysis.json",
+        "evidence/graphics-followup-ProjectGame.cpp",
+        "evidence/graphics-followup-build.log"
+      ]
+    },
+    {
+      "status": "passed",
+      "previous_status": "partial",
+      "feature_id": "material-blends",
+      "engineVersion": "2026.11.11.0",
+      "expected": "Render real opaque, masked and translucent materials; verify masked transparent-hole versus covered pixels and an independently calculated source-over overlap in supported Forward/Deferred rendering.",
+      "actual": "Own 640x360 D3D11 render used three independently authored material shaders: opaque red, masked green with an alpha texture whose left half is transparent and right half opaque, and blue alpha .5. Forward samples: opaque=(217,31,20); masked hole=(0,0,51), identical to background; covered=(31,209,46); translucent-only=(10,25,147). Red source-over blue expected (119,41,131), measured exactly (119,41,131). Repeated in Deferred: source-over (119,41,131), same masked hole/background and covered green samples. Frames visually inspected; both commandlet results ok=true on RTX 4070 Laptop GPU.",
+      "evidence_paths": [
+        "evidence/material-blends-forward.request.json",
+        "evidence/material-blends-forward.result.json",
+        "evidence/material-blends-forward.log",
+        "evidence/material-blends-forward.bmp",
+        "evidence/material-blends-sourceover.request.json",
+        "evidence/material-blends-sourceover.result.json",
+        "evidence/material-blends-sourceover.log",
+        "evidence/material-blends-sourceover.bmp",
+        "evidence/material-blends-deferred.request.json",
+        "evidence/material-blends-deferred.result.json",
+        "evidence/material-blends-deferred.log",
+        "evidence/material-blends-deferred.bmp",
+        "evidence/Opaque.hlsl",
+        "evidence/Opaque.mat",
+        "evidence/Masked.hlsl",
+        "evidence/Masked.mat",
+        "evidence/Mask.png",
+        "evidence/Translucent.hlsl",
+        "evidence/Translucent.mat",
+        "evidence/material-shadow-uv-pixel-analysis.py",
+        "evidence/material-shadow-uv-pixel-analysis.json",
+        "evidence/replay-final-b.ps1",
+        "evidence/replay-final-b-validation.aggregate.log",
+        "evidence/replay-final-b-validation.exitcode.txt",
+        "evidence/replay-final-b-validation.analysis.json",
+        "evidence/replay-final-b-validation-build.log",
+        "evidence/replay-final-b-validation-smoke.stdout.log",
+        "evidence/replay-final-b-validation-smoke.stderr.log"
+      ]
+    },
+    {
+      "status": "passed",
+      "previous_status": "partial",
+      "feature_id": "shadows",
+      "engineVersion": "2026.11.11.0",
+      "expected": "With camera, receiver and caster fixed, compare shadow-casting enabled/disabled, then move the point light and show the receiver shadow changes; return to the original state and reproduce the exact frame.",
+      "actual": "Actual Forward D3D11 point-shadow commandlet rendered a cube caster above a broad cube receiver at 640x480. With identical camera, geometry, light and material, cast-on vs cast-off yielded 1,183 strongly darkened receiver pixels (bbox x320..396,y228..249); the point shadow slot changed 1→0. A matched moved-light cast-on/off pair yielded 564 darkened pixels at x281..330,y209..240; the two thresholded shadow masks had zero shared pixels and centroids moved (359.30,238.58)→(301.41,225.34). Returning to the original light/caster/shadow state reproduced the first BMP exactly (0 differing pixels). Visually inspected all states; commandlet result ok=true.",
+      "evidence_paths": [
+        "evidence/shadows-final.request.json",
+        "evidence/shadows-final.result.json",
+        "evidence/shadows-final.log",
+        "evidence/shadows-frame-0.bmp",
+        "evidence/shadows-frame-1.bmp",
+        "evidence/shadows-frame-2.bmp",
+        "evidence/shadows-frame-3.bmp",
+        "evidence/shadows-frame-4.bmp",
+        "evidence/material-shadow-uv-pixel-analysis.py",
+        "evidence/material-shadow-uv-pixel-analysis.json",
+        "evidence/replay-final-b.ps1",
+        "evidence/replay-final-b-validation.aggregate.log",
+        "evidence/replay-final-b-validation.exitcode.txt",
+        "evidence/replay-final-b-validation.analysis.json",
+        "evidence/replay-final-b-validation-build.log",
+        "evidence/replay-final-b-validation-smoke.stdout.log",
+        "evidence/replay-final-b-validation-smoke.stderr.log"
+      ]
+    },
+    {
+      "status": "passed",
+      "previous_status": "partial",
+      "feature_id": "imported-shadows",
+      "engineVersion": "2026.11.11.0",
+      "expected": "With camera, imported skeletal caster, receiver, animation time and point light fixed, compare point-light shadow enable on/off and restore the original frame; assess the imported model in the enabled point-shadow path.",
+      "actual": "The real point-shadow commandlet loaded the imported CesiumMan.glb at scale1.15, time=.35 and position(0,1.15,0), above a separate receiver. Its frame.shadows control toggles PointLightComponent::SetCastShadows with the imported caster fixed; it does not toggle the model component's own CastShadows flag. Light shadow on/off changed 739 receiver pixels (bbox x316..446,y182..237), and returning to the same enabled light state reproduced the frame exactly. Captures were visually inspected; GPU commandlet result ok=true. Per-model caster CastShadows=false was not tested.",
+      "evidence_paths": [
+        "evidence/imported-shadows.request.json",
+        "evidence/imported-shadows.result.json",
+        "evidence/imported-shadows.log",
+        "evidence/imported-shadow-on.bmp",
+        "evidence/imported-shadow-off.bmp",
+        "evidence/imported-shadow-return.bmp",
+        "evidence/material-shadow-uv-pixel-analysis.py",
+        "evidence/material-shadow-uv-pixel-analysis.json",
+        "evidence/imported-shadow-cesium-man.glb",
+        "evidence/replay-final-b.ps1",
+        "evidence/replay-final-b-validation.aggregate.log",
+        "evidence/replay-final-b-validation.exitcode.txt",
+        "evidence/replay-final-b-validation.analysis.json",
+        "evidence/replay-final-b-validation-build.log",
+        "evidence/replay-final-b-validation-smoke.stdout.log",
+        "evidence/replay-final-b-validation-smoke.stderr.log"
+      ]
+    },
+    {
+      "status": "passed",
+      "previous_status": "partial",
+      "feature_id": "imported-uv",
+      "engineVersion": "2026.11.11.0",
+      "expected": "Use an imported model and imported material BaseMap with a known four-color UV chart; verify distinct expected chart regions in a real rendered frame.",
+      "actual": "Copied own BomberArchiveCheck project to a private fixture, replaced only the blend-uv imported model's referenced 128x128 BaseColor_0.png with a hard-edged RGBA quadrant chart, and launched the project through EngineLauncher --smoke-project (exit0). The actual imported model/material binding remains Material_0.mat BaseMap→../Textures/BaseColor_0.png. The 1000x500 D3D frame, inspected visually, shows four chart quadrants. Interior RGB means: upper-left green (19.78,212.96,37.75), upper-right red (217.81,21.31,17.22), lower-left yellow (229.69,204.47,17.98), lower-right blue (21.20,34.58,200.98). TB_HUD_PROBE=1 hid diagnostics overlay to keep all regions visible. Project source was unchanged; this scratch-only texture replacement does not alter the source archive.",
+      "evidence_paths": [
+        "evidence/imported-uv.request.json",
+        "evidence/imported-uv-smoke.stdout.log",
+        "evidence/imported-uv-smoke.stderr.log",
+        "evidence/imported-uv-chart-frame.bmp",
+        "evidence/imported-uv-chart.png",
+        "evidence/imported-uv-model.glb",
+        "evidence/imported-uv-material.mat",
+        "evidence/imported-uv-scene.json",
+        "evidence/material-shadow-uv-pixel-analysis.py",
+        "evidence/material-shadow-uv-pixel-analysis.json",
+        "evidence/make-imported-uv-chart.py",
+        "evidence/replay-final-b.ps1",
+        "evidence/replay-final-b-validation.aggregate.log",
+        "evidence/replay-final-b-validation.exitcode.txt",
+        "evidence/replay-final-b-validation.analysis.json",
+        "evidence/replay-final-b-validation-build.log",
+        "evidence/replay-final-b-validation-smoke.stdout.log",
+        "evidence/replay-final-b-validation-smoke.stderr.log"
+      ]
+    }
+  ],
+  "engineVersion": "2026.11.11.0"
+}

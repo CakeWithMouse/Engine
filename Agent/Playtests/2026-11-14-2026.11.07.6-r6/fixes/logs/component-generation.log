@@ -1,0 +1,25 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator.vcxproj -> E:\Engine\Engine\build\x64\Release\ComponentGenerator.exe
+  ComponentGenerator: 3 component(s), ComponentGenerationTests
+  main.cpp
+  GeneratedComponents.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\ComponentGenerationTests.lib и объект E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\ComponentGenerationTests.exp
+  ComponentGenerationTests.vcxproj -> E:\Engine\Engine\build\x64\Release\ComponentGenerationTests.exe
+
+Component generation integration: PASS (no editor/window/device)
+Scanner tests: 24 passed
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator.vcxproj -> E:\Engine\Engine\build\x64\Release\ComponentGenerator.exe
+  ComponentGenerator: 0 component(s), GeneratorContractTests
+  GeneratedComponents.cpp
+  GeneratorContractTests.vcxproj -> E:\Engine\Engine\build\x64\Release\GeneratorContractTests.lib
+
+Compiler contract: 4 expected rejections + empty catalog passed. Artifacts: E:\Engine\Engine\build\component-generator-tests\8ae497f62a844033b165feea5521a982

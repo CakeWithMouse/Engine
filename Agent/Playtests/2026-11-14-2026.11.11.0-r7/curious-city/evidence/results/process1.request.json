@@ -1,0 +1,29 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Project.json",
+  "steps": [
+    {
+      "action": "load",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Content\\Scenes\\AiProbe.scene.json"
+    },
+    {
+      "path": "/Game/Models/blend-suzanne-multiple/blend-suzanne-multiple.glb",
+      "action": "model",
+      "name": "CodecModelProbe"
+    },
+    {
+      "target": "CodecModelProbe",
+      "action": "parent",
+      "parent": "CityGuard"
+    },
+    {
+      "path": "/materialSlots/0",
+      "target": "CodecModelProbe",
+      "value": "/Game/Materials/Hologram.mat",
+      "action": "property"
+    },
+    {
+      "action": "save",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Content\\Scenes\\CityCodecFull.scene.json"
+    }
+  ]
+}

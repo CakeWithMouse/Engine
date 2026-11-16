@@ -1,0 +1,3143 @@
+{
+    "frames": 104,
+    "ok": true,
+    "steps": [
+        {
+            "kind": "control",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        20,
+                        1,
+                        20
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        5,
+                        -1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        3,
+                        4,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Throw lane",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.03999999910593033,
+                        -0.5
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        4.800000190734863,
+                        0.07999999821186066,
+                        14
+                    ],
+                    "type": "Trash.ThrowLane"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Bucket base",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.11999999731779099,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.5999999046325684,
+                        0.4000000059604645,
+                        2.5999999046325684
+                    ],
+                    "type": "Trash.BucketBase"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "Bucket left wall",
+                    "parent": 0,
+                    "position": [
+                        -1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.18000000715255737,
+                        1.5,
+                        2.700000047683716
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bucket right wall",
+                    "parent": 0,
+                    "position": [
+                        1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.18000000715255737,
+                        1.5,
+                        2.700000047683716
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bucket front wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        3.950000047683716
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.700000047683716,
+                        1.5,
+                        0.18000000715255737
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bucket back wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        6.449999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.700000047683716,
+                        1.5,
+                        0.18000000715255737
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Sky",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Environment.Sky"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Throw ledger",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "hits": 0,
+                        "misses": 0,
+                        "round": 1,
+                        "throws": 0,
+                        "version": 3
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "ThrowLedger"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Trash sun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 1,
+                        "shadowDistance": 150,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "rotation": [
+                        -0.4460148811340332,
+                        -0.2295752912759781,
+                        -0.11950933188199997,
+                        0.8567866683006287
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Directional"
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "Trash view",
+                    "parent": 0,
+                    "position": [
+                        9,
+                        7,
+                        -11
+                    ],
+                    "projectData": {
+                        "farClip": 250,
+                        "fov": 58,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        -0.06818784773349762,
+                        0.9208279848098755,
+                        0.18734456598758698,
+                        0.3351539969444275
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "Trash camera rig",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -100,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 13,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": true,
+                        "standardControl": false,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.10000000149011612,
+                        0.10000000149011612,
+                        0.10000000149011612
+                    ],
+                    "type": "Gameplay.Player"
+                }
+            ]
+        },
+        {
+            "kind": "focus",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        20,
+                        1,
+                        20
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        5,
+                        -1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        3,
+                        4,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Throw lane",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.03999999910593033,
+                        -0.5
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        4.800000190734863,
+                        0.07999999821186066,
+                        14
+                    ],
+                    "type": "Trash.ThrowLane"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Bucket base",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.11999999731779099,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.5999999046325684,
+                        0.4000000059604645,
+                        2.5999999046325684
+                    ],
+                    "type": "Trash.BucketBase"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "Bucket left wall",
+                    "parent": 0,
+                    "position": [
+                        -1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.18000000715255737,
+                        1.5,
+                        2.700000047683716
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bucket right wall",
+                    "parent": 0,
+                    "position": [
+                        1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.18000000715255737,
+                        1.5,
+                        2.700000047683716
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bucket front wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        3.950000047683716
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.700000047683716,
+                        1.5,
+                        0.18000000715255737
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bucket back wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        6.449999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.700000047683716,
+                        1.5,
+                        0.18000000715255737
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Sky",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Environment.Sky"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Throw ledger",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "hits": 0,
+                        "misses": 0,
+                        "round": 1,
+                        "throws": 0,
+                        "version": 3
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "ThrowLedger"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Trash sun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 1,
+                        "shadowDistance": 150,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "rotation": [
+                        -0.4460148811340332,
+                        -0.2295752912759781,
+                        -0.11950933188199997,
+                        0.8567866683006287
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Directional"
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "Trash view",
+                    "parent": 0,
+                    "position": [
+                        9,
+                        7,
+                        -11
+                    ],
+                    "projectData": {
+                        "farClip": 250,
+                        "fov": 58,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        -0.06818784773349762,
+                        0.9208279848098755,
+                        0.18734456598758698,
+                        0.3351539969444275
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "Trash camera rig",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -100,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 13,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": true,
+                        "standardControl": false,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.10000000149011612,
+                        0.10000000149011612,
+                        0.10000000149011612
+                    ],
+                    "type": "Gameplay.Player"
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        20,
+                        1,
+                        20
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        5,
+                        -1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        3,
+                        4,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Throw lane",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.03999999910593033,
+                        -0.5
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        4.800000190734863,
+                        0.07999999821186066,
+                        14
+                    ],
+                    "type": "Trash.ThrowLane"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Bucket base",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.11999999731779099,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.5999999046325684,
+                        0.4000000059604645,
+                        2.5999999046325684
+                    ],
+                    "type": "Trash.BucketBase"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "Bucket left wall",
+                    "parent": 0,
+                    "position": [
+                        -1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.18000000715255737,
+                        1.5,
+                        2.700000047683716
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bucket right wall",
+                    "parent": 0,
+                    "position": [
+                        1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.18000000715255737,
+                        1.5,
+                        2.700000047683716
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bucket front wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        3.950000047683716
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.700000047683716,
+                        1.5,
+                        0.18000000715255737
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bucket back wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        6.449999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.700000047683716,
+                        1.5,
+                        0.18000000715255737
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Sky",
+                    "parent": 0,
+                    "position": [
+                        9,
+                        7,
+                        -11
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Environment.Sky"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Throw ledger",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "hits": 0,
+                        "misses": 0,
+                        "round": 1,
+                        "throws": 0,
+                        "version": 3
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "ThrowLedger"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Trash sun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 1,
+                        "shadowDistance": 150,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "rotation": [
+                        -0.4460148811340332,
+                        -0.2295752912759781,
+                        -0.11950933188199997,
+                        0.8567866683006287
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Directional"
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "Trash view",
+                    "parent": 0,
+                    "position": [
+                        9,
+                        7,
+                        -11
+                    ],
+                    "projectData": {
+                        "farClip": 250,
+                        "fov": 58,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        -0.06818784773349762,
+                        0.9208279848098755,
+                        0.18734456598758698,
+                        0.3351539969444275
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "Trash camera rig",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -100,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 13,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": true,
+                        "standardControl": false,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.10000000149011612,
+                        0.10000000149011612,
+                        0.10000000149011612
+                    ],
+                    "type": "Gameplay.Player"
+                }
+            ]
+        },
+        {
+            "kind": "key",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        20,
+                        1,
+                        20
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        5,
+                        -1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        3,
+                        4,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Throw lane",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.03999999910593033,
+                        -0.5
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        4.800000190734863,
+                        0.07999999821186066,
+                        14
+                    ],
+                    "type": "Trash.ThrowLane"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Bucket base",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.11999999731779099,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.5999999046325684,
+                        0.4000000059604645,
+                        2.5999999046325684
+                    ],
+                    "type": "Trash.BucketBase"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "Bucket left wall",
+                    "parent": 0,
+                    "position": [
+                        -1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.18000000715255737,
+                        1.5,
+                        2.700000047683716
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bucket right wall",
+                    "parent": 0,
+                    "position": [
+                        1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.18000000715255737,
+                        1.5,
+                        2.700000047683716
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bucket front wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        3.950000047683716
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.700000047683716,
+                        1.5,
+                        0.18000000715255737
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bucket back wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        6.449999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.700000047683716,
+                        1.5,
+                        0.18000000715255737
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Sky",
+                    "parent": 0,
+                    "position": [
+                        9,
+                        7,
+                        -11
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Environment.Sky"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Throw ledger",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "hits": 0,
+                        "misses": 0,
+                        "round": 1,
+                        "throws": 0,
+                        "version": 3
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "ThrowLedger"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Trash sun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 1,
+                        "shadowDistance": 150,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "rotation": [
+                        -0.4460148811340332,
+                        -0.2295752912759781,
+                        -0.11950933188199997,
+                        0.8567866683006287
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Directional"
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "Trash view",
+                    "parent": 0,
+                    "position": [
+                        9,
+                        7,
+                        -11
+                    ],
+                    "projectData": {
+                        "farClip": 250,
+                        "fov": 58,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        -0.06818784773349762,
+                        0.9208279848098755,
+                        0.18734456598758698,
+                        0.3351539969444275
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "Trash camera rig",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -100,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 13,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": true,
+                        "standardControl": false,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.10000000149011612,
+                        0.10000000149011612,
+                        0.10000000149011612
+                    ],
+                    "type": "Gameplay.Player"
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        20,
+                        1,
+                        20
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        5,
+                        -1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        3,
+                        4,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Throw lane",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.03999999910593033,
+                        -0.5
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        4.800000190734863,
+                        0.07999999821186066,
+                        14
+                    ],
+                    "type": "Trash.ThrowLane"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Bucket base",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.11999999731779099,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.5999999046325684,
+                        0.4000000059604645,
+                        2.5999999046325684
+                    ],
+                    "type": "Trash.BucketBase"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "Bucket left wall",
+                    "parent": 0,
+                    "position": [
+                        -1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.18000000715255737,
+                        1.5,
+                        2.700000047683716
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bucket right wall",
+                    "parent": 0,
+                    "position": [
+                        1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.18000000715255737,
+                        1.5,
+                        2.700000047683716
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bucket front wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        3.950000047683716
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.700000047683716,
+                        1.5,
+                        0.18000000715255737
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bucket back wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        6.449999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.700000047683716,
+                        1.5,
+                        0.18000000715255737
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Sky",
+                    "parent": 0,
+                    "position": [
+                        9,
+                        7,
+                        -11
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Environment.Sky"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Throw ledger",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "hits": 0,
+                        "misses": 0,
+                        "round": 1,
+                        "throws": 1,
+                        "version": 3
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "ThrowLedger"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Trash sun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 1,
+                        "shadowDistance": 150,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "rotation": [
+                        -0.4460148811340332,
+                        -0.2295752912759781,
+                        -0.11950933188199997,
+                        0.8567866683006287
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Directional"
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "Trash view",
+                    "parent": 0,
+                    "position": [
+                        9,
+                        7,
+                        -11
+                    ],
+                    "projectData": {
+                        "farClip": 250,
+                        "fov": 58,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        -0.06818784773349762,
+                        0.9208279848098755,
+                        0.18734456598758698,
+                        0.3351539969444275
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "Trash camera rig",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -100,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 13,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": true,
+                        "standardControl": false,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.10000000149011612,
+                        0.10000000149011612,
+                        0.10000000149011612
+                    ],
+                    "type": "Gameplay.Player"
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "Multi-material item 1",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.699999988079071,
+                        -5
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat"
+                        },
+                        "version": 1
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.41999998688697815,
+                        0.41999998688697815,
+                        0.41999998688697815
+                    ],
+                    "type": "Trash.MultiMaterialProjectile"
+                }
+            ]
+        },
+        {
+            "kind": "key",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        20,
+                        1,
+                        20
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        5,
+                        -1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        3,
+                        4,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Throw lane",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.03999999910593033,
+                        -0.5
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        4.800000190734863,
+                        0.07999999821186066,
+                        14
+                    ],
+                    "type": "Trash.ThrowLane"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Bucket base",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.11999999731779099,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.5999999046325684,
+                        0.4000000059604645,
+                        2.5999999046325684
+                    ],
+                    "type": "Trash.BucketBase"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "Bucket left wall",
+                    "parent": 0,
+                    "position": [
+                        -1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.18000000715255737,
+                        1.5,
+                        2.700000047683716
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bucket right wall",
+                    "parent": 0,
+                    "position": [
+                        1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.18000000715255737,
+                        1.5,
+                        2.700000047683716
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bucket front wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        3.950000047683716
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.700000047683716,
+                        1.5,
+                        0.18000000715255737
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bucket back wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        6.449999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.700000047683716,
+                        1.5,
+                        0.18000000715255737
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Sky",
+                    "parent": 0,
+                    "position": [
+                        9,
+                        7,
+                        -11
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Environment.Sky"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Throw ledger",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "hits": 0,
+                        "misses": 0,
+                        "round": 1,
+                        "throws": 1,
+                        "version": 3
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "ThrowLedger"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Trash sun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 1,
+                        "shadowDistance": 150,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "rotation": [
+                        -0.4460148811340332,
+                        -0.2295752912759781,
+                        -0.11950933188199997,
+                        0.8567866683006287
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Directional"
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "Trash view",
+                    "parent": 0,
+                    "position": [
+                        9,
+                        7,
+                        -11
+                    ],
+                    "projectData": {
+                        "farClip": 250,
+                        "fov": 58,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        -0.06818784773349762,
+                        0.9208279848098755,
+                        0.18734456598758698,
+                        0.3351539969444275
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "Trash camera rig",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -100,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 13,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": true,
+                        "standardControl": false,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.10000000149011612,
+                        0.10000000149011612,
+                        0.10000000149011612
+                    ],
+                    "type": "Gameplay.Player"
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "Multi-material item 1",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.699999988079071,
+                        -5
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat"
+                        },
+                        "version": 1
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.41999998688697815,
+                        0.41999998688697815,
+                        0.41999998688697815
+                    ],
+                    "type": "Trash.MultiMaterialProjectile"
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        20,
+                        1,
+                        20
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        5,
+                        -1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        3,
+                        4,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Throw lane",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.03999999910593033,
+                        -0.5
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        4.800000190734863,
+                        0.07999999821186066,
+                        14
+                    ],
+                    "type": "Trash.ThrowLane"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Bucket base",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.11999999731779099,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.5999999046325684,
+                        0.4000000059604645,
+                        2.5999999046325684
+                    ],
+                    "type": "Trash.BucketBase"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "Bucket left wall",
+                    "parent": 0,
+                    "position": [
+                        -1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.18000000715255737,
+                        1.5,
+                        2.700000047683716
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bucket right wall",
+                    "parent": 0,
+                    "position": [
+                        1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.18000000715255737,
+                        1.5,
+                        2.700000047683716
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bucket front wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        3.950000047683716
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.700000047683716,
+                        1.5,
+                        0.18000000715255737
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bucket back wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        6.449999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.700000047683716,
+                        1.5,
+                        0.18000000715255737
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Sky",
+                    "parent": 0,
+                    "position": [
+                        9,
+                        7,
+                        -11
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Environment.Sky"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Throw ledger",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "hits": 1,
+                        "misses": 0,
+                        "round": 1,
+                        "throws": 1,
+                        "version": 3
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "ThrowLedger"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Trash sun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 1,
+                        "shadowDistance": 150,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "rotation": [
+                        -0.4460148811340332,
+                        -0.2295752912759781,
+                        -0.11950933188199997,
+                        0.8567866683006287
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Directional"
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "Trash view",
+                    "parent": 0,
+                    "position": [
+                        9,
+                        7,
+                        -11
+                    ],
+                    "projectData": {
+                        "farClip": 250,
+                        "fov": 58,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        -0.06818784773349762,
+                        0.9208279848098755,
+                        0.18734456598758698,
+                        0.3351539969444275
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "Trash camera rig",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -100,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 13,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 10,
+                        "orthographic": false,
+                        "playerControlled": true,
+                        "standardControl": false,
+                        "version": 1,
+                        "viewPlane": 0
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.10000000149011612,
+                        0.10000000149011612,
+                        0.10000000149011612
+                    ],
+                    "type": "Gameplay.Player"
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "Multi-material item 1",
+                    "parent": 0,
+                    "position": [
+                        -0.07920001447200775,
+                        0.35349714756011963,
+                        5.098001480102539
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat"
+                        },
+                        "version": 1
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.41999998688697815,
+                        0.41999998688697815,
+                        0.41999998688697815
+                    ],
+                    "type": "Trash.MultiMaterialProjectile"
+                },
+                {
+                    "id": 16,
+                    "material": "",
+                    "name": "Hit sparks",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.9700000286102295,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Particle.Sparks"
+                }
+            ]
+        },
+        {
+            "kind": "control",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        20,
+                        1,
+                        20
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        5,
+                        -1
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        3,
+                        4,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Throw lane",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.03999999910593033,
+                        -0.5
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        4.800000190734863,
+                        0.07999999821186066,
+                        14
+                    ],
+                    "type": "Trash.ThrowLane"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Bucket base",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.11999999731779099,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.5999999046325684,
+                        0.4000000059604645,
+                        2.5999999046325684
+                    ],
+                    "type": "Trash.BucketBase"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "Bucket left wall",
+                    "parent": 0,
+                    "position": [
+                        -1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.18000000715255737,
+                        1.5,
+                        2.700000047683716
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bucket right wall",
+                    "parent": 0,
+                    "position": [
+                        1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        0.18000000715255737,
+                        1.5,
+                        2.700000047683716
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bucket front wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        3.950000047683716
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.700000047683716,
+                        1.5,
+                        0.18000000715255737
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bucket back wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        6.449999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        2.700000047683716,
+                        1.5,
+                        0.18000000715255737
+                    ],
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Sky",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Environment.Sky"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Throw ledger",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "hits": 0,
+                        "misses": 0,
+                        "round": 1,
+                        "throws": 0,
+                        "version": 3
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "ThrowLedger"
+                }
+            ]
+        }
+    ]
+}

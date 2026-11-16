@@ -1,0 +1,267 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+frame-dump E:\Engine\Engine\build\playtests\20261114-r7\tired-bomber\final-b-graphics\imported-shadow-on.bmp written=1 size=640x480
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 640x480
+frame-dump E:\Engine\Engine\build\playtests\20261114-r7\tired-bomber\final-b-graphics\imported-shadow-off.bmp written=1 size=640x480
+frame-dump E:\Engine\Engine\build\playtests\20261114-r7\tired-bomber\final-b-graphics\imported-shadow-return.bmp written=1 size=640x480
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "caster": "skeletal",
+    "frames": [
+        {
+            "count": 1,
+            "cubes": [
+                {
+                    "faces": [
+                        {
+                            "face": 0,
+                            "occupied": 11337,
+                            "sha256": "a6f78ec5528edf2a239a019b20a4e59418e61314a90dbc59edce6cecd2dc5ed2"
+                        },
+                        {
+                            "face": 1,
+                            "occupied": 19316,
+                            "sha256": "9a1d756881dddac994172a58d648598b89cc7026fc138f6b0f8421a03aba3189"
+                        },
+                        {
+                            "face": 2,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        },
+                        {
+                            "face": 3,
+                            "occupied": 1048576,
+                            "sha256": "bf61bf8812b5fb0c279eb6b214c2dc73f5b056950a052441effc435cc11d57b2"
+                        },
+                        {
+                            "face": 4,
+                            "occupied": 17094,
+                            "sha256": "6f728c301b84569f7355d5fb6cd326aed2337d6c816201f3070173af022aa9db"
+                        },
+                        {
+                            "face": 5,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        }
+                    ],
+                    "light": [
+                        -3,
+                        5,
+                        -3,
+                        25
+                    ],
+                    "probes": [
+                    ],
+                    "slot": 0
+                }
+            ],
+            "directionalShadows": true,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 11337,
+                    "sha256": "a6f78ec5528edf2a239a019b20a4e59418e61314a90dbc59edce6cecd2dc5ed2"
+                },
+                {
+                    "face": 1,
+                    "occupied": 19316,
+                    "sha256": "9a1d756881dddac994172a58d648598b89cc7026fc138f6b0f8421a03aba3189"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "bf61bf8812b5fb0c279eb6b214c2dc73f5b056950a052441effc435cc11d57b2"
+                },
+                {
+                    "face": 4,
+                    "occupied": 17094,
+                    "sha256": "6f728c301b84569f7355d5fb6cd326aed2337d6c816201f3070173af022aa9db"
+                },
+                {
+                    "face": 5,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\final-b-graphics\\imported-shadow-on.bmp",
+            "light": [
+                -3,
+                5,
+                -3,
+                25
+            ],
+            "lights": [
+                {
+                    "enabled": true,
+                    "index": 0,
+                    "intensity": 2.799999952316284,
+                    "position": [
+                        -3,
+                        5,
+                        -3
+                    ],
+                    "radius": 25,
+                    "slot": 0
+                }
+            ],
+            "position": [
+                0,
+                1.149999976158142,
+                0
+            ],
+            "probes": [
+            ],
+            "slot": 0,
+            "time": 0.3499999940395355
+        },
+        {
+            "count": 0,
+            "cubes": [
+            ],
+            "directionalShadows": true,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\final-b-graphics\\imported-shadow-off.bmp",
+            "lights": [
+                {
+                    "enabled": true,
+                    "index": 0,
+                    "intensity": 2.799999952316284,
+                    "position": [
+                        -3,
+                        5,
+                        -3
+                    ],
+                    "radius": 25,
+                    "slot": -1
+                }
+            ],
+            "position": [
+                0,
+                1.149999976158142,
+                0
+            ],
+            "time": 0.3499999940395355
+        },
+        {
+            "count": 1,
+            "cubes": [
+                {
+                    "faces": [
+                        {
+                            "face": 0,
+                            "occupied": 11337,
+                            "sha256": "a6f78ec5528edf2a239a019b20a4e59418e61314a90dbc59edce6cecd2dc5ed2"
+                        },
+                        {
+                            "face": 1,
+                            "occupied": 19316,
+                            "sha256": "9a1d756881dddac994172a58d648598b89cc7026fc138f6b0f8421a03aba3189"
+                        },
+                        {
+                            "face": 2,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        },
+                        {
+                            "face": 3,
+                            "occupied": 1048576,
+                            "sha256": "bf61bf8812b5fb0c279eb6b214c2dc73f5b056950a052441effc435cc11d57b2"
+                        },
+                        {
+                            "face": 4,
+                            "occupied": 17094,
+                            "sha256": "6f728c301b84569f7355d5fb6cd326aed2337d6c816201f3070173af022aa9db"
+                        },
+                        {
+                            "face": 5,
+                            "occupied": 0,
+                            "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                        }
+                    ],
+                    "light": [
+                        -3,
+                        5,
+                        -3,
+                        25
+                    ],
+                    "probes": [
+                    ],
+                    "slot": 0
+                }
+            ],
+            "directionalShadows": true,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 11337,
+                    "sha256": "a6f78ec5528edf2a239a019b20a4e59418e61314a90dbc59edce6cecd2dc5ed2"
+                },
+                {
+                    "face": 1,
+                    "occupied": 19316,
+                    "sha256": "9a1d756881dddac994172a58d648598b89cc7026fc138f6b0f8421a03aba3189"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "bf61bf8812b5fb0c279eb6b214c2dc73f5b056950a052441effc435cc11d57b2"
+                },
+                {
+                    "face": 4,
+                    "occupied": 17094,
+                    "sha256": "6f728c301b84569f7355d5fb6cd326aed2337d6c816201f3070173af022aa9db"
+                },
+                {
+                    "face": 5,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\final-b-graphics\\imported-shadow-return.bmp",
+            "light": [
+                -3,
+                5,
+                -3,
+                25
+            ],
+            "lights": [
+                {
+                    "enabled": true,
+                    "index": 0,
+                    "intensity": 2.799999952316284,
+                    "position": [
+                        -3,
+                        5,
+                        -3
+                    ],
+                    "radius": 25,
+                    "slot": 0
+                }
+            ],
+            "position": [
+                0,
+                1.149999976158142,
+                0
+            ],
+            "probes": [
+            ],
+            "slot": 0,
+            "time": 0.3499999940395355
+        }
+    ],
+    "ok": true
+}

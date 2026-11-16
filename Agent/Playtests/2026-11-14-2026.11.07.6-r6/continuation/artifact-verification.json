@@ -1,0 +1,56 @@
+{
+  "archives": [
+    {
+      "path": "calm-city/continuation/calm-city-continuation-source.zip",
+      "entries": 64,
+      "bytes": 190126,
+      "sha256": "981514b93f2e820eb13f2cfbf0f1cf5a70bc59c90e77f74581ed6b9ed67289da",
+      "sourceOnly": true
+    },
+    {
+      "path": "curious-city/continuation/CuriousCity-r6-continuation-source.zip",
+      "entries": 136,
+      "bytes": 1175187,
+      "sha256": "07d6217045d3e83bf417b2aaffee9d97683d5bd86ca691d875c9ec2336e08366",
+      "sourceOnly": true
+    },
+    {
+      "path": "tired-bomber/continuation/SdkProbe-source.zip",
+      "entries": 45,
+      "bytes": 186802,
+      "sha256": "026fae6f14feb70b0e7e5ad7c7483f9306a1771fba91f7f145fd6891633cc9e5",
+      "sourceOnly": true
+    }
+  ],
+  "fingerprints": {
+    "Engine/build/x64/Release/Engine.lib": "73f1a6b0c573537e233c21496dcadcdb2ac6a22210cdf211ad23a7e95b801931",
+    "Game/build/x64/Release/Runtime/SDK/Lib/Engine.lib": "73f1a6b0c573537e233c21496dcadcdb2ac6a22210cdf211ad23a7e95b801931",
+    "Game/build/x64/Release/Runtime/EngineRuntime.exe": "e673c58a6ed1b7094007e2fff29bd9aa20cfe39df9db8075e119b2d7fc7864ca",
+    "Game/build/x64/Release/Runtime/Editor.dll": "e13b10fe60f68bb1b406a2711cafe7e773e8442c4f437cbc87a1de71e2080cdf",
+    "Game/build/x64/Release/Runtime/EngineCommandlets.exe": "d9d2c55ee82f8130a0fdaaece8b33441c8d40707dfa43c6f3112dcb92119799d",
+    "Engine/Content/Shaders/BasicSky.hlsl": "f80f417acbb70259c5fa9d8351f7ec1bc73de03fb8dc2c2a648a9dee862001a1",
+    "Game/build/x64/Release/Runtime/EngineContent/Shaders/BasicSky.hlsl": "f80f417acbb70259c5fa9d8351f7ec1bc73de03fb8dc2c2a648a9dee862001a1",
+    "Engine/Content/Shaders/Material/MaterialTemplate.hlsl": "9a145164c620f1e2a1b2538975b978689c57128efa2d65f791fc782087dd9dac",
+    "Game/build/x64/Release/Runtime/EngineContent/Shaders/Material/MaterialTemplate.hlsl": "9a145164c620f1e2a1b2538975b978689c57128efa2d65f791fc782087dd9dac"
+  },
+  "preservedLogs": [
+    "continuation-authoring-before-tests.log",
+    "continuation-authoring-after-tests.log",
+    "continuation-normal-before-tests-host.log",
+    "continuation-normal-after-tests.log",
+    "continuation-register-before-tests.log",
+    "continuation-register-after-tests.log",
+    "continuation-register-integration-03.log",
+    "continuation-sky-before-tests-auto.log",
+    "continuation-sky-after-tests.log",
+    "continuation-authoring-final.log",
+    "continuation-integer-final.log",
+    "continuation-mesh-final.log",
+    "continuation-particles-final.log",
+    "continuation-material-regression.log",
+    "continuation-all-build.log",
+    "continuation-editor-final-build.log",
+    "continuation-integer-build.log"
+  ],
+  "note": "Current continuation artifacts. Earlier r6 archives and first-phase fingerprints remain historical."
+}

@@ -1,0 +1,16 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Project.json",
+  "steps": [
+    {
+      "action": "new"
+    },
+    {
+      "action": "load",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Content\\Scenes\\CityCodecFull.scene.json"
+    },
+    {
+      "action": "save",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\scene-codec-full\\roundtrip.scene.json"
+    }
+  ]
+}

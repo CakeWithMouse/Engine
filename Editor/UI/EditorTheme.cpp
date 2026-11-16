@@ -89,6 +89,14 @@ ThemePalette EditorTheme::Palette() const
     pal.axisX = QColor(QStringLiteral("#EF4444"));
     pal.axisY = QColor(QStringLiteral("#22C55E"));
     pal.axisZ = QColor(QStringLiteral("#3B82F6"));
+    // Categorical icon plates: bright on dark theme, dark on light theme, so the
+    // shader's luminance-based glyph auto-contrast stays readable in both.
+    pal.iconPointLight  = isDark ? QColor(0xFB, 0xBF, 0x24) : QColor(0xB4, 0x53, 0x09);
+    pal.iconSunSky      = isDark ? QColor(0x38, 0xBD, 0xF8) : QColor(0x03, 0x69, 0xA1);
+    pal.iconCamera      = isDark ? QColor(0xE5, 0xE7, 0xEB) : QColor(0x33, 0x41, 0x55);
+    pal.iconGameCamera  = isDark ? QColor(0x4A, 0xDE, 0x80) : QColor(0x15, 0x80, 0x3D);
+    pal.iconParticles   = isDark ? QColor(0xE8, 0x79, 0xF9) : QColor(0x86, 0x19, 0x8F);
+    pal.iconCharacter   = isDark ? QColor(0xFB, 0x92, 0x3C) : QColor(0xC2, 0x41, 0x0C);
     return pal;
 }
 

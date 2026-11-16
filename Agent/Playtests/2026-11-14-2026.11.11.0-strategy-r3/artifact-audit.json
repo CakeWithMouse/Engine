@@ -1,0 +1,27 @@
+{
+  "path": "strategy/RepairCorridor-r3-source.zip",
+  "sha256": "5134954f87ebbe5b9660d73862037870716b41f28e1666d88769df394752e3c1",
+  "bytes": 12544,
+  "entries": 16,
+  "crc": "passed",
+  "forbiddenEntries": [],
+  "sourceMismatch": [],
+  "evidenceSdk": {
+    "engineVersion": "2026.11.11.0 localOnly",
+    "base": "main 388d7e9 + STRATEGY-003/007/008/013/015",
+    "runtime": "E:/Engine/Game/build/x64/Release/Runtime",
+    "engineLibSha256": "18622FC582C05F0DEC25753C4297C3276C44C736D764FBFDA460D2E56F35B1B3"
+  },
+  "evidenceEntries": 11,
+  "evidenceStatuses": {
+    "passed": 9,
+    "failed": 1,
+    "partial": 1
+  },
+  "evidencePathsChecked": 39,
+  "evidencePathsMissing": [],
+  "freshBuild": "strategy/fresh-build.log",
+  "freshPlay": "strategy/fresh-central-gate-result.json",
+  "freshStandalone": "strategy/fresh-standalone.exit",
+  "freshStandaloneExit": "0"
+}

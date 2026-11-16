@@ -6,8 +6,10 @@
 #include <glm/gtc/quaternion.hpp>
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <numeric>
 #include <stdexcept>
+#include <unordered_map>
 
 namespace Ai
 {
@@ -156,6 +158,8 @@ bool Group::SyncBody()
 
 void Group::AssignSlots(glm::vec2 center)
 {
+    pathGoal_ = goalPoint_;
+    repathTimer_ = 0;
     std::vector<size_t> alive;
     for (size_t i = 0; i < members_.size(); ++i) if (members_[i].alive) alive.push_back(i);
     if (alive.empty()) return;
@@ -167,6 +171,25 @@ void Group::AssignSlots(glm::vec2 center)
     std::sort(alive.begin(), alive.end(), [&](size_t a, size_t b) {
         return glm::dot(members_[a].position - center, forward) > glm::dot(members_[b].position - center, forward); });
     NavGrid& grid = world_->Navigation();
+    // Projecting each slot independently can collapse neighbours onto the same
+    // edge of an obstacle. Reserve space as slots are assigned, using local
+    // buckets so large formations do not compare every pair of soldiers.
+    const float bucketSize = std::max(.1f, 2 * largest_ + .05f);
+    std::unordered_map<uint64_t, std::vector<size_t>> occupied;
+    auto bucket = [&](glm::vec2 p) { return glm::ivec2(glm::floor(p / bucketSize)); };
+    auto key = [](glm::ivec2 c) { return (uint64_t(uint32_t(c.x)) << 32) | uint32_t(c.y); };
+    auto vacant = [&](glm::vec2 p, float radius) {
+        const auto cell = bucket(p);
+        for (int y = -1; y <= 1; ++y) for (int x = -1; x <= 1; ++x) {
+            const auto it = occupied.find(key(cell + glm::ivec2(x, y)));
+            if (it == occupied.end()) continue;
+            for (const size_t index : it->second) {
+                const auto& other = members_[index];
+                if (glm::length(p - other.slot) < radius + other.radius + .05f) return false;
+            }
+        }
+        return true;
+    };
     for (int row = 0; row < rows; ++row)
     {
         const auto first = alive.begin() + row * columns;
@@ -180,6 +203,26 @@ void Group::AssignSlots(glm::vec2 center)
             const glm::vec2 offset = right * ((static_cast<float>(column) - (inRow - 1) * 0.5f) * formation_.spacing)
                                    - forward * ((static_cast<float>(row) - (rows - 1) * 0.5f) * formation_.spacing);
             m.slot = grid.IsConfigured() ? grid.NearestWalkable(center + offset, m.radius) : center + offset;
+            if (grid.IsConfigured() && !vacant(m.slot, m.radius)) {
+                const auto origin = grid.CellOf(m.slot);
+                const int rings = std::max(1, int(std::ceil(16 / grid.CellSize())));
+                bool found = false;
+                for (int ring = 1; ring <= rings && !found; ++ring) {
+                    float best = std::numeric_limits<float>::max();
+                    glm::vec2 candidate = m.slot;
+                    for (int y = -ring; y <= ring; ++y) for (int x = -ring; x <= ring; ++x) {
+                        if (std::max(std::abs(x), std::abs(y)) != ring) continue;
+                        const auto cell = origin + glm::ivec2(x, y);
+                        const auto p = grid.CenterOf(cell);
+                        if (!grid.IsWalkableCell(cell, m.radius) || !vacant(p, m.radius) ||
+                            !grid.CanWalkStraight(m.slot, p, m.radius)) continue;
+                        const float distance = glm::length(p - (center + offset));
+                        if (distance < best) { best = distance; candidate = p; found = true; }
+                    }
+                    if (found) m.slot = candidate;
+                }
+            }
+            occupied[key(bucket(m.slot))].push_back(*(first + column));
             m.hasSlot = true;
             m.settled = false;
             m.direct = false;
@@ -191,6 +234,7 @@ void Group::MoveTo(glm::vec3 point, float acceptanceRadius)
 {
     if (Size() == 0) { moveStatus_ = MoveStatus::Unavailable; return; }
     goal_ = Goal::Point;
+    goalObject_ = {};
     goalPoint_ = point;
     acceptance_ = acceptanceRadius;
     orderTime_ = world_->Time();
@@ -217,7 +261,8 @@ void Group::RequestField()
         low = glm::min(low, glm::min(m.position, m.slot));
         high = glm::max(high, glm::max(m.position, m.slot));
     }
-    field_ = world_->Fields().Request(grid, {goalPoint_.x, goalPoint_.z}, largest, low, high, fieldMargin_);
+    const float approachRadius = formation_.spacing * std::sqrt(static_cast<float>(std::max(Size(), size_t(1)))) * 0.75f + 2 * largest;
+    field_ = world_->Fields().Request(grid, {goalPoint_.x, goalPoint_.z}, largest, low, high, fieldMargin_, approachRadius);
 }
 
 void Group::MoveTo(ObjectRef target, float acceptanceRadius)
@@ -225,6 +270,7 @@ void Group::MoveTo(ObjectRef target, float acceptanceRadius)
     const glm::vec3 at = ObjectPosition(target);
     if (!std::isfinite(at.x)) { StopMovement(); moveStatus_ = MoveStatus::Unreachable; return; }
     MoveTo(at, acceptanceRadius);
+    if (Size()) { goal_ = Goal::Object; goalObject_ = target; }
 }
 
 void Group::StopMovement()
@@ -236,10 +282,30 @@ void Group::StopMovement()
     if (moveStatus_ == MoveStatus::Waiting || moveStatus_ == MoveStatus::Moving) moveStatus_ = MoveStatus::Idle;
 }
 
-void Group::UpdateMovement(float)
+void Group::UpdateMovement(float dt)
 {
     if (!moving_) return;
     NavGrid& grid = world_->Navigation();
+    if (goal_ == Goal::Object)
+    {
+        const glm::vec3 at = ObjectPosition(goalObject_);
+        if (!std::isfinite(at.x))
+        {
+            StopMovement();
+            moveStatus_ = MoveStatus::Unreachable;
+            OnMoveFinished(MoveStatus::Unreachable);
+            return;
+        }
+        goalPoint_ = at;
+        repathTimer_ += dt;
+        const float moved = glm::length(glm::vec2(at.x - pathGoal_.x, at.z - pathGoal_.z));
+        // Like a single controller, follow the object without rebuilding every frame.
+        if (moved > std::max(1.0f, grid.CellSize()) || (repathTimer_ > 1.0f && moved > 0.1f))
+        {
+            AssignSlots({at.x, at.z});
+            RequestField();
+        }
+    }
     const float largest = largest_;
     if (grid.IsConfigured() && (!field_ || field_->version != grid.Version())) RequestField();
     if (grid.IsConfigured() && !field_->ready) { moveStatus_ = MoveStatus::Waiting; return; }
@@ -255,6 +321,15 @@ void Group::UpdateMovement(float)
             fieldMargin_ = fieldMargin_ * 4 > span ? -1 : fieldMargin_ * 4;
             RequestField();
             moveStatus_ = MoveStatus::Waiting;
+            return;
+        }
+        if (alive && reach == 0)
+        {
+            // After widening to the whole grid, no member can reach the goal.
+            // Do not report Moving for ten minutes while pushing against a wall.
+            StopMovement();
+            moveStatus_ = MoveStatus::Unreachable;
+            OnMoveFinished(MoveStatus::Unreachable);
             return;
         }
     }
@@ -276,7 +351,9 @@ void Group::UpdateMovement(float)
         ++alive;
         const glm::vec2 toSlot = m.slot - m.position;
         const float distance = glm::length(toSlot);
-        if (distance <= std::max(0.3f, 0.25f * m.radius) || (m.settled && distance <= m.radius))
+        // Small soldiers must settle close enough to their slots to leave their neighbours room.
+        const float arrivalDistance = std::min(0.3f, 0.25f * m.radius);
+        if (distance <= arrivalDistance || (m.settled && distance <= m.radius))
         {
             m.settled = true;
             m.velocity = glm::vec2(0);
@@ -290,9 +367,32 @@ void Group::UpdateMovement(float)
         glm::vec2 direction(0);
         // Once the line to the slot is clear the soldier walks it; the line is checked again only now and then.
         if (grid.IsConfigured() && (!m.direct || (frame / stride + i) % 8 == 0))
-            m.direct = glm::length(m.position - glm::vec2(goalPoint_.x, goalPoint_.z)) <= formationRadius && grid.CanWalkStraight(m.position, m.slot, m.radius);
+        {
+            // A shared field may end near a different order. Hand off to the actual slot there,
+            // and keep following it while clear instead of turning back toward the cached goal.
+            const bool nearGoal = glm::length(m.position - glm::vec2(goalPoint_.x, goalPoint_.z)) <= formationRadius;
+            const bool nearFieldGoal = field_ && glm::length(m.position - field_->goal) <= formationRadius;
+            m.direct = (m.direct || nearGoal || nearFieldGoal) && grid.CanWalkStraight(m.position, m.slot, m.radius);
+        }
         const bool direct = !grid.IsConfigured() || m.direct;
         if (!direct) direction = field_->Sample(grid, m.position);
+        if (!direct && glm::length(direction) < 1e-3f &&
+            !grid.CanWalkStraight(m.position, m.slot, m.radius)) {
+            // Cached fields round radii up. Avoidance/physics can put a member
+            // in a cell valid for its own radius but outside that field. Rejoin
+            // a reachable neighbour instead of pointing through the obstacle.
+            const auto cell = grid.CellOf(m.position);
+            float best = std::numeric_limits<float>::max();
+            for (int y = -1; y <= 1; ++y) for (int x = -1; x <= 1; ++x) {
+                const auto p = grid.CenterOf(cell + glm::ivec2(x, y));
+                if (!field_->Reaches(grid, p) || !grid.CanWalkStraight(m.position, p, m.radius)) continue;
+                const float distance = glm::length(p - m.position);
+                if (distance > 1e-4f && distance < best) {
+                    best = distance;
+                    direction = (p - m.position) / distance;
+                }
+            }
+        }
         if (glm::length(direction) < 1e-3f) direction = toSlot / distance;
         float speed = m.speed;
         if (direct) speed *= std::clamp(distance / std::max(0.01f, 0.5f * m.speed), 0.3f, 1.0f);
@@ -303,6 +403,13 @@ void Group::UpdateMovement(float)
 
     if (alive && static_cast<float>(settled) >= arrivedFraction_ * static_cast<float>(alive))
     {
+        // Reaching the old slots is not arrival if the tracked object moved since planning.
+        if (goal_ == Goal::Object && glm::length(glm::vec2(goalPoint_.x - pathGoal_.x, goalPoint_.z - pathGoal_.z)) > 0.1f)
+        {
+            AssignSlots({goalPoint_.x, goalPoint_.z});
+            RequestField();
+            return;
+        }
         // The order is done: stragglers stop where they are instead of drifting on.
         for (Member& m : members_) { m.velocity = glm::vec2(0); m.settled = true; }
         moving_ = false;
@@ -437,6 +544,8 @@ void Group::SerializeSaveGame(SaveArchive& archive)
         else members_ = std::move(saved);
         Recount();
         reloadPositions_ = true;
+        pathGoal_ = goalPoint_;
+        repathTimer_ = 0;
         field_.reset();
         if (goal_ != Goal::None) { moving_ = true; needsPath_ = false; moveStatus_ = MoveStatus::Waiting; orderTime_ = world_->Time(); }
         else moving_ = false;

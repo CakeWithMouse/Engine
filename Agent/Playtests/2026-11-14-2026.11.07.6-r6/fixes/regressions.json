@@ -1,0 +1,316 @@
+[
+  {
+    "name": "engine",
+    "exit": 0,
+    "passed": true,
+    "command": [
+      "pwsh",
+      "-NoProfile",
+      "-File",
+      "Engine/tests/run.ps1",
+      "-Configuration",
+      "Release",
+      "-PlatformToolset",
+      "auto"
+    ],
+    "seconds": 21.2,
+    "log": "logs/engine.log"
+  },
+  {
+    "name": "savegame",
+    "exit": 0,
+    "passed": true,
+    "command": [
+      "pwsh",
+      "-NoProfile",
+      "-File",
+      "Engine/tests/savegame/run.ps1"
+    ],
+    "seconds": 10.3,
+    "log": "logs/savegame.log"
+  },
+  {
+    "name": "assets",
+    "exit": 0,
+    "passed": true,
+    "command": [
+      "pwsh",
+      "-NoProfile",
+      "-File",
+      "Engine/tests/assets/run.ps1",
+      "-Configuration",
+      "Release",
+      "-EnableAssimp"
+    ],
+    "seconds": 36.3,
+    "log": "logs/assets.log"
+  },
+  {
+    "name": "edit-session",
+    "exit": 0,
+    "passed": true,
+    "command": [
+      "pwsh",
+      "-NoProfile",
+      "-File",
+      "Engine/tests/edit-session/run.ps1",
+      "-Configuration",
+      "Release"
+    ],
+    "seconds": 22.8,
+    "log": "logs/edit-session.log"
+  },
+  {
+    "name": "input",
+    "exit": 0,
+    "passed": true,
+    "command": [
+      "pwsh",
+      "-NoProfile",
+      "-File",
+      "Engine/tests/input/run.ps1",
+      "-Configuration",
+      "Release"
+    ],
+    "seconds": 9.0,
+    "log": "logs/input.log"
+  },
+  {
+    "name": "subsystems",
+    "exit": 0,
+    "passed": true,
+    "command": [
+      "pwsh",
+      "-NoProfile",
+      "-File",
+      "Engine/tests/subsystems/run.ps1"
+    ],
+    "seconds": 6.1,
+    "log": "logs/subsystems.log"
+  },
+  {
+    "name": "skeletal",
+    "exit": 0,
+    "passed": true,
+    "command": [
+      "pwsh",
+      "-NoProfile",
+      "-File",
+      "Engine/tests/skeletal/run.ps1",
+      "-Configuration",
+      "Release",
+      "-EnableAssimp"
+    ],
+    "seconds": 5.0,
+    "log": "logs/skeletal.log"
+  },
+  {
+    "name": "compatibility",
+    "exit": 0,
+    "passed": true,
+    "command": [
+      "pwsh",
+      "-NoProfile",
+      "-File",
+      "Engine/tests/compatibility/run.ps1"
+    ],
+    "seconds": 31.1,
+    "log": "logs/compatibility.log"
+  },
+  {
+    "name": "component-generation",
+    "exit": 0,
+    "passed": true,
+    "command": [
+      "pwsh",
+      "-NoProfile",
+      "-File",
+      "Engine/tests/component-generation/run.ps1",
+      "-Configuration",
+      "Release"
+    ],
+    "seconds": 16.6,
+    "log": "logs/component-generation.log"
+  },
+  {
+    "name": "scene-module",
+    "exit": 0,
+    "passed": true,
+    "command": [
+      "pwsh",
+      "-NoProfile",
+      "-File",
+      "Engine/tests/scene-module/run.ps1",
+      "-Configuration",
+      "Release"
+    ],
+    "seconds": 5.8,
+    "log": "logs/scene-module.log"
+  },
+  {
+    "name": "render-diagnostics",
+    "exit": 0,
+    "passed": true,
+    "command": [
+      "pwsh",
+      "-NoProfile",
+      "-File",
+      "Engine/tests/render-diagnostics/run.ps1",
+      "-Configuration",
+      "Release"
+    ],
+    "seconds": 10.3,
+    "log": "logs/render-diagnostics.log"
+  },
+  {
+    "name": "commandlets",
+    "exit": 0,
+    "passed": true,
+    "command": [
+      "pwsh",
+      "-NoProfile",
+      "-File",
+      "Editor/tests/CommandletTests.ps1",
+      "-Output",
+      "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\regressions\\commands"
+    ],
+    "seconds": 4.7,
+    "log": "logs/commandlets.log"
+  },
+  {
+    "name": "savegame-commandlets",
+    "exit": 0,
+    "passed": true,
+    "command": [
+      "pwsh",
+      "-NoProfile",
+      "-File",
+      "Editor/tests/SaveGameCommandletTests.ps1",
+      "-Output",
+      "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\regressions\\savegame"
+    ],
+    "seconds": 2.9,
+    "log": "logs/savegame-commandlets.log"
+  },
+  {
+    "name": "tangent-commandlets",
+    "exit": 0,
+    "passed": true,
+    "command": [
+      "pwsh",
+      "-NoProfile",
+      "-File",
+      "Editor/tests/TangentCommandletTests.ps1",
+      "-Output",
+      "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\regressions\\tangents"
+    ],
+    "seconds": 2.6,
+    "log": "logs/tangent-commandlets.log"
+  },
+  {
+    "name": "material-graph",
+    "exit": 1,
+    "passed": false,
+    "command": [
+      "pwsh",
+      "-NoProfile",
+      "-File",
+      "Editor/tests/MaterialGraphCommandletTests.ps1",
+      "-Output",
+      "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\regressions\\graph"
+    ],
+    "seconds": 4.1,
+    "log": "logs/material-graph.log"
+  },
+  {
+    "name": "material-render",
+    "exit": 0,
+    "passed": true,
+    "command": [
+      "python",
+      "Editor/tests/MaterialRenderTests.py",
+      "--tool",
+      "E:\\Engine\\Game\\build\\x64\\Release\\Runtime\\EngineCommandlets.exe",
+      "--output",
+      "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\regressions\\materials"
+    ],
+    "seconds": 173.4,
+    "log": "logs/material-render.log"
+  },
+  {
+    "name": "point-motion",
+    "exit": 0,
+    "passed": true,
+    "command": [
+      "python",
+      "Editor/tests/PointShadowMotionTests.py",
+      "--tool",
+      "E:\\Engine\\Game\\build\\x64\\Release\\Runtime\\EngineCommandlets.exe",
+      "--output",
+      "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\regressions\\point",
+      "--model",
+      "E:\\Engine\\Game\\Battle\\Content\\Models\\CesiumMan.glb"
+    ],
+    "seconds": 86.9,
+    "log": "logs/point-motion.log"
+  },
+  {
+    "name": "point-slots-lod",
+    "exit": 0,
+    "passed": true,
+    "command": [
+      "python",
+      "Editor/tests/PointShadowSlotsLodTests.py",
+      "--tool",
+      "E:\\Engine\\Game\\build\\x64\\Release\\Runtime\\EngineCommandlets.exe",
+      "--output",
+      "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\regressions\\slots",
+      "--model",
+      "E:\\Engine\\Game\\Battle\\Content\\Models\\CesiumMan.glb"
+    ],
+    "seconds": 152.8,
+    "log": "logs/point-slots-lod.log"
+  },
+  {
+    "name": "transparency",
+    "exit": 0,
+    "passed": true,
+    "command": [
+      "python",
+      "Editor/tests/TransparencyTests.py",
+      "--tool",
+      "E:\\Engine\\Game\\build\\x64\\Release\\Runtime\\EngineCommandlets.exe",
+      "--output",
+      "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\regressions\\transparency"
+    ],
+    "seconds": 43.3,
+    "log": "logs/transparency.log"
+  },
+  {
+    "name": "intersections",
+    "exit": 0,
+    "passed": true,
+    "command": [
+      "python",
+      "Editor/tests/TransparencyIntersectionTests.py",
+      "--tool",
+      "E:\\Engine\\Game\\build\\x64\\Release\\Runtime\\EngineCommandlets.exe",
+      "--output",
+      "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\regressions\\intersections"
+    ],
+    "seconds": 50.2,
+    "log": "logs/intersections.log"
+  },
+  {
+    "name": "api-reference",
+    "exit": 0,
+    "passed": true,
+    "command": [
+      "node",
+      "Engine/docs/api-reference/build.mjs",
+      "--check"
+    ],
+    "seconds": 2.7,
+    "log": "logs/api-reference.log"
+  }
+]

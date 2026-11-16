@@ -46,6 +46,42 @@ void Vector(const Json& value, float* output, size_t count)
         if (!std::isfinite(output[i])) Invalid("Non-finite transform");
     }
 }
+PhysicsBodyType BodyType(const Json& value)
+{
+    if (!value.is_string()) Invalid("Expected physics body type string");
+    const auto text = value.get<std::string>();
+    if (text == "static") return PhysicsBodyType::Static;
+    if (text == "dynamic") return PhysicsBodyType::Dynamic;
+    if (text == "kinematic") return PhysicsBodyType::Kinematic;
+    Invalid("Unknown physics body type");
+}
+PhysicsShapeType ShapeType(const Json& value)
+{
+    if (!value.is_string()) Invalid("Expected physics shape type string");
+    const auto text = value.get<std::string>();
+    if (text == "box") return PhysicsShapeType::Box;
+    if (text == "sphere") return PhysicsShapeType::Sphere;
+    if (text == "capsule") return PhysicsShapeType::Capsule;
+    Invalid("Unknown physics shape type");
+}
+const char* BodyTypeName(PhysicsBodyType type)
+{
+    switch (type)
+    {
+    case PhysicsBodyType::Static: return "static";
+    case PhysicsBodyType::Kinematic: return "kinematic";
+    default: return "dynamic";
+    }
+}
+const char* ShapeTypeName(PhysicsShapeType type)
+{
+    switch (type)
+    {
+    case PhysicsShapeType::Sphere: return "sphere";
+    case PhysicsShapeType::Capsule: return "capsule";
+    default: return "box";
+    }
+}
 void Structure(const SceneSnapshot& data)
 {
     if (data.documentVersion < 1 || data.documentVersion > 3)
@@ -73,8 +109,9 @@ void Structure(const SceneSnapshot& data)
                 Invalid("Custom data requires an object with an unsigned version");
         }
         if (item.pointLight && !item.pointLight->IsValid()) Invalid("Invalid point light parameters");
+        if (item.physics && !item.physics->IsValid()) Invalid("Invalid physics body parameters");
         if (!SceneAssets::ValidPath(item.modelAsset) || !SceneAssets::ValidPath(item.textureAsset) ||
-            !SceneAssets::ValidPath(item.materialAsset))
+            !SceneAssets::ValidPath(item.materialAsset) || !SceneAssets::ValidPath(item.scriptAsset))
             Invalid("Assets must be canonical /Game paths without traversal");
         if (item.typeName == SceneAssets::ModelType && item.modelAsset.empty())
             Invalid("Engine.Model requires a model asset");
@@ -146,7 +183,7 @@ SceneSnapshot SceneDocument::Parse(const std::string& text)
         for (const auto& o : objects)
         {
             auto core = o;
-            core.erase("assets"); core.erase("pointLight");
+            core.erase("assets"); core.erase("pointLight"); core.erase("physics");
             if (version >= 3) core.erase("projectData");
             RequireFields(core, {"id", "type", "name", "parent", "inheritParentScale", "transform"});
             SceneComponentSnapshot item;
@@ -170,17 +207,48 @@ SceneSnapshot SceneDocument::Parse(const std::string& text)
                 value.castShadows = hasCastShadows ? light.at("castShadows").get<bool>() : false;
                 item.pointLight = value;
             }
+            if (o.contains("physics"))
+            {
+                const auto& body = o.at("physics");
+                RequireFields(body, {"enabled", "body", "shape", "friction", "restitution", "density"});
+                if (!body.at("enabled").is_boolean() ||
+                    !body.at("friction").is_number() || !body.at("restitution").is_number() ||
+                    !body.at("density").is_number())
+                    Invalid("Invalid physics fields");
+                SceneComponentSnapshot::PhysicsBody value;
+                value.enabled = body.at("enabled").get<bool>();
+                value.bodyType = BodyType(body.at("body"));
+                value.shapeType = ShapeType(body.at("shape"));
+                value.friction = body.at("friction").get<float>();
+                value.restitution = body.at("restitution").get<float>();
+                value.density = body.at("density").get<float>();
+                item.physics = value;
+            }
             if (o.contains("assets"))
             {
-                // "material" is optional: documents written before materials stay readable.
+                // "material" and "script" are optional: documents written without them stay readable,
+                // and they are written only when assigned, so such documents stay readable by older builds.
                 const auto& a = o.at("assets");
-                if (a.is_object() && a.contains("material")) RequireFields(a, {"model", "texture", "material"});
-                else RequireFields(a, {"model", "texture"});
+                if (!a.is_object()) Invalid("Invalid asset reference");
+                auto required = a;
+                required.erase("material"); required.erase("script"); required.erase("scriptVariables");
+                RequireFields(required, {"model", "texture"});
                 if (!a.at("model").is_string() || !a.at("texture").is_string() ||
-                    (a.contains("material") && !a.at("material").is_string())) Invalid("Invalid asset reference");
+                    (a.contains("material") && !a.at("material").is_string()) ||
+                    (a.contains("script") && !a.at("script").is_string())) Invalid("Invalid asset reference");
                 item.modelAsset = a.at("model").get<std::string>();
                 item.textureAsset = a.at("texture").get<std::string>();
                 if (a.contains("material")) item.materialAsset = a.at("material").get<std::string>();
+                if (a.contains("script")) item.scriptAsset = a.at("script").get<std::string>();
+                if (a.contains("scriptVariables"))
+                {
+                    // Values of the script's variables for this object: an object of literals.
+                    const auto& values = a.at("scriptVariables");
+                    if (!values.is_object() || values.empty()) Invalid("Invalid script variables");
+                    for (const auto& value : values)
+                        if (!value.is_boolean() && !value.is_number() && !value.is_string() && !value.is_array()) Invalid("Invalid script variables");
+                    item.scriptVariables = values.dump();
+                }
             }
             item.id = Id(o.at("id")); item.parentId = Id(o.at("parent"));
             item.name = Text(o.at("name")); item.typeName = Text(o.at("type"));
@@ -210,11 +278,13 @@ std::string SceneDocument::Serialize(const SceneSnapshot& data)
             {"transform", {{"position", {t.position.x,t.position.y,t.position.z}},
                 {"rotation", {t.rotation.x,t.rotation.y,t.rotation.z,t.rotation.w}},
                 {"scale", {t.scale.x,t.scale.y,t.scale.z}}}}});
-        if (!o.modelAsset.empty() || !o.textureAsset.empty() || !o.materialAsset.empty())
+        if (!o.modelAsset.empty() || !o.textureAsset.empty() || !o.materialAsset.empty() || !o.scriptAsset.empty() || !o.scriptVariables.empty())
         {
             auto& assets = json["objects"].back()["assets"];
             assets = {{"model", o.modelAsset}, {"texture", o.textureAsset}};
             if (!o.materialAsset.empty()) assets["material"] = o.materialAsset;
+            if (!o.scriptAsset.empty()) assets["script"] = o.scriptAsset;
+            if (!o.scriptVariables.empty()) assets["scriptVariables"] = nlohmann::json::parse(o.scriptVariables);
         }
         if (o.pointLight)
         {
@@ -231,6 +301,13 @@ std::string SceneDocument::Serialize(const SceneSnapshot& data)
                 object["properties"] = {{"Engine.PointLight", {{"version",1},{"value",object["pointLight"]}}}};
                 object.erase("pointLight");
             }
+        }
+        if (o.physics)
+        {
+            const auto& body = *o.physics;
+            json["objects"].back()["physics"] = {{"enabled", body.enabled},
+                {"body", BodyTypeName(body.bodyType)}, {"shape", ShapeTypeName(body.shapeType)},
+                {"friction", body.friction}, {"restitution", body.restitution}, {"density", body.density}};
         }
         if (!o.projectData.empty()) json["objects"].back()["projectData"] = Json::parse(o.projectData);
     }
@@ -369,11 +446,15 @@ void SceneDocument::Restore(const SceneSnapshot& data, ComponentTypeCatalog cata
             object->LoadProjectData(o.projectData);
             if (!skeletal) SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset);
         }
+        object->SetScriptAsset(o.scriptAsset); // a missing or broken file only fails in Play
+        object->SetScriptVariables(o.scriptVariables);
         auto added = target.AddComponent(o.name, object, o.typeName);
         if (added.result != SceneResult::Ok || target.SetTransform(added.id, o.transform) != SceneResult::Ok)
             throw std::runtime_error("Cannot restore object: " + o.name);
         if (o.pointLight && target.SetPointLight(added.id, *o.pointLight) != SceneResult::Ok)
             Invalid("Point light properties require a point light component: " + o.name);
+        if (o.physics && target.SetPhysicsBody(added.id, *o.physics) != SceneResult::Ok)
+            Invalid("Invalid physics properties: " + o.name);
         ids.emplace(o.id, added.id);
         if (!o.parentId && !o.inheritParentScale) EngineInternal::ComponentAccess::ParentWithoutScale(*target.FindComponent(added.id), nullptr);
     }

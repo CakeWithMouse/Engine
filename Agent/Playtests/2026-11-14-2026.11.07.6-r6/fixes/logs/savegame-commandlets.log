@@ -1,0 +1,7 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  EditorModule.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\EngineCommandlets.exe
+
+SaveGame commandlets: 9 calls passed. Fixture: E:\Engine\Engine\build\savegame-commandlets-ecadcf3f6e9f4e9d8c79e75c67938223

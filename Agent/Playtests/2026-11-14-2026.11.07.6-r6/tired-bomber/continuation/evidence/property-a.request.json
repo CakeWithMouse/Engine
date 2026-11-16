@@ -1,0 +1,5 @@
+{
+  "path": "/fov",
+  "type": "Gameplay.Camera",
+  "value": 75
+}

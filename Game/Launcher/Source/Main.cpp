@@ -1,4 +1,4 @@
-﻿#define NOMINMAX
+#define NOMINMAX
 #include <Windows.h>
 #include <shellapi.h>
 #include "Catalog.h"
@@ -9,6 +9,8 @@
 #include <shobjidl.h>
 #include <shlobj.h>
 #include <wrl/client.h>
+#include <thread>
+#include <fstream>
 #include "ProjectLibrary.h"
 #include "ProjectVersion.h"
 #include "LaunchSplash.h"
@@ -29,6 +31,95 @@ constexpr INT_PTR InstallEngineId = 105, UpgradeId = 106, PinEngineId = 107;
 constexpr INT_PTR EnableCodeId = 108, BuildCodeId = 109;
 constexpr INT_PTR ExportId = 112;
 std::vector<std::filesystem::path> userProjects;
+
+void DeployIconToFolder(const std::filesystem::path& folder)
+{
+    if (folder.empty()) return;
+    try {
+        const auto target = folder / "icon_pain_multisize.ico";
+        if (std::filesystem::exists(target)) return;
+
+        const auto source = ExampleDeployment::ExecutableDirectory() / "icon_pain_multisize.ico";
+        const auto source2 = ExampleDeployment::ExecutableDirectory() / "Runtime/icon_pain_multisize.ico";
+        if (std::filesystem::exists(source) && CopyFileW(source.c_str(), target.c_str(), TRUE)) return;
+        if (std::filesystem::exists(source2) && CopyFileW(source2.c_str(), target.c_str(), TRUE)) return;
+
+        HRSRC hRes = FindResourceW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(302), RT_RCDATA);
+        if (hRes) {
+            HGLOBAL hData = LoadResource(GetModuleHandleW(nullptr), hRes);
+            if (hData) {
+                const void* pData = LockResource(hData);
+                DWORD size = SizeofResource(GetModuleHandleW(nullptr), hRes);
+                if (pData && size > 0) {
+                    HANDLE hFile = CreateFileW(target.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
+                    if (hFile != INVALID_HANDLE_VALUE) {
+                        DWORD written = 0;
+                        WriteFile(hFile, pData, size, &written, nullptr);
+                        CloseHandle(hFile);
+                    }
+                }
+            }
+        }
+    } catch (...) {}
+}
+
+void SyncEngineStoreIcons()
+{
+    try {
+        const auto store = EngineStore();
+        if (std::filesystem::exists(store)) {
+            for (const auto& ver : std::filesystem::directory_iterator(store)) {
+                if (ver.is_directory()) {
+                    for (const auto& cfg : std::filesystem::directory_iterator(ver.path())) {
+                        if (cfg.is_directory()) {
+                            DeployIconToFolder(cfg.path());
+                        }
+                    }
+                }
+            }
+        }
+    } catch (...) {}
+}
+
+void EnsureProcessIcon(DWORD pid, int durationMs = 8000)
+{
+    if (!pid) return;
+    std::thread watcher([pid, durationMs]() {
+        const auto deadline = GetTickCount64() + durationMs;
+        HANDLE hProcess = OpenProcess(SYNCHRONIZE, FALSE, pid);
+        while (GetTickCount64() < deadline) {
+            if (hProcess && WaitForSingleObject(hProcess, 0) == WAIT_OBJECT_0) {
+                break;
+            }
+            HICON hIcon = LoadIconW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(101));
+            HICON hIconSm = static_cast<HICON>(LoadImageW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(101), IMAGE_ICON,
+                GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR));
+            if (!hIcon && !hIconSm) break;
+
+            struct Context { DWORD pid; HICON big; HICON sm; } ctx{pid, hIcon, hIconSm};
+            EnumWindows([](HWND w, LPARAM p) -> BOOL {
+                auto& c = *reinterpret_cast<Context*>(p);
+                DWORD id = 0;
+                GetWindowThreadProcessId(w, &id);
+                if (id == c.pid) {
+                    if (c.big) {
+                        SendMessageW(w, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(c.big));
+                        SetClassLongPtrW(w, GCLP_HICON, reinterpret_cast<LONG_PTR>(c.big));
+                    }
+                    if (c.sm) {
+                        SendMessageW(w, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(c.sm));
+                        SetClassLongPtrW(w, GCLP_HICONSM, reinterpret_cast<LONG_PTR>(c.sm));
+                    }
+                }
+                return TRUE;
+            }, reinterpret_cast<LPARAM>(&ctx));
+
+            Sleep(80);
+        }
+        if (hProcess) CloseHandle(hProcess);
+    });
+    watcher.detach();
+}
 
 void RunProjectCodeTool(const std::filesystem::path& project, const wchar_t* action)
 {
@@ -135,7 +226,8 @@ INT_PTR CALLBACK CreateDialogProc(HWND window, UINT message, WPARAM wParam, LPAR
             std::string buildWarning;
             {
                 LaunchSplash splash(L"Создание проекта…", true, window);
-                *output = ProjectLibrary::Create(path, Utf8(Text(window, 201)), ExampleDeployment::ExecutableDirectory() / "Runtime/Templates/SceneProject/Game.dll");
+                const auto installed = InstallEngineRelease(ExampleDeployment::ExecutableDirectory() / "Runtime");
+                *output = ProjectLibrary::Create(path, Utf8(Text(window, 201)), ExampleDeployment::ExecutableDirectory() / "Runtime/Templates/SceneProject/Game.dll", &installed);
                 if (IsDlgButtonChecked(window,204) == BST_CHECKED) {
                     try { RunProjectCodeTool(*output,L"Enable"); }
                     catch (const std::exception& error) { buildWarning = error.what(); }
@@ -217,10 +309,14 @@ int LaunchProject(const std::filesystem::path& file, bool editor, bool smoke = f
             currentEngine=true;
         }
     }
+    SyncEngineStoreIcons();
     LaunchSplash splash(editor ? L"Запуск редактора…" : L"Запуск игры…", !smoke, GetActiveWindow());
     LaunchReadiness readiness;
     const auto runtime = (currentEngine ? release : ProjectLibrary::ResolveRelease(settings, current)).runtime / "EngineRuntime.exe";
     if (!std::filesystem::is_regular_file(runtime)) throw std::runtime_error("EngineRuntime.exe is missing");
+    DeployIconToFolder(runtime.parent_path());
+    DeployIconToFolder(project.parent_path());
+    if (std::filesystem::is_directory(project)) DeployIconToFolder(project);
     std::wstring command = L"\"" + runtime.wstring() + L"\" --project \"" + project.wstring() + L"\" --mode " + (editor ? L"editor --scene-api" : L"game");
     if (smoke) command += L" --frames 3";
     if (currentEngine) command += L" --compatible-engine";
@@ -228,7 +324,7 @@ int LaunchProject(const std::filesystem::path& file, bool editor, bool smoke = f
     if (!CreateProcessW(runtime.c_str(), command.data(), nullptr, nullptr, FALSE, smoke ? CREATE_NO_WINDOW : CREATE_NEW_CONSOLE,
         nullptr, runtime.parent_path().c_str(), &startup, &process)) throw std::runtime_error("Cannot start project, Windows error " + std::to_string(GetLastError()));
     CloseHandle(process.hThread);
-    if (!smoke) { try { readiness.Wait(process.hProcess,process.dwProcessId); } catch (...) { CloseHandle(process.hProcess); throw; } CloseHandle(process.hProcess); if(status)SetWindowTextW(status,L"Приложение запущено. Лаунчер можно закрыть."); return 0; }
+    if (!smoke) { EnsureProcessIcon(process.dwProcessId); try { readiness.Wait(process.hProcess,process.dwProcessId); } catch (...) { CloseHandle(process.hProcess); throw; } CloseHandle(process.hProcess); if(status)SetWindowTextW(status,L"Приложение запущено. Лаунчер можно закрыть."); return 0; }
     if (WaitForSingleObject(process.hProcess, 60000) != WAIT_OBJECT_0)
     { TerminateProcess(process.hProcess, 124); CloseHandle(process.hProcess); throw std::runtime_error("Project smoke timed out"); }
     DWORD code = 1; GetExitCodeProcess(process.hProcess, &code); CloseHandle(process.hProcess); return static_cast<int>(code);
@@ -298,7 +394,7 @@ int Launch(const GameEntry& entry, bool smoke, bool editor = false)
                         (entry.runtime || editor) && !smoke ? CREATE_NEW_CONSOLE : 0, nullptr, nullptr, &startup, &process))
         throw std::runtime_error("CreateProcess failed, Windows error " + std::to_string(GetLastError()));
     CloseHandle(process.hThread);
-    if (!smoke) { try { readiness.Wait(process.hProcess,process.dwProcessId); } catch (...) { CloseHandle(process.hProcess); throw; } CloseHandle(process.hProcess); return 0; }
+    if (!smoke) { EnsureProcessIcon(process.dwProcessId); try { readiness.Wait(process.hProcess,process.dwProcessId); } catch (...) { CloseHandle(process.hProcess); throw; } CloseHandle(process.hProcess); return 0; }
     const DWORD wait = WaitForSingleObject(process.hProcess, 60000);
     if (wait != WAIT_OBJECT_0)
     {
@@ -408,7 +504,16 @@ LRESULT WindowProcImpl(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
         AppendMenuW(bar,MF_POPUP,reinterpret_cast<UINT_PTR>(versions),L"Версии движка");
         SetMenu(window,bar);
         status = CreateWindowW(L"STATIC", L"", WS_CHILD | WS_VISIBLE | SS_LEFT,
-            18, 372, 670, 70, window, nullptr, nullptr, nullptr);
+            18, 335, 670, 70, window, nullptr, nullptr, nullptr);
+        // Without WM_SETFONT the controls use the bitmap System font, which has no Cyrillic glyphs when the
+        // system locale is not Russian: the list showed bars instead of letters. Use the Windows UI font.
+        static const HFONT font = [] {
+            NONCLIENTMETRICSW metrics{sizeof(metrics)};
+            return SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0)
+                ? CreateFontIndirectW(&metrics.lfMessageFont) : static_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
+        }();
+        EnumChildWindows(window, [](HWND child, LPARAM font) { SendMessageW(child, WM_SETFONT, static_cast<WPARAM>(font), TRUE); return TRUE; },
+            reinterpret_cast<LPARAM>(font));
         UpdateStatus();
         return 0;
     }
@@ -554,6 +659,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show)
     if (diagnostic) LauncherCli::InitializeStreams();
     try
     {
+        SyncEngineStoreIcons();
         if (diagnostic)
         {
             const std::wstring option = argv[1];
@@ -598,7 +704,8 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show)
             }
             if (option == L"--create-project" && argc == 4)
             {
-                ProjectLibrary::Create(argv[2], Utf8(argv[3]), ExampleDeployment::ExecutableDirectory() / "Runtime/Templates/SceneProject/Game.dll");
+                const auto installed = InstallEngineRelease(ExampleDeployment::ExecutableDirectory() / "Runtime");
+                ProjectLibrary::Create(argv[2], Utf8(argv[3]), ExampleDeployment::ExecutableDirectory() / "Runtime/Templates/SceneProject/Game.dll", &installed);
                 LocalFree(argv); return 0;
             }
             if (argc == 3 && (option == L"--check-project" || option == L"--smoke-project" || option == L"--smoke-project-editor"))
@@ -634,16 +741,23 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show)
         const auto runtime = ExampleDeployment::ExecutableDirectory() / "Runtime";
         // The games can run from a local build without Qt. Only complete runtimes go in the engine store.
         if (std::filesystem::is_regular_file(runtime / "Editor.dll")) InstallEngineRelease(runtime);
+        SyncEngineStoreIcons();
         WNDCLASSW wc{};
         wc.lpfnWndProc = WindowProc;
         wc.hInstance = instance;
         wc.lpszClassName = L"EngineLauncherWindow";
         wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+        wc.hIcon = LoadIconW(instance, MAKEINTRESOURCEW(101));
+        if (!wc.hIcon) wc.hIcon = LoadIconW(nullptr, IDI_APPLICATION);
         wc.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
         if (!RegisterClassW(&wc)) throw std::runtime_error("Cannot register launcher window");
         HWND window = CreateWindowW(wc.lpszClassName, L"Engine Launcher", WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
             CW_USEDEFAULT, CW_USEDEFAULT, 730, 510, nullptr, nullptr, instance, nullptr);
         if (!window) throw std::runtime_error("Cannot create launcher window");
+        HICON smIcon = static_cast<HICON>(LoadImageW(instance, MAKEINTRESOURCEW(101), IMAGE_ICON,
+            GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR));
+        if (wc.hIcon) SendMessageW(window, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(wc.hIcon));
+        if (smIcon) SendMessageW(window, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(smIcon));
         ShowWindow(window, show);
         MSG msg{};
         BOOL result;

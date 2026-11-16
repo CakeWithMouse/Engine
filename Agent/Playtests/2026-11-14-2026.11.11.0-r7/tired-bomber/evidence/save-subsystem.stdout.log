@@ -1,0 +1,472 @@
+Project: Tired Bomber R5
+Mode: game
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Game/build/x64/Release/Runtime/EngineContent'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberUpgradedR7/Content'
+ModuleLoaded
+[VfsRead] Bind host VFS service v1
+GameCreate
+[VfsService] first read via module: /Game/Models/blend-suzanne-multiple/blend-suzanne-multiple.glb
+GameSceneLoaded
+GameStart
+Tired Bomber R5
+[TiredBomber] subsystem initialized
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[TiredBomber] settings vsync=0 aa=1 mode=0 adapter=NVIDIA GeForce RTX 4070 Laptop GPU
+[MaterialSlotsProbe] target slots=2 sourceID=0 path=/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat sourceID=1 path=/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat
+[MaterialSlotsProbe] changed=1 unknownIdRejected=1 overrideSet=1 overrideCleared=1 slotRestored=1
+[TiredBomber] mesh check usable=0 triangles=12 configured=1 lowLOD=12 sphere=224 sphereLOD=130 error=0
+asset-check procedural cube (default unit profile): 12 triangles, 24 vertices, size 1.00 x 1.00 x 1.00 m, pivot y -0.50, uv yes, NOT USABLE
+  problem: Pivot is not on the ground: the lowest point is at y = -0.50 m. Move the model so that its tracks or wheels touch y = 0.
+[TiredBomber] trace filter channel=1 -> ground
+[TiredBomber] trace filter channel=2 -> unit
+[TiredBomber] trace ignore channel=2 before=7 ignored=7 after=0 status=Miss
+[HierarchyProbe] attached=1 parent=16 child=17 local=1,0,0 world=10,2,0 expected=10,2,0 error=2.38419e-07
+[TiredBomber] scene ready: 4 moving units, orthographic XZ camera, W/A/S/D controller, B drops a bomb
+[TiredBomber] subsystem scene ready: Main
+GameUpdate
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+auto-lod mesh LOD1: 12 -> 12 triangles (target 6, error 0, silhouette drift 0%)
+auto-lod mesh LOD2: 12 -> 12 triangles (target 3, error 0, silhouette drift 0%)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+auto-lod mesh LOD1: 12 -> 12 triangles (target 6, error 0, silhouette drift 0%)
+auto-lod mesh LOD2: 12 -> 12 triangles (target 3, error 0, silhouette drift 0%)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberUpgradedR7/Content/Models/blend-uv/Textures/BaseColor_0.png (64x64)
+[TiredBomber] GetSubsystem after startup=available
+[TiredBomber] marker instances drawn=0 total=13 LODs=3 lod0=0 lod1=0 lod2=0
+Material E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberUpgradedR7/Content/Models/blend-suzanne-multiple/Materials/Material_0.mat: params.Tint is not declared by the shader
+Material E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberUpgradedR7/Content/Models/blend-suzanne-multiple/Materials/Material_0.mat: textures.BaseMap is not declared by the shader
+Material E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberUpgradedR7/Content/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat: params.Tint is not declared by the shader
+Material E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberUpgradedR7/Content/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat: textures.BaseMap is not declared by the shader
+[Info] FXAA pipeline and shaders compiled successfully
+FontAtlas: 161 glyphs at 14 px in a 512x128 atlas.
+frame-dump E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberUpgradedR7/Content/tired-bomber-frame.bmp written=1 size=1000x500
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[TiredBomber] marker instances drawn=11 total=13 LODs=3 lod0=0 lod1=0 lod2=11
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[TiredBomber] save at frame=20 status=1 hits=0 misses=0 elapsed=0.316667 sim=1
+[SubsystemSaveProbe] tick=20 elapsed=0.333333
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[SubsystemSaveProbe] tick=40 elapsed=0.666667
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[TiredBomber] completed frame valid=1 index=59 draws=97 instances=128 visible=12 culled=0
+[TiredBomber] LOD component=Bomber.LOD.ScreenHeightProbe frame=59 prepared=1 drawn=1/1 hidden=0 distance=0 frustum=0 camera=24..24 thresholds=50,20, perLOD=0,1,0,
+[TiredBomber] LOD component=Bomber.Markers.LOD frame=59 prepared=1 drawn=11/13 hidden=1 distance=0 frustum=1 camera=24.5967..46.545 thresholds=9,17, perLOD=0,0,11,
+[LOD panel] RENDER / LOD    F7 hide | F8 next
+[LOD panel] Frame 59 | CPU submission counters
+[LOD panel] Draws 97  instances 128  dispatch 0
+[LOD panel] Indices 222501 (all passes)
+[LOD panel] Component 1/2  Bomber.LOD.ScreenHeightProbe
+[LOD panel] Color visible 1 / 1
+[LOD panel] Hidden 0  distance 0  frustum 0
+[LOD panel] Camera distance 24.0..24.0
+[LOD panel] Draw limit off | LOD by screen pixels
+[LOD panel] LOD0 mesh: 0 | next < 50.0 px
+[LOD panel] LOD1 mesh: 1 | next < 20.0 px
+[LOD panel] LOD2 mesh: 0
+[LOD panel] Buckets may overlap during LOD fade
+[LOD panel] Color selection only; shadows counted separately
+[SubsystemSaveProbe] tick=60 elapsed=1
+frame-dump E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberUpgradedR7/Content/lod-camera-24.bmp written=1 size=1000x500
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[TiredBomber] player position x=-10 y=0.5 z=5 t=1.01667s
+[TiredBomber] bomb released at t=1.01667s
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[SubsystemSaveProbe] tick=80 elapsed=1.33333
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[TiredBomber] diagnostics camera moved to Y=8 at frame 90
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[SubsystemSaveProbe] tick=100 elapsed=1.66667
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[TiredBomber] save completion status=2 ticket=1 message=
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[TiredBomber] completed-frame snapshot after near-camera move
+[TiredBomber] completed frame valid=1 index=109 draws=103 instances=144 visible=13 culled=0
+[TiredBomber] LOD component=Bomber.LOD.ScreenHeightProbe frame=109 prepared=1 drawn=1/1 hidden=0 distance=0 frustum=0 camera=8..8 thresholds=50,20, perLOD=0,1,0,
+[TiredBomber] LOD component=Bomber.Markers.LOD frame=109 prepared=1 drawn=11/13 hidden=1 distance=0 frustum=1 camera=9.96996..40.7534 thresholds=9,17, perLOD=0,11,0,
+[LOD panel] RENDER / LOD    F7 hide | F8 next
+[LOD panel] Frame 109 | CPU submission counters
+[LOD panel] Draws 103  instances 144  dispatch 0
+[LOD panel] Indices 225621 (all passes)
+[LOD panel] Component 1/2  Bomber.LOD.ScreenHeightProbe
+[LOD panel] Color visible 1 / 1
+[LOD panel] Hidden 0  distance 0  frustum 0
+[LOD panel] Camera distance 8.0..8.0
+[LOD panel] Draw limit off | LOD by screen pixels
+[LOD panel] LOD0 mesh: 0 | next < 50.0 px
+[LOD panel] LOD1 mesh: 1 | next < 20.0 px
+[LOD panel] LOD2 mesh: 0
+[LOD panel] Buckets may overlap during LOD fade
+[LOD panel] Color selection only; shadows counted separately
+frame-dump E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberUpgradedR7/Content/lod-camera-8.bmp written=1 size=1000x500
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[TiredBomber] HIT unit id=7 t=1.95s trace=Hit queries=60 triangles=40
+[TiredBomber] GPU spark burst started (256, depth collision, sorting)
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+frame-dump E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberUpgradedR7/Content/tired-bomber-hit-1.bmp written=1 size=1000x500
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[SubsystemSaveProbe] tick=120 elapsed=2
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdates=120
+GameStop
+[TiredBomber] subsystem scene closing: Main
+GameDestroy
+[VfsRead] Unbind
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped

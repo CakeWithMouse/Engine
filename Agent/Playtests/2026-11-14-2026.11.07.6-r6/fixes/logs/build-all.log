@@ -1,0 +1,265 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  Base.cpp
+  DirectionalLightComponent.cpp
+  Scene.cpp
+  Trace.cpp
+  ComponentTrace.cpp
+  StandardSky.cpp
+  GameTrace.cpp
+  SaveGame.cpp
+  SaveState.cpp
+  RenderDiagnostics.cpp
+  SceneCommands.cpp
+  SceneDocument.cpp
+  SceneAssets.cpp
+  ModelImport.cpp
+  BlendImport.cpp
+  SceneEditAssets.cpp
+  SceneEditAudio.cpp
+  SceneEditMaterials.cpp
+  SceneEditSession.cpp
+  SceneEditBatch.cpp
+E:\Engine\Engine\Source\Scene\Scene.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  SceneAuthoring.cpp
+E:\Engine\Engine\Source\MainGame\SaveState.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  AssetUpdate.cpp
+E:\Engine\Engine\Source\Base\Base.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  GameEditModule.cpp
+E:\Engine\Engine\Source\Components\Light\DirectionalLightComponent.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  BaseResources.cpp
+E:\Engine\Engine\Source\Components\ComponentTrace.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  BaseGameConfig.cpp
+E:\Engine\Engine\Source\Components\StandardSky.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  GameComponents.cpp
+E:\Engine\Engine\Source\MainGame\RenderDiagnostics.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  CubeMap.cpp
+E:\Engine\Engine\Source\Scene\SceneCommands.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  CubeComponent.cpp
+E:\Engine\Engine\Source\Scene\SceneDocument.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  FBXComponent.cpp
+E:\Engine\Engine\Source\Scene\SceneAssets.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  InstancedMeshComponent.cpp
+E:\Engine\Engine\Source\MainGame\SaveGame.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  MeshComponent.cpp
+E:\Engine\Engine\Source\Scene\Trace.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  InstancedMeshSkinned.cpp
+E:\Engine\Engine\Source\MainGame\GameTrace.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  InstancedMeshImpostor.cpp
+E:\Engine\Engine\Source\Scene\ModelImport.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  InstancedMeshShadows.cpp
+E:\Engine\Engine\Source\Runtime\SceneEditAssets.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  ParticleSystemComponent.cpp
+E:\Engine\Engine\Source\Scene\BlendImport.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  SphereComponent.cpp
+E:\Engine\Engine\Source\Runtime\SceneEditAudio.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  TriangleComponent.cpp
+E:\Engine\Engine\Source\Runtime\SceneEditMaterials.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  UIComponent.cpp
+E:\Engine\Engine\Source\Runtime\SceneEditSession.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  Display.cpp
+E:\Engine\Engine\Source\Runtime\SceneEditBatch.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  Delegates.cpp
+E:\Engine\Engine\Source\Runtime\SceneAuthoring.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  InputDevice.cpp
+E:\Engine\Engine\Source\Scene\AssetUpdate.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  InputActions.cpp
+E:\Engine\Engine\Source\Runtime\GameEditModule.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  Character.cpp
+E:\Engine\Engine\Source\Base\Config\BaseResources.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  CharacterController.cpp
+E:\Engine\Engine\Source\Base\Config\BaseGameConfig.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  GameSession.cpp
+E:\Engine\Engine\Source\Components\GameComponents.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  Game.cpp
+E:\Engine\Engine\Source\Components\Light\CubeMap.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  Player.cpp
+E:\Engine\Engine\Source\Components\SpecificComponents\CubeComponent.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  ImpostorAtlas.cpp
+E:\Engine\Engine\Source\Components\SpecificComponents\FBXComponent.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  Material.cpp
+E:\Engine\Engine\Source\Components\SpecificComponents\InstancedMeshComponent.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  MeshData.cpp
+E:\Engine\Engine\Source\Components\SpecificComponents\MeshComponent.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  MaterialAsset.cpp
+E:\Engine\Engine\Source\Components\SpecificComponents\InstancedMeshSkinned.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  MeshPrimitives.cpp
+E:\Engine\Engine\Source\Components\SpecificComponents\InstancedMeshImpostor.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  MeshSimplifier.cpp
+E:\Engine\Engine\Source\Components\SpecificComponents\InstancedMeshShadows.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  MeshValidation.cpp
+E:\Engine\Engine\Source\Components\SpecificComponents\ParticleSystemComponent.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  AudioEngine.cpp
+E:\Engine\Engine\Source\Components\SpecificComponents\SphereComponent.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  AudioStream.cpp
+E:\Engine\Engine\Source\Components\SpecificComponents\TriangleComponent.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  DecoderFactory.cpp
+E:\Engine\Engine\Source\Components\SpecificComponents\UIComponent.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  MediaFoundationDecoder.cpp
+E:\Engine\Engine\Source\Display\Display.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  VoicePool.cpp
+E:\Engine\Engine\Source\InputDevice\Delegates.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  WavDecoder.cpp
+E:\Engine\Engine\Source\InputDevice\InputDevice.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  FontAtlas.cpp
+E:\Engine\Engine\Source\InputDevice\InputActions.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  UIElement.cpp
+E:\Engine\Engine\Source\Components\Character.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  UIMarkup.cpp
+E:\Engine\Engine\Source\MainGame\CharacterController.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  allocator.cpp
+E:\Engine\Engine\Source\MainGame\GameSession.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  indexgenerator.cpp
+E:\Engine\Engine\Source\MainGame\BaseGameClass\Game.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  simplifier.cpp
+E:\Engine\Engine\Source\MainGame\Player.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  spatialorder.cpp
+E:\Engine\Engine\Source\Render\ImpostorAtlas.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  vcacheoptimizer.cpp
+E:\Engine\Engine\Source\Render\Material.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  vfetchoptimizer.cpp
+E:\Engine\Engine\Source\Render\MeshData.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  TextureLoader.cpp
+E:\Engine\Engine\Source\Render\MaterialAsset.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  ShaderCompiler.cpp
+E:\Engine\Engine\Source\Render\MeshPrimitives.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  SkeletalAnimation.cpp
+E:\Engine\Engine\Source\Render\MeshSimplifier.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  SkeletalBaker.cpp
+E:\Engine\Engine\Source\Render\MeshValidation.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  SkeletalLoaderAssimp.cpp
+E:\Engine\Engine\Source\Sound\AudioEngine.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  SkeletalMeshComponent.cpp
+E:\Engine\Engine\Source\Sound\AudioStream.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  Paths.cpp
+E:\Engine\Engine\Source\Sound\DecoderFactory.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  VirtualFileSystem.cpp
+E:\Engine\Engine\Source\Sound\MediaFoundationDecoder.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  VfsRead.cpp
+E:\Engine\Engine\Source\Sound\VoicePool.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  LocalVfs.cpp
+E:\Engine\Engine\Source\Sound\WavDecoder.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  HostVfsProxy.cpp
+E:\Engine\Engine\Source\UI\FontAtlas.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  VfsService.cpp
+E:\Engine\Engine\Source\UI\UIElement.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\UI\UIMarkup.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\ThirdParty\meshoptimizer\src\allocator.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\ThirdParty\meshoptimizer\src\indexgenerator.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\ThirdParty\meshoptimizer\src\simplifier.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\ThirdParty\meshoptimizer\src\spatialorder.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\ThirdParty\meshoptimizer\src\vcacheoptimizer.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\ThirdParty\meshoptimizer\src\vfetchoptimizer.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\Render\TextureLoader.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\Render\ShaderCompiler.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\Render\SkeletalAnimation.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\Render\SkeletalBaker.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\Render\SkeletalLoaderAssimp.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\Components\SpecificComponents\SkeletalMeshComponent.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\Resources\Paths.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\Resources\VirtualFileSystem.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\Resources\VfsRead.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\Resources\LocalVfs.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\Resources\HostVfsProxy.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\Runtime\VfsService.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Engine\Engine.vcxproj]
+  MOC FileService.h
+  MOC MainWindow.h
+  pch.cpp
+  Module.cpp
+  QtHost.cpp
+  EditorHistory.cpp
+  ViewportCommandHandler.cpp
+  AssetCommandHandler.cpp
+  SceneCommandHandler.cpp
+  EditorApp.cpp
+  EditorTheme.cpp
+  EditorStyles.cpp
+  DockLayoutManager.cpp
+  MainToolBar.cpp
+  IconProvider.cpp
+  ImportSettingsDialog.cpp
+  PlaySettingsDialog.cpp
+  ExternalGameRunner.cpp
+  MainWindow.cpp
+  AssetTools.cpp
+  ImportCommands.cpp
+  FileBrowser.cpp
+  ViewportWidget.cpp
+E:\Engine\Editor\Source\Module.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  ViewportWidget_Input.cpp
+E:\Engine\Editor\Source\QtHost.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  ViewportOverlayHelper.cpp
+E:\Engine\Editor\Host\EditorHistory.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  ObjectInspectorPanel.cpp
+E:\Engine\Editor\Host\ViewportCommandHandler.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  ProjectProperties.cpp
+E:\Engine\Editor\Host\AssetCommandHandler.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  SceneObjectsPanel.cpp
+E:\Engine\Editor\Host\SceneCommandHandler.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  MaterialEditorWindow.cpp
+E:\Engine\Editor\UI\EditorApp.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  MaterialTextureTools.cpp
+E:\Engine\Editor\UI\EditorTheme.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  MaterialGraphWidget.cpp
+E:\Engine\Editor\UI\DockLayoutManager.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  Logger.cpp
+E:\Engine\Editor\UI\MainToolBar.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  CommandRegistry.cpp
+E:\Engine\Editor\UI\EditorStyles.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  FileService.cpp
+E:\Engine\Editor\UI\IconProvider.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  EditorLocale.cpp
+E:\Engine\Editor\UI\ImportSettingsDialog.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  GizmoMath.cpp
+E:\Engine\Editor\UI\PlaySettingsDialog.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  ViewportOverlay.cpp
+E:\Engine\Editor\UI\ExternalGameRunner.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  GizmoGeometry.cpp
+E:\Engine\Editor\Source\AssetTools.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  GizmoTriangles.cpp
+E:\Engine\Editor\Source\FileBrowser.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  EditorSettings.cpp
+E:\Engine\Editor\Source\MainWindow.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  SettingsService.cpp
+E:\Engine\Editor\Source\ImportCommands.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  AssetOps.cpp
+E:\Engine\Editor\Source\ViewportWidget.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  HlslGraphCompiler.cpp
+E:\Engine\Editor\Source\ViewportWidget_Input.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  MaterialGraphModel.cpp
+E:\Engine\Editor\UI\ViewportOverlayHelper.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  SceneFile.cpp
+E:\Engine\Editor\Source\ObjectInspectorPanel.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  ImportSettings.cpp
+E:\Engine\Editor\Source\ProjectProperties.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  ModelImportSidecar.cpp
+E:\Engine\Editor\Source\SceneObjectsPanel.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  Terminal.cpp
+E:\Engine\Editor\Source\MaterialEditorWindow.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  UIEditorWindow.cpp
+E:\Engine\Editor\Source\MaterialTextureTools.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  HudTools.cpp
+E:\Engine\Editor\Source\MaterialGraphWidget.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+  CodeTools.cpp
+E:\Engine\Editor\Core\Logger.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Core\CommandRegistry.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Core\FileService.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Core\EditorLocale.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Core\GizmoMath.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Core\ViewportOverlay.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Core\GizmoGeometry.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Core\GizmoTriangles.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Core\EditorSettings.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Core\SettingsService.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Core\AssetOps.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Core\HlslGraphCompiler.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Core\MaterialGraphModel.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Core\SceneFile.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Core\ImportSettings.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Core\ModelImportSidecar.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Core\Terminal.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\UIEditorWindow.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\HudTools.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\CodeTools.cpp : fatal  error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию [E:\Engine\Editor\EditorModule.vcxproj]
+

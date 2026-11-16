@@ -1,0 +1,2722 @@
+{
+    "before": {
+        "live": [
+        ],
+        "machine": "",
+        "objects": [
+            {
+                "id": 1,
+                "material": "",
+                "name": "Ground",
+                "parent": 0,
+                "position": [
+                    0,
+                    -0.5,
+                    0
+                ],
+                "projectData": {
+                },
+                "scale": [
+                    20,
+                    1,
+                    20
+                ],
+                "type": "Primitive.Plane"
+            },
+            {
+                "id": 2,
+                "material": "",
+                "name": "Cube",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "projectData": {
+                },
+                "scale": [
+                    1,
+                    1,
+                    1
+                ],
+                "type": "Primitive.Cube"
+            },
+            {
+                "id": 3,
+                "material": "",
+                "name": "Warm Light",
+                "parent": 0,
+                "position": [
+                    2,
+                    3,
+                    2
+                ],
+                "projectData": {
+                },
+                "scale": [
+                    1,
+                    1,
+                    1
+                ],
+                "type": "Light.Point"
+            },
+            {
+                "id": 4,
+                "material": "",
+                "name": "Cool Light",
+                "parent": 0,
+                "position": [
+                    -3,
+                    2,
+                    1
+                ],
+                "projectData": {
+                },
+                "scale": [
+                    1,
+                    1,
+                    1
+                ],
+                "type": "Light.Point"
+            },
+            {
+                "id": 5,
+                "material": "",
+                "name": "SaveGameSlotProbe",
+                "parent": 0,
+                "position": [
+                    0,
+                    2,
+                    0
+                ],
+                "projectData": {
+                    "materialSlots": {
+                        "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                        "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                    },
+                    "version": 1
+                },
+                "scale": [
+                    1,
+                    1,
+                    1
+                ],
+                "type": "Engine.Model"
+            }
+        ],
+        "playState": 0
+    },
+    "dialogs": [
+    ],
+    "observation": "Actual themed Qt graph/card and runtime AI extension; widget image excludes D3D viewport.",
+    "ok": true,
+    "steps": [
+        {
+            "action": "create-file",
+            "error": "",
+            "snapshot": {
+                "canRedo": false,
+                "canUndo": false,
+                "checkCount": 1,
+                "detail": "",
+                "file": {
+                    "connections": [
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "targetKey": "Target"
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "1cc7fce1a2eafdff9d8640be7ef722453d64e31e2587bbf7781d68e5f72f663b",
+                "graph": {
+                    "connections": [
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "targetKey": "Target"
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        }
+                    ],
+                    "version": 1
+                },
+                "live": [
+                ],
+                "machine": "/Game/AI/CityGate2.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "action": "add",
+            "error": "",
+            "node": 2,
+            "snapshot": {
+                "canRedo": false,
+                "canUndo": true,
+                "checkCount": 1,
+                "detail": "",
+                "file": {
+                    "connections": [
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "targetKey": "Target"
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "1cc7fce1a2eafdff9d8640be7ef722453d64e31e2587bbf7781d68e5f72f663b",
+                "graph": {
+                    "connections": [
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "Patrol",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.35,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Patrol",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "targetKey": "Target"
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        }
+                    ],
+                    "version": 1
+                },
+                "live": [
+                ],
+                "machine": "/Game/AI/CityGate2.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "accepted": true,
+            "action": "connect",
+            "error": "",
+            "snapshot": {
+                "canRedo": false,
+                "canUndo": true,
+                "checkCount": 1,
+                "detail": "",
+                "file": {
+                    "connections": [
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "targetKey": "Target"
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "1cc7fce1a2eafdff9d8640be7ef722453d64e31e2587bbf7781d68e5f72f663b",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "Patrol",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.35,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Patrol",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "targetKey": "Target"
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        }
+                    ],
+                    "version": 1
+                },
+                "live": [
+                ],
+                "machine": "/Game/AI/CityGate2.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "action": "variables",
+            "error": "",
+            "snapshot": {
+                "canRedo": false,
+                "canUndo": true,
+                "checkCount": 1,
+                "detail": "",
+                "file": {
+                    "connections": [
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "targetKey": "Target"
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "1cc7fce1a2eafdff9d8640be7ef722453d64e31e2587bbf7781d68e5f72f663b",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "Patrol",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.35,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Patrol",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "targetKey": "Target"
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "live": [
+                ],
+                "machine": "/Game/AI/CityGate2.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "action": "settings",
+            "error": "",
+            "snapshot": {
+                "canRedo": false,
+                "canUndo": true,
+                "checkCount": 1,
+                "detail": "",
+                "file": {
+                    "connections": [
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "targetKey": "Target"
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "1cc7fce1a2eafdff9d8640be7ef722453d64e31e2587bbf7781d68e5f72f663b",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "Patrol",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.35,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Patrol",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "live": [
+                ],
+                "machine": "/Game/AI/CityGate2.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "action": "save",
+            "error": "",
+            "snapshot": {
+                "canRedo": false,
+                "canUndo": true,
+                "checkCount": 2,
+                "detail": "",
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "Patrol",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.35,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Patrol",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "7f2bd010706cf0c7adf41c6aeb67703842f48c0d2089175edb2fa8f0fab7d067",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "Patrol",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.35,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Patrol",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "live": [
+                ],
+                "machine": "/Game/AI/CityGate2.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "action": "undo",
+            "error": "",
+            "snapshot": {
+                "canRedo": true,
+                "canUndo": true,
+                "checkCount": 2,
+                "detail": "",
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "Patrol",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.35,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Patrol",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "7f2bd010706cf0c7adf41c6aeb67703842f48c0d2089175edb2fa8f0fab7d067",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "Patrol",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.35,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Patrol",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "targetKey": "Target"
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "live": [
+                ],
+                "machine": "/Game/AI/CityGate2.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "action": "redo",
+            "error": "",
+            "snapshot": {
+                "canRedo": false,
+                "canUndo": true,
+                "checkCount": 2,
+                "detail": "",
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "Patrol",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.35,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Patrol",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "7f2bd010706cf0c7adf41c6aeb67703842f48c0d2089175edb2fa8f0fab7d067",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "Patrol",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.35,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Patrol",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "live": [
+                ],
+                "machine": "/Game/AI/CityGate2.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "action": "save",
+            "error": "",
+            "snapshot": {
+                "canRedo": false,
+                "canUndo": true,
+                "checkCount": 3,
+                "detail": "",
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "Patrol",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.35,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Patrol",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "7f2bd010706cf0c7adf41c6aeb67703842f48c0d2089175edb2fa8f0fab7d067",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "Patrol",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.35,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Patrol",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "live": [
+                ],
+                "machine": "/Game/AI/CityGate2.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "action": "close",
+            "error": "",
+            "snapshot": {
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "Patrol",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.35,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Patrol",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "7f2bd010706cf0c7adf41c6aeb67703842f48c0d2089175edb2fa8f0fab7d067",
+                "live": [
+                ],
+                "machine": "/Game/AI/CityGate2.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0
+            },
+            "status": 0
+        },
+        {
+            "action": "reopen",
+            "error": "",
+            "snapshot": {
+                "canRedo": false,
+                "canUndo": false,
+                "checkCount": 1,
+                "detail": "",
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "Patrol",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.35,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Patrol",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "7f2bd010706cf0c7adf41c6aeb67703842f48c0d2089175edb2fa8f0fab7d067",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "Patrol",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.35,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Patrol",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "live": [
+                ],
+                "machine": "/Game/AI/CityGate2.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "warnings": {
+                }
+            },
+            "status": 0
+        }
+    ]
+}

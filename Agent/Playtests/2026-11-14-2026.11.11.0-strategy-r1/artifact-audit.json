@@ -1,0 +1,10 @@
+{
+  "path": "strategy/RepairCorridor-source.zip",
+  "sha256": "f59d612b096863e879d384746c2bf2932c54538ee57d11a1627442523b3e1bf8",
+  "bytes": 8888,
+  "entries": 15,
+  "crc": "passed",
+  "freshBuild": "strategy/evidence/fresh-build.log",
+  "freshPlay": "strategy/evidence/fresh-clear-win-result.json",
+  "freshStandalone": "strategy/evidence/fresh-standalone.status"
+}

@@ -1,0 +1,8 @@
+Kind	Type	Base	Source	CppClass
+Subsystem	CityEconomySubsystem	public GameSubsystem	E:\Engine\Engine\build\playtests\20261114-r7\curious-city\upgraded-city\Source\CityEconomySubsystem.h	CityEconomySubsystem
+Component	CuriousCity.Interaction	public GameComponent	E:\Engine\Engine\build\playtests\20261114-r7\curious-city\upgraded-city\Source\CityInteractionComponent.h	CityInteractionComponent
+Object	CuriousCity.CityRules		E:\Engine\Engine\build\playtests\20261114-r7\curious-city\upgraded-city\Source\CityRulesObject.h	CityRulesObject
+Component	CuriousCity.House	public GameComponent	E:\Engine\Engine\build\playtests\20261114-r7\curious-city\upgraded-city\Source\HouseComponent.h	HouseComponent
+Component	ProjectComponent	public GameComponent	E:\Engine\Engine\build\playtests\20261114-r7\curious-city\upgraded-city\Source\ProjectComponent.h	ProjectComponent
+Game	ProjectGame	public Game	E:\Engine\Engine\build\playtests\20261114-r7\curious-city\upgraded-city\Source\ProjectGame.h	ProjectGame
+Component	RotatingCube	public CubeComponent	E:\Engine\Engine\build\playtests\20261114-r7\curious-city\upgraded-city\Source\RotatingCube.h	RotatingCube

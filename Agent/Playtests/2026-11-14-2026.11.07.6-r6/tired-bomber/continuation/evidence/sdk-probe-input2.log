@@ -1,0 +1,1681 @@
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 640x480
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "frames": 52,
+    "ok": true,
+    "steps": [
+        {
+            "kind": "control",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "StartupSceneTwo",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "RotatingCube",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                        "enabled": true,
+                        "speed": 90,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "RotatingCube"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "BomberProbePilot",
+                    "parent": 0,
+                    "position": [
+                        -2,
+                        0.44999998807907104,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 14,
+                        "orthographic": true,
+                        "playerControlled": true,
+                        "standardControl": false,
+                        "version": 1,
+                        "viewPlane": 2
+                    },
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": "Gameplay.Player"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "BomberProbeRender",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        0.3499999940395355,
+                        0.3499999940395355,
+                        0.3499999940395355
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "BomberProbeParticles",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.25,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "BomberProbeHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ]
+        },
+        {
+            "kind": "focus",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "StartupSceneTwo",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "RotatingCube",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                        "enabled": true,
+                        "speed": 90,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "RotatingCube"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "BomberProbePilot",
+                    "parent": 0,
+                    "position": [
+                        -2,
+                        0.44999998807907104,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 14,
+                        "orthographic": true,
+                        "playerControlled": true,
+                        "standardControl": false,
+                        "version": 1,
+                        "viewPlane": 2
+                    },
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": "Gameplay.Player"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "BomberProbeRender",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        0.3499999940395355,
+                        0.3499999940395355,
+                        0.3499999940395355
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "BomberProbeParticles",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.25,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "BomberProbeHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "StartupSceneTwo",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "RotatingCube",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                        "enabled": true,
+                        "speed": 90,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "RotatingCube"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "BomberProbePilot",
+                    "parent": 0,
+                    "position": [
+                        -1.679999828338623,
+                        0.44999998807907104,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 14,
+                        "orthographic": true,
+                        "playerControlled": true,
+                        "standardControl": false,
+                        "version": 1,
+                        "viewPlane": 2
+                    },
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": "Gameplay.Player"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "BomberProbeRender",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        0.3499999940395355,
+                        0.3499999940395355,
+                        0.3499999940395355
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "BomberProbeParticles",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.25,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "BomberProbeHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ]
+        },
+        {
+            "kind": "cursor",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "StartupSceneTwo",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "RotatingCube",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                        "enabled": true,
+                        "speed": 90,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "RotatingCube"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "BomberProbePilot",
+                    "parent": 0,
+                    "position": [
+                        -1.679999828338623,
+                        0.44999998807907104,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 14,
+                        "orthographic": true,
+                        "playerControlled": true,
+                        "standardControl": false,
+                        "version": 1,
+                        "viewPlane": 2
+                    },
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": "Gameplay.Player"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "BomberProbeRender",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        0.3499999940395355,
+                        0.3499999940395355,
+                        0.3499999940395355
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "BomberProbeParticles",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.25,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "BomberProbeHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ]
+        },
+        {
+            "kind": "key",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "StartupSceneTwo",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "RotatingCube",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                        "enabled": true,
+                        "speed": 90,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "RotatingCube"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "BomberProbePilot",
+                    "parent": 0,
+                    "position": [
+                        -1.679999828338623,
+                        0.44999998807907104,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 14,
+                        "orthographic": true,
+                        "playerControlled": true,
+                        "standardControl": false,
+                        "version": 1,
+                        "viewPlane": 2
+                    },
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": "Gameplay.Player"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "BomberProbeRender",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        0.3499999940395355,
+                        0.3499999940395355,
+                        0.3499999940395355
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "BomberProbeParticles",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.25,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "BomberProbeHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "StartupSceneTwo",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "RotatingCube",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                        "enabled": true,
+                        "speed": 90,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "RotatingCube"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "BomberProbePilot",
+                    "parent": 0,
+                    "position": [
+                        -1.5199997425079346,
+                        0.44999998807907104,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 14,
+                        "orthographic": true,
+                        "playerControlled": true,
+                        "standardControl": false,
+                        "version": 1,
+                        "viewPlane": 2
+                    },
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": "Gameplay.Player"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "BomberProbeRender",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        0.3499999940395355,
+                        0.3499999940395355,
+                        0.3499999940395355
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "BomberProbeParticles",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.25,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "BomberProbeHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ]
+        },
+        {
+            "kind": "key",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "StartupSceneTwo",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "RotatingCube",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                        "enabled": true,
+                        "speed": 90,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "RotatingCube"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "BomberProbePilot",
+                    "parent": 0,
+                    "position": [
+                        -1.5199997425079346,
+                        0.44999998807907104,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 14,
+                        "orthographic": true,
+                        "playerControlled": true,
+                        "standardControl": false,
+                        "version": 1,
+                        "viewPlane": 2
+                    },
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": "Gameplay.Player"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "BomberProbeRender",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        0.3499999940395355,
+                        0.3499999940395355,
+                        0.3499999940395355
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "BomberProbeParticles",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.25,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "BomberProbeHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "StartupSceneTwo",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "RotatingCube",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                        "enabled": true,
+                        "speed": 90,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "RotatingCube"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "BomberProbePilot",
+                    "parent": 0,
+                    "position": [
+                        1.520000696182251,
+                        0.44999998807907104,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 14,
+                        "orthographic": true,
+                        "playerControlled": true,
+                        "standardControl": false,
+                        "version": 1,
+                        "viewPlane": 2
+                    },
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": "Gameplay.Player"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "BomberProbeRender",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        0.3499999940395355,
+                        0.3499999940395355,
+                        0.3499999940395355
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "BomberProbeParticles",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.25,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "BomberProbeHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ]
+        },
+        {
+            "kind": "control",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "StartupSceneTwo",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "RotatingCube",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                        "enabled": true,
+                        "speed": 90,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "RotatingCube"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "BomberProbePilot",
+                    "parent": 0,
+                    "position": [
+                        1.520000696182251,
+                        0.44999998807907104,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 14,
+                        "orthographic": true,
+                        "playerControlled": true,
+                        "standardControl": false,
+                        "version": 1,
+                        "viewPlane": 2
+                    },
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": "Gameplay.Player"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "BomberProbeRender",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        0.3499999940395355,
+                        0.3499999940395355,
+                        0.3499999940395355
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "BomberProbeParticles",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.25,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "BomberProbeHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "StartupSceneTwo",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "RotatingCube",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                        "enabled": true,
+                        "speed": 90,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "RotatingCube"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "BomberProbePilot",
+                    "parent": 0,
+                    "position": [
+                        1.520000696182251,
+                        0.44999998807907104,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 14,
+                        "orthographic": true,
+                        "playerControlled": true,
+                        "standardControl": false,
+                        "version": 1,
+                        "viewPlane": 2
+                    },
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": "Gameplay.Player"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "BomberProbeRender",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        0.3499999940395355,
+                        0.3499999940395355,
+                        0.3499999940395355
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "BomberProbeParticles",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.25,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "BomberProbeHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ]
+        },
+        {
+            "kind": "control",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "StartupSceneTwo",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "RotatingCube",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                        "enabled": true,
+                        "speed": 90,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "RotatingCube"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "BomberProbePilot",
+                    "parent": 0,
+                    "position": [
+                        1.520000696182251,
+                        0.44999998807907104,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 14,
+                        "orthographic": true,
+                        "playerControlled": true,
+                        "standardControl": false,
+                        "version": 1,
+                        "viewPlane": 2
+                    },
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": "Gameplay.Player"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "BomberProbeRender",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        0.3499999940395355,
+                        0.3499999940395355,
+                        0.3499999940395355
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "BomberProbeParticles",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.25,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "BomberProbeHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "StartupSceneTwo",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "RotatingCube",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                        "enabled": true,
+                        "speed": 90,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "RotatingCube"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "BomberProbePilot",
+                    "parent": 0,
+                    "position": [
+                        1.9200009107589722,
+                        0.44999998807907104,
+                        0
+                    ],
+                    "projectData": {
+                        "camera": 0,
+                        "cameraDistance": 5,
+                        "cameraHeight": 2,
+                        "farClip": 10000,
+                        "fov": 60,
+                        "lookSensitivity": 0.004999999888241291,
+                        "moveSpeed": 5,
+                        "nearClip": 0.10000000149011612,
+                        "orthoHeight": 14,
+                        "orthographic": true,
+                        "playerControlled": true,
+                        "standardControl": false,
+                        "version": 1,
+                        "viewPlane": 2
+                    },
+                    "scale": [
+                        0.6000000238418579,
+                        1.7999999523162842,
+                        0.6000000238418579
+                    ],
+                    "type": "Gameplay.Player"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "BomberProbeRender",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        0.3499999940395355,
+                        0.3499999940395355,
+                        0.3499999940395355
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "BomberProbeParticles",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.25,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "BomberProbeHud",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": ""
+                }
+            ]
+        },
+        {
+            "kind": "control",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "StartupSceneTwo",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cylinder"
+                }
+            ]
+        }
+    ]
+}

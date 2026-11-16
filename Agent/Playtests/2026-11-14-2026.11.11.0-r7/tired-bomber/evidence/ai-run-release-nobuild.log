@@ -1,0 +1,57 @@
+PASS: stage1 blackboard values and types
+PASS: stage1 enter, tick and exit order
+PASS: stage1 parent selects its first allowed child
+PASS: stage1 transitions leaf first, one per think
+PASS: stage1 completion bubbles up and restarts
+PASS: stage1 events wake and are used once
+PASS: stage1 delayed transitions and cancel
+PASS: stage1 linked machine and Finish
+PASS: stage1 Next and Finish targets
+PASS: stage1 readable build errors
+PASS: stage1 task data is per unit
+PASS: stage1 services and think interval
+PASS: stage1 exit on stop and destroy
+PASS: stage2 grid basics
+PASS: stage2 clearance to walls and edges
+PASS: stage2 path around a wall
+PASS: stage2 wide unit and narrow gap
+PASS: stage2 no corner cutting
+PASS: stage2 unreachable goals
+PASS: stage2 costs and straightening
+PASS: stage2 line of sight
+PASS: stage2 time-sliced path service
+[VfsRead] using local VFS (no host service)
+PASS: stage3 built-in subsystem only in gameplay
+PASS: stage3 route with rest stops
+PASS: stage3 path around NavVolume walls
+PASS: stage3 chase a moving target
+PASS: stage3 unreachable goal and stuck body
+PASS: stage3 removed body removes the controller
+PASS: stage4 sight: radius, field of view, walls
+PASS: stage4 lost target and memory
+PASS: stage4 teams and attitudes
+PASS: stage4 hearing, damage and broadcast
+PASS: stage4 sight checks within the budget
+PASS: stage4 guide: GuardStartsOnPatrol
+PASS: stage4 guide: guard patrols, chases, hits, searches
+PASS: stage5 save and load through SaveGame
+PASS: stage6 debugger lines, reports and overlay
+PASS: stage7 queries: generators, filters, scores, task
+PASS: stage8 head-on units pass each other
+PASS: stage8 crowd to one point: no overlap, no jitter
+PASS: stage8 a standing unit is walked around
+PASS: stage9 squad of 100 through a gap on one field
+PASS: stage9 shared field and open ground
+PASS: stage9 squad machine, teams, losses
+PASS: stage9 flow field window and widening
+PASS: stage10 squad at 60 FPS: re-planning in turns
+PASS: stage11 machines by name, AiCharacter property
+PASS: stage12 smart objects: claim, use, release
+PASS: stage13 machines from .fsm files and blocks
+[Script] E:\Engine\Engine\tests\ai\Source\..\..\..\..\Game\AiTutorial\Content\Scripts/Player.vscript: Охранник поймал вас — обратно к южному краю.
+[Script] E:\Engine\Engine\tests\ai\Source\..\..\..\..\Game\AiTutorial\Content\Scripts/Player.vscript: Шум! Охранник идёт проверить.
+PASS: stage14 AI tutorial scene: guard and visitor
+[Script] C:\Users\serge\AppData\Local\Packages\openai.codex_2p2nqsd0c76g0\AC\#!sandbox.{abc5cb69-bef5-492b-ab1e-e5edc76196e8}\Temp\ai-script-link-tests\Box.vscript: node 2 (Ai.SendEvent): the object is not an AI character; the script of this object is stopped until the next Play
+PASS: stage15 visual scripts and machines talk
+PASS: stage3 turret focus and the player
+52/52 AI tests passed

@@ -1,0 +1,34 @@
+{
+  "size": 2,
+  "material": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation\\CityApiProbe\\Content\\Models\\blend-uv\\Materials\\Material_0.mat",
+  "mirrorUv": false,
+  "width": 320,
+  "rendering": 0,
+  "shape": "plane",
+  "camera": [
+    0,
+    0,
+    5
+  ],
+  "height": 256,
+  "target": [
+    0,
+    0,
+    0
+  ],
+  "up": [
+    0,
+    1,
+    0
+  ],
+  "frames": [
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation/mesh-imported/base.bmp",
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  ]
+}

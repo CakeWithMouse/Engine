@@ -1,0 +1,102 @@
+{
+    "connections": [
+        {
+            "fromNode": 2,
+            "fromPin": "RGB",
+            "toNode": 4,
+            "toPin": "A"
+        },
+        {
+            "fromNode": 3,
+            "fromPin": "Out",
+            "toNode": 4,
+            "toPin": "B"
+        },
+        {
+            "fromNode": 4,
+            "fromPin": "Out",
+            "toNode": 1,
+            "toPin": "Albedo"
+        },
+        {
+            "fromNode": 5,
+            "fromPin": "Value",
+            "toNode": 1,
+            "toPin": "Specular"
+        },
+        {
+            "fromNode": 6,
+            "fromPin": "Value",
+            "toNode": 1,
+            "toPin": "AmbientModel"
+        }
+    ],
+    "nodes": [
+        {
+            "id": 1,
+            "properties": {
+            },
+            "title": "Material Output",
+            "type": "MaterialOutput",
+            "x": 600,
+            "y": 180
+        },
+        {
+            "id": 2,
+            "properties": {
+                "color": [
+                    1,
+                    0.7215686440467834,
+                    0.27843138575553894,
+                    1
+                ],
+                "name": "GoldTint"
+            },
+            "title": "GoldTint",
+            "type": "ColorParam",
+            "x": 100,
+            "y": 100
+        },
+        {
+            "id": 3,
+            "properties": {
+            },
+            "title": "Fresnel",
+            "type": "Fresnel",
+            "x": 100,
+            "y": 220
+        },
+        {
+            "id": 4,
+            "properties": {
+            },
+            "title": "Add Rim",
+            "type": "Add",
+            "x": 360,
+            "y": 140
+        },
+        {
+            "id": 5,
+            "properties": {
+                "name": "Specular",
+                "value": 1
+            },
+            "title": "Specular",
+            "type": "ScalarParam",
+            "x": 240,
+            "y": 300
+        },
+        {
+            "id": 6,
+            "properties": {
+                "name": "FlatAmbient",
+                "value": 0
+            },
+            "title": "FlatAmbient",
+            "type": "ScalarParam",
+            "x": 240,
+            "y": 380
+        }
+    ],
+    "version": 1
+}

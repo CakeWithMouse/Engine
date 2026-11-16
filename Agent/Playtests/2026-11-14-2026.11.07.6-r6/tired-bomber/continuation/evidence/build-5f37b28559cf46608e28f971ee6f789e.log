@@ -1,0 +1,23 @@
+﻿
+C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(548,5): warning MSB8029: Промежуточный каталог или каталог выхода не может располагаться во временном каталоге, потому что это может стать причиной проблем с добавочной сборкой. [E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Game.vcxproj]
+  ComponentGenerator: 6 component(s), Project
+  ProjectGame.cpp
+E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Source\ProjectGame.cpp(37,16): error C2039: "standardControl": не является членом "GameComponent". [E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Game.vcxproj]
+      E:\Engine\Game\build\x64\Release\Runtime\SDK\Include\Engine\Components\GameComponents.h(43,7):
+       см. объявление "GameComponent"
+  
+E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Source\ProjectGame.cpp(38,16): error C2039: "cameraSettings": не является членом "GameComponent". [E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Game.vcxproj]
+      E:\Engine\Game\build\x64\Release\Runtime\SDK\Include\Engine\Components\GameComponents.h(43,7):
+       см. объявление "GameComponent"
+  
+E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Source\ProjectGame.cpp(39,16): error C2039: "cameraSettings": не является членом "GameComponent". [E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Game.vcxproj]
+      E:\Engine\Game\build\x64\Release\Runtime\SDK\Include\Engine\Components\GameComponents.h(43,7):
+       см. объявление "GameComponent"
+  
+E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Source\ProjectGame.cpp(40,16): error C2039: "cameraSettings": не является членом "GameComponent". [E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\SdkProbe\Game.vcxproj]
+      E:\Engine\Game\build\x64\Release\Runtime\SDK\Include\Engine\Components\GameComponents.h(43,7):
+       см. объявление "GameComponent"
+  
+  ReferenceExamples.cpp
+  GeneratedComponents.cpp
+  Создание кода...

@@ -1,0 +1,14 @@
+{
+  "kind": "model",
+  "model": {
+    "flipUv": false,
+    "importMaterials": true,
+    "importTextures": true,
+    "mergeMeshes": true,
+    "normals": "file",
+    "scale": 0.009999999776482582,
+    "smoothingAngle": 60.0,
+    "useFileUnitScale": false
+  },
+  "version": 1
+}

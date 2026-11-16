@@ -1,0 +1,1 @@
+{"passed": 8, "meshFrames": 16, "result": "Both renderers preserve tangent pixels under X reflection and SaveGame; Z reflection reverses V. Texture/audio imports preserve bytes."}

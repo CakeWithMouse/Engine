@@ -17,6 +17,8 @@ public:
         const EngineSceneBatchApi* batch = nullptr;
         const EngineAuthoringApi* authoring = nullptr;
         const EnginePointLightV2Api* pointLightV2 = nullptr;
+        const EnginePhysicsObjectApi* physicsObject = nullptr;
+        const EngineScriptApi* script = nullptr;
     };
 
     SceneCommandHandler();

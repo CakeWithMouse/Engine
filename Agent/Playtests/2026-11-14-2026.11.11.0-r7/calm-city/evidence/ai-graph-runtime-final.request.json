@@ -1,0 +1,10 @@
+{
+  "machine": "/Game/AI/CalmRoutine.fsm",
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/calm-city/AIPlayground/Project.json",
+  "steps": [
+    {
+      "image": "E:/Engine/Engine/build/playtests/20261114-r7/calm-city/results/ai-graph-runtime-final.png",
+      "action": "check"
+    }
+  ]
+}

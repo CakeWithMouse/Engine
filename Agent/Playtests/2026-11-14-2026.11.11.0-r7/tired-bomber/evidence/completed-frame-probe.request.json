@@ -1,0 +1,37 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\BomberUpgradedR7\\Project.json",
+  "steps": [
+    {
+      "enabled": true,
+      "kind": "focus"
+    },
+    {
+      "kind": "control",
+      "action": "play"
+    },
+    {
+      "kind": "frames",
+      "count": 12
+    },
+    {
+      "kind": "control",
+      "action": "pause"
+    },
+    {
+      "kind": "frames",
+      "count": 60
+    },
+    {
+      "kind": "control",
+      "action": "resume"
+    },
+    {
+      "kind": "frames",
+      "count": 2
+    },
+    {
+      "kind": "control",
+      "action": "stop"
+    }
+  ]
+}

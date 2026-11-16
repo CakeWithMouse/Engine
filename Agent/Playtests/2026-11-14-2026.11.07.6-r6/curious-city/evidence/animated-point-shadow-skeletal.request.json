@@ -1,0 +1,21 @@
+{
+  "caster":"skeletal",
+  "travel":4,
+  "rendering":1,
+  "sceneLighting":true,
+  "globalShadows":true,
+  "radius":24,
+  "intensity":0.7,
+  "scale":1,
+  "width":320,
+  "height":256,
+  "camera":[9,8,-13],
+  "target":[0,0,0],
+  "probes":[[0,0,0],[1,0,0],[0,0,1]],
+  "frames":[
+    {"time":0,"position":[0,1,0],"light":[0,4,0],"shadows":true,"image":"E:/Engine/Engine/build/playtests/20261114-r6/curious-city/animated-features/skeletal-shadow-t0.bmp"},
+    {"time":0.5,"position":[0,1,0],"light":[0,4,0],"shadows":true,"image":"E:/Engine/Engine/build/playtests/20261114-r6/curious-city/animated-features/skeletal-shadow-t05.bmp"},
+    {"time":1,"position":[0,1,0],"light":[0,4,0],"shadows":true,"image":"E:/Engine/Engine/build/playtests/20261114-r6/curious-city/animated-features/skeletal-shadow-t1.bmp"},
+    {"time":0,"position":[0,1,0],"light":[0,4,0],"shadows":true,"image":"E:/Engine/Engine/build/playtests/20261114-r6/curious-city/animated-features/skeletal-shadow-return.bmp"}
+  ]
+}

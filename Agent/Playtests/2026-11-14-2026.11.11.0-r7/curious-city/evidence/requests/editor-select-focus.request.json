@@ -1,0 +1,30 @@
+{
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Project.json",
+  "steps": [
+    {
+      "action": "frames",
+      "count": 1
+    },
+    {
+      "action": "viewport-click",
+      "x": 0.5,
+      "y": 0.5
+    },
+    {
+      "action": "hierarchy-click",
+      "target": "Warm Light"
+    },
+    {
+      "action": "viewport-click",
+      "x": 0.5,
+      "y": 0.5,
+      "control": true
+    },
+    {
+      "action": "ui-command",
+      "id": "Gizmo.FocusSelected",
+      "image": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/editor-select-focus.png",
+      "scope": "main"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+PASS: 2 render modes; resized 3-LOD sequence; animated VAT pixel A/B and exact cycle return

@@ -1,0 +1,17 @@
+Using v143 / MSVC 14.44.35207 / Windows SDK 10.0.26100.0
+Assimp enabled: true
+
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator.vcxproj -> E:\Engine\Engine\build\x64\Release\ComponentGenerator.exe
+  ComponentGenerator: 3 component(s), AiTests
+  CrowdTests.cpp
+  main.cpp
+E:\Engine\Engine\tests\ai\Source\CrowdTests.cpp(176,44): error C2662: glm::vec3 GameComponent::GetWorldPosition(void): невозможно преобразовать указатель "this" из "const Character" в "GameComponent &" [E:\Engine\Engine\tests\ai\AiTests.vcxproj]
+E:\Engine\Engine\tests\ai\Source\CrowdTests.cpp(176,35): message : В результате преобразования теряются квалификаторы [E:\Engine\Engine\tests\ai\AiTests.vcxproj]
+E:\Engine\Engine\Include\Engine\Components\GameComponents.h(188,15): message : см. объявление "GameComponent::GetWorldPosition" (компилируется исходный файл Source\CrowdTests.cpp) [E:\Engine\Engine\tests\ai\AiTests.vcxproj]
+E:\Engine\Engine\tests\ai\Source\CrowdTests.cpp(176,44): message : при попытке сопоставить список аргументов "()" [E:\Engine\Engine\tests\ai\AiTests.vcxproj]
+E:\Engine\Engine\tests\ai\Source\CrowdTests.cpp(176,24): error C2737: "p": необходимо инициализировать объект const [E:\Engine\Engine\tests\ai\AiTests.vcxproj]
+E:\Engine\Engine\tests\ai\Source\CrowdTests.cpp(177,45): error C3536: p: не может использоваться до инициализации [E:\Engine\Engine\tests\ai\AiTests.vcxproj]
+E:\Engine\Engine\tests\ai\Source\CrowdTests.cpp(177,24): error C2737: "nearest": необходимо инициализировать объект const [E:\Engine\Engine\tests\ai\AiTests.vcxproj]
+E:\Engine\Engine\tests\ai\Source\CrowdTests.cpp(178,13): error C3536: nearest: не может использоваться до инициализации [E:\Engine\Engine\tests\ai\AiTests.vcxproj]
+

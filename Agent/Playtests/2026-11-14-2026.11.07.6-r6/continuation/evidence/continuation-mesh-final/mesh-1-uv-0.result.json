@@ -1,0 +1,200 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "basis": [
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ]
+            ],
+            "center": [
+                127,
+                127,
+                0
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\continuation-mesh-final\\mesh-1-uv-0-0.bmp",
+            "restored": false,
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "sha256": "ec659ee1b3265730cf62bf28317337ebaaa75a0fda247f0efb29eb71fd465886",
+            "transientMaterialRebound": false
+        },
+        {
+            "basis": [
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ]
+            ],
+            "center": [
+                127,
+                127,
+                0
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\continuation-mesh-final\\mesh-1-uv-0-1.bmp",
+            "restored": false,
+            "scale": [
+                -2,
+                1,
+                0.5
+            ],
+            "sha256": "ba4598746d829a8129bf1afc66128fb53d1572319fb7f75b062e7b0c80fe2b3a",
+            "transientMaterialRebound": false
+        },
+        {
+            "basis": [
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ]
+            ],
+            "center": [
+                127,
+                127,
+                255
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\continuation-mesh-final\\mesh-1-uv-0-2.bmp",
+            "restored": false,
+            "scale": [
+                1,
+                1,
+                -1
+            ],
+            "sha256": "c37acf484f3bbd038d20be56222b1c401404baea70d9526f5f7752dd0e6a4214",
+            "transientMaterialRebound": false
+        },
+        {
+            "basis": [
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ]
+            ],
+            "center": [
+                127,
+                127,
+                0
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\continuation-mesh-final\\mesh-1-uv-0-3.bmp",
+            "restored": true,
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "sha256": "ec659ee1b3265730cf62bf28317337ebaaa75a0fda247f0efb29eb71fd465886",
+            "transientMaterialRebound": true
+        }
+    ],
+    "ok": true,
+    "originalBasis": [
+        [
+            1,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            1
+        ]
+    ]
+}

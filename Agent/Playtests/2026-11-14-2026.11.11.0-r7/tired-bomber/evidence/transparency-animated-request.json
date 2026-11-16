@@ -1,0 +1,131 @@
+{
+  "width": 640,
+  "height": 480,
+  "rendering": 0,
+  "orthographic": false,
+  "groups": [
+    {
+      "layers": [
+        {
+          "color": [
+            1,
+            0,
+            0
+          ],
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "alpha": 0.5
+        }
+      ],
+      "geometry": "plane",
+      "material": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-fixture\\Layer.mat",
+      "kind": "skeletal"
+    },
+    {
+      "material": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-fixture\\Layer.mat",
+      "geometry": "plane",
+      "lods": 2,
+      "layers": [
+        {
+          "color": [
+            0,
+            0,
+            1
+          ],
+          "position": [
+            0,
+            0,
+            0.5
+          ],
+          "alpha": 0.5
+        }
+      ],
+      "fade": 0,
+      "lodDistances": [
+        8
+      ],
+      "kind": "crowd"
+    }
+  ],
+  "frames": [
+    {
+      "camera": [
+        0,
+        0,
+        -6
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-animated-lod-resize-pass2\\near-640-t0.bmp",
+      "time": 0,
+      "target": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "camera": [
+        0,
+        0,
+        -6
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-animated-lod-resize-pass2\\near-640-t06.bmp",
+      "time": 0.6,
+      "target": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "time": 0.6,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-animated-lod-resize-pass2\\near-1280-t06.bmp",
+      "width": 1280,
+      "camera": [
+        0,
+        0,
+        -6
+      ],
+      "height": 720
+    },
+    {
+      "time": 1.2,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-animated-lod-resize-pass2\\far-640-t12.bmp",
+      "width": 640,
+      "camera": [
+        0,
+        0,
+        -10
+      ],
+      "height": 480
+    },
+    {
+      "time": 1.8,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-animated-lod-resize-pass2\\far-1280-t18.bmp",
+      "width": 1280,
+      "camera": [
+        0,
+        0,
+        -10
+      ],
+      "height": 720
+    }
+  ]
+}

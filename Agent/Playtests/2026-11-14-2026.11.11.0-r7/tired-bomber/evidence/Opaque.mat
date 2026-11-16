@@ -1,0 +1,1 @@
+{"version":1,"shader":"Opaque.hlsl","render":{"blend":"opaque","lighting":"unlit","twoSided":true,"castShadows":false}}

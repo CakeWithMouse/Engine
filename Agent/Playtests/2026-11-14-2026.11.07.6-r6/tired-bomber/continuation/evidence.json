@@ -1,0 +1,523 @@
+{
+  "run": "2026-11-14-2026.11.07.6-r6/tired-bomber/continuation",
+  "version": "2026.11.07.6",
+  "head": "base d74aebb + r6 working fixes",
+  "phase": "All 37 assigned feature criteria have passing practical evidence; audio playback acceptance is verified but audible output was not established.",
+  "observations": [
+    {
+      "actual": "2/2/10/.20 and 3/3/21/.84.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/session-a.result.json",
+        "evidence/session-b.result.json"
+      ],
+      "action": "session.lifecycle with 2×5×.02 and 3×7×.04 configurations.",
+      "expected": "Ready, closing, ticks and elapsed match configured counts.",
+      "feature_id": "session"
+    },
+    {
+      "actual": "Both status Success and expected ray values.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/screen-ortho-a.result.json",
+        "evidence/screen-ortho-b.result.json",
+        "evidence/sdk-probe-deferred.result.json",
+        "evidence/sdk-probe-deferred-events.txt"
+      ],
+      "action": "Orthographic screen ray at center 320×240 and off-center fraction at 640×360.",
+      "expected": "Both rays use view-plane projection with finite origin/direction.",
+      "feature_id": "camera-orthographic"
+    },
+    {
+      "actual": "FOV values read back; missing-field calls returned status 6, Property is not editable, schema/data.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/property-a.result.json",
+        "evidence/property-b.result.json",
+        "evidence/missing-camera-field.result.json",
+        "evidence/missing-object-field.result.json"
+      ],
+      "action": "Changed Gameplay.Camera FOV to 75 and 42; tried missing properties on Camera and Primitive.Cube after BUG-R6-004.",
+      "expected": "Editable property round-trips; missing fields return structured non-editable response.",
+      "feature_id": "scene-properties"
+    },
+    {
+      "actual": "Both settings tuples matched requested values.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/settings-a.result.json",
+        "evidence/settings-b.result.json",
+        "evidence/sdk-probe-deferred.result.json",
+        "evidence/sdk-probe-deferred-events.txt"
+      ],
+      "action": "Round-tripped Forward/VSync/AA then Deferred/no-VSync/no-AA.",
+      "expected": "Getter values match each independent settings update.",
+      "feature_id": "game-settings"
+    },
+    {
+      "actual": "Results matched expected snapped coordinates.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/snap-a.result.json",
+        "evidence/snap-b.result.json",
+        "evidence/gizmo-world.result.json",
+        "evidence/gizmo-local.result.json"
+      ],
+      "action": "Snapped two independent vector deltas at .5 and .25 plus gizmo center local/world cases.",
+      "expected": "Coordinates round to configured steps and center respects local mode.",
+      "feature_id": "scene-snapping"
+    },
+    {
+      "actual": "Parent links and translated positions matched after save/load.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/scene-a2.result.json",
+        "evidence/scene-a2.request.json"
+      ],
+      "action": "Created Cube A/B, parented B under A; saved/reloaded and separately exercised group move.",
+      "expected": "Parent and group transforms persist in scene snapshots.",
+      "feature_id": "scene-hierarchy"
+    },
+    {
+      "actual": "Character and Component source pairs generated; Bad-Name rejected with useful validation.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/class-wizard-character.request.json",
+        "evidence/class-wizard-character.result.json",
+        "evidence/class-wizard-invalid.result.json"
+      ],
+      "action": "Real project.class-wizard in separate Character and Component projects; invalid identifier trial.",
+      "expected": "Accepted valid class args generate matching .h/.cpp; invalid identifier is rejected without generated files.",
+      "feature_id": "class-wizard"
+    },
+    {
+      "actual": "C1189; buildSucceeded=false; replaced=false; windowEnabled=true; buildId and SHA256 remained identical.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/hotreload-fail.request.json",
+        "evidence/hotreload-fail.result.json",
+        "evidence/hotreload-fail-assertions.json"
+      ],
+      "action": "Injected #error BOMBER_ROLLBACK_PROBE then invoked actual offscreen project.build.",
+      "expected": "Compiler failure leaves active project module and DLL hash unchanged and editor remains enabled.",
+      "feature_id": "failed-build-rollback"
+    },
+    {
+      "actual": "buildSucceeded/replaced/windowEnabled true; buildId changed e05f4f…→232299… and SHA changed 043646…→888ADB…; log says DLL replaced.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/hotreload-success.request.json",
+        "evidence/hotreload-success.result.json",
+        "evidence/hotreload-success-assertions.json"
+      ],
+      "action": "After removing deliberate #error, ran actual project.build action on same project.",
+      "expected": "Successful compile activates a new DLL identity and hash.",
+      "feature_id": "hot-reload"
+    },
+    {
+      "actual": "Both types appeared in resulting snapshots; only one practical check per shape.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/scene-a2.result.json",
+        "evidence/scene-b.result.json"
+      ],
+      "action": "Created Cube and Cylinder primitives in independent scene workflows.",
+      "expected": "Primitive types create selectable scene objects with expected transforms.",
+      "feature_id": "scene-primitives"
+    },
+    {
+      "actual": "Returned scene snapshots confirmed rename/position/deletion and restoration.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/scene-b.request.json",
+        "evidence/scene-b.result.json"
+      ],
+      "action": "Single-object scene workflow created, renamed, moved, deleted, then undo restored it.",
+      "expected": "Object operations update snapshot and undo restores the deleted object.",
+      "feature_id": "scene-object"
+    },
+    {
+      "actual": "Second practical clone copied Sphere type and transform to a new object identity; independently moved clone to [4,3,0], saved, New/Load restored source ID 1 at [2,1,-3] and clone ID 2 at [4,3,0].",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/clone-saveas-second.request.json",
+        "evidence/clone-saveas-second.result.json"
+      ],
+      "action": "Duplicated Cube A once in hierarchy flow.",
+      "expected": "Clone receives distinct identity while preserving copied object data.",
+      "feature_id": "scene-clone"
+    },
+    {
+      "actual": "Scene snapshots restored expected content; SaveGame load restored subsystem tick marker.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/scene-a2.result.json",
+        "evidence/scene-b.result.json",
+        "evidence/sdk-probe-save.log",
+        "evidence/sdk-probe-load.log"
+      ],
+      "action": "Saved and loaded two scene workflows and separately saved/loaded gameplay SaveGame across processes.",
+      "expected": "Scene objects and game subsystem state survive their respective save/load paths.",
+      "feature_id": "scene-save-load"
+    },
+    {
+      "actual": "Both manifest paths matched the selected scene.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/scene-startup-projectpaths.result.json",
+        "evidence/scene-startup-projectpaths.result.json"
+      ],
+      "action": "Used actual EditorMainWindow startup action for StartupOne and StartupTwo in separate project paths.",
+      "expected": "Manifest selects the requested saved scene as startup.",
+      "feature_id": "scene-startup"
+    },
+    {
+      "actual": "A separate original scene file was preserved byte-for-byte (same SHA256) while New created a cone at [-4,2,7], saved to a different path, New/Load restored that object from SaveAs.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/scene-saveas-second.request.json",
+        "evidence/scene-saveas-second.result.json",
+        "evidence/scene-saveas-second-assertions.json"
+      ],
+      "action": "Created New scene and saved it to a new scene path during workflow B.",
+      "expected": "New scene can be saved under a distinct name and reopened.",
+      "feature_id": "scene-new-save-as"
+    },
+    {
+      "actual": "Snapshots after each action matched the expected state.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/scene-a2.result.json",
+        "evidence/scene-b.result.json"
+      ],
+      "action": "Undo/redo group edit and undo deletion in separate workflows.",
+      "expected": "Undo reverses last edit and redo reapplies it; deletion undo restores object.",
+      "feature_id": "scene-undo"
+    },
+    {
+      "actual": "Both selected positions translated by same requested delta; world/local center returned expected coordinates.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/scene-a2.result.json",
+        "evidence/gizmo-world.result.json",
+        "evidence/gizmo-local.result.json"
+      ],
+      "action": "Selected two cubes and applied group nudge; separately centered world/local transforms.",
+      "expected": "Group operation transforms selection consistently; center helper respects coordinate mode.",
+      "feature_id": "scene-groups"
+    },
+    {
+      "actual": "Group selection and single selection snapshots matched request.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/scene-a2.result.json",
+        "evidence/scene-b.result.json"
+      ],
+      "action": "Selected a pair and a single object in separate scene requests.",
+      "expected": "Selection snapshots contain exactly requested object identities.",
+      "feature_id": "scene-select"
+    },
+    {
+      "actual": "Both recovery processes returned expected markers.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/recovery-write.result.json",
+        "evidence/recovery-load.result.json",
+        "evidence/recovery-write-second.result.json",
+        "evidence/recovery-load-second.result.json"
+      ],
+      "action": "Wrote/recovered one unsaved marker and two unsaved markers in isolated process pairs.",
+      "expected": "Recovery restores the exact unsaved marker set.",
+      "feature_id": "scene-recovery"
+    },
+    {
+      "actual": "Both returned XML snapshots matched entered strings.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/hud-editor-hit.result.json",
+        "evidence/hud-editor-paused.result.json"
+      ],
+      "action": "Edited and saved HUD text twice including em dash.",
+      "expected": "Saved XML includes the exact edited text.",
+      "feature_id": "hud-editor"
+    },
+    {
+      "actual": "render.host-hooks=1,1; single SDK game setup in this continuation.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/sdk-probe-events-current.txt",
+        "evidence/sdk-probe-input.log",
+        "evidence/sdk-probe-deferred.result.json",
+        "evidence/sdk-probe-deferred-events.txt"
+      ],
+      "action": "Custom SDK render component observed D3D device/context in game run.",
+      "expected": "Render callback receives usable device and context.",
+      "feature_id": "render-host"
+    },
+    {
+      "actual": "Callbacks and lookup succeeded in SDKProbe; one game setup.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/sdk-probe-events-current.txt",
+        "evidence/sdk-probe-save.log",
+        "evidence/sdk-probe-deferred.result.json",
+        "evidence/sdk-probe-deferred-events.txt"
+      ],
+      "action": "Custom project subsystem used Initialize/SceneReady/Tick/SceneClosing and lookup.",
+      "expected": "Host constructs subsystem, provides lookup and lifecycle callbacks.",
+      "feature_id": "host-services"
+    },
+    {
+      "actual": "1/.1/.01 presets; accepted .025 sidecar; canceled request retained four initial objects.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/import-dialog-accept.result.json",
+        "evidence/import-dialog-cancel.result.json"
+      ],
+      "action": "Actual import dialog cycled three scale presets, accepted custom .025, and canceled a second import.",
+      "expected": "Preset selection changes scale; accept imports/spawns/sidecars; cancel leaves scene unchanged.",
+      "feature_id": "import-scale-dialog-presets"
+    },
+    {
+      "actual": "Lifecycle and lookup logs present; save/load restored tick marker once.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/sdk-probe-save.log",
+        "evidence/sdk-probe-load.log",
+        "evidence/sdk-probe-deferred.result.json",
+        "evidence/sdk-probe-deferred-events.txt"
+      ],
+      "action": "Custom BomberProbeSubsystem lifecycle and separate-process SaveGame.",
+      "expected": "Subsystem initializes, receives scene-ready/ticks/closing and restored serialized state.",
+      "feature_id": "subsystem"
+    },
+    {
+      "actual": "Observed x movement from -2 toward positive coordinates; one authored path.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/sdk-probe-events-current.txt",
+        "evidence/sdk-probe-input.result.json",
+        "evidence/sdk-probe-deferred.result.json",
+        "evidence/sdk-probe-deferred-events.txt"
+      ],
+      "action": "PlayerCharacter placed in orthographic XZ scene and moved by custom controller.",
+      "expected": "Character world position changes under controller input while staying on configured plane.",
+      "feature_id": "character"
+    },
+    {
+      "actual": "Controller.move events and monotonic x displacement observed; one input profile.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/sdk-probe-events-current.txt",
+        "evidence/sdk-probe-input2.result.json",
+        "evidence/sdk-probe-deferred.result.json",
+        "evidence/sdk-probe-deferred-events.txt"
+      ],
+      "action": "BomberProbeController applied repeated movement input to PlayerCharacter.",
+      "expected": "Controller input updates character position over ticks.",
+      "feature_id": "controller"
+    },
+    {
+      "actual": "Initial camera/aim configuration returned Miss; corrected viewPlane configuration later returned Hit at (-2.0146,-.5,-1.9854).",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/sdk-probe-events-current.txt",
+        "evidence/sdk-probe-save.log",
+        "evidence/sdk-probe-deferred.result.json",
+        "evidence/sdk-probe-deferred-events.txt"
+      ],
+      "action": "RaycastScreen through orthographic view plane against ground plane in SDK game.",
+      "expected": "Center screen ray hits ground plane and returns world contact.",
+      "feature_id": "trace-screen"
+    },
+    {
+      "actual": "Dispatch 57; early hashes match, late surface hashes differ, no-surface hashes match; visible bounce vs fall-through.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/particles-probe-on.result.json",
+        "evidence/particles-probe-off.result.json",
+        "evidence/particles-probe-on-early.bmp",
+        "evidence/particles-probe-on-late.bmp"
+      ],
+      "action": "SDK component registered catalog-backed Sparks; actual GPU render.particles on/off and no-surface controls.",
+      "expected": "Particles render; depth collision changes post-contact trajectory only when a surface exists.",
+      "feature_id": "particles"
+    },
+    {
+      "actual": "Early hashes equal; late hashes differ; no-surface hashes equal.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/particles-probe-on.result.json",
+        "evidence/particles-probe-off.result.json",
+        "evidence/particles-probe-nosurface-on.result.json",
+        "evidence/particles-probe-nosurface-off.result.json"
+      ],
+      "action": "Custom trajectory with surface, collision on/off, early and late captures; no-surface control.",
+      "expected": "Before impact output is equal, after impact differs with surface, and disabling surface removes effect.",
+      "feature_id": "particle-collision"
+    },
+    {
+      "actual": "hud.button-click=1; both strings saved; one gameplay click profile.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/sdk-probe-events-current.txt",
+        "evidence/hud-editor-hit.result.json",
+        "evidence/hud-editor-paused.result.json",
+        "evidence/sdk-probe-deferred.result.json",
+        "evidence/sdk-probe-deferred-events.txt"
+      ],
+      "action": "Triggered HUD button callback by input and edited/saved HUD text twice.",
+      "expected": "Button click invokes callback and editor persists text.",
+      "feature_id": "hud-events"
+    },
+    {
+      "actual": "Read expected profile line and found audio asset; one content layout tested.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/sdk-probe-events-current.txt",
+        "evidence/sdk-probe-input.log",
+        "evidence/sdk-probe-deferred.result.json",
+        "evidence/sdk-probe-deferred-events.txt"
+      ],
+      "action": "Read config and resolve WAV path through EngineModuleVfs in SDKProbe.",
+      "expected": "Virtual game paths resolve and content can be read.",
+      "feature_id": "vfs"
+    },
+    {
+      "actual": "Exporter exit 0; standalone exited 0 with GameUpdates=5; one export variant. Source contains no __FILE__ use; exported relative paths/runtime run independently from packaged Game/Content and Game/Binaries.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/export.stdout.log",
+        "evidence/exported-game.stdout.log"
+      ],
+      "action": "Exported SDKProbe project and launched generated standalone runtime for five frames.",
+      "expected": "Export validates, publishes runtime, and runs independently.",
+      "feature_id": "export"
+    },
+    {
+      "actual": "ReferenceExamples compiled in successful explicit-Runtime build; one build configuration.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/build-2ca7d440b5334ee3bc1fcacc9c601418.log",
+        "evidence/Project.code.json"
+      ],
+      "action": "Built copied API ReferenceExamples.cpp with SDKProbe custom source.",
+      "expected": "Documented sample code compiles and links against release SDK.",
+      "feature_id": "sdk-examples"
+    },
+    {
+      "actual": "8000 Hz, 8000 frames, 64 read, seek true; one sample format. This confirms API acceptance/decode; audible sound was not established by the hidden run.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/sdk-probe-events-current.txt",
+        "evidence/sdk-probe-input.log",
+        "evidence/sdk-probe-deferred.result.json",
+        "evidence/sdk-probe-deferred-events.txt"
+      ],
+      "action": "Decoded generated WAV, read 64 frames and sought to frame zero.",
+      "expected": "Decoder reports format/length and supports read/seek.",
+      "feature_id": "audio-decode"
+    },
+    {
+      "actual": "audio.load=1 and audio.play2d=1; one clip. This confirms API acceptance/decode; audible sound was not established by the hidden run.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/sdk-probe-events-current.txt",
+        "evidence/sdk-probe-input.log",
+        "evidence/sdk-probe-deferred.result.json",
+        "evidence/sdk-probe-deferred-events.txt"
+      ],
+      "action": "Loaded generated WAV and called AudioEngine Play2D.",
+      "expected": "Valid sound handle and accepted playback request.",
+      "feature_id": "audio-play2d"
+    },
+    {
+      "actual": "audio.play3d=1; one emitter placement. This confirms API acceptance/decode; audible sound was not established by the hidden run.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/sdk-probe-events-current.txt",
+        "evidence/sdk-probe-input.log",
+        "evidence/sdk-probe-deferred.result.json",
+        "evidence/sdk-probe-deferred-events.txt"
+      ],
+      "action": "Loaded WAV and called Play3D with committed emitter at (2,0,1).",
+      "expected": "3D playback request accepted for a positioned emitter.",
+      "feature_id": "audio-play3d"
+    },
+    {
+      "actual": "audio.stream=1; one clip. This confirms API acceptance/decode; audible sound was not established by the hidden run.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/sdk-probe-events-current.txt",
+        "evidence/sdk-probe-input.log",
+        "evidence/sdk-probe-deferred.result.json",
+        "evidence/sdk-probe-deferred-events.txt"
+      ],
+      "action": "Started PlayStream on generated WAV and stopped returned stream handle.",
+      "expected": "Stream handle is valid and can be stopped.",
+      "feature_id": "audio-stream"
+    },
+    {
+      "feature_id": "scene-create-delete",
+      "expected": "Create/remove operations alter the live scene selection/snapshot; undo restores deleted object.",
+      "actual": "Cube/Cylinder objects appeared in snapshots, TargetLight was absent after delete and present after undo. Concrete workflow covered; second role evidence is needed for threshold.",
+      "status": "partial",
+      "action": "project.scene workflow created Cube and Cylinder objects, deleted TargetLight, then undid deletion.",
+      "evidence_paths": [
+        "evidence/scene-b.result.json",
+        "evidence/scene-b.request.json"
+      ]
+    },
+    {
+      "feature_id": "trace-filter",
+      "expected": "Excluded pilot does not occlude screen ray; query reaches world geometry behind it.",
+      "actual": "Trace returned Hit at ground y=-0.5 while player was explicitly in ignore list. One exclusion scenario only.",
+      "status": "partial",
+      "action": "SDK Game RaycastScreen query set maxDistance=100 and ignored the controlled pilot ComponentId.",
+      "evidence_paths": [
+        "evidence/sdk-probe-events-current.txt",
+        "evidence/sdk-probe-deferred-events.txt"
+      ]
+    },
+    {
+      "feature_id": "model-import",
+      "expected": "Supported model import creates content asset and scene instance at chosen scale.",
+      "actual": "Imported/spawned GLB and sidecar captured .025 scale; cancel/presets are covered separately. This only establishes this GLB route.",
+      "status": "partial",
+      "action": "Actual import dialog accepted a GLB model at scale .025, imported it and spawned it into scene.",
+      "evidence_paths": [
+        "evidence/import-dialog-accept.request.json",
+        "evidence/import-dialog-accept.result.json"
+      ]
+    },
+    {
+      "feature_id": "trace-world",
+      "expected": "Trace against actual world geometry returns a hit position.",
+      "actual": "Ray hit ground plane at (-2.014583,-0.5,-1.985417); only this world primitive/path covered.",
+      "status": "partial",
+      "action": "SDK Game orthographic screen-ray hit the scene Plane at world y=-0.5.",
+      "evidence_paths": [
+        "evidence/sdk-probe-events-current.txt",
+        "evidence/sdk-probe-deferred-events.txt"
+      ]
+    }
+  ],
+  "blocked": [],
+  "visual_status": "not tested in visible UI; commandlet checks only",
+  "build_status": "Actual project.build failed with old module preserved, then repaired source built and activated a different DLL; see failed-build-rollback and hot-reload observations.",
+  "review_findings": [
+    {
+      "status": "fixed-and-verified-by-coordinator",
+      "pre_fix_evidence": [
+        "evidence/integer-fraction-repro.request.json",
+        "evidence/integer-fraction-repro.result.json",
+        "evidence/integer-fraction-repro.log"
+      ],
+      "finding": "Diagnostic integer fields narrowed JSON doubles through float then int before range checks; slices=24.5 silently truncated.",
+      "id": "integer-narrowing",
+      "fix": "Added bounded PointShadowDiagnostics::Integer validating isDouble, finite double, integral value and range before cast; replaced all integer Number casts in PointShadow/Particle/Mesh diagnostics.",
+      "regression": "Coordinator rebuilt commandlet: 13 integer negative cases passed, followed by mesh 8/16 GPU frames, particles 8/32 GPU frames and point-shadow positive controls 2/2 GPU frames.",
+      "post_fix_evidence": "../../continuation/regressions.json"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+Using v143, MSVC 14.44.35207, Windows SDK 10.0.26100.0.
+MSBuild: C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe
+
+  ComponentGenerator: 2 component(s), Project
+  Module.cpp
+  ProjectComponent.cpp
+  ProjectGame.cpp
+E:\Engine\Engine\build\playtests\strategy-r1\RepairCorridor\Source\ProjectGame.h(32,27): error C2017: недопустимая escape-последовательность [E:\Engine\Engine\build\playtests\strategy-r1\RepairCorridor\Game.vcxproj]
+  (компиляция исходного файла "Source/ProjectGame.cpp")
+  
+E:\Engine\Engine\build\playtests\strategy-r1\RepairCorridor\Source\ProjectGame.h(32,33): error C2144: синтаксическая ошибка: перед "void" требуется ";" [E:\Engine\Engine\build\playtests\strategy-r1\RepairCorridor\Game.vcxproj]
+  (компиляция исходного файла "Source/ProjectGame.cpp")
+  
+E:\Engine\Engine\build\playtests\strategy-r1\RepairCorridor\Source\ProjectGame.h(32,28): error C4430: отсутствует спецификатор типа - предполагается int. Примечание. C++ не поддерживает int по умолчанию [E:\Engine\Engine\build\playtests\strategy-r1\RepairCorridor\Game.vcxproj]
+  (компиляция исходного файла "Source/ProjectGame.cpp")
+  
+  RotatingCube.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+
+Full build log: E:\Engine\Engine\build\playtests\strategy-r1\RepairCorridor\Binaries\Release\d9074b3279074f8ebd67e34f689bbad0\build.log

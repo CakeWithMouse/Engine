@@ -1,0 +1,9 @@
+{
+  "passed": 8,
+  "frames": 32,
+  "renderers": [
+    "Forward",
+    "Deferred"
+  ],
+  "result": "Before-contact frames match; collision retains visible particles above floor, disabled particles pass below; absent surface never changes trajectory."
+}

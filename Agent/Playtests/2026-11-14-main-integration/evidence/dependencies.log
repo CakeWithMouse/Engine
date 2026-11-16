@@ -1,0 +1,276 @@
+Detecting compiler hash for triplet x64-windows...
+Compiler found: C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe
+The following packages are already installed:
+  * vcpkg-cmake:x64-windows@2025-08-07 -- git+https://github.com/microsoft/vcpkg@16b9390dfeaca6df7288ba3f827e40e48e5fc942
+  * vcpkg-cmake-config:x64-windows@2026-07-21 -- git+https://github.com/microsoft/vcpkg@51befcb03097f8d19c1c59f9ec3625e69d85322a
+The following packages will be built and installed:
+    assimp:x64-windows@6.0.4#3 -- git+https://github.com/microsoft/vcpkg@327397e12c4348d0a3637b297501126c3d715b68
+  * jhasse-poly2tri:x64-windows@2023-12-27#2 -- git+https://github.com/microsoft/vcpkg@d94a24dde4173f85d1aaeb16b3eecc71b100b5be
+    joltphysics:x64-windows@5.6.0#1 -- git+https://github.com/microsoft/vcpkg@459e842b1521f5c365acaf110a7a1635f201569c
+  * kubazip:x64-windows@0.3.15 -- git+https://github.com/microsoft/vcpkg@ca5503c1bd9dd8d574ddf6010ff0a88ccbd1cf29
+  * minizip:x64-windows@1.3.2 -- git+https://github.com/microsoft/vcpkg@b485c18ad5b9ce53d790be6875324577d308e8b1
+  * polyclipping:x64-windows@6.4.2#13 -- git+https://github.com/microsoft/vcpkg@2388298c7ad673550c7492454666dd3a34ada895
+  * pugixml:x64-windows@1.16 -- git+https://github.com/microsoft/vcpkg@57dda7f8da9461a690dbc3c09363436215230838
+  * rapidjson:x64-windows@2025-02-26 -- git+https://github.com/microsoft/vcpkg@4297a243aa0e3ed6c3a4c307579914593da5751d
+  * stb:x64-windows@2024-07-29#1 -- git+https://github.com/microsoft/vcpkg@c362152d1d02973e7b1ce777960f8a6876656560
+  * utfcpp:x64-windows@4.2.0 -- git+https://github.com/microsoft/vcpkg@b3e22f2df71f470ef2a2efd61514b5823061ad00
+  * vcpkg-cmake-get-vars:x64-windows@2025-05-29 -- git+https://github.com/microsoft/vcpkg@d6510f888dd526c7828f6b973349e7f30be51254
+  * zlib:x64-windows@1.3.2#2 -- git+https://github.com/microsoft/vcpkg@f4f43a5a505cda1a0d1ff056be1fdba9e566242e
+Additional packages (*) will be modified to complete this operation.
+Restored 0 package(s) from C:\Users\serge\AppData\Local\vcpkg\archives in 215 us. Use --debug to see more details.
+Installing 1/12 zlib:x64-windows@1.3.2#2...
+Building zlib:x64-windows@1.3.2#2...
+C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\f4f43a5a505cda1a0d1ff056be1fdba9e566242e: info: installing from git registry git+https://github.com/microsoft/vcpkg@f4f43a5a505cda1a0d1ff056be1fdba9e566242e
+-- Using cached madler-zlib-v1.3.2.tar.gz
+-- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/madler-zlib-v1.3.2.tar.gz
+-- Applying patch 0001-no-version-script-on-ohos.patch
+-- Using source at E:/Engine/Engine/build/main-integration-20261114/dependency-build/zlib/src/v1.3.2-c19a0bfd23.clean
+-- Configuring x64-windows
+-- Building x64-windows-dbg
+-- Building x64-windows-rel
+-- Fixing pkgconfig file: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/zlib_x64-windows/lib/pkgconfig/zlib.pc
+-- Using cached msys2-mingw-w64-x86_64-pkgconf-1~2.4.3-1-any.pkg.tar.zst
+-- Using cached msys2-msys2-runtime-3.6.2-2-x86_64.pkg.tar.zst
+-- Using msys root at C:/Users/serge/AppData/Local/vcpkg/downloads/tools/msys2/9272adbcaf19caef
+-- Fixing pkgconfig file: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/zlib_x64-windows/debug/lib/pkgconfig/zlib.pc
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/zlib_x64-windows/share/zlib/vcpkg-cmake-wrapper.cmake
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/zlib_x64-windows/share/zlib/copyright
+-- Performing post-build validation
+Starting submission of zlib:x64-windows@1.3.2#2 to 1 binary cache(s) in the background
+Elapsed time to handle zlib:x64-windows: 8.7 s
+zlib:x64-windows package ABI: 53dec13ba8d78bd1c73fc7b3787e71e0e4e27f8d62e74113b0598fbc26065f23
+Installing 2/12 utfcpp:x64-windows@4.2.0...
+Building utfcpp:x64-windows@4.2.0...
+C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\b3e22f2df71f470ef2a2efd61514b5823061ad00: info: installing from git registry git+https://github.com/microsoft/vcpkg@b3e22f2df71f470ef2a2efd61514b5823061ad00
+-- Using cached nemtrif-utfcpp-v4.2.0.tar.gz
+-- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/nemtrif-utfcpp-v4.2.0.tar.gz
+-- Using source at E:/Engine/Engine/build/main-integration-20261114/dependency-build/utfcpp/src/v4.2.0-5064610e27.clean
+-- Configuring x64-windows
+-- Building x64-windows-rel
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/utfcpp_x64-windows/share/utfcpp/copyright
+-- Performing post-build validation
+Starting submission of utfcpp:x64-windows@4.2.0 to 1 binary cache(s) in the background
+Elapsed time to handle utfcpp:x64-windows: 2.5 s
+utfcpp:x64-windows package ABI: d07052ab12ec2097b9c7900a47cfd08e19c5e82c07b8ddb0b230ea783b0ef7a2
+Completed submission of zlib:x64-windows@1.3.2#2 to 1 binary cache(s) in 131 ms
+Installing 3/12 stb:x64-windows@2024-07-29#1...
+Building stb:x64-windows@2024-07-29#1...
+C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\c362152d1d02973e7b1ce777960f8a6876656560: info: installing from git registry git+https://github.com/microsoft/vcpkg@c362152d1d02973e7b1ce777960f8a6876656560
+-- Using cached nothings-stb-f75e8d1cad7d90d72ef7a4661f1b994ef78b4e31.tar.gz
+-- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/nothings-stb-f75e8d1cad7d90d72ef7a4661f1b994ef78b4e31.tar.gz
+-- Using source at E:/Engine/Engine/build/main-integration-20261114/dependency-build/stb/src/4ef78b4e31-bf024d35de.clean
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/stb_x64-windows/share/stb/FindStb.cmake
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/stb_x64-windows/share/stb/vcpkg-cmake-wrapper.cmake
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/stb_x64-windows/share/stb/usage
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/stb_x64-windows/share/stb/copyright
+-- Performing post-build validation
+Starting submission of stb:x64-windows@2024-07-29#1 to 1 binary cache(s) in the background
+Elapsed time to handle stb:x64-windows: 1.2 s
+stb:x64-windows package ABI: 5a0dc9ceb5f6ba1a6a026f90c2b67c203398509d37366a4d8575101f71b4420d
+Completed submission of utfcpp:x64-windows@4.2.0 to 1 binary cache(s) in 54.4 ms
+Installing 4/12 rapidjson:x64-windows@2025-02-26...
+Building rapidjson:x64-windows@2025-02-26...
+C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\4297a243aa0e3ed6c3a4c307579914593da5751d: info: installing from git registry git+https://github.com/microsoft/vcpkg@4297a243aa0e3ed6c3a4c307579914593da5751d
+-- Using cached Tencent-rapidjson-24b5e7a8b27f42fa16b96fc70aade9106cf7102f-2.tar.gz
+-- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/Tencent-rapidjson-24b5e7a8b27f42fa16b96fc70aade9106cf7102f-2.tar.gz
+-- Using source at E:/Engine/Engine/build/main-integration-20261114/dependency-build/rapidjson/src/106cf7102f-b0877c68bd.clean
+-- Configuring x64-windows
+-- Building x64-windows-dbg
+-- Building x64-windows-rel
+-- Using cached msys2-mingw-w64-x86_64-pkgconf-1~2.4.3-1-any.pkg.tar.zst
+-- Using cached msys2-msys2-runtime-3.6.2-2-x86_64.pkg.tar.zst
+-- Using msys root at C:/Users/serge/AppData/Local/vcpkg/downloads/tools/msys2/9272adbcaf19caef
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/rapidjson_x64-windows/share/rapidjson/copyright
+-- Performing post-build validation
+Starting submission of rapidjson:x64-windows@2025-02-26 to 1 binary cache(s) in the background
+Elapsed time to handle rapidjson:x64-windows: 4.3 s
+rapidjson:x64-windows package ABI: d797310c59fe7036db7c81d4ba2c4622ba347bea9bff2aa8a3bcbab6120b617d
+Completed submission of stb:x64-windows@2024-07-29#1 to 1 binary cache(s) in 108 ms
+Installing 5/12 pugixml:x64-windows@1.16...
+Building pugixml:x64-windows@1.16...
+C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\57dda7f8da9461a690dbc3c09363436215230838: info: installing from git registry git+https://github.com/microsoft/vcpkg@57dda7f8da9461a690dbc3c09363436215230838
+-- Using cached zeux-pugixml-v1.16.tar.gz
+-- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/zeux-pugixml-v1.16.tar.gz
+-- Using source at E:/Engine/Engine/build/main-integration-20261114/dependency-build/pugixml/src/v1.16-22f15b704a.clean
+-- Configuring x64-windows
+-- Building x64-windows-dbg
+-- Building x64-windows-rel
+-- Fixing pkgconfig file: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/pugixml_x64-windows/lib/pkgconfig/pugixml.pc
+-- Using cached msys2-mingw-w64-x86_64-pkgconf-1~2.4.3-1-any.pkg.tar.zst
+-- Using cached msys2-msys2-runtime-3.6.2-2-x86_64.pkg.tar.zst
+-- Using msys root at C:/Users/serge/AppData/Local/vcpkg/downloads/tools/msys2/9272adbcaf19caef
+-- Fixing pkgconfig file: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/pugixml_x64-windows/debug/lib/pkgconfig/pugixml.pc
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/pugixml_x64-windows/share/pugixml/copyright
+-- Performing post-build validation
+Starting submission of pugixml:x64-windows@1.16 to 1 binary cache(s) in the background
+Elapsed time to handle pugixml:x64-windows: 4.9 s
+pugixml:x64-windows package ABI: 8612099c4c62c155fb534018b17479111346ca4a08a559c83cdc2387027c6808
+Completed submission of rapidjson:x64-windows@2025-02-26 to 1 binary cache(s) in 73.5 ms
+Installing 6/12 polyclipping:x64-windows@6.4.2#13...
+Building polyclipping:x64-windows@6.4.2#13...
+C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\2388298c7ad673550c7492454666dd3a34ada895: info: installing from git registry git+https://github.com/microsoft/vcpkg@2388298c7ad673550c7492454666dd3a34ada895
+-- Note: polyclipping only supports static library linkage. Building static library.
+-- Using cached clipper_ver6.4.2.zip
+-- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/clipper_ver6.4.2.zip
+-- Applying patch fix_targets.patch
+-- Using source at E:/Engine/Engine/build/main-integration-20261114/dependency-build/polyclipping/src/ipper_ver6-06b887c850.clean
+-- Configuring x64-windows
+-- Building x64-windows-dbg
+-- Building x64-windows-rel
+-- Fixing pkgconfig file: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/polyclipping_x64-windows/lib/pkgconfig/polyclipping.pc
+-- Using cached msys2-mingw-w64-x86_64-pkgconf-1~2.4.3-1-any.pkg.tar.zst
+-- Using cached msys2-msys2-runtime-3.6.2-2-x86_64.pkg.tar.zst
+-- Using msys root at C:/Users/serge/AppData/Local/vcpkg/downloads/tools/msys2/9272adbcaf19caef
+-- Fixing pkgconfig file: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/polyclipping_x64-windows/debug/lib/pkgconfig/polyclipping.pc
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/polyclipping_x64-windows/share/clipper/FindCLIPPER.cmake
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/polyclipping_x64-windows/share/clipper/vcpkg-cmake-wrapper.cmake
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/polyclipping_x64-windows/share/polyclipping/copyright
+-- Fixing pkgconfig file: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/polyclipping_x64-windows/lib/pkgconfig/polyclipping.pc
+-- Fixing pkgconfig file: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/polyclipping_x64-windows/debug/lib/pkgconfig/polyclipping.pc
+-- Performing post-build validation
+Starting submission of polyclipping:x64-windows@6.4.2#13 to 1 binary cache(s) in the background
+Elapsed time to handle polyclipping:x64-windows: 5.8 s
+polyclipping:x64-windows package ABI: a07a0e72c109e049fdc3f82e4ff3978b776c73922c36c852f4b4dffca0858f27
+Completed submission of pugixml:x64-windows@1.16 to 1 binary cache(s) in 215 ms
+Installing 7/12 vcpkg-cmake-get-vars:x64-windows@2025-05-29...
+Building vcpkg-cmake-get-vars:x64-windows@2025-05-29...
+C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\d6510f888dd526c7828f6b973349e7f30be51254: info: installing from git registry git+https://github.com/microsoft/vcpkg@d6510f888dd526c7828f6b973349e7f30be51254
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/vcpkg-cmake-get-vars_x64-windows/share/vcpkg-cmake-get-vars/vcpkg_cmake_get_vars.cmake
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/vcpkg-cmake-get-vars_x64-windows/share/vcpkg-cmake-get-vars/cmake_get_vars
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/vcpkg-cmake-get-vars_x64-windows/share/vcpkg-cmake-get-vars/cmake_get_vars/CMakeLists.txt
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/vcpkg-cmake-get-vars_x64-windows/share/vcpkg-cmake-get-vars/cmake-get-vars.cmake.in
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/vcpkg-cmake-get-vars_x64-windows/share/vcpkg-cmake-get-vars/vcpkg-port-config.cmake
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/vcpkg-cmake-get-vars_x64-windows/share/vcpkg-cmake-get-vars/copyright
+-- Performing post-build validation
+Starting submission of vcpkg-cmake-get-vars:x64-windows@2025-05-29 to 1 binary cache(s) in the background
+Elapsed time to handle vcpkg-cmake-get-vars:x64-windows: 86.7 ms
+vcpkg-cmake-get-vars:x64-windows package ABI: 02de2c712d4a0986f7219207562fec6beef241a9d9c7a346ee4bc945c4a4ed84
+Installing 8/12 minizip:x64-windows@1.3.2...
+Building minizip:x64-windows@1.3.2...
+C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\b485c18ad5b9ce53d790be6875324577d308e8b1: info: installing from git registry git+https://github.com/microsoft/vcpkg@b485c18ad5b9ce53d790be6875324577d308e8b1
+-- Using cached madler-zlib-v1.3.2.tar.gz
+-- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/madler-zlib-v1.3.2.tar.gz
+-- Applying patch pkgconfig.patch
+-- Applying patch install-tools.diff
+-- Applying patch restore-32bit.diff
+-- Applying patch unofficial-iowin32.diff
+-- Applying patch header-destination.diff
+-- Using source at E:/Engine/Engine/build/main-integration-20261114/dependency-build/minizip/src/v1.3.2-355bf577a0.clean
+-- Configuring x64-windows
+-- Building x64-windows-dbg
+-- Building x64-windows-rel
+-- Fixing pkgconfig file: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/minizip_x64-windows/lib/pkgconfig/minizip.pc
+-- Using cached msys2-mingw-w64-x86_64-pkgconf-1~2.4.3-1-any.pkg.tar.zst
+-- Using cached msys2-msys2-runtime-3.6.2-2-x86_64.pkg.tar.zst
+-- Using msys root at C:/Users/serge/AppData/Local/vcpkg/downloads/tools/msys2/9272adbcaf19caef
+-- Fixing pkgconfig file: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/minizip_x64-windows/debug/lib/pkgconfig/minizip.pc
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/minizip_x64-windows/share/minizip/copyright
+-- Performing post-build validation
+Starting submission of minizip:x64-windows@1.3.2 to 1 binary cache(s) in the background
+Elapsed time to handle minizip:x64-windows: 8.3 s
+minizip:x64-windows package ABI: 77aba535481deb21978f6c59dbb52e91552f6a9d45ead66997490761524c0d59
+Completed submission of polyclipping:x64-windows@6.4.2#13 to 1 binary cache(s) in 285 ms
+Completed submission of vcpkg-cmake-get-vars:x64-windows@2025-05-29 to 1 binary cache(s) in 47.2 ms
+Installing 9/12 kubazip:x64-windows@0.3.15...
+Building kubazip:x64-windows@0.3.15...
+C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\ca5503c1bd9dd8d574ddf6010ff0a88ccbd1cf29: info: installing from git registry git+https://github.com/microsoft/vcpkg@ca5503c1bd9dd8d574ddf6010ff0a88ccbd1cf29
+-- Using cached kuba---zip-v0.3.15.tar.gz
+-- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/kuba---zip-v0.3.15.tar.gz
+-- Applying patch fix-name-conflict.diff
+-- Applying patch disable-werror.patch
+-- Applying patch fix-project-version.patch
+-- Using source at E:/Engine/Engine/build/main-integration-20261114/dependency-build/kubazip/src/v0.3.15-3d1fad8ad9.clean
+-- Configuring x64-windows
+-- Building x64-windows-dbg
+-- Building x64-windows-rel
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/kubazip_x64-windows/share/kubazip/kubazipConfig.cmake
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/kubazip_x64-windows/share/kubazip/usage
+-- Performing post-build validation
+Starting submission of kubazip:x64-windows@0.3.15 to 1 binary cache(s) in the background
+Elapsed time to handle kubazip:x64-windows: 4 s
+kubazip:x64-windows package ABI: e42bfdb7f601e4693d6364029ce552186177d5746c380a8498bb746e54bb0389
+Completed submission of minizip:x64-windows@1.3.2 to 1 binary cache(s) in 109 ms
+Installing 10/12 jhasse-poly2tri:x64-windows@2023-12-27#2...
+Building jhasse-poly2tri:x64-windows@2023-12-27#2...
+C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\d94a24dde4173f85d1aaeb16b3eecc71b100b5be: info: installing from git registry git+https://github.com/microsoft/vcpkg@d94a24dde4173f85d1aaeb16b3eecc71b100b5be
+-- Using cached jhasse-poly2tri-0171f030bd3d5c6747c29d93403546eed668a1b6.tar.gz
+-- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/jhasse-poly2tri-0171f030bd3d5c6747c29d93403546eed668a1b6.tar.gz
+-- Applying patch cmake.patch
+-- Using source at E:/Engine/Engine/build/main-integration-20261114/dependency-build/jhasse-poly2tri/src/eed668a1b6-2f597c27ae.clean
+-- Configuring x64-windows
+-- Building x64-windows-dbg
+-- Building x64-windows-rel
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/jhasse-poly2tri_x64-windows/share/jhasse-poly2tri/usage
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/jhasse-poly2tri_x64-windows/share/jhasse-poly2tri/copyright
+-- Performing post-build validation
+Starting submission of jhasse-poly2tri:x64-windows@2023-12-27#2 to 1 binary cache(s) in the background
+Elapsed time to handle jhasse-poly2tri:x64-windows: 4.8 s
+jhasse-poly2tri:x64-windows package ABI: a7d55f68442ee1d5c57b55b80b27ab7966a29357f85d27a0ebc37d5ef9a820e4
+Completed submission of kubazip:x64-windows@0.3.15 to 1 binary cache(s) in 90.5 ms
+Installing 11/12 assimp:x64-windows@6.0.4#3...
+Building assimp:x64-windows@6.0.4#3...
+C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\327397e12c4348d0a3637b297501126c3d715b68: info: installing from git registry git+https://github.com/microsoft/vcpkg@327397e12c4348d0a3637b297501126c3d715b68
+-- Using cached assimp-assimp-v6.0.4.tar.gz
+-- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/assimp-assimp-v6.0.4.tar.gz
+-- Applying patch build_fixes.patch
+-- Using source at E:/Engine/Engine/build/main-integration-20261114/dependency-build/assimp/src/v6.0.4-ae4a96b033.clean
+-- Configuring x64-windows
+-- Building x64-windows-dbg
+-- Building x64-windows-rel
+-- Fixing pkgconfig file: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/assimp_x64-windows/lib/pkgconfig/assimp.pc
+-- Using cached msys2-mingw-w64-x86_64-pkgconf-1~2.4.3-1-any.pkg.tar.zst
+-- Using cached msys2-msys2-runtime-3.6.2-2-x86_64.pkg.tar.zst
+-- Using msys root at C:/Users/serge/AppData/Local/vcpkg/downloads/tools/msys2/9272adbcaf19caef
+-- Fixing pkgconfig file: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/assimp_x64-windows/debug/lib/pkgconfig/assimp.pc
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/assimp_x64-windows/share/assimp/copyright
+-- Performing post-build validation
+Starting submission of assimp:x64-windows@6.0.4#3 to 1 binary cache(s) in the background
+Elapsed time to handle assimp:x64-windows: 1.4 min
+assimp:x64-windows package ABI: 37ca70e68a745d2fb10ac0a6bc35e41d13ebe4364ea187fb40ba7fe605561c9d
+Completed submission of jhasse-poly2tri:x64-windows@2023-12-27#2 to 1 binary cache(s) in 66.1 ms
+Installing 12/12 joltphysics:x64-windows@5.6.0#1...
+Building joltphysics:x64-windows@5.6.0#1...
+C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\459e842b1521f5c365acaf110a7a1635f201569c: info: installing from git registry git+https://github.com/microsoft/vcpkg@459e842b1521f5c365acaf110a7a1635f201569c
+Downloading https://github.com/jrouwe/JoltPhysics/archive/v5.6.0.tar.gz -> jrouwe-JoltPhysics-v5.6.0.tar.gz
+Successfully downloaded jrouwe-JoltPhysics-v5.6.0.tar.gz
+-- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/jrouwe-JoltPhysics-v5.6.0.tar.gz
+-- Using source at E:/Engine/Engine/build/main-integration-20261114/dependency-build/joltphysics/src/v5.6.0-58760e711a.clean
+-- Configuring x64-windows
+-- Building x64-windows-dbg
+-- Building x64-windows-rel
+-- Using cached msys2-mingw-w64-x86_64-pkgconf-1~2.4.3-1-any.pkg.tar.zst
+-- Using cached msys2-msys2-runtime-3.6.2-2-x86_64.pkg.tar.zst
+-- Using msys root at C:/Users/serge/AppData/Local/vcpkg/downloads/tools/msys2/9272adbcaf19caef
+-- Installing: E:/Engine/Engine/build/main-integration-20261114/dependency-packages/joltphysics_x64-windows/share/joltphysics/copyright
+-- Performing post-build validation
+Starting submission of joltphysics:x64-windows@5.6.0#1 to 1 binary cache(s) in the background
+Elapsed time to handle joltphysics:x64-windows: 42 s
+joltphysics:x64-windows package ABI: bee10630526232c1e6916d2b1f48e9c85ff78223f118b2b88896244e9ce64f30
+Installed contents are licensed to you by owners. Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
+Packages installed in this vcpkg installation declare the following licenses:
+(MIT OR CC-PDDC)
+BSD-3-Clause
+BSL-1.0
+MIT
+Zlib
+assimp provides CMake targets:
+
+  # this is heuristically generated, and may not be correct
+  find_package(assimp CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE assimp::assimp)
+
+assimp provides pkg-config modules:
+
+  # Import various well-known 3D model formats in an uniform manner.
+  assimp
+
+joltphysics provides CMake targets:
+
+  # this is heuristically generated, and may not be correct
+  find_package(Jolt CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE Jolt::Jolt)
+
+Completed submission of assimp:x64-windows@6.0.4#3 to 1 binary cache(s) in 12 s
+Waiting for 1 remaining binary cache submissions...
+Completed submission of joltphysics:x64-windows@5.6.0#1 to 1 binary cache(s) in 2.2 s (1/1)
+All requested installations completed successfully in: 2.8 min

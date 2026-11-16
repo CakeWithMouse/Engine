@@ -1,0 +1,56 @@
+{
+  "name": "Scene",
+  "objects": [
+    {
+      "id": 1,
+      "inheritParentScale": true,
+      "name": "CloneSource",
+      "parent": 0,
+      "transform": {
+        "position": [
+          2.0,
+          1.0,
+          -3.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "Primitive.Sphere"
+    },
+    {
+      "id": 2,
+      "inheritParentScale": true,
+      "name": "CloneCopy",
+      "parent": 0,
+      "transform": {
+        "position": [
+          4.0,
+          3.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "Primitive.Sphere"
+    }
+  ],
+  "version": 1
+}

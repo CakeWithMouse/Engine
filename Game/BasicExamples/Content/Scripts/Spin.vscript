@@ -1,0 +1,61 @@
+{
+    "format": "ITMOEngine.Graph",
+    "version": 1,
+    "schema": "code",
+    "schemaVersion": 1,
+    "variables": [],
+    "nodes": [
+        {
+            "id": 1,
+            "type": "Event.Tick",
+            "title": "",
+            "x": 0,
+            "y": 0,
+            "properties": {}
+        },
+        {
+            "id": 2,
+            "type": "Vec3.Scale",
+            "title": "",
+            "x": 240,
+            "y": 80,
+            "properties": {
+                "inputs": {
+                    "Vector": [
+                        0,
+                        90,
+                        0
+                    ]
+                }
+            }
+        },
+        {
+            "id": 3,
+            "type": "Action.Rotate",
+            "title": "",
+            "x": 480,
+            "y": 0,
+            "properties": {}
+        }
+    ],
+    "connections": [
+        {
+            "fromNode": 1,
+            "fromPin": "then",
+            "toNode": 3,
+            "toPin": "exec"
+        },
+        {
+            "fromNode": 1,
+            "fromPin": "DeltaTime",
+            "toNode": 2,
+            "toPin": "Factor"
+        },
+        {
+            "fromNode": 2,
+            "fromPin": "Out",
+            "toNode": 3,
+            "toPin": "Degrees"
+        }
+    ]
+}

@@ -1,0 +1,24 @@
+{
+  "cellSize": 0.25,
+  "configured": true,
+  "details": "object 20  state: Patrol\n  task Patrol: FollowRoute [Running]\nmovement: Moving to (-2.6, 6.0), corners left 2\nhistory:\n    0.02  -> Patrol   start\n    1.63  Patrol -> Pause   task succeeded\n    2.29  Pause -> Patrol   task succeeded\n",
+  "field": "none",
+  "height": 87,
+  "lines": 34,
+  "radius": 0.4000000059604645,
+  "source": "paused",
+  "stride": 1,
+  "triangles": 0,
+  "units": [
+    {
+      "id": 1,
+      "name": "CorridorGuard"
+    },
+    {
+      "id": 5,
+      "name": "Player order 131"
+    }
+  ],
+  "version": 176,
+  "width": 24
+}

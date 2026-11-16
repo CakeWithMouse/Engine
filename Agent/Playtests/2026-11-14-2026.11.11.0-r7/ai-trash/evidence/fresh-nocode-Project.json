@@ -1,0 +1,6 @@
+{
+  "content": "Content",
+  "module": "Game.dll",
+  "name": "AI Trash no-code r7",
+  "startupScene": "Content/Scenes/Main.scene.json"
+}

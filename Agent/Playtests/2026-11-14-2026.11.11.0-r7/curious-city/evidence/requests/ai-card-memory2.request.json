@@ -1,0 +1,13 @@
+{
+  "project":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Project.json",
+  "steps":[
+    {"action":"select","target":"CityGuard","image":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/ai-card-selected2.png","scope":"main"},
+    {"action":"field","scope":"main","name":"AiMemory_Speed","value":"3.25"},
+    {"action":"scene-undo","target":"CityGuard"},
+    {"action":"scene-redo","target":"CityGuard"},
+    {"action":"clone","target":"CityGuard","image":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/ai-card-cloned2.png","scope":"main"},
+    {"action":"select","target":"CityGuard"},
+    {"action":"button","scope":"main","name":"AiMemoryReset_Speed","image":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/ai-card-reset2.png","scope":"main"},
+    {"action":"save-scene","path":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/Scenes/AiProbe.scene.json"}
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber/BomberUpgradedR7/Project.json",
+  "steps": [
+    {
+      "action": "frames",
+      "count": 1
+    },
+    {
+      "action": "hierarchy-click",
+      "target": "Ground"
+    },
+    {
+      "name": "Transform0",
+      "action": "field",
+      "value": 3,
+      "scope": "main"
+    },
+    {
+      "name": "Transform3",
+      "action": "field",
+      "value": 15,
+      "scope": "main"
+    },
+    {
+      "name": "Transform4",
+      "action": "field",
+      "value": 30,
+      "scope": "main"
+    },
+    {
+      "name": "Transform6",
+      "action": "field",
+      "value": 2,
+      "scope": "main"
+    },
+    {
+      "action": "save-scene",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber/BomberUpgradedR7/Content/Scenes/tired-bomber-transform-probe.scene.json"
+    },
+    {
+      "action": "load-scene",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber/BomberUpgradedR7/Content/Scenes/tired-bomber-transform-probe.scene.json"
+    },
+    {
+      "y": 0.5,
+      "action": "viewport-click",
+      "x": 0.5
+    },
+    {
+      "action": "ui-command",
+      "id": "Gizmo.FocusSelected"
+    }
+  ]
+}

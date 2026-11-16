@@ -1,0 +1,10 @@
+{
+  "module": "Binaries/Release/6749fb2c82f5475e8aff938971ed81af/Game.dll",
+  "fingerprint": "9qauR774193qzqvvg3agDzRNuPsjoFN9JTJtdqcZf2g=",
+  "format": 1,
+  "configuration": "Release",
+  "previousModule": "Binaries/Release/5fc8602be7db47c48e9aa155b5920904/Game.dll",
+  "state": "ready",
+  "sdk": "2026.11.11.0",
+  "buildId": "6749fb2c82f5475e8aff938971ed81af"
+}

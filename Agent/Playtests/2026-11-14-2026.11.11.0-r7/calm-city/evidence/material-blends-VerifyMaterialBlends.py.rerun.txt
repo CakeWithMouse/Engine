@@ -1,0 +1,1 @@
+PASS: masked alpha and translucent source-over pixels match in Forward and Deferred.

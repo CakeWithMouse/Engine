@@ -6,6 +6,8 @@
 #include <Engine/Runtime/EditSessionApi.h>
 #include <Engine/Scene/SceneCommands.h>
 #include <Engine/Runtime/ProjectDataApi.h>
+#include <Engine/Runtime/PhysicsEditApi.h>
+#include <Engine/Runtime/PhysicsObjectEditApi.h>
 #include <Engine/Runtime/SelectionApi.h>
 #include <Engine/Runtime/SceneBatchApi.h>
 #include <Engine/Runtime/AuthoringApi.h>
@@ -14,6 +16,8 @@
 #include <Engine/Runtime/ViewportOverlayApi.h>
 #include <Engine/Runtime/EditExtensions.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
+
+#include <Engine/AI/World.h>
 
 // Entire object and both Games live in the module containing the generated types.
 // Edit never invokes gameplay hooks. Play owns a separate Game and Scene.
@@ -34,10 +38,18 @@ public:
     EngineViewportOverlayApi GetViewportOverlayApi() noexcept;
     EnginePointLightV2Api GetPointLightV2Api() noexcept;
     EngineAudioPreviewApi GetAudioPreviewApi() noexcept;
+    EnginePhysicsApi GetPhysicsApi() noexcept;
+    EnginePhysicsObjectApi GetPhysicsObjectApi() noexcept;
+    EngineScriptApi GetScriptApi() noexcept;
+    EngineGraphTraceApi GetGraphTraceApi() noexcept;
+    EngineAiMachineApi GetAiMachineApi() noexcept;
+    EngineAiDiagnosticsApi GetAiDiagnosticsApi() noexcept;
     EngineAssetImportApi GetAssetImportApi() noexcept;
     SceneEditSession(const SceneEditSession&) = delete;
     SceneEditSession& operator=(const SceneEditSession&) = delete;
 private:
+    std::unique_ptr<Ai::World> diagnosticPreview_;
+    std::string diagnosticSceneKey_;
     ComponentTypeCatalog catalog_;
     GameFactory gameFactory_ = nullptr;
     std::thread::id thread_ = std::this_thread::get_id();

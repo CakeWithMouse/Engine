@@ -1,0 +1,13 @@
+{
+  "acceptedOrders": 1,
+  "attackOrders": 1,
+  "attackHits": 4,
+  "guardHP": 0,
+  "guardDead": 1,
+  "activeAttackOrders": 0,
+  "barrierViolationFrames": 0,
+  "won": 1,
+  "lost": 0,
+  "runtimeUpdates": 60,
+  "runtimeStopped": true
+}

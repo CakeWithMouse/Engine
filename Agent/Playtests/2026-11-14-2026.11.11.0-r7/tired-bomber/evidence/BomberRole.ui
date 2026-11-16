@@ -1,0 +1,11 @@
+<UI>
+  <Panel name="statusPanel" rect="16 150 260 120" padding="12" color="#112233DD">
+    <Label name="status" rect="0 0 230 24" text="BOMB READY" color="#FFFFFFFF"/>
+    <Bar name="charge" rect="0 34 220 14" fill="0.25" trackColor="#222222FF" fillColor="#33DD88FF"/>
+  </Panel>
+  <Panel name="anchorTR" anchor="TopRight" rect="16 16 40 24" color="#FFB020FF"/>
+  <Panel name="anchorBL" anchor="BottomLeft" rect="16 16 40 24" color="#20D0FFFF"/>
+  <Panel name="anchorCenter" anchor="Center" rect="0 0 40 24" color="#E050E0FF"/>
+  <Button name="fire" anchor="BottomRight" rect="16 16 150 36" text="FIRE" color="#882222FF"/>
+</UI>
+

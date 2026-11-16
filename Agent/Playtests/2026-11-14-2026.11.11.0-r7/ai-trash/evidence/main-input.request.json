@@ -1,0 +1,53 @@
+{
+  "steps": [
+    {
+      "kind": "control",
+      "action": "play"
+    },
+    {
+      "kind": "focus",
+      "enabled": true
+    },
+    {
+      "kind": "frames",
+      "count": 3
+    },
+    {
+      "kind": "key",
+      "down": true,
+      "key": 39
+    },
+    {
+      "kind": "frames",
+      "count": 1
+    },
+    {
+      "kind": "key",
+      "down": false,
+      "key": 39
+    },
+    {
+      "kind": "key",
+      "down": true,
+      "key": 32
+    },
+    {
+      "kind": "frames",
+      "count": 1
+    },
+    {
+      "kind": "key",
+      "down": false,
+      "key": 32
+    },
+    {
+      "kind": "frames",
+      "count": 100
+    },
+    {
+      "kind": "control",
+      "action": "stop"
+    }
+  ],
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\ai-trash\\TrashGameUpgraded\\Project.json"
+}

@@ -1,0 +1,117 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Project.json",
+  "steps": [
+    {
+      "kind": "control",
+      "action": "play"
+    },
+    {
+      "kind": "focus",
+      "enabled": true
+    },
+    {
+      "kind": "frames",
+      "count": 3
+    },
+    {
+      "kind": "cursor",
+      "valid": true,
+      "x": 64,
+      "y": 110
+    },
+    {
+      "kind": "key",
+      "key": 500,
+      "down": true
+    },
+    {
+      "kind": "frames",
+      "count": 1
+    },
+    {
+      "kind": "key",
+      "key": 500,
+      "down": false
+    },
+    {
+      "kind": "frames",
+      "count": 2
+    },
+    {
+      "kind": "cursor",
+      "valid": true,
+      "x": 160,
+      "y": 110
+    },
+    {
+      "kind": "key",
+      "key": 500,
+      "down": true
+    },
+    {
+      "kind": "frames",
+      "count": 1
+    },
+    {
+      "kind": "key",
+      "key": 500,
+      "down": false
+    },
+    {
+      "kind": "frames",
+      "count": 65
+    },
+    {
+      "kind": "cursor",
+      "valid": true,
+      "x": 64,
+      "y": 110
+    },
+    {
+      "kind": "key",
+      "key": 500,
+      "down": true
+    },
+    {
+      "kind": "frames",
+      "count": 1
+    },
+    {
+      "kind": "key",
+      "key": 500,
+      "down": false
+    },
+    {
+      "kind": "frames",
+      "count": 2
+    },
+    {
+      "kind": "cursor",
+      "valid": true,
+      "x": 245,
+      "y": 110
+    },
+    {
+      "kind": "key",
+      "key": 500,
+      "down": true
+    },
+    {
+      "kind": "frames",
+      "count": 1
+    },
+    {
+      "kind": "key",
+      "key": 500,
+      "down": false
+    },
+    {
+      "kind": "frames",
+      "count": 3
+    },
+    {
+      "kind": "control",
+      "action": "stop"
+    }
+  ]
+}

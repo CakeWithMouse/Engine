@@ -1,0 +1,41 @@
+{
+  "expected": "Real native D3D Material Editor preview captured after graph enable/apply/save in fresh processes; project viewport minimized.",
+  "results": {
+    "Teal": {
+      "nativePreviewSize": [
+        241,
+        282
+      ],
+      "bmpDimensions": [
+        241,
+        282
+      ],
+      "centerRgb": [
+        10,
+        209,
+        173
+      ],
+      "sha256": "1f3ab946722af0bd96fe0bf2419479429682f1dbc0c6292d9f947a855e15397c",
+      "image": "NativePreviewTeal-native-v2.bmp",
+      "steps": 4
+    },
+    "Amber": {
+      "nativePreviewSize": [
+        241,
+        282
+      ],
+      "bmpDimensions": [
+        241,
+        282
+      ],
+      "centerRgb": [
+        255,
+        92,
+        9
+      ],
+      "sha256": "90670fb1a2fb7b85eac3a39d36d1c3d987718b9b894cac158c245831f84868f5",
+      "image": "NativePreviewAmber-native-v2.bmp",
+      "steps": 4
+    }
+  }
+}

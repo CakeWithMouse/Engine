@@ -1,0 +1,111 @@
+{
+  "rendering": 0,
+  "width": 320,
+  "height": 256,
+  "groups": [
+    {
+      "kind": "mesh",
+      "width": 6,
+      "layers": [
+        {
+          "alpha": 0.45,
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            -45,
+            0
+          ],
+          "color": [
+            1,
+            0.15,
+            0.15
+          ]
+        }
+      ],
+      "material": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\transparency\\Layer.mat",
+      "geometry": "plane",
+      "height": 4
+    },
+    {
+      "layers": [
+        {
+          "alpha": 0.45,
+          "position": [
+            0,
+            0,
+            0.2
+          ],
+          "rotation": [
+            0,
+            45,
+            0
+          ],
+          "color": [
+            0.1,
+            0.3,
+            1
+          ]
+        }
+      ],
+      "geometry": "plane",
+      "lodDistances": [
+        8
+      ],
+      "height": 4,
+      "kind": "instances",
+      "material": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\transparency\\Layer.mat",
+      "lods": 2,
+      "width": 6,
+      "fade": 0.2
+    },
+    {
+      "kind": "mesh",
+      "width": 3,
+      "layers": [
+        {
+          "alpha": 0.3,
+          "position": [
+            0,
+            0,
+            0.35
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "color": [
+            1,
+            1,
+            1
+          ]
+        }
+      ],
+      "material": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\transparency\\Cross.mat",
+      "geometry": "cross",
+      "height": 3
+    }
+  ],
+  "frames": [
+    {
+      "height": 360,
+      "width": 640,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\transparency\\intersect-resize-640x360.bmp",
+      "camera": [
+        8,
+        0,
+        -8
+      ],
+      "time": 0.25
+    }
+  ]
+}

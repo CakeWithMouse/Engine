@@ -148,7 +148,13 @@ MaterialOutput EvaluateMaterial(PS_IN input, bool frontFace)
     // Interpolation shortens the tangent between vertices and the two-sided flip above turned the
     // normal around; re-orthogonalising here keeps the basis square whatever the surface does.
     float3 interpolatedTangent = input.tangent.xyz - normal * dot(input.tangent.xyz, normal);
-    i.Tangent = float4(interpolatedTangent, input.tangent.w);
+    float handedness = input.tangent.w;
+#if defined(MATERIAL_TWO_SIDED)
+    // Flipping N must not flip the texture's +V direction: B = cross(N, T) * w.
+    // Keep the UV axes fixed while the normal faces the other side of the sheet.
+    handedness = frontFace ? handedness : -handedness;
+#endif
+    i.Tangent = float4(interpolatedTangent, handedness);
 
     // The texture of the component (SetTexture, a scene object's texture) tints the default albedo,
     // as in the engine's other shaders; a surface may still replace it.

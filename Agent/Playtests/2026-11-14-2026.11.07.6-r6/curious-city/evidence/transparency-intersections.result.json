@@ -1,0 +1,58 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "drawCalls": 116,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\transparency\\intersect-front.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        0,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 116,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\transparency\\intersect-side.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        0,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 116,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\transparency\\intersect-orbit.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        0,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 116,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\transparency\\intersect-back.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        0,
+                        1
+                    ]
+                }
+            ]
+        }
+    ],
+    "ok": true
+}

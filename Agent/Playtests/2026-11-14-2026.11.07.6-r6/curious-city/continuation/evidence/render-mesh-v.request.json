@@ -1,0 +1,62 @@
+{
+  "orthoHeight": 3,
+  "height": 240,
+  "size": 2,
+  "material": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Content\\Materials\\NormalTangentProbeV.mat",
+  "frames": [
+    {
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-v-base.bmp"
+    },
+    {
+      "scale": [
+        -1,
+        1,
+        1
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-v-negx.bmp"
+    },
+    {
+      "scale": [
+        1,
+        1,
+        -1
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-v-negz.bmp"
+    },
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-v-save.bmp",
+      "saveRoundTrip": true,
+      "saveFile": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-v-save.json",
+      "scale": [
+        -1,
+        1,
+        1
+      ]
+    }
+  ],
+  "up": [
+    0,
+    1,
+    0
+  ],
+  "shape": "plane",
+  "mirrorUv": false,
+  "orthographic": true,
+  "camera": [
+    0,
+    3,
+    4
+  ],
+  "target": [
+    0,
+    0,
+    0
+  ],
+  "rendering": 0,
+  "width": 320
+}

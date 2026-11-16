@@ -1,0 +1,173 @@
+Using v143 / MSVC 14.44.35207 / Windows SDK 10.0.26100.0
+Assimp enabled: true
+
+  Installing vcpkg dependencies to E:\Engine\Engine\..\Engine\vcpkg_installed\
+  "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\vcpkg.exe" install  --x-wait-for-lock --triplet "x64-windows" --vcpkg-root "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\\" "--x-manifest-root=E:\Engine\Engine\..\Engine\\" "--x-install-root=E:\Engine\Engine\..\Engine\vcpkg_installed\\" 
+  Detecting compiler hash for triplet x64-windows...
+  Compiler found: C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe
+  The following packages will be rebuilt:
+      assimp:x64-windows@6.0.4#3 -- git+https://github.com/microsoft/vcpkg@327397e12c4348d0a3637b297501126c3d715b68
+    * jhasse-poly2tri:x64-windows@2023-12-27#2 -- git+https://github.com/microsoft/vcpkg@d94a24dde4173f85d1aaeb16b3eecc71b100b5be
+    * kubazip:x64-windows@0.3.15 -- git+https://github.com/microsoft/vcpkg@ca5503c1bd9dd8d574ddf6010ff0a88ccbd1cf29
+    * minizip:x64-windows@1.3.2 -- git+https://github.com/microsoft/vcpkg@b485c18ad5b9ce53d790be6875324577d308e8b1
+    * polyclipping:x64-windows@6.4.2#13 -- git+https://github.com/microsoft/vcpkg@2388298c7ad673550c7492454666dd3a34ada895
+    * pugixml:x64-windows@1.16 -- git+https://github.com/microsoft/vcpkg@57dda7f8da9461a690dbc3c09363436215230838
+    * rapidjson:x64-windows@2025-02-26 -- git+https://github.com/microsoft/vcpkg@4297a243aa0e3ed6c3a4c307579914593da5751d
+    * stb:x64-windows@2024-07-29#1 -- git+https://github.com/microsoft/vcpkg@c362152d1d02973e7b1ce777960f8a6876656560
+    * utfcpp:x64-windows@4.2.0 -- git+https://github.com/microsoft/vcpkg@b3e22f2df71f470ef2a2efd61514b5823061ad00
+    * vcpkg-cmake:x64-windows@2025-08-07 -- git+https://github.com/microsoft/vcpkg@16b9390dfeaca6df7288ba3f827e40e48e5fc942
+    * vcpkg-cmake-config:x64-windows@2026-07-21 -- git+https://github.com/microsoft/vcpkg@51befcb03097f8d19c1c59f9ec3625e69d85322a
+    * vcpkg-cmake-get-vars:x64-windows@2025-05-29 -- git+https://github.com/microsoft/vcpkg@d6510f888dd526c7828f6b973349e7f30be51254
+    * zlib:x64-windows@1.3.2#2 -- git+https://github.com/microsoft/vcpkg@f4f43a5a505cda1a0d1ff056be1fdba9e566242e
+  The following packages will be built and installed:
+      joltphysics:x64-windows@5.6.0#1 -- git+https://github.com/microsoft/vcpkg@459e842b1521f5c365acaf110a7a1635f201569c
+  Additional packages (*) will be modified to complete this operation.
+  Restored 0 package(s) from C:\Users\serge\AppData\Local\vcpkg\archives in 2.36 ms. Use --debug to see more details.
+  Removing 1/27 assimp:x64-windows
+  Elapsed time to handle assimp:x64-windows: 19.3 ms
+  Removing 2/27 jhasse-poly2tri:x64-windows
+  Elapsed time to handle jhasse-poly2tri:x64-windows: 7.78 ms
+  Removing 3/27 kubazip:x64-windows
+  Elapsed time to handle kubazip:x64-windows: 7.51 ms
+  Removing 4/27 minizip:x64-windows
+  Elapsed time to handle minizip:x64-windows: 8.77 ms
+  Removing 5/27 vcpkg-cmake-get-vars:x64-windows
+  Elapsed time to handle vcpkg-cmake-get-vars:x64-windows: 6.31 ms
+  Removing 6/27 polyclipping:x64-windows
+  Elapsed time to handle polyclipping:x64-windows: 8.12 ms
+  Removing 7/27 pugixml:x64-windows
+  Elapsed time to handle pugixml:x64-windows: 7.38 ms
+  Removing 8/27 rapidjson:x64-windows
+  Elapsed time to handle rapidjson:x64-windows: 9.56 ms
+  Removing 9/27 stb:x64-windows
+  Elapsed time to handle stb:x64-windows: 8.05 ms
+  Removing 10/27 utfcpp:x64-windows
+  Elapsed time to handle utfcpp:x64-windows: 7.15 ms
+  Removing 11/27 zlib:x64-windows
+  Elapsed time to handle zlib:x64-windows: 9.33 ms
+  Removing 12/27 vcpkg-cmake:x64-windows
+  Elapsed time to handle vcpkg-cmake:x64-windows: 15 ms
+  Removing 13/27 vcpkg-cmake-config:x64-windows
+  Elapsed time to handle vcpkg-cmake-config:x64-windows: 6.1 ms
+  Installing 14/27 vcpkg-cmake-config:x64-windows@2026-07-21...
+  Building vcpkg-cmake-config:x64-windows@2026-07-21...
+  C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\51befcb03097f8d19c1c59f9ec3625e69d85322a: info: installing from git registry git+https://github.com/microsoft/vcpkg@51befcb03097f8d19c1c59f9ec3625e69d85322a
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake-config_x64-windows/share/vcpkg-cmake-config/vcpkg_cmake_config_fixup.cmake
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake-config_x64-windows/share/vcpkg-cmake-config/vcpkg-port-config.cmake
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake-config_x64-windows/share/vcpkg-cmake-config/copyright
+  -- Skipping post-build validation due to VCPKG_POLICY_EMPTY_PACKAGE
+  Starting submission of vcpkg-cmake-config:x64-windows@2026-07-21 to 1 binary cache(s) in the background
+  Elapsed time to handle vcpkg-cmake-config:x64-windows: 93.6 ms
+  vcpkg-cmake-config:x64-windows package ABI: 9379562190aea73d02272803d4d36537d3aab0582cbe264c9e43977547d2789e
+  Installing 15/27 vcpkg-cmake:x64-windows@2025-08-07...
+  Building vcpkg-cmake:x64-windows@2025-08-07...
+  C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\16b9390dfeaca6df7288ba3f827e40e48e5fc942: info: installing from git registry git+https://github.com/microsoft/vcpkg@16b9390dfeaca6df7288ba3f827e40e48e5fc942
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake_x64-windows/share/vcpkg-cmake/vcpkg_cmake_configure.cmake
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake_x64-windows/share/vcpkg-cmake/vcpkg_cmake_build.cmake
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake_x64-windows/share/vcpkg-cmake/vcpkg_cmake_install.cmake
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake_x64-windows/share/vcpkg-cmake/vcpkg-port-config.cmake
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake_x64-windows/share/vcpkg-cmake/copyright
+  -- Performing post-build validation
+  Starting submission of vcpkg-cmake:x64-windows@2025-08-07 to 1 binary cache(s) in the background
+  Elapsed time to handle vcpkg-cmake:x64-windows: 103 ms
+  vcpkg-cmake:x64-windows package ABI: e9e67597c7b0e48e81a61f3ba6919e8626249c3efaeafd45920e6d1976dd41b3
+  Installing 16/27 zlib:x64-windows@1.3.2#2...
+  Building zlib:x64-windows@1.3.2#2...
+  C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\f4f43a5a505cda1a0d1ff056be1fdba9e566242e: info: installing from git registry git+https://github.com/microsoft/vcpkg@f4f43a5a505cda1a0d1ff056be1fdba9e566242e
+  -- Using cached madler-zlib-v1.3.2.tar.gz
+  -- Cleaning sources at E:/Engine/Engine/vcpkg_installed/vcpkg/blds/zlib/src/v1.3.2-c19a0bfd23.clean. Use --editable to skip cleaning for the packages you specify.
+  -- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/madler-zlib-v1.3.2.tar.gz
+  -- Applying patch 0001-no-version-script-on-ohos.patch
+  -- Using source at E:/Engine/Engine/vcpkg_installed/vcpkg/blds/zlib/src/v1.3.2-c19a0bfd23.clean
+  -- Configuring x64-windows
+  -- Building x64-windows-dbg
+  CMake Error at scripts/cmake/vcpkg_execute_build_process.cmake:58 (message):
+    Failed to execute command
+    "C:/Users/serge/AppData/Local/vcpkg/downloads/tools/cmake-3.30.1-windows/cmake-3.30.1-windows-i386/bin/cmake.exe
+    --build .  --config Debug --target install -- -v -j21" in working directory
+    "E:/Engine/Engine/vcpkg_installed/vcpkg/blds/zlib/x64-windows-dbg": -1
+  Call Stack (most recent call first):
+    E:/Engine/Engine/vcpkg_installed/x64-windows/share/vcpkg-cmake/vcpkg_cmake_build.cmake:74 (vcpkg_execute_build_process)
+    E:/Engine/Engine/vcpkg_installed/x64-windows/share/vcpkg-cmake/vcpkg_cmake_install.cmake:16 (vcpkg_cmake_build)
+    C:/Users/serge/AppData/Local/vcpkg/registries/git-trees/f4f43a5a505cda1a0d1ff056be1fdba9e566242e/portfile.cmake:23 (vcpkg_cmake_install)
+    scripts/ports.cmake:206 (include)
+  
+  
+EXEC : error : building zlib:x64-windows failed with: BUILD_FAILED [E:\Engine\Engine\Engine.vcxproj]
+  See https://learn.microsoft.com/vcpkg/troubleshoot/build-failures?WT.mc_id=vcpkg_inproduct_cli for more information.
+  Elapsed time to handle zlib:x64-windows: 9.4 s
+  Please ensure you're using the latest port files with `git pull` and `vcpkg update`.
+  Then check for known issues at:
+    https://github.com/microsoft/vcpkg/issues?q=is%3Aissue+is%3Aopen+in%3Atitle+zlib
+  You can submit a new issue at:
+    https://github.com/microsoft/vcpkg/issues/new?title=%5Bzlib%5D%20build%20error%20on%20x64-windows&body=Copy%20issue%20body%20from%20E%3A%2FEngine%2FEngine%2Fvcpkg_installed%2Fvcpkg%2Fissue_body.md
+  
+  Completed submission of vcpkg-cmake-config:x64-windows@2026-07-21 to 1 binary cache(s) in 163 ms
+  Completed submission of vcpkg-cmake:x64-windows@2025-08-07 to 1 binary cache(s) in 44.7 ms
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.targets(183,5): error MSB3073: выход из команды ""C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\vcpkg.exe" install  --x-wait-for-lock --triplet "x64-windows" --vcpkg-root "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\\" "--x-manifest-root=E:\Engine\Engine\..\Engine\\" "--x-install-root=E:\Engine\Engine\..\Engine\vcpkg_installed\\" " с кодом 1. [E:\Engine\Engine\Engine.vcxproj]
+  MOC FileService.h
+  MOC MainWindow.h
+  MOC ObjectInspectorPanel.h
+  Module.cpp
+  QtHost.cpp
+  EditorHistory.cpp
+  ViewportCommandHandler.cpp
+  AssetCommandHandler.cpp
+  SceneCommandHandler.cpp
+  EditorApp.cpp
+  EditorTheme.cpp
+  EditorStyles.cpp
+  MainToolBar.cpp
+  IconProvider.cpp
+  AssetThumbnailCache.cpp
+  AssetPickerDialog.cpp
+  ImportSettingsDialog.cpp
+  ModelImportEditFlow.cpp
+  ExternalGameRunner.cpp
+  MainWindow.cpp
+  AssetTools.cpp
+  ImportCommands.cpp
+  AssetDeleteCommand.cpp
+  FileBrowser.cpp
+  ViewportWidget.cpp
+  ViewportWidget_Input.cpp
+  ViewportOverlayHelper.cpp
+  ObjectInspectorPanel.cpp
+  ObjectInspectorLight.cpp
+  ProjectProperties.cpp
+  SceneObjectsPanel.cpp
+  MaterialEditorWindow.cpp
+  MaterialTextureTools.cpp
+  MaterialGraphWidget.cpp
+  ScriptEditorWindow.cpp
+  AiMachineEditorWindow.cpp
+  FileService.cpp
+  ViewportOverlay.cpp
+  AssetOps.cpp
+  SceneFile.cpp
+  ImportSettings.cpp
+  ModelImportSidecar.cpp
+  ModelImportSidecarTransaction.cpp
+  HudTools.cpp
+  PhysicsTools.cpp
+  CodeTools.cpp
+E:\Engine\Editor\Source\MainWindow.cpp(337,32): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(345,33): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(349,31): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(353,35): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(361,37): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(383,30): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(384,30): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(385,35): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+  moc_FileService.cpp
+  moc_MainWindow.cpp
+  moc_MaterialEditorWindow.cpp
+  moc_ObjectInspectorPanel.cpp
+  moc_SceneObjectsPanel.cpp
+  moc_ViewportWidget.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Editor.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Editor.exp
+  Создание кода
+  Создание кода завершено
+  EditorModule.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Editor.dll
+E:\Engine\Engine\BuildSupport\AssimpRuntime.targets(10,5): error : Assimp is enabled but its runtime dependencies are missing from E:\Engine\Engine\BuildSupport\..\..\Engine\vcpkg_installed\x64-windows\bin. [E:\Engine\Editor\EditorModule.vcxproj]
+

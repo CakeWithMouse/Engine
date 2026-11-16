@@ -1,0 +1,19 @@
+{
+  "attackSamples": 25,
+  "activeAttackSamples": 10,
+  "maxDestinationToCurrentGuardDistance": 0.025605438875363942,
+  "attackOrderCount": 1,
+  "hits": 4,
+  "finalHP": 0,
+  "won": true,
+  "lost": false,
+  "activeAfterDeath": 0,
+  "barrierViolationFrames": 0,
+  "visualsInspected": [
+    "r4-selection-rect.bmp",
+    "r4-selection-controls-resized.bmp",
+    "r4-selection-stable-empty.bmp",
+    "r4-selection-two-stable.bmp",
+    "r4-attack-single-late.bmp"
+  ]
+}

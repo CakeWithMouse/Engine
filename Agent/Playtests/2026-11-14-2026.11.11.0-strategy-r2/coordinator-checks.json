@@ -1,0 +1,10 @@
+{
+  "pausePositionsUnchanged": true,
+  "resumeGuardMoved": true,
+  "visualsInspected": [
+    "strategy/order-arrive.bmp",
+    "strategy/order-clear-win.bmp",
+    "strategy/order-clear-win-delayed.bmp"
+  ],
+  "note": "order-clear-win.bmp is a loss; only delayed scenario is a win"
+}

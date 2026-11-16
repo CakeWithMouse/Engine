@@ -1,0 +1,18 @@
+{
+  "steps": [
+    {
+      "action": "load",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Content\\Scenes\\CityWorkshop.scene.json"
+    },
+    {
+      "name": "RecoveryBeacon",
+      "action": "create",
+      "type": "Primitive.Cube"
+    },
+    {
+      "action": "write-recovery"
+    }
+  ],
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Project.json",
+  "recovery": true
+}

@@ -61,7 +61,9 @@ enum class RegisterResult
 const char* ToString(RegisterResult result);
 
 class GameComponent;
+namespace Script { struct Problem; }
 class Material;
+class PhysicsWorld;
 class PointLightComponent;
 class UIComponent;
 class FBXComponent;
@@ -165,6 +167,11 @@ public:
     // Borrowed reference: valid for this Game lifetime.
     GameSettings& GetSettings() { return Settings; }
     const GameSettings& GetSettings() const { return Settings; }
+    /**
+     * World of the physics simulation. Created lazily while simulation runs and physics
+     * is enabled in the settings; nullptr otherwise. Valid until the Game is destroyed.
+     */
+    PhysicsWorld* GetPhysicsWorld() const { return PhysicsWorldPtr.get(); }
 
     /** Creates window, device and base resources. Returns false (and releases everything) on failure. */
     bool Initialize();
@@ -178,6 +185,8 @@ public:
     // preserveSceneOnFailure is for data-only edit scenes (no custom AfterInitialize).
     bool InitializeViewport(HWND window, int width, int height, bool preserveSceneOnFailure = false);
     bool RenderViewportFrame(float deltaTime);
+    // Hosts that already called StepProjectSimulation render without a second tick.
+    bool RenderViewportFrame(float deltaTime, bool advanceSimulation);
     // Transitional preview sessions share one device/swap chain, never scene objects.
     bool InitializePlayViewport(Game& editorScene);
     void SuspendViewportTargets();
@@ -200,8 +209,10 @@ public:
      * for (the old code advanced 0.13 time units per frame, i.e. 7.8 units per second at 60 FPS).
      */
     void SetSimulationTimeScale(float scale) { SimulationTimeScale = scale > 0.0f ? scale : 0.0f; }
+    float GetSimulationTimeScale() const { return SimulationTimeScale; }
     virtual void AfterInitialize() {}
-    // One simulation path for standalone and embedded project games.
+    // Explicit simulation seconds, already scaled by a host that owns a real-time clock.
+    // Keeping this primitive unscaled also permits deterministic offline stepping.
     void StepProjectSimulation(float deltaTime) { UpdateSimulation(deltaTime); }
 
     bool IsShadowEnabled() const { return bShadowsEnabled; }
@@ -219,6 +230,13 @@ public:
     bool UnregisterComponent(const std::string& Name);
     GameComponent* FindComponent(const std::string& Name) const;
     Scene& GetScene() noexcept { return scene; }
+    /** Why the script at this /Game path did not start in this game; empty if it compiled or was never started. */
+    std::vector<Script::Problem> GetScriptProblems(const std::string& asset) const;
+    // Visual scripts (Spawn copy): a copy of source — its type, model/texture/material, project data, script,
+    // rotation and scale — at position, named "<source>_N". Added like any object added during play (its own
+    // BeginPlay and script start next frame). Parent, children and light settings are not copied.
+    // Returns the new id; 0 and error when the type is unknown to this game.
+    uint64_t SpawnCopy(const GameComponent& source, const glm::vec3& position, std::string& error);
     const Scene& GetScene() const noexcept { return scene; }
 
     bool CreateProceduralCubeMap(const std::string& cubeMapName, CubeMapPreset preset, int faceSize = 256);
@@ -231,6 +249,9 @@ public:
     void DebugDrawTrace(const Trace::Ray&,const Trace::Result&,float lifetime=1);
     /** A world-space line for one frame, colour 0xAABBGGRR. Drawn in Play and in standalone games. */
     void DebugDrawLine(const glm::vec3& from, const glm::vec3& to, uint32_t abgr);
+    void SetAiDiagnosticOverlay(std::vector<EngineOverlayLine> lines, std::vector<EngineOverlayTriangle> triangles) {
+        AiDiagnosticLines = std::move(lines); AiDiagnosticTriangles = std::move(triangles);
+    }
     size_t GetFrameDebugLineCount() const { return FrameDebugLines.size(); }
     void ClearDebugTraces();
     size_t GetDebugTraceLineCount();
@@ -400,8 +421,10 @@ protected:
     void Run();
     bool PumpMessages();
     void ApplyPendingResize();
-    void UpdateFrame(float realDeltaTime);
+    void UpdateFrame(float realDeltaTime, bool advanceSimulation = true);
     void UpdateSimulation(float deltaTime);
+    // Steps the physics world (fixed timestep) before component ticks.
+    void TickPhysicsWorld(float deltaTime);
     void UpdateAudio();
     void StartGameplayComponents();
     void PrepareRenderFrame();
@@ -507,6 +530,7 @@ protected:
     bool GameplayInitialized = false;
     std::unique_ptr<GameSession> OwnedSession;
     GameSession* Session = nullptr;
+    std::unique_ptr<PhysicsWorld> PhysicsWorldPtr;
     std::unique_ptr<UIComponent> ProjectHudComponent;
 
     // Scene owns components. The read-only alias preserves legacy traversal/order.
@@ -535,6 +559,12 @@ protected:
     std::shared_ptr<Material> errorMaterial;
     /** Components whose material asset failed to load try again on their next draw. */
     void RetryFailedMaterialAssets();
+
+    // Visual scripts by resolved .vscript path; a changed file is compiled again at the next start.
+    struct CachedScript;
+    std::map<std::string, std::shared_ptr<const CachedScript>> scriptCache;
+    /** Creates the component's script instance and runs its BeginPlay; errors are logged, never thrown. */
+    void StartScript(GameComponent& component);
 
     // Depth
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;          // opaque: test + write
@@ -715,6 +745,8 @@ protected:
     struct TimedTraceLine {EngineOverlayLine line;double expiry;};
     std::vector<TimedTraceLine> TraceDebugLines;
     std::vector<EngineOverlayLine> FrameDebugLines;
+    std::vector<EngineOverlayLine> AiDiagnosticLines;
+    std::vector<EngineOverlayTriangle> AiDiagnosticTriangles;
     std::vector<EngineOverlayLine> CollectTraceDebugLines();
     std::vector<EngineOverlayLine> PendingOverlayLines;
     float OverlayLineThickness = 1.0f;

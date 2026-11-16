@@ -1,4 +1,6 @@
 #include "Common.hlsli"
+TextureCube SkyMap : register(t1);
+SamplerState SkySampler : register(s1);
 struct Vertex { float4 pos : POSITION; float4 color : COLOR; };
 struct Pixel { float4 pos : SV_POSITION; float3 direction : TEXCOORD0; };
 Pixel VSMain(Vertex v)
@@ -11,6 +13,8 @@ Pixel VSMain(Vertex v)
 }
 float4 PSMain(Pixel p) : SV_Target
 {
+    if (ReflectionData.x > 0.5)
+        return float4(SkyMap.Sample(SkySampler, p.direction).rgb, 1);
     float height = normalize(p.direction).y;
     float3 horizon = float3(0.66, 0.79, 0.92);
     float3 color = height >= 0 ? lerp(horizon, float3(0.12,0.34,0.72), pow(saturate(height),0.6))

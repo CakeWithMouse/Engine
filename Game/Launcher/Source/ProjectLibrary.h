@@ -31,8 +31,10 @@ inline RuntimeProject Validate(const std::filesystem::path& file)
         throw std::runtime_error("Project requires an existing startupScene");
     return project;
 }
+// pinned: the release the project is locked to, the installed copy of the template's runtime (a rebuilt
+// version may be installed under the next build number). Without it, the runtime's own manifest.
 inline std::filesystem::path Create(const std::filesystem::path& directory, const std::string& name,
-    const std::filesystem::path& templateModule)
+    const std::filesystem::path& templateModule, const EngineRelease* pinned = nullptr)
 {
     if (name.empty() || name.size() > 200 || name.find_first_of(std::string("\0\r\n", 3)) != std::string::npos ||
         name.find_first_not_of(" \t") == std::string::npos)
@@ -66,7 +68,7 @@ inline std::filesystem::path Create(const std::filesystem::path& directory, cons
             light(4,"Cool Light",{-3,2,1},{0.3,0.55,1.0})})}});
         Write(root / "Project.json", {{"name",name},{"module","Game.dll"},{"content","Content"},
             {"startupScene","Content/Scenes/Main.scene.json"}});
-        const auto release = ReadEngineRelease(templateModule.parent_path().parent_path().parent_path());
+        const auto release = pinned ? *pinned : ReadEngineRelease(templateModule.parent_path().parent_path().parent_path());
         Write(root / "Engine.lock.json", {{"format",1},{"engineVersion",release.version},
             {"engineConfiguration",release.configuration},{"templateId","SceneProject"}});
         Validate(root / "Project.json");

@@ -1,0 +1,439 @@
+Running CoreTests...
+[Test] TestUserPrompt...
+[Test] TestLogger...
+[Info] Hello Info
+[Warning] Careful!
+[Error] Critical error
+[Debug] Thread 0 Msg 0
+[Debug] Thread 0 Msg 1
+[Debug] Thread 2 Msg 0
+[Debug] Thread 2 Msg 1
+[Debug] Thread 2 Msg 2
+[Debug] Thread 0 Msg 2
+[Debug] Thread 1 Msg 0
+[Debug] Thread 0 Msg 3
+[Debug] Thread 2 Msg 3
+[Debug] Thread 0 Msg 4
+[Debug] Thread 1 Msg 1
+[Debug] Thread 2 Msg 4
+[Debug] Thread 1 Msg 2
+[Debug] Thread 2 Msg 5
+[Debug] Thread 1 Msg 3
+[Debug] Thread 2 Msg 6
+[Debug] Thread 1 Msg 4
+[Debug] Thread 1 Msg 5
+[Debug] Thread 0 Msg 5
+[Debug] Thread 2 Msg 7
+[Debug] Thread 0 Msg 6
+[Debug] Thread 3 Msg 0
+[Debug] Thread 0 Msg 7
+[Debug] Thread 1 Msg 6
+[Debug] Thread 2 Msg 8
+[Debug] Thread 3 Msg 1
+[Debug] Thread 2 Msg 9
+[Debug] Thread 2 Msg 10
+[Debug] Thread 2 Msg 11
+[Debug] Thread 0 Msg 8
+[Debug] Thread 2 Msg 12
+[Debug] Thread 0 Msg 9
+[Debug] Thread 3 Msg 2
+[Debug] Thread 0 Msg 10
+[Debug] Thread 2 Msg 13
+[Debug] Thread 1 Msg 7
+[Debug] Thread 3 Msg 3
+[Debug] Thread 1 Msg 8
+[Debug] Thread 2 Msg 14
+[Debug] Thread 0 Msg 11
+[Debug] Thread 2 Msg 15
+[Debug] Thread 0 Msg 12
+[Debug] Thread 0 Msg 13
+[Debug] Thread 1 Msg 9
+[Debug] Thread 0 Msg 14
+[Debug] Thread 1 Msg 10
+[Debug] Thread 2 Msg 16
+[Debug] Thread 3 Msg 4
+[Debug] Thread 2 Msg 17
+[Debug] Thread 2 Msg 18
+[Debug] Thread 2 Msg 19
+[Debug] Thread 0 Msg 15
+[Debug] Thread 1 Msg 11
+[Debug] Thread 3 Msg 5
+[Debug] Thread 3 Msg 6
+[Debug] Thread 3 Msg 7
+[Debug] Thread 0 Msg 16
+[Debug] Thread 3 Msg 8
+[Debug] Thread 0 Msg 17
+[Debug] Thread 3 Msg 9
+[Debug] Thread 3 Msg 10
+[Debug] Thread 3 Msg 11
+[Debug] Thread 3 Msg 12
+[Debug] Thread 2 Msg 20
+[Debug] Thread 2 Msg 21
+[Debug] Thread 2 Msg 22
+[Debug] Thread 2 Msg 23
+[Debug] Thread 3 Msg 13
+[Debug] Thread 3 Msg 14
+[Debug] Thread 1 Msg 12
+[Debug] Thread 3 Msg 15
+[Debug] Thread 0 Msg 18
+[Debug] Thread 3 Msg 16
+[Debug] Thread 0 Msg 19
+[Debug] Thread 0 Msg 20
+[Debug] Thread 1 Msg 13
+[Debug] Thread 1 Msg 14
+[Debug] Thread 2 Msg 24
+[Debug] Thread 3 Msg 17
+[Debug] Thread 2 Msg 25
+[Debug] Thread 2 Msg 26
+[Debug] Thread 2 Msg 27
+[Debug] Thread 2 Msg 28
+[Debug] Thread 2 Msg 29
+[Debug] Thread 0 Msg 21
+[Debug] Thread 0 Msg 22
+[Debug] Thread 0 Msg 23
+[Debug] Thread 0 Msg 24
+[Debug] Thread 0 Msg 25
+[Debug] Thread 0 Msg 26
+[Debug] Thread 2 Msg 30
+[Debug] Thread 0 Msg 27
+[Debug] Thread 2 Msg 31
+[Debug] Thread 0 Msg 28
+[Debug] Thread 2 Msg 32
+[Debug] Thread 0 Msg 29
+[Debug] Thread 0 Msg 30
+[Debug] Thread 1 Msg 15
+[Debug] Thread 0 Msg 31
+[Debug] Thread 1 Msg 16
+[Debug] Thread 0 Msg 32
+[Debug] Thread 1 Msg 17
+[Debug] Thread 3 Msg 18
+[Debug] Thread 1 Msg 18
+[Debug] Thread 2 Msg 33
+[Debug] Thread 1 Msg 19
+[Debug] Thread 2 Msg 34
+[Debug] Thread 1 Msg 20
+[Debug] Thread 2 Msg 35
+[Debug] Thread 1 Msg 21
+[Debug] Thread 0 Msg 33
+[Debug] Thread 1 Msg 22
+[Debug] Thread 3 Msg 19
+[Debug] Thread 2 Msg 36
+[Debug] Thread 3 Msg 20
+[Debug] Thread 0 Msg 34
+[Debug] Thread 3 Msg 21
+[Debug] Thread 0 Msg 35
+[Debug] Thread 3 Msg 22
+[Debug] Thread 0 Msg 36
+[Debug] Thread 1 Msg 23
+[Debug] Thread 0 Msg 37
+[Debug] Thread 1 Msg 24
+[Debug] Thread 2 Msg 37
+[Debug] Thread 3 Msg 23
+[Debug] Thread 0 Msg 38
+[Debug] Thread 3 Msg 24
+[Debug] Thread 0 Msg 39
+[Debug] Thread 3 Msg 25
+[Debug] Thread 2 Msg 38
+[Debug] Thread 0 Msg 40
+[Debug] Thread 1 Msg 25
+[Debug] Thread 0 Msg 41
+[Debug] Thread 1 Msg 26
+[Debug] Thread 2 Msg 39
+[Debug] Thread 3 Msg 26
+[Debug] Thread 0 Msg 42
+[Debug] Thread 2 Msg 40
+[Debug] Thread 3 Msg 27
+[Debug] Thread 3 Msg 28
+[Debug] Thread 1 Msg 27
+[Debug] Thread 3 Msg 29
+[Debug] Thread 0 Msg 43
+[Debug] Thread 1 Msg 28
+[Debug] Thread 0 Msg 44
+[Debug] Thread 3 Msg 30
+[Debug] Thread 0 Msg 45
+[Debug] Thread 1 Msg 29
+[Debug] Thread 0 Msg 46
+[Debug] Thread 3 Msg 31
+[Debug] Thread 3 Msg 32
+[Debug] Thread 3 Msg 33
+[Debug] Thread 2 Msg 41
+[Debug] Thread 0 Msg 47
+[Debug] Thread 0 Msg 48
+[Debug] Thread 0 Msg 49
+[Debug] Thread 3 Msg 34
+[Debug] Thread 3 Msg 35
+[Debug] Thread 3 Msg 36
+[Debug] Thread 3 Msg 37
+[Debug] Thread 3 Msg 38
+[Debug] Thread 3 Msg 39
+[Debug] Thread 3 Msg 40
+[Debug] Thread 3 Msg 41
+[Debug] Thread 3 Msg 42
+[Debug] Thread 2 Msg 42
+[Debug] Thread 3 Msg 43
+[Debug] Thread 3 Msg 44
+[Debug] Thread 1 Msg 30
+[Debug] Thread 3 Msg 45
+[Debug] Thread 1 Msg 31
+[Debug] Thread 3 Msg 46
+[Debug] Thread 1 Msg 32
+[Debug] Thread 3 Msg 47
+[Debug] Thread 1 Msg 33
+[Debug] Thread 3 Msg 48
+[Debug] Thread 2 Msg 43
+[Debug] Thread 1 Msg 34
+[Debug] Thread 1 Msg 35
+[Debug] Thread 3 Msg 49
+[Debug] Thread 1 Msg 36
+[Debug] Thread 1 Msg 37
+[Debug] Thread 1 Msg 38
+[Debug] Thread 2 Msg 44
+[Debug] Thread 1 Msg 39
+[Debug] Thread 1 Msg 40
+[Debug] Thread 2 Msg 45
+[Debug] Thread 1 Msg 41
+[Debug] Thread 2 Msg 46
+[Debug] Thread 1 Msg 42
+[Debug] Thread 2 Msg 47
+[Debug] Thread 1 Msg 43
+[Debug] Thread 2 Msg 48
+[Debug] Thread 1 Msg 44
+[Debug] Thread 1 Msg 45
+[Debug] Thread 2 Msg 49
+[Debug] Thread 1 Msg 46
+[Debug] Thread 1 Msg 47
+[Debug] Thread 1 Msg 48
+[Debug] Thread 1 Msg 49
+[Test] TestCommandRegistry...
+[Error] CommandRegistry: cannot register command with empty id
+[Warning] CommandRegistry: duplicate command registration 'Edit.Test'
+[Warning] CommandRegistry: command cannot execute 'Edit.Disabled'
+[Error] CommandRegistry: command not found 'Edit.Test'
+[Test] TestFileService...
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-ZVzgxv'
+[Info] FileService: wrote 26 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-ZVzgxv/SubDir/test.txt'
+[Info] FileService: wrote 18 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-ZVzgxv/SubDir/test.txt'
+[Info] FileService: deleted 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-ZVzgxv/SubDir/test.txt'
+[Error] FileService: read failed 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-ZVzgxv/SubDir/test.txt': Не удается найти указанный файл.
+[Error] FileService: path '../forbidden.txt' is outside sandbox 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-ZVzgxv'
+[Error] Access denied: path is outside project sandbox (../forbidden.txt)
+[Error] FileService: path '../forbidden.txt' is outside sandbox 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-ZVzgxv'
+[Error] Access denied: path is outside project sandbox (../forbidden.txt)
+[Error] FileService: path '../forbidden.txt' is outside sandbox 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-ZVzgxv'
+[Error] Access denied: path is outside project sandbox
+[Test] TestEditorLocale...
+[Info] SettingsService: Set 'ui/language'
+[Info] SettingsService: Set 'ui/language'
+[Test] TestGizmoMath...
+[Test] TestGizmoGeometry...
+[Test] TestSettingsService...
+[Info] SettingsService: Set 'layout/6027d7610ab2/state'
+[Info] SettingsService: Set 'layout/6027d7610ab2/geometry'
+[Info] SettingsService: Remove 'layout/6027d7610ab2/state'
+[Info] SettingsService: Remove 'layout/6027d7610ab2/geometry'
+[Test] TestMaterialGraph...
+[Test] TestGraphCore...
+[Test] TestSceneFile...
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-QKTPjd'
+[Info] FileService: wrote 1384 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-QKTPjd/Content/Scenes/Main.scene.json'
+[Error] FileService: read failed 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-QKTPjd/Content/Missing.scene.json': Не удается найти указанный файл.
+[Info] FileService: wrote 24 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-QKTPjd/Content/Corrupt.scene.json'
+[Test] TestTerminal...
+[Test] TestAssetOps...
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf'
+[Info] FileService: wrote 11 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf/Materials/test.mat'
+[Error] FileService: path '../outside.txt' is outside sandbox 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf'
+[Info] FileService: created directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf/Textures/Albedo'
+[Info] FileService: wrote 4 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf/Textures/Albedo/keep.txt'
+[Error] FolderPaths: Parent traversal is not allowed: ../evil_dir
+[Info] FileService: wrote 5 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf/Materials/metal.mat'
+[Error] FileService: path '../outside.mat' is outside sandbox 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf'
+[Info] FileService: wrote 11 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf/Materials/test_renamed_Copy.mat'
+[Info] FileService: wrote 11 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf/Materials/test_renamed_Copy_1.mat'
+[Info] FileService: wrote 11 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf/Materials/custom_dup.mat'
+[Info] FileService: deleted 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf/Materials/custom_dup.mat'
+[Info] FileService: deleted directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf/Textures_Backup'
+[Error] FileService: path '../outside.txt' is outside sandbox 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf'
+[Info] FileService: wrote 9 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf/Models/Hero.glb'
+[Info] FileService: wrote 13 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf/Models/Hero.glb.importsettings.json'
+[Info] FileService: wrote 18 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf/Models/Hero.glb.source.json'
+[Info] FileService: wrote 12 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf/Models/Hero.glb.import.json'
+[Info] FileService: wrote 9 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf/Models/Hero_Copy.glb'
+[Info] FileService: wrote 18 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf/Models/Hero_Copy.glb.source.json'
+[Info] FileService: wrote 12 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf/Models/Hero_Copy.glb.import.json'
+[Info] FileService: wrote 13 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf/Models/Hero_Copy.glb.importsettings.json'
+[Info] FileService: deleted 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf/Models/Hero_Renamed.glb'
+[Info] FileService: deleted 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf/Models/Hero_Renamed.glb.source.json'
+[Info] FileService: deleted 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf/Models/Hero_Renamed.glb.import.json'
+[Info] FileService: deleted 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-fylwtf/Models/Hero_Renamed.glb.importsettings.json'
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-NTpNvN'
+[Error] FolderPaths: Folder path must be project-relative: 
+[Error] FolderPaths: Folder path must be project-relative: 
+[Error] FolderPaths: Parent traversal is not allowed: ../Rejected
+[Error] FolderPaths: Parent traversal is not allowed: ../Rejected
+[Error] FolderPaths: Parent traversal is not allowed: Inside/../Rejected
+[Error] FolderPaths: Parent traversal is not allowed: Inside/../Rejected
+[Error] FolderPaths: Parent traversal is not allowed: Inside/..
+[Error] FolderPaths: Parent traversal is not allowed: Inside/..
+[Error] FolderPaths: Parent traversal is not allowed: Inside\..\Rejected
+[Error] FolderPaths: Parent traversal is not allowed: Inside\..\Rejected
+[Error] FolderPaths: Parent traversal is not allowed: ..\Rejected
+[Error] FolderPaths: Parent traversal is not allowed: ..\Rejected
+[Error] FolderPaths: Folder path must be project-relative: /Rejected
+[Error] FolderPaths: Folder path must be project-relative: /Rejected
+[Error] FolderPaths: Folder path must be project-relative: E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-NTpNvN/Rejected
+[Error] FolderPaths: Folder path must be project-relative: E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-NTpNvN/Rejected
+[Error] FolderPaths: Folder path must be project-relative: C:/Rejected
+[Error] FolderPaths: Folder path must be project-relative: C:/Rejected
+[Error] FolderPaths: Folder path must be project-relative: C:Rejected
+[Error] FolderPaths: Folder path must be project-relative: C:Rejected
+[Error] FolderPaths: Folder path must be project-relative: Inside/name:stream
+[Error] FolderPaths: Folder path must be project-relative: Inside/name:stream
+[Error] FolderPaths: Folder path must be project-relative: //server/share/Rejected
+[Error] FolderPaths: Folder path must be project-relative: //server/share/Rejected
+[Error] FolderPaths: Folder path must be project-relative: \\server\share\Rejected
+[Error] FolderPaths: Folder path must be project-relative: \\server\share\Rejected
+[Error] FolderPaths: Folder path must be project-relative: \Rejected
+[Error] FolderPaths: Folder path must be project-relative: \Rejected
+[Info] FileService: created directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-NTpNvN/Inside/Child'
+[Error] FolderPaths: Invalid folder name: 
+[Error] FolderPaths: Invalid folder name: .
+[Error] FolderPaths: Invalid folder name: ..
+[Error] FolderPaths: Invalid folder name: a/b
+[Error] FolderPaths: Invalid folder name: a\b
+[Error] FolderPaths: Invalid folder name: a:b
+[Error] FolderPaths: Invalid folder name: <name
+[Error] FolderPaths: Invalid folder name: name>
+[Error] FolderPaths: Invalid folder name: "name
+[Error] FolderPaths: Invalid folder name: name|
+[Error] FolderPaths: Invalid folder name: name?
+[Error] FolderPaths: Invalid folder name: name*
+[Error] FolderPaths: Invalid folder name: name.
+[Error] FolderPaths: Invalid folder name: name 
+[Error] FolderPaths: Invalid folder name: CON
+[Error] FolderPaths: Invalid folder name: con.txt
+[Error] FolderPaths: Invalid folder name: PRN
+[Error] FolderPaths: Invalid folder name: AUX
+[Error] FolderPaths: Invalid folder name: NUL.bin
+[Error] FolderPaths: Invalid folder name: COM1
+[Error] FolderPaths: Invalid folder name: com9.more
+[Error] FolderPaths: Invalid folder name: lpt1
+[Error] FolderPaths: Invalid folder name: LPT9.ext
+[Error] FolderPaths: Invalid folder name: COM¹
+[Error] FolderPaths: Invalid folder name: LPT²
+[Error] FolderPaths: Invalid folder name: CONIN$
+[Error] FolderPaths: Invalid folder name: CONOUT$
+[Error] FolderPaths: Invalid folder name: bad
+name
+[Error] FolderPaths: Invalid folder name: 
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-qHYsRz'
+[Error] Folder parent does not exist: E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-qHYsRz/Folders
+[Info] FileService: created directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-qHYsRz/Folders'
+[Info] FileService: created directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-qHYsRz/Folders/Owned'
+[Info] FileService: wrote 4 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-qHYsRz/Folders/Owned/keep.txt'
+[Error] Folder target already exists: E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-qHYsRz/Folders/Owned
+[Info] FileService: wrote 4 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-qHYsRz/Folders/File'
+[Error] Folder target already exists: E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-qHYsRz/Folders/File
+[Error] Folder target already exists: E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-qHYsRz
+[Info] FileService: created directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-qHYsRz/Direct/Nested'
+[Info] FileService: created directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-qHYsRz/Direct/Owned'
+[Error] Folder target already exists: E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-qHYsRz/Direct/Owned
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-LIdTMW'
+[Info] FileService: created directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-LIdTMW/Inside'
+[Info] FileService: created directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-LIdTMW/Inside/Missing/Child'
+[Info] FileService: wrote 4 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-LIdTMW/ParentFile'
+[Error] FolderPaths: Folder parent is not a directory: ParentFile/Child
+[Error] FolderPaths: Folder parent is not a directory: ParentFile/Child
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-LIdTMW/UnresolvedRoot'
+[Error] FolderPaths: Cannot resolve project root: Child
+[Error] FolderPaths: Cannot resolve project root: Child
+[Test] TestImportSettings...
+[Info] ImportSettings: migrating legacy sidecar with 'scale' to v1 model format
+[Info] ImportSettings: migrating legacy sidecar with 'scale' to v1 model format
+[Error] ImportSettings: JSON parse error: illegal value
+[Error] ImportSettings: missing 'kind' field in JSON, using default settings
+[Error] ImportSettings: missing or invalid 'model' object
+[Error] ImportSettings: unsupported kind 'audio'
+[Error] ImportSettings: 'scale' must be a number
+[Error] ImportSettings: 'normals' must be a string
+[Error] ImportSettings: 'smoothingAngle' must be a number
+[Error] ImportSettings: 'importMaterials' must be a boolean
+[Error] ImportSettings: 'useFileUnitScale' must be a boolean
+[Error] ImportSettings: 'flipUv' must be a boolean
+[Error] ImportSettings: 'mergeMeshes' must be a boolean
+[Error] ImportSettings: scale 0 is out of allowed range [0.0001, 10000]
+[Error] ImportSettings: scale -5 is out of allowed range [0.0001, 10000]
+[Error] ImportSettings: scale 100000 is out of allowed range [0.0001, 10000]
+[Error] ImportSettings: smoothingAngle -10 is out of allowed range [0, 175]
+[Error] ImportSettings: smoothingAngle 180 is out of allowed range [0, 175]
+[Error] ImportSettings: invalid normals mode 'invalid_enum' (must be 'file', 'flat', or 'smooth')
+[Error] ImportSettings: legacy 'scale' is not a number, using default 1.0
+[Error] ImportSettings: legacy scale -1 is out of allowed range [0.0001, 10000], using default 1.0
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-tTaCch'
+[Info] FileService: wrote 312 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-tTaCch/Models/Hero/Hero.glb.importsettings.json'
+[Error] FileService: path '../Outside.json' is outside sandbox 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-tTaCch'
+[Info] ImportSettings: sidecar not found for 'Models/Missing/none.glb.importsettings.json', using default settings
+[Info] FileService: wrote 25 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-tTaCch/Models/Corrupt/corrupt.importsettings.json'
+[Error] ImportSettings: JSON parse error: illegal value
+[Info] FileService: wrote 58 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-tTaCch/Models/Range/range.importsettings.json'
+[Error] ImportSettings: scale -10 is out of allowed range [0.0001, 10000]
+[Error] ImportSettings: cannot save invalid scale -1
+[Error] ImportSettings: cannot save invalid smoothingAngle 200
+[Error] ImportSettings: cannot save invalid normals 'file'
+[Info] FileService: created directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-tTaCch/Content/Models'
+[Info] FileService: wrote 313 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-tTaCch/Content/Models/Hero/Hero.glb.importsettings.json'
+[Info] FileService: wrote 312 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-tTaCch/Content/Models/Batch/Tree1.glb.importsettings.json'
+[Info] FileService: wrote 312 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-tTaCch/Content/Models/Batch/Tree2.glb.importsettings.json'
+[Info] FileService: wrote 312 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-tTaCch/Content/Models/Batch/Tree3.glb.importsettings.json'
+[Info] ImportSettings: sidecar not found for 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-tTaCch/Content/Models/NoSidecar/Chair.glb.importsettings.json', using default settings
+[Info] FileService: wrote 14 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-tTaCch/Content/Models/Broken/Broken.glb.importsettings.json'
+[Error] ImportSettings: JSON parse error: illegal value
+[Info] FileService: wrote 312 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-tTaCch/Content/Models/Hero..v2.glb.importsettings.json'
+[Error] ModelImportSidecar: asset path '/Game/../../outside.glb' is outside project sandbox 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-tTaCch'
+[Error] ModelImportSidecar: asset path 'C:/Outside/Other.glb' is outside project sandbox 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-tTaCch'
+[Info] FileService: wrote 313 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-tTaCch/Content/Models/Regression/Tree001.glb.importsettings.json'
+[Info] ImportSettings: sidecar not found for 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-tTaCch/Content/Models/Regression/NoSidecarModel.glb.importsettings.json', using default settings
+[Info] FileService: wrote 19 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-tTaCch/Content/Models/Regression/CorruptModel.glb.importsettings.json'
+[Error] ImportSettings: JSON parse error: illegal value
+[Info] FileService: wrote 312 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-tTaCch/Content/Models/Regression/ReimportModel.glb.importsettings.json'
+[Test] TestImportSettingsV2...
+[Info] ImportSettings: migrating legacy sidecar with 'scale' to v1 model format
+[Test] TestImportSettingsSpawnV2...
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-IuZFnC'
+[Info] FileService: created directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-IuZFnC/Content/Models'
+[Info] FileService: wrote 313 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-IuZFnC/Content/Models/V2/Hero.glb.importsettings.json'
+[Info] FileService: wrote 294 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-IuZFnC/Content/Models/V2Big/Tree.glb.importsettings.json'
+[Info] FileService: wrote 313 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-IuZFnC/Content/Models/V1/Chair.glb.importsettings.json'
+[Info] FileService: wrote 16 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-IuZFnC/Content/Models/Legacy/Table.glb.importsettings.json'
+[Info] ImportSettings: migrating legacy sidecar with 'scale' to v1 model format
+[Info] ImportSettings: sidecar not found for 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-IuZFnC/Content/Models/None/Lamp.glb.importsettings.json', using default settings
+[Test] TestSidecarTransaction...
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-axWbFE'
+[Info] FileService: created directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-axWbFE/Content/Models'
+[Info] FileService: wrote 36 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-axWbFE/Content/Models/Box.obj.importsettings.json'
+[Info] FileService: wrote 35 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-axWbFE/Content/Models/Box.obj.importsettings.json'
+[Info] FileService: wrote 36 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-axWbFE/Content/Models/Box.obj.importsettings.json'
+[Info] FileService: wrote 36 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-axWbFE/Content/Models/Box.obj.importsettings.json'
+[Info] FileService: wrote 35 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-axWbFE/Content/Models/Box.obj.importsettings.json'
+[Info] FileService: deleted 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-axWbFE/Content/Models/Box.obj.importsettings.json'
+[Info] FileService: wrote 35 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-axWbFE/Content/Models/Box.obj.importsettings.json'
+[Info] FileService: deleted 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-axWbFE/Content/Models/Box.obj.importsettings.json'
+[Info] FileService: wrote 36 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-axWbFE/Content/Models/Box.obj.importsettings.json'
+[Info] FileService: wrote 35 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-axWbFE/Content/Models/Box.obj.importsettings.json'
+[Info] FileService: wrote 36 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-axWbFE/Content/Models/Box.obj.importsettings.json'
+[Info] FileService: wrote 35 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-axWbFE/Content/Models/Box.obj.importsettings.json'
+[Info] FileService: wrote 36 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-axWbFE/Content/Models/Box.obj.importsettings.json'
+[Info] FileService: wrote 36 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-axWbFE/Content/Models/Box.obj.importsettings.json'
+[Info] FileService: wrote 35 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-axWbFE/Content/Models/Box.obj.importsettings.json'
+[Test] TestImportReimportChain...
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-pEHEqK'
+[Info] FileService: created directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-pEHEqK/Content/Models'
+[Info] FileService: wrote 313 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-pEHEqK/Content/Models/Hero.glb.importsettings.json'
+[Info] FileService: wrote 294 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-pEHEqK/Content/Models/Hero.glb.importsettings.json'
+[Info] FileService: wrote 294 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-pEHEqK/Content/Models/Hero.glb.importsettings.json'
+[Info] FileService: wrote 294 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-pEHEqK/Content/Models/Hero.glb.importsettings.json'
+[Info] FileService: wrote 313 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-pEHEqK/Content/Models/Old.glb.importsettings.json'
+[Info] FileService: wrote 313 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/CoreTests-pEHEqK/Content/Models/Old.glb.importsettings.json'
+[Test] TestAssetExtensions...
+AssetExtensionsTests: 66 checks passed.
+CoreTests: 1055 checks passed.

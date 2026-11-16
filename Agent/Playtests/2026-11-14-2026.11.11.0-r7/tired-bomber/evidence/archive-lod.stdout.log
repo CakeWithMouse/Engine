@@ -1,0 +1,317 @@
+Project: Tired Bomber R5
+Mode: game
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Game/build/x64/Release/Runtime/EngineContent'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Content'
+ModuleLoaded
+[VfsRead] Bind host VFS service v1
+GameCreate
+[VfsService] first read via module: /Game/Models/blend-suzanne-multiple/blend-suzanne-multiple.glb
+GameSceneLoaded
+GameStart
+Tired Bomber R5
+[TiredBomber] subsystem initialized
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[TiredBomber] settings vsync=0 aa=1 mode=0 adapter=NVIDIA GeForce RTX 4070 Laptop GPU
+[MaterialSlotsProbe] target slots=2 sourceID=0 path=/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat sourceID=1 path=/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat
+[MaterialSlotsProbe] changed=1 unknownIdRejected=1 overrideSet=1 overrideCleared=1 slotRestored=1
+[TiredBomber] mesh check usable=0 triangles=12 configured=1 lowLOD=12 sphere=224 sphereLOD=130 error=0
+asset-check procedural cube (default unit profile): 12 triangles, 24 vertices, size 1.00 x 1.00 x 1.00 m, pivot y -0.50, uv yes, NOT USABLE
+  problem: Pivot is not on the ground: the lowest point is at y = -0.50 m. Move the model so that its tracks or wheels touch y = 0.
+[TiredBomber] trace filter channel=1 -> ground
+[TiredBomber] trace filter channel=2 -> unit
+[TiredBomber] trace ignore channel=2 before=7 ignored=7 after=0 status=Miss
+[TiredBomber] scene ready: 4 moving units, orthographic XZ camera, W/A/S/D controller, B drops a bomb
+[TiredBomber] subsystem scene ready: Main
+GameUpdate
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+auto-lod mesh LOD1: 12 -> 12 triangles (target 6, error 0, silhouette drift 0%)
+auto-lod mesh LOD2: 12 -> 12 triangles (target 3, error 0, silhouette drift 0%)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+auto-lod mesh LOD1: 12 -> 12 triangles (target 6, error 0, silhouette drift 0%)
+auto-lod mesh LOD2: 12 -> 12 triangles (target 3, error 0, silhouette drift 0%)
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Content/Models/blend-uv/Textures/BaseColor_0.png (64x64)
+[TiredBomber] GetSubsystem after startup=available
+[TiredBomber] marker instances drawn=0 total=13 LODs=3 lod0=0 lod1=0 lod2=0
+Material E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Content/Models/blend-suzanne-multiple/Materials/Material_0.mat: params.Tint is not declared by the shader
+Material E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Content/Models/blend-suzanne-multiple/Materials/Material_0.mat: textures.BaseMap is not declared by the shader
+Material E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Content/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat: params.Tint is not declared by the shader
+Material E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Content/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat: textures.BaseMap is not declared by the shader
+[Info] FXAA pipeline and shaders compiled successfully
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+FontAtlas: 161 glyphs at 14 px in a 512x128 atlas.
+frame-dump E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Content/tired-bomber-frame.bmp written=1 size=1000x500
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[TiredBomber] marker instances drawn=11 total=13 LODs=3 lod0=0 lod1=0 lod2=11
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[LodPanelProbe] stage=selected-panel-component preUpdate=5 frame=4 valid=1 draws=90 instances=121 visible=10 culled=0
+[LodPanelProbe] component=Bomber.Markers.LOD drawn=11/13 hidden=1 distanceCulled=0 frustumCulled=1 cameraDistance=24.5967..46.545 thresholds=9,17, perLOD=0,0,11,
+[LodPanelProbe] targetPresent=1
+[LodPanelProbe panel] RENDER / LOD    F7 hide | F8 next
+[LodPanelProbe panel] Frame 4 | CPU submission counters
+[LodPanelProbe panel] Draws 90  instances 121  dispatch 0
+[LodPanelProbe panel] Indices 222363 (all passes)
+[LodPanelProbe panel] Component 2/2  Bomber.Markers.LOD
+[LodPanelProbe panel] Color visible 11 / 13
+[LodPanelProbe panel] Hidden 1  distance 0  frustum 1
+[LodPanelProbe panel] Camera distance 24.6..46.5
+[LodPanelProbe panel] Draw limit 60.0 | LOD by distance
+[LodPanelProbe panel] LOD0 mesh: 0 | next >= 9.0 units
+[LodPanelProbe panel] LOD1 mesh: 0 | next >= 17.0 units
+[LodPanelProbe panel] LOD2 mesh: 11
+[LodPanelProbe panel] Buckets may overlap during LOD fade
+[LodPanelProbe panel] Color selection only; shadows counted separately
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[LodPanelProbe] stage=far-24m preUpdate=12 frame=11 valid=1 draws=90 instances=121 visible=10 culled=0
+[LodPanelProbe] component=Bomber.Markers.LOD drawn=11/13 hidden=1 distanceCulled=0 frustumCulled=1 cameraDistance=24.5967..46.545 thresholds=9,17, perLOD=0,0,11,
+[LodPanelProbe] targetPresent=1
+[LodPanelProbe panel] RENDER / LOD    F7 hide | F8 next
+[LodPanelProbe panel] Frame 11 | CPU submission counters
+[LodPanelProbe panel] Draws 90  instances 121  dispatch 0
+[LodPanelProbe panel] Indices 222363 (all passes)
+[LodPanelProbe panel] Component 2/2  Bomber.Markers.LOD
+[LodPanelProbe panel] Color visible 11 / 13
+[LodPanelProbe panel] Hidden 1  distance 0  frustum 1
+[LodPanelProbe panel] Camera distance 24.6..46.5
+[LodPanelProbe panel] Draw limit 60.0 | LOD by distance
+[LodPanelProbe panel] LOD0 mesh: 0 | next >= 9.0 units
+[LodPanelProbe panel] LOD1 mesh: 0 | next >= 17.0 units
+[LodPanelProbe panel] LOD2 mesh: 11
+[LodPanelProbe panel] Buckets may overlap during LOD fade
+[LodPanelProbe panel] Color selection only; shadows counted separately
+frame-dump E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Content/lod-panel-2-far-24m.bmp written=1 size=1000x500
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[LodPanelProbe] camera moved y=8
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[LodPanelProbe] stage=mid-8m preUpdate=28 frame=27 valid=1 draws=92 instances=133 visible=10 culled=0
+[LodPanelProbe] component=Bomber.Markers.LOD drawn=11/13 hidden=1 distanceCulled=0 frustumCulled=1 cameraDistance=9.96996..40.7534 thresholds=9,17, perLOD=0,11,0,
+[LodPanelProbe] targetPresent=1
+[LodPanelProbe panel] RENDER / LOD    F7 hide | F8 next
+[LodPanelProbe panel] Frame 27 | CPU submission counters
+[LodPanelProbe panel] Draws 92  instances 133  dispatch 0
+[LodPanelProbe panel] Indices 222795 (all passes)
+[LodPanelProbe panel] Component 2/2  Bomber.Markers.LOD
+[LodPanelProbe panel] Color visible 11 / 13
+[LodPanelProbe panel] Hidden 1  distance 0  frustum 1
+[LodPanelProbe panel] Camera distance 10.0..40.8
+[LodPanelProbe panel] Draw limit 60.0 | LOD by distance
+[LodPanelProbe panel] LOD0 mesh: 0 | next >= 9.0 units
+[LodPanelProbe panel] LOD1 mesh: 11 | next >= 17.0 units
+[LodPanelProbe panel] LOD2 mesh: 0
+[LodPanelProbe panel] Buckets may overlap during LOD fade
+[LodPanelProbe panel] Color selection only; shadows counted separately
+frame-dump E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Content/lod-panel-2-mid-8m.bmp written=1 size=1000x500
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[LodPanelProbe] camera moved y=60 drawDistance=60
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[TiredBomber] marker instances drawn=0 total=13 LODs=3 lod0=0 lod1=0 lod2=0
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[LodPanelProbe] stage=cull-before-resize preUpdate=42 frame=41 valid=1 draws=86 instances=86 visible=10 culled=0
+[LodPanelProbe] component=Bomber.Markers.LOD drawn=0/13 hidden=1 distanceCulled=12 frustumCulled=0 cameraDistance=60.1215..71.9447 thresholds=9,17, perLOD=0,0,0,
+[LodPanelProbe] targetPresent=1
+[LodPanelProbe panel] RENDER / LOD    F7 hide | F8 next
+[LodPanelProbe panel] Frame 41 | CPU submission counters
+[LodPanelProbe panel] Draws 86  instances 86  dispatch 0
+[LodPanelProbe panel] Indices 221103 (all passes)
+[LodPanelProbe panel] Component 2/2  Bomber.Markers.LOD
+[LodPanelProbe panel] Color visible 0 / 13
+[LodPanelProbe panel] Hidden 1  distance 12  frustum 0
+[LodPanelProbe panel] Camera distance 60.1..71.9
+[LodPanelProbe panel] Draw limit 60.0 | LOD by distance
+[LodPanelProbe panel] LOD0 mesh: 0 | next >= 9.0 units
+[LodPanelProbe panel] LOD1 mesh: 0 | next >= 17.0 units
+[LodPanelProbe panel] LOD2 mesh: 0
+[LodPanelProbe panel] Buckets may overlap during LOD fade
+[LodPanelProbe panel] Color selection only; shadows counted separately
+[LodPanelProbe] requested viewport resize 1280x720
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[LodPanelProbe] stage=cull-resized-1280x720 preUpdate=50 frame=49 valid=1 draws=87 instances=87 visible=10 culled=0
+[LodPanelProbe] component=Bomber.Markers.LOD drawn=0/13 hidden=1 distanceCulled=12 frustumCulled=0 cameraDistance=60.1215..71.9447 thresholds=9,17, perLOD=0,0,0,
+[LodPanelProbe] targetPresent=1
+[LodPanelProbe panel] RENDER / LOD    F7 hide | F8 next
+[LodPanelProbe panel] Frame 49 | CPU submission counters
+[LodPanelProbe panel] Draws 87  instances 87  dispatch 0
+[LodPanelProbe panel] Indices 221139 (all passes)
+[LodPanelProbe panel] Component 2/2  Bomber.Markers.LOD
+[LodPanelProbe panel] Color visible 0 / 13
+[LodPanelProbe panel] Hidden 1  distance 12  frustum 0
+[LodPanelProbe panel] Camera distance 60.1..71.9
+[LodPanelProbe panel] Draw limit 60.0 | LOD by distance
+[LodPanelProbe panel] LOD0 mesh: 0 | next >= 9.0 units
+[LodPanelProbe panel] LOD1 mesh: 0 | next >= 17.0 units
+[LodPanelProbe panel] LOD2 mesh: 0
+[LodPanelProbe panel] Buckets may overlap during LOD fade
+[LodPanelProbe panel] Color selection only; shadows counted separately
+frame-dump E:/Engine/Engine/build/playtests/20261114-r7/tired-bomber/BomberArchiveCheck/Content/lod-panel-2-cull-1280x720.bmp written=1 size=1280x720
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdates=55
+GameStop
+[TiredBomber] subsystem scene closing: Main
+GameDestroy
+[VfsRead] Unbind
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped

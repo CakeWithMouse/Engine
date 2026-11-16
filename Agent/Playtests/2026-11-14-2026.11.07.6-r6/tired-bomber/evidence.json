@@ -1,0 +1,153 @@
+{
+  "run": "2026-11-14-2026.11.07.6-r6/tired-bomber",
+  "version": "2026.11.07.6",
+  "head": "base d74aebb + r6 working fixes (BUG-R6-003)",
+  "phase": "completed role tests and exact post-fix project.input retry",
+  "usage_baseline_percent": 7,
+  "confirmed_defects": [
+    "BUG-R6-003 (fixed; coordinator)"
+  ],
+  "observations": [
+    {
+      "feature_id": "fresh-project-create-enable",
+      "status": "passed",
+      "action": "Installed current runtime to own EngineStore, created BomberFresh with launcher, enabled C++.",
+      "expected": "Fresh project pins current Release and enables/builds C++ code.",
+      "actual": "create-project exit 0; Engine.lock.json is 2026.11.07.6 Release; enable-code exit 0.",
+      "evidence_paths": [
+        "E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/logs/create-fresh.exitcode.txt",
+        "E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/logs/enable-fresh.exitcode.txt"
+      ]
+    },
+    {
+      "feature_id": "r5-copy-upgrade-current-sdk-build",
+      "status": "passed",
+      "action": "Official launcher upgraded the real r5 BomberFinalR5 project with DLL into BomberUpgrade, then current Release built and activated the copied module.",
+      "expected": "New copy locks current runtime, preserves original, and produces a current SDK module.",
+      "actual": "Upgrade exit 0; UpgradeReport originalPreserved=true, standardModuleUpdated=false; lock is 2026.11.07.6; build exit 0 and validated/activated. Original Project.json and Game.dll remained unchanged by file metadata; hashes were captured in the build log folder.",
+      "evidence_paths": [
+        "E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/logs/upgrade-r5.exitcode.txt",
+        "E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/BomberUpgrade/UpgradeReport.json",
+        "E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/logs/build-upgrade.exitcode.txt",
+        "E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/logs/build-enhancement-final.exitcode.txt"
+      ]
+    },
+    {
+      "feature_id": "standalone-bomber-hit-trace-hud",
+      "status": "passed",
+      "action": "Ran the upgraded current SDK project standalone for 240 frames; inspected saved hit BMP.",
+      "expected": "Bomb reaches moving target, Exact trace hit is counted and HUD reports the result.",
+      "actual": "Runtime exit 0 on NVIDIA GeForce RTX 4070 Laptop GPU. `[TiredBomber] HIT unit id=7 t=1.95s trace=Hit queries=58 triangles=28`; hit frame 1000x500 shows hits 1, misses 0 and separate readable `last trace: hit unit 1` line. HUD enhancement is project-only.",
+      "evidence_paths": [
+        "evidence/runtime-save-reopen/game-run.stdout.log",
+        "evidence/runtime-save-reopen/game-run.exitcode.txt",
+        "evidence/runtime-save-reopen/game-hit-1.bmp"
+      ]
+    },
+    {
+      "feature_id": "save-reopen-round-state",
+      "status": "passed",
+      "action": "At simulation frame 180 paused before requesting round-1 save; closed process; relaunched with TB_LOAD_SLOT=round-1 and TB_START_PAUSED=1.",
+      "expected": "Round state and paused simulation restore in a new process.",
+      "actual": "Save slot exists; second process exit 0; loaded-round log reports elapsed=2.98333, hits=1, misses=0, units=5 and simulation=0.",
+      "evidence_paths": [
+        "evidence/runtime-save-reopen/round-1.save.json",
+        "evidence/runtime-save-reopen/game-reopen.stdout.log",
+        "evidence/runtime-save-reopen/game-reopen.exitcode.txt"
+      ]
+    },
+    {
+      "feature_id": "project-input-play-pause-gameplay",
+      "status": "passed-after-fix",
+      "action": "project.input: Play, focus, 130 frames, Pause, 10 frames, Resume, 10 frames, Stop; 150 total frames.",
+      "expected": "Actual Play-session game update should release/hit the automatic bomb; pause holds state and resume proceeds.",
+      "actual": "Pre-fix reproduction was BUG-R6-003: Play/focus/130/Pause/10/Resume/10/Stop returned exit 0, but no bomb or hit; Bomber.Unit.1 remained at its start position. Coordinator fixed SceneEditSession simulation state and render/tick ownership. Rebuilt BomberUpgrade using explicit current Runtime SDK. Exact same request on current EngineCommandlets exit 0/150 frames: bomb released t=1.008s and HIT unit id=7 t=1.936s, trace=Hit, 60 queries/28 triangles. Unit.1 moved from [-6,0.42,-2] to [-4.655859,0.42,-1.782786]; 10 paused frames produced 0 movement; after Resume it moved 0.05343.",
+      "evidence_paths": [
+        "evidence/project-input-prefx/request.json",
+        "evidence/project-input-prefx/result.json",
+        "evidence/project-input-prefx/run.stdout.log",
+        "evidence/project-input-postfix/request.json",
+        "evidence/project-input-postfix/result.json",
+        "evidence/project-input-postfix/run.stdout.log",
+        "E:/Engine/Engine/Source/Runtime/SceneEditSession.cpp",
+        "E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/BomberUpgrade/Source/ProjectGame.cpp"
+      ]
+    },
+    {
+      "feature_id": "transparency-skeletal-vat-intersections-resize-lod",
+      "status": "passed-commandlet-gpu-capture",
+      "action": "Parameterized render.transparency with cross/self-intersecting skeletal and crowd/VAT surfaces, camera orbit, animation time, LOD, and frame resize, in Forward and Deferred.",
+      "expected": "GPU captures render layers and animation during camera motion; resize and LOD state respond.",
+      "actual": "After the r6 fix, the current rebuilt Runtime commandlet was rerun: Forward and Deferred each exit 0, ok=true, four 320x256/640x360 frames on RTX 4070. Forward drawCalls 183,133,133,183; Deferred 184,134,134,184. Crowd LOD bucket counts changed from [2,2,0] to [2,0,0] as orbit/distance changed. Current Forward capture was visually inspected and shows intersecting colored semitransparent planes. No independent pixel oracle was run; state is GPU capture pass, not full numerical correctness.",
+      "evidence_paths": [
+        "evidence/gpu-transparency/request.json",
+        "evidence/gpu-transparency/result.json",
+        "evidence/gpu-transparency/frame-01.bmp",
+        "evidence/gpu-transparency-deferred/request.json",
+        "evidence/gpu-transparency-deferred/result.json",
+        "evidence/gpu-transparency-deferred/frame-01.bmp"
+      ]
+    },
+    {
+      "feature_id": "point-shadow-skeletal-motion-light-toggle",
+      "status": "passed-commandlet-gpu-capture",
+      "action": "Parameterized render.point-shadows with animated skeletal caster, moving point light, shadows off/on, and restored initial frame.",
+      "expected": "Shadow cube responds to caster/light motion; off removes cube; repeating initial state restores same map.",
+      "actual": "After the r6 fix, current rebuilt Runtime `render.point-shadows` was rerun: exit 0 on RTX 4070. Animated skeletal caster/light movement, shadows off, restored frame produced cube counts 1,1,0,1 and slots 0,0,-1,0; moving-frame face hashes changed and restored initial hashes match. Inspected current BMP shows caster and point-light shadow on receiver. This is hidden GPU commandlet/BMP evidence, not visible editor A/B.",
+      "evidence_paths": [
+        "evidence/gpu-point-shadows/request.json",
+        "evidence/gpu-point-shadows/result.json",
+        "evidence/gpu-point-shadows/run.stdout.log",
+        "evidence/gpu-point-shadows/frame-01.bmp"
+      ]
+    },
+    {
+      "feature_id": "import-settings-scale-sidecar-spawn",
+      "status": "passed",
+      "action": "Ran current project.import hidden commandlet on BomberFresh with scale 0.025.",
+      "expected": "Import completion records sidecar scale and spawns the imported model at the requested scale.",
+      "actual": "Exit 0, accepted=true, sidecarExists=true; sidecar version 1 scale 0.025; spawned model transform scale is 0.025 on all axes; before 4 objects, after import 5.",
+      "evidence_paths": [
+        "evidence/import-settings/request.json",
+        "evidence/import-settings/result.json",
+        "evidence/import-settings/blend-suzanne-multiple.glb.importsettings.json",
+        "evidence/import-settings/exitcode-current.txt"
+      ]
+    },
+    {
+      "feature_id": "current-sdk-build-after-BUG-R6-003",
+      "status": "passed",
+      "action": "Rebuilt BomberUpgrade with Build.ps1 -Runtime pointing at current Game/build/x64/Release/Runtime, then verified fingerprint.",
+      "expected": "Game DLL links the rebuilt fixed Engine.lib rather than stale private-store .6 SDK.",
+      "actual": "Build.ps1 -Runtime current Release SDK validated/activated buildId 445a9ff7edfa4165995bb06683c6e6bf. Current SDK Engine.lib SHA256 9FD749170E1C7433EC99047591C9B1CBAF6C4A10F38FA72C42BC1E88ADAC8149; ProjectTools fingerprint Z/8FdOoCny8rf6DL2DL1TO7cCMhY7BUqy82SqZ4JNpo7sU=. Subsequent Build.ps1 returned Project is already up to date.",
+      "evidence_paths": [
+        "evidence/build-postfix-sdk/build.exitcode.txt",
+        "evidence/build-postfix-sdk/build-postfix-verify.stdout.log",
+        "evidence/build-postfix-sdk/Project.code.json"
+      ]
+    }
+  ],
+  "visual_status": {
+    "game_hit_hud": "passed-image-inspected",
+    "transparency_forward": "passed-image-inspected",
+    "point_shadow": "passed-image-inspected",
+    "editor_edit": "not-tested",
+    "project_input_ui": "commandlet-only",
+    "project_input": "post-fix commandlet gameplay passed; visible editor Play not inspected"
+  },
+  "runtime_status": {
+    "build": "current Release SDK build passed with explicit Runtime and SDK fingerprint recorded",
+    "cpu": "standalone hit/save/reopen passed; project.input fixed BUG-R6-003 and post-fix retry passed",
+    "gpu": "parameterized hidden commandlets passed",
+    "visible_desktop": "released after bounded runtime run"
+  },
+  "source_archive": "tired-bomber-r6-source.zip",
+  "build": {
+    "module": "Binaries/Release/445a9ff7edfa4165995bb06683c6e6bf/Game.dll",
+    "sdkPath": "E:/Engine/Game/build/x64/Release/Runtime/SDK",
+    "engineLibSha256": "9FD749170E1C7433EC99047591C9B1CBAF6C4A10F38FA72C42BC1E88ADAC8149",
+    "projectToolsFingerprint": "Z/8FdOoCny8rf6DL1TO7cCMhY7BUqy82SqZ4JNpo7sU=",
+    "buildId": "445a9ff7edfa4165995bb06683c6e6bf",
+    "status": "Build.ps1 passed; current SDK selected explicitly"
+  }
+}

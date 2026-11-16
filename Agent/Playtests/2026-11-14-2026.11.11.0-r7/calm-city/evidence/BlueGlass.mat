@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "shader": "BlueGlass.hlsl",
+  "render": {
+    "blend": "translucent",
+    "lighting": "unlit",
+    "castShadows": false,
+    "twoSided": true
+  },
+  "params": {
+    "Tint": [
+      0.05,
+      0.1,
+      1.0,
+      1.0
+    ],
+    "Opacity": 0.5
+  }
+}

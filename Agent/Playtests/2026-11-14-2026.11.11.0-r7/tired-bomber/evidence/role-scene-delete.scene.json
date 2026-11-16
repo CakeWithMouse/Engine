@@ -1,0 +1,31 @@
+{
+  "name": "Scene",
+  "objects": [
+    {
+      "id": 1,
+      "inheritParentScale": true,
+      "name": "RoleDeleteProbe",
+      "parent": 0,
+      "transform": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "Primitive.Cube"
+    }
+  ],
+  "version": 1
+}

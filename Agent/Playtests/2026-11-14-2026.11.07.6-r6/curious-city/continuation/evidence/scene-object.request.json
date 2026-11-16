@@ -1,0 +1,28 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Project.json",
+  "steps": [
+    {
+      "action": "new"
+    },
+    {
+      "type": "CityEconomyRules",
+      "action": "create",
+      "name": "ZoningRules"
+    },
+    {
+      "target": "ZoningRules",
+      "action": "duplicate"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Content\\Scenes\\CityObjects.scene.json",
+      "action": "save"
+    },
+    {
+      "action": "new"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Content\\Scenes\\CityObjects.scene.json",
+      "action": "load"
+    }
+  ]
+}

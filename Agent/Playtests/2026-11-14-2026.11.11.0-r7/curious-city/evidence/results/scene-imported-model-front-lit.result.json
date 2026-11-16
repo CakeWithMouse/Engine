@@ -1,0 +1,259 @@
+{
+    "dialogs": [
+    ],
+    "ok": true,
+    "recoveryCandidates": [
+    ],
+    "steps": [
+        {
+            "action": "new",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "model",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "ImportedCityTriangleFront",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": ""
+                        },
+                        "version": 1
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+                1
+            ],
+            "status": 0
+        },
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "ImportedCityTriangleFront",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": ""
+                        },
+                        "version": 1
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "ImportProbeLight",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                }
+            ],
+            "selected": [
+                2
+            ],
+            "status": 0
+        },
+        {
+            "action": "move",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "ImportedCityTriangleFront",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": ""
+                        },
+                        "version": 1
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "ImportProbeLight",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        2,
+                        -3
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                }
+            ],
+            "selected": [
+                2
+            ],
+            "status": 0
+        },
+        {
+            "action": "save",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "ImportedCityTriangleFront",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": ""
+                        },
+                        "version": 1
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "ImportProbeLight",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        2,
+                        -3
+                    ],
+                    "projectData": {
+                    },
+                    "rotation": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Point"
+                }
+            ],
+            "selected": [
+                2
+            ],
+            "status": 0
+        }
+    ]
+}

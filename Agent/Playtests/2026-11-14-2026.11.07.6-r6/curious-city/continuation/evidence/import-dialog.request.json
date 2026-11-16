@@ -1,0 +1,13 @@
+{
+  "dialog": {
+    "action": "accept",
+    "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\import-dialog.png",
+    "presets": [
+      "Preset1",
+      "Preset01",
+      "Preset001"
+    ]
+  },
+  "source": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\CityDialog.obj",
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Project.json"
+}

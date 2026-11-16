@@ -1,0 +1,19 @@
+Using v143 / MSVC 14.44.35207 / Windows SDK 10.0.26100.0
+Assimp enabled: true
+
+  AssetCommandHandler.cpp
+  EditorHistory.cpp
+  SceneCommandHandler.cpp
+  ViewportCommandHandler.cpp
+  QtHost.cpp
+  HostTests.cpp
+E:\Engine\Editor\tests\HostScriptTests.h(75,84): error C2440: инициализация: невозможно преобразовать "EngineScriptApi *" в "const EnginePhysicsObjectApi *" (компилируется исходный файл HostTests.cpp) [E:\Engine\Editor\tests\HostTests.vcxproj]
+E:\Engine\Editor\tests\HostScriptTests.h(75,84): message : Типы, на которые указывают указатели, не связаны; для преобразования требуется reinterpret_cast, приведение в стиле С или приведение в стиле функции в круглых скобках (компилируется исходный файл HostTests.cpp) [E:\Engine\Editor\tests\HostTests.vcxproj]
+
+Exception: E:\Engine\Engine\BuildSupport\Invoke-MSBuild.ps1:75
+Line |
+  75 |  if ($result.exitCode) { throw "MSBuild failed: $($result.exitCode)" }
+     |                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | MSBuild failed: 1
+
+

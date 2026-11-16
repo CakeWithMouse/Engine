@@ -6,9 +6,15 @@
 #include "../Core/SettingsService.h"
 #include "../Core/GizmoMath.h"
 #include "core/GizmoMathTests.h"
+#include "core/CameraGuideTests.h"
 #include "../Core/MaterialGraphModel.h"
 #include "../Core/HlslGraphCompiler.h"
 #include "core/MaterialGraphTests.h"
+#include "core/GraphCoreTests.h"
+#include "core/CodeGraphSchemaTests.h"
+#include "core/ScriptMessagesTests.h"
+#include "core/FsmGraphSchemaTests.h"
+#include "core/GraphToolsTests.h"
 #include "../Core/SceneFile.h"
 #include "core/SceneFileTests.h"
 #include "../Core/Terminal.h"
@@ -281,6 +287,15 @@ void TestMaterialGraph()
     gChecks += 18;
 }
 
+void TestGraphCore()
+{
+    gChecks += RunGraphCoreTests();
+    gChecks += RunCodeGraphSchemaTests();
+    gChecks += RunScriptMessagesTests();
+    gChecks += RunFsmGraphSchemaTests();
+    gChecks += RunGraphToolsTests();
+}
+
 void TestSceneFile()
 {
     RunSceneFileTests();
@@ -298,8 +313,8 @@ void TestTerminal()
 void TestAssetOps()
 {
     RunAssetOpsTests();
-    // 44 distinct checks in RunAssetOpsTests
-    gChecks += 44;
+    // 132 distinct checks in RunAssetOpsTests
+    gChecks += 132;
 }
 
 void TestEditorLocale()
@@ -410,6 +425,10 @@ int main(int argc, char* argv[])
     std::fflush(stdout);
     TestMaterialGraph();
 
+    std::printf("[Test] TestGraphCore...\n");
+    std::fflush(stdout);
+    TestGraphCore();
+
     std::printf("[Test] TestSceneFile...\n");
     std::fflush(stdout);
     TestSceneFile();
@@ -446,6 +465,7 @@ int main(int argc, char* argv[])
     std::fflush(stdout);
     AssetExtensionsTests::Run(gChecks);
 
+    RunCameraGuideTests(gChecks);
     std::printf("CoreTests: %d checks passed.\n", gChecks);
     std::fflush(stdout);
     return 0;

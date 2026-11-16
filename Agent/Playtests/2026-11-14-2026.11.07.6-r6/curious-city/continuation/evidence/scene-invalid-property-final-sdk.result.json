@@ -1,0 +1,588 @@
+{
+    "dialogs": [
+        "Property is not editable"
+    ],
+    "ok": true,
+    "recoveryCandidates": [
+        "E:/Engine/Engine/build/playtests/20261114-r6/curious-city/continuation/city-copy/.painengine/Recovery/9cb08880-4246-4909-a12f-1716787da8a1.json"
+    ],
+    "steps": [
+        {
+            "action": "load",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Market",
+                    "parent": 0,
+                    "position": [
+                        2.25,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Lamp",
+                    "parent": 1,
+                    "position": [
+                        2.25,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Sphere"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Lot",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Tower",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Roof",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cone"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "Monument",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Pyramid"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Market 2",
+                    "parent": 0,
+                    "position": [
+                        3.25,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "property",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "Property is not editable",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Market",
+                    "parent": 0,
+                    "position": [
+                        2.25,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Lamp",
+                    "parent": 1,
+                    "position": [
+                        2.25,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Sphere"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Lot",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Tower",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Roof",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cone"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "Monument",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Pyramid"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Market 2",
+                    "parent": 0,
+                    "position": [
+                        3.25,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 6
+        },
+        {
+            "action": "save",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Market",
+                    "parent": 0,
+                    "position": [
+                        2.25,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Lamp",
+                    "parent": 1,
+                    "position": [
+                        2.25,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Sphere"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Lot",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Tower",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Roof",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cone"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "Monument",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Pyramid"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Market 2",
+                    "parent": 0,
+                    "position": [
+                        3.25,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "startup",
+            "manifest": {
+                "content": "Content",
+                "module": "Binaries/Release/061ea372dc93421bbf27e280e6ae3945/Game.dll",
+                "name": "CuriousCityR5",
+                "startupScene": "Content/Scenes/CityWorkshop.scene.json"
+            },
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Market",
+                    "parent": 0,
+                    "position": [
+                        2.25,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Lamp",
+                    "parent": 1,
+                    "position": [
+                        2.25,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Sphere"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Lot",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Tower",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Roof",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cone"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "Monument",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Pyramid"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Market 2",
+                    "parent": 0,
+                    "position": [
+                        3.25,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "status": 0
+        }
+    ]
+}

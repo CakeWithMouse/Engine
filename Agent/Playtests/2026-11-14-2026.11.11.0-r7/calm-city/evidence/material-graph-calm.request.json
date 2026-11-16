@@ -1,0 +1,30 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\CalmCityUpgraded\\Project.json",
+  "material": "/Game/Materials/WarmStone.mat",
+  "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\results\\material-graph-calm.png",
+  "steps": [
+    {
+      "action": "enable"
+    },
+    {
+      "action": "preset",
+      "index": 1
+    },
+    {
+      "action": "apply"
+    },
+    {
+      "action": "save"
+    },
+    {
+      "action": "preset",
+      "index": 2
+    },
+    {
+      "action": "apply"
+    },
+    {
+      "action": "revert"
+    }
+  ]
+}

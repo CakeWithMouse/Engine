@@ -1,0 +1,16 @@
+{
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Project.json",
+  "source": "E:/Engine/Game/Katamari/Content/Models/2.obj",
+  "dialog": {
+    "presets": [
+      "Preset1",
+      "Preset01",
+      "Preset001"
+    ],
+    "action": "accept",
+    "value": 0.01,
+    "image": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/import-options-dialog2.png"
+  },
+  "reimportSource": "E:/Engine/Game/Katamari/Content/Models/2.obj",
+  "moveTo": "/Game/Models/CityImport/2.obj"
+}

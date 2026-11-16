@@ -1,0 +1,59 @@
+{
+  "surfacePosition": [
+    0,
+    0,
+    0
+  ],
+  "baseVelocity": [
+    0,
+    -3,
+    0
+  ],
+  "depthCollision": false,
+  "acceleration": [
+    0,
+    -8,
+    0
+  ],
+  "width": 400,
+  "bias": 0.05,
+  "particleCount": 1024,
+  "camera": [
+    6,
+    5,
+    -8
+  ],
+  "frames": [
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\particles-probe-nosurface-off.bmp",
+      "dt": 0.0167,
+      "steps": 120
+    }
+  ],
+  "spread": 0.15,
+  "size": 0.12,
+  "bounce": 0.9,
+  "position": [
+    0,
+    1.5,
+    0
+  ],
+  "surface": false,
+  "target": [
+    0,
+    0,
+    0
+  ],
+  "brightness": 2,
+  "sorting": true,
+  "friction": 0.08,
+  "radialSpeed": 0.4,
+  "height": 300,
+  "rendering": 0,
+  "surfaceScale": [
+    4,
+    1,
+    4
+  ],
+  "lifetime": 4
+}

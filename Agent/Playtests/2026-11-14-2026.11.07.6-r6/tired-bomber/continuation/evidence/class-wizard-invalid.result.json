@@ -1,0 +1,22 @@
+{
+    "arguments": [
+        "-Name",
+        "Bad-Name",
+        "-Kind",
+        "Component",
+        "-Base",
+        "GameComponent",
+        "-BaseHeader",
+        "Engine/Components/GameComponents.h"
+    ],
+    "console": "",
+    "dialogs": [
+    ],
+    "generated": {
+    },
+    "ok": true,
+    "replaced": false,
+    "windowEnabled": true,
+    "wizardAccepted": false,
+    "wizardError": "Введите имя вроде MyCharacter: без пробелов, кириллицы и расширения файла."
+}

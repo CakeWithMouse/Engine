@@ -13,6 +13,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <Engine/Render/ShaderConstants.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
+#include <Engine/Physics/PhysicsWorld.h>
 
 namespace GameComponentNames
 {
@@ -30,6 +31,7 @@ class Game;
 class Material;
 class SaveArchive;
 struct MeshLodData;
+namespace Script { class Instance; struct Problem; }
 
 /** Shader pair of one pass variant, resolved lazily by Game::BindComponentShaders. */
 struct ComponentShaderVariant
@@ -86,6 +88,20 @@ public:
     bool SetMaterialAsset(const std::string& path);
     const std::string& GetMaterialAsset() const { return MaterialAssetPath; }
     virtual bool SupportsMaterials() const { return false; }
+
+    /**
+     * Visual script asset by its /Game path (a .vscript; scenes store this). It starts in Play and in
+     * the game after BeginPlay and runs after Tick every frame. A change during Play applies from the
+     * next Play. Empty clears it. See Engine/docs/VISUAL-SCRIPTING.md.
+     */
+    void SetScriptAsset(const std::string& path) { ScriptAssetPath = path; }
+    const std::string& GetScriptAsset() const { return ScriptAssetPath; }
+    // Values of script variables for this object: a JSON object {"Speed": 45}; "" — the script's defaults.
+    void SetScriptVariables(const std::string& json) { ScriptVariableValues = json; }
+    const std::string& GetScriptVariables() const { return ScriptVariableValues; }
+    /** The running script of this play session; null in Edit, without a script or when it did not compile. */
+    const Script::Instance* GetScriptInstance() const { return ScriptState.get(); }
+    Script::Instance* GetScriptInstance() { return ScriptState.get(); }
     /** Drawn only through a material: without one of its own, the game uses its default material. */
     virtual bool RequiresMaterial() const { return false; }
     /** MaterialVariant flags of the shader set this component draws with (instances, skinning). */
@@ -188,6 +204,31 @@ public:
     bool HasOpacity() const;
     bool IsSkybox() const { return bIsSkybox; }
     virtual bool DoSmthWithCollision(GameComponent* AnotherComponent) { return false; }
+
+    // Physics. Every scene object can join the Game physics world: enable it here
+    // and tune the collision shape. During Play dynamic bodies drive the component
+    // transform; static and kinematic bodies follow the transform instead. The
+    // editor Edit mode never simulates, so these settings only persist there.
+    void SetPhysicsEnabled(bool enabled);
+    bool IsPhysicsEnabled() const { return physicsEnabled_; }
+    // True once any physics setting was assigned; drives scene serialization.
+    bool HasPhysicsSettings() const { return physicsConfigured_; }
+    void SetPhysicsBodyType(PhysicsBodyType type);
+    PhysicsBodyType GetPhysicsBodyType() const { return physicsBodyType_; }
+    void SetPhysicsShapeType(PhysicsShapeType shape);
+    PhysicsShapeType GetPhysicsShapeType() const { return physicsShape_; }
+    // Dynamic bodies only: density used to compute the mass.
+    void SetPhysicsDensity(float density);
+    float GetPhysicsDensity() const { return physicsDensity_; }
+    void SetPhysicsFriction(float friction);
+    float GetPhysicsFriction() const { return physicsFriction_; }
+    void SetPhysicsRestitution(float restitution);
+    float GetPhysicsRestitution() const { return physicsRestitution_; }
+    // Valid only while the body exists (Play with physics enabled in the world settings).
+    bool HasPhysicsBody() const { return physicsBodyHandle_ != 0; }
+    glm::vec3 GetPhysicsLinearVelocity() const;
+    void SetPhysicsLinearVelocity(const glm::vec3& velocity);
+    void AddPhysicsImpulse(const glm::vec3& impulse);
 
     // Instancing: the owner is a template, only its instances are drawn (colour and shadow passes).
     GameComponent* CreateInstance(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, glm::vec4 Color);
@@ -325,6 +366,21 @@ protected:
     ID3D11PixelShader* pixelShader = nullptr;
 
 private:
+    void SyncPhysicsBody();
+    void CreatePhysicsBody();
+    void DestroyPhysicsBody();
+    void DestroyBodyAndRecreate();
+
+    bool physicsEnabled_ = false;
+    bool physicsConfigured_ = false;
+    PhysicsBodyType physicsBodyType_ = PhysicsBodyType::Dynamic;
+    PhysicsShapeType physicsShape_ = PhysicsShapeType::Box;
+    float physicsFriction_ = 0.5f;
+    float physicsRestitution_ = 0.0f;
+    float physicsDensity_ = 1000.0f;
+    // Handle in the Game physics world; 0 when no body exists.
+    uint32_t physicsBodyHandle_ = 0;
+
     std::unique_ptr<GameComponent> VisualComponent;
     std::string VisualModelAsset;
     bool VisualPrimitive = false;
@@ -337,6 +393,9 @@ private:
     ComponentId SceneComponentId = 0;
     std::string SceneName;
     std::string SceneTypeName; // assigned by Scene on addition, independent of instance name
+    std::string ScriptAssetPath;
+    std::string ScriptVariableValues;
+    std::unique_ptr<Script::Instance> ScriptState; // created by Game at BeginPlay, ticked by Scene
     Game* RenderOwner = nullptr;
     std::string VertexShaderName;
     std::string PixelShaderName;

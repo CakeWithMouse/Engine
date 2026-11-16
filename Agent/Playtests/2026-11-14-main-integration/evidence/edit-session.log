@@ -1,0 +1,416 @@
+Using v143 / MSVC 14.44.35207 / Windows SDK 10.0.26100.0
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator.vcxproj -> E:\Engine\Engine\build\x64\Release\ComponentGenerator.exe
+  ComponentGenerator: 2 component(s), RuntimeExample
+  RuntimeExample.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Projects\RuntimeExample\Game.dll
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  EditConsumer.vcxproj -> E:\Engine\Engine\build\x64\Release\EditConsumer.dll
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  EditSessionTests.cpp
+  ModeParityTests.cpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3630,56): warning C4244: аргумент: преобразование "_Ty" в "float", возможна потеря данных [E:\Engine\Engine\tests\edit-session\EditSessionTests.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл ModeParityTests.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3630,56): message : контекст создания экземпляра шаблона (сначала самый старый) (компилируется исходный файл ModeParityTests.cpp) [E:\Engine\Engine\tests\edit-session\EditSessionTests.vcxproj]
+E:\Engine\Engine\tests\edit-session\ModeParityTests.cpp(23,25): message : выполняется компиляция ссылки на экземпляр шаблон функции "std::unique_ptr<PointLightComponent,std::default_delete<PointLightComponent>> std::make_unique<PointLightComponent,glm::vec3,glm::vec3,int,int,0>(glm::vec3 &&,glm::vec3 &&,int &&,int &&)" [E:\Engine\Engine\tests\edit-session\EditSessionTests.vcxproj]
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\EditSessionTests.lib и объект E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\EditSessionTests.exp
+  EditSessionTests.vcxproj -> E:\Engine\Engine\build\x64\Release\EditSessionTests.exe
+
+Using v143 / MSVC 14.44.35207 / Windows SDK 10.0.26100.0
+Assimp enabled: true
+
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  Fixture.vcxproj -> E:\Engine\Engine\build\x64\Release\RuntimeFixtures\SceneLegacy.dll
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  Fixture.vcxproj -> E:\Engine\Engine\build\x64\Release\RuntimeFixtures\SceneBadVersion.dll
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  Fixture.vcxproj -> E:\Engine\Engine\build\x64\Release\RuntimeFixtures\SceneIncomplete.dll
+
+[VfsRead] using local VFS (no host service)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 320x240
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 320x240
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Initialization failed: shader files not found
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+frame-dump E:\Engine\Engine\build/mode-parity\0-forward-edit.bmp written=1 size=320x240
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+frame-dump E:\Engine\Engine\build/mode-parity\0-forward-play.bmp written=1 size=320x240
+[SceneModule] Host getService is null, falling back to local VFS
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+frame-dump E:\Engine\Engine\build/mode-parity\0-forward-runtime.bmp written=1 size=320x240
+frame-dump E:\Engine\Engine\build/mode-parity\0-forward-before-fix.bmp written=1 size=320x240
+[VfsRead] Unbind
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+frame-dump E:\Engine\Engine\build/mode-parity\0-deferred-edit.bmp written=1 size=320x240
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+frame-dump E:\Engine\Engine\build/mode-parity\0-deferred-play.bmp written=1 size=320x240
+[SceneModule] Host getService is null, falling back to local VFS
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+frame-dump E:\Engine\Engine\build/mode-parity\0-deferred-runtime.bmp written=1 size=320x240
+[VfsRead] Unbind
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+frame-dump E:\Engine\Engine\build/mode-parity\1-forward-edit.bmp written=1 size=320x240
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+frame-dump E:\Engine\Engine\build/mode-parity\1-forward-play.bmp written=1 size=320x240
+[SceneModule] Host getService is null, falling back to local VFS
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+frame-dump E:\Engine\Engine\build/mode-parity\1-forward-runtime.bmp written=1 size=320x240
+frame-dump E:\Engine\Engine\build/mode-parity\1-forward-before-fix.bmp written=1 size=320x240
+[VfsRead] Unbind
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+frame-dump E:\Engine\Engine\build/mode-parity\1-deferred-edit.bmp written=1 size=320x240
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+frame-dump E:\Engine\Engine\build/mode-parity\1-deferred-play.bmp written=1 size=320x240
+[SceneModule] Host getService is null, falling back to local VFS
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+frame-dump E:\Engine\Engine\build/mode-parity\1-deferred-runtime.bmp written=1 size=320x240
+[VfsRead] Unbind
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+frame-dump E:\Engine\Engine\build/mode-parity\2-forward-edit.bmp written=1 size=320x240
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+frame-dump E:\Engine\Engine\build/mode-parity\2-forward-play.bmp written=1 size=320x240
+[SceneModule] Host getService is null, falling back to local VFS
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+frame-dump E:\Engine\Engine\build/mode-parity\2-forward-runtime.bmp written=1 size=320x240
+[VfsRead] Unbind
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+frame-dump E:\Engine\Engine\build/mode-parity\2-deferred-edit.bmp written=1 size=320x240
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+frame-dump E:\Engine\Engine\build/mode-parity\2-deferred-play.bmp written=1 size=320x240
+[SceneModule] Host getService is null, falling back to local VFS
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+frame-dump E:\Engine\Engine\build/mode-parity\2-deferred-runtime.bmp written=1 size=320x240
+[VfsRead] Unbind
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+frame-dump E:\Engine\Engine\build/mode-parity\3-forward-edit.bmp written=1 size=320x240
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+frame-dump E:\Engine\Engine\build/mode-parity\3-forward-play.bmp written=1 size=320x240
+[SceneModule] Host getService is null, falling back to local VFS
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+frame-dump E:\Engine\Engine\build/mode-parity\3-forward-runtime.bmp written=1 size=320x240
+[VfsRead] Unbind
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+frame-dump E:\Engine\Engine\build/mode-parity\3-deferred-edit.bmp written=1 size=320x240
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+frame-dump E:\Engine\Engine\build/mode-parity\3-deferred-play.bmp written=1 size=320x240
+[SceneModule] Host getService is null, falling back to local VFS
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+frame-dump E:\Engine\Engine\build/mode-parity\3-deferred-runtime.bmp written=1 size=320x240
+[VfsRead] Unbind
+Mode parity: 24 GPU captures match; old lighting mismatch reproduced; audio Play/Pause/Resume/failure/Stop passed
+[VfsRead] using local VFS (no host service)
+SetParent rejected: the hierarchy would contain a cycle.
+SetParent rejected: the hierarchy would contain a cycle.
+[VfsRead] using local VFS (no host service)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Initialization failed: shader files not found
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+Initialization failed: shader files not found
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+Initialization failed: shader files not found
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 320x240
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 320x240
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+RuntimeError: Cannot load startupScene 'E:\Engine\Engine\build\main-integration-20261114\Temp\engine-startup-19608-сцена.json' (status 2): Unknown component type: Missing::Class
+RuntimeError: Cannot load startupScene 'E:\Engine\Engine\build\main-integration-20261114\Temp\engine-startup-19608-сцена.json' (status 10): [json.exception.parse_error.101] parse error at line 1, column 2: syntax error while parsing object key - unexpected end of input; expected string literal
+RuntimeError: Cannot load startupScene 'E:\Engine\Engine\build\main-integration-20261114\Temp\engine-startup-19608-сцена.json' (status 10): Unexpected or missing JSON fields
+RuntimeError: Cannot load startupScene 'E:\Engine\Engine\build\main-integration-20261114\Temp\engine-startup-19608-сцена.json' (status 11): Cannot open scene file
+RuntimeError: Cannot load game startupScene 'E:\Engine\Engine\build\main-integration-20261114\Temp\engine-startup-19608-сцена.json' (status 11): Cannot open scene file
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/Content'
+ModuleLoaded
+[VfsRead] using local VFS (no host service)
+EngineFrame (edit scene API)
+EngineFrameEnd (edit scene API)
+EngineFrame (edit scene API)
+EngineFrameEnd (edit scene API)
+EngineFrame (edit scene API)
+EngineFrameEnd (edit scene API)
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/Content'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/main-integration-20261114/Temp/'
+ModuleLoaded
+[VfsRead] using local VFS (no host service)
+EngineFrame (edit scene API)
+EngineFrameEnd (edit scene API)
+EngineFrame (edit scene API)
+EngineFrameEnd (edit scene API)
+EngineFrame (edit scene API)
+EngineFrameEnd (edit scene API)
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/Content'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/main-integration-20261114/Temp/'
+ResourcesStopped (stub)
+EngineStopped
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/Content'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/main-integration-20261114/Temp/'
+ResourcesStopped (stub)
+EngineStopped
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/Content'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/main-integration-20261114/Temp/'
+ResourcesStopped (stub)
+EngineStopped
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/Content'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/main-integration-20261114/Temp/'
+ResourcesStopped (stub)
+EngineStopped
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/Content'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/main-integration-20261114/Temp/'
+ModuleLoaded
+[VfsRead] Bind host VFS service v1
+GameCreate
+GameDestroy
+[VfsRead] Unbind
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/Content'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/main-integration-20261114/Temp/'
+ModuleLoaded
+[VfsRead] Bind host VFS service v1
+GameCreate
+GameSceneLoaded
+GameStart
+startup-scene-test
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsService] first read via module: /Engine/Shaders/RotatedFigure.hlsl
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+SkeletalMeshComponent: failed to load /Game/Models/CesiumMan.glb: Unable to open file "/Game/Models/CesiumMan.glb".
+[RuntimeExample] SkeletalMesh failed to load CesiumMan.glb
+[SceneModule] Host getService is null, falling back to local VFS
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdates=1
+GameStop
+GameDestroy
+[VfsRead] Unbind
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/Content'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/main-integration-20261114/Temp/'
+ModuleLoaded
+[VfsRead] Bind host VFS service v1
+GameCreate
+GameStart
+startup-scene-test
+GameUpdate
+EngineUpdate (stub)
+EngineRender (stub)
+EngineFrameEnd (stub)
+GameUpdates=1
+GameStop
+GameDestroy
+[VfsRead] Unbind
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/Content'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/main-integration-20261114/Temp/'
+ModuleLoaded
+[VfsRead] using local VFS (no host service)
+EngineFrame (edit scene API)
+EngineFrameEnd (edit scene API)
+EngineFrame (edit scene API)
+EngineFrameEnd (edit scene API)
+EngineFrame (edit scene API)
+EngineFrameEnd (edit scene API)
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+SkeletalMeshComponent: failed to load /Game/Models/CesiumMan.glb: Unable to open file "/Game/Models/CesiumMan.glb".
+[RuntimeExample] SkeletalMesh failed to load CesiumMan.glb
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/Content'
+ModuleLoaded
+FixtureCreate
+FixtureStart
+FixtureUpdate
+FixtureStop
+FixtureDestroy
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped
+RuntimeError: startupScene requires compatible EngineGetGameSceneApi
+RuntimeError: Cannot load game startupScene 'E:\Engine\Engine\build\main-integration-20261114\Temp\game-startup-19608.json' (status 2): Unknown component type: Unknown
+RuntimeError: Cannot load game startupScene 'E:\Engine\Engine\build\main-integration-20261114\Temp\game-startup-19608.json' (status 10): [json.exception.parse_error.101] parse error at line 1, column 2: syntax error while parsing object key - unexpected end of input; expected string literal
+RuntimeError: Cannot load game startupScene 'E:\Engine\Engine\build\main-integration-20261114\Temp\game-startup-19608.json' (status 10): Unexpected or missing JSON fields
+SkeletalMeshComponent: failed to load /Game/Models/CesiumMan.glb: Unable to open file "/Game/Models/CesiumMan.glb".
+[RuntimeExample] SkeletalMesh failed to load CesiumMan.glb
+SkeletalMeshComponent: failed to load /Game/Models/CesiumMan.glb: Unable to open file "/Game/Models/CesiumMan.glb".
+[RuntimeExample] SkeletalMesh failed to load CesiumMan.glb
+SkeletalMeshComponent: failed to load /Game/Models/CesiumMan.glb: Unable to open file "/Game/Models/CesiumMan.glb".
+[RuntimeExample] SkeletalMesh failed to load CesiumMan.glb
+[VfsRead] Unbind
+Edit session: 682 checks passed (no editor)

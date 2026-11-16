@@ -1,0 +1,9 @@
+{
+  "command": "--build-project",
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\BomberUpgradedR7\\Project.json",
+  "exit": 0,
+  "stdout": "",
+  "stderr": "",
+  "buildId": "05782613a88a406ab18010c93214a07e",
+  "sdk": "2026.11.11.0"
+}

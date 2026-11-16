@@ -1,0 +1,10 @@
+{
+  "fingerprint": "8KaPj49pXnuyiG6MhmvkVYzlK8P1kKy5jrBfuboA22A=",
+  "module": "Binaries/Release/f802409a658c4c6c84776396db223579/Game.dll",
+  "state": "ready",
+  "buildId": "f802409a658c4c6c84776396db223579",
+  "format": 1,
+  "previousModule": "Binaries/Release/8fe492d05ac04fb5ba19086c6a567cc5/Game.dll",
+  "sdk": "2026.11.11.0",
+  "configuration": "Release"
+}

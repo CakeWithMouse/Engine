@@ -1,0 +1,449 @@
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\BasicSky.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\BasicSky.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 640x480
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\curious-city\continuation\render-host-hook.bmp written=1 size=640x480
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "frames": 6,
+    "ok": true,
+    "steps": [
+        {
+            "kind": "control",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        12,
+                        1,
+                        12
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "LightHouse",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "CitySun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 3,
+                        "shadowDistance": 150,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Directional"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "CitySky",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Environment.Sky"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "CityControlsContinuation",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "CuriousCity.Interaction"
+                }
+            ]
+        },
+        {
+            "kind": "focus",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        12,
+                        1,
+                        12
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "LightHouse",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "CitySun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 3,
+                        "shadowDistance": 150,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Directional"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "CitySky",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Environment.Sky"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "CityControlsContinuation",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "CuriousCity.Interaction"
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        12,
+                        1,
+                        12
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "LightHouse",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "CitySun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 3,
+                        "shadowDistance": 150,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Directional"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "CitySky",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        5
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Environment.Sky"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "CityControlsContinuation",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "CuriousCity.Interaction"
+                }
+            ]
+        },
+        {
+            "kind": "control",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        12,
+                        1,
+                        12
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "LightHouse",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "CitySun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 3,
+                        "shadowDistance": 150,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Light.Directional"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "CitySky",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Environment.Sky"
+                }
+            ]
+        }
+    ]
+}

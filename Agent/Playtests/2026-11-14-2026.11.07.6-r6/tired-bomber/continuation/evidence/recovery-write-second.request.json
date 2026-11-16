@@ -1,0 +1,17 @@
+{
+  "steps": [
+    {
+      "action": "recover"
+    },
+    {
+      "action": "create",
+      "type": "Primitive.Sphere",
+      "name": "SecondUncommittedMarker"
+    },
+    {
+      "action": "write-recovery"
+    }
+  ],
+  "recovery": true,
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\BomberContinue\\Project.json"
+}

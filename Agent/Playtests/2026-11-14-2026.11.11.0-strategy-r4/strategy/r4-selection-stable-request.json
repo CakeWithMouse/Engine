@@ -1,0 +1,133 @@
+{
+  "steps": [
+    {
+      "action": "play",
+      "kind": "control"
+    },
+    {
+      "enabled": true,
+      "kind": "focus"
+    },
+    {
+      "count": 3,
+      "kind": "frames"
+    },
+    {
+      "kind": "cursor",
+      "valid": true,
+      "y": 476,
+      "x": 365
+    },
+    {
+      "kind": "key",
+      "down": true,
+      "key": 500
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "kind": "cursor",
+      "valid": true,
+      "y": 443,
+      "x": 270
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "kind": "key",
+      "down": false,
+      "key": 500
+    },
+    {
+      "count": 12,
+      "kind": "frames"
+    },
+    {
+      "kind": "cursor",
+      "valid": true,
+      "y": 300,
+      "x": 450
+    },
+    {
+      "kind": "key",
+      "down": true,
+      "key": 500
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "kind": "cursor",
+      "valid": true,
+      "y": 350,
+      "x": 500
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "kind": "key",
+      "down": false,
+      "key": 500
+    },
+    {
+      "count": 12,
+      "kind": "frames"
+    },
+    {
+      "kind": "key",
+      "down": true,
+      "key": 16
+    },
+    {
+      "kind": "cursor",
+      "valid": true,
+      "y": 440,
+      "x": 304
+    },
+    {
+      "kind": "key",
+      "down": true,
+      "key": 500
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "kind": "cursor",
+      "valid": true,
+      "y": 476,
+      "x": 336
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "kind": "key",
+      "down": false,
+      "key": 500
+    },
+    {
+      "kind": "key",
+      "down": false,
+      "key": 16
+    },
+    {
+      "count": 12,
+      "kind": "frames"
+    },
+    {
+      "action": "stop",
+      "kind": "control"
+    }
+  ],
+  "project": "E:/Engine/Engine/build/playtests/strategy-r4/RepairCorridor/Project.json"
+}

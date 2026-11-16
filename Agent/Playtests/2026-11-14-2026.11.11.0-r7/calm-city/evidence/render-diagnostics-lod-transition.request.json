@@ -1,0 +1,87 @@
+{
+  "screenHeights": [
+    30,
+    12
+  ],
+  "views": [
+    {
+      "direction": [
+        0,
+        -1,
+        0
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "position": [
+        0,
+        8,
+        0
+      ],
+      "orthoHeight": 10,
+      "orthographic": true
+    },
+    {
+      "direction": [
+        0,
+        -1,
+        0
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "position": [
+        0,
+        24,
+        0
+      ],
+      "orthoHeight": 24,
+      "orthographic": true
+    }
+  ],
+  "width": 480,
+  "lodCount": 3,
+  "instances": [
+    {
+      "visible": true,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "scale": 1
+    },
+    {
+      "visible": true,
+      "position": [
+        4,
+        0,
+        0
+      ],
+      "scale": 1
+    },
+    {
+      "visible": true,
+      "position": [
+        10,
+        0,
+        0
+      ],
+      "scale": 1
+    }
+  ],
+  "rendering": 0,
+  "fade": 0.15,
+  "panel": true,
+  "distances": [
+    5,
+    12
+  ],
+  "height": 320,
+  "drawDistance": 60,
+  "image": "E:/Engine/Engine/build/playtests/20261114-r7/calm-city/results/render-diagnostics-lod-transition.bmp"
+}

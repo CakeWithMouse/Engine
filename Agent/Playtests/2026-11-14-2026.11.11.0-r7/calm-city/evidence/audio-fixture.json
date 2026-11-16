@@ -1,0 +1,9 @@
+{
+  "sampleRate": 48000,
+  "channels": 1,
+  "bitsPerSample": 16,
+  "frequencyHz": 733,
+  "chipSeconds": 0.125,
+  "amplitudeCode": "11010010111000101101001100010110",
+  "durationSeconds": 4.0
+}

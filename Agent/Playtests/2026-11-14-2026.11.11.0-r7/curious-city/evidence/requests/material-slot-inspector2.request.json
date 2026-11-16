@@ -1,0 +1,38 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Project.json",
+  "steps": [
+    {
+      "action": "frames",
+      "count": 1
+    },
+    {
+      "scope": "main",
+      "action": "hierarchy-click",
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\frames\\material-slot-inspector-selected.png",
+      "target": "SaveGameSlotProbe"
+    },
+    {
+      "scope": "main",
+      "action": "field",
+      "value": "/Game/Materials/Hologram.mat",
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\frames\\material-slot-inspector-edited.png",
+      "name": "Property/materialSlots/0"
+    },
+    {
+      "action": "scene-undo"
+    },
+    {
+      "action": "scene-redo"
+    },
+    {
+      "action": "save-scene",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Content\\Scenes\\MaterialSlotInspectorProbe.scene.json"
+    },
+    {
+      "scope": "main",
+      "action": "load-scene",
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\frames\\material-slot-inspector-reopened.png",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Content\\Scenes\\MaterialSlotInspectorProbe.scene.json"
+    }
+  ]
+}

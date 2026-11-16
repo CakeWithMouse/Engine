@@ -1,0 +1,22 @@
+{
+    "format": "ITMOEngine.Graph",
+    "version": 1,
+    "schema": "ai.fsm",
+    "schemaVersion": 1,
+    "variables": [],
+    "settings": {"thinkInterval": 0.2},
+    "nodes": [
+        {"id": 1, "type": "Fsm.State", "title": "SitOnBench", "x": 0, "y": 0,
+         "properties": {"name": "SitOnBench", "tasks": [{"type": "Ai.UseSmartObject", "tag": "Bench", "seconds": 3, "radius": 50}]}},
+        {"id": 2, "type": "Fsm.State", "title": "DrinkWater", "x": 0, "y": 160,
+         "properties": {"name": "DrinkWater", "tasks": [{"type": "Ai.UseSmartObject", "tag": "Well", "seconds": 2, "radius": 50}]}},
+        {"id": 3, "type": "Fsm.State", "title": "Stretch", "x": 0, "y": 320,
+         "properties": {"name": "Stretch", "tasks": [{"type": "Ai.WaitRandom", "minimum": 1, "maximum": 2}]}},
+        {"id": 4, "type": "Fsm.Next", "title": "", "x": 360, "y": 160, "properties": {}}
+    ],
+    "connections": [
+        {"fromNode": 1, "fromPin": "out", "toNode": 4, "toPin": "in"},
+        {"fromNode": 2, "fromPin": "out", "toNode": 4, "toPin": "in"},
+        {"fromNode": 3, "fromPin": "out", "toNode": 1, "toPin": "in"}
+    ]
+}

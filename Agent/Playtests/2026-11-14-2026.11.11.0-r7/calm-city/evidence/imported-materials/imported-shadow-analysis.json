@@ -1,0 +1,226 @@
+{
+  "expected": "Same imported Suzanne scene and materials except render.castShadows true vs false; ground/city pixel ROI should change when model shadow is removed.",
+  "actual": {
+    "resolution": [
+      1000,
+      500
+    ],
+    "roi": [
+      0,
+      0,
+      550,
+      500
+    ],
+    "changedPixelsOver3": 1334,
+    "maxRGBDelta": 133,
+    "examples": [
+      {
+        "xy": [
+          467,
+          187
+        ],
+        "castOn": [
+          8,
+          8,
+          0
+        ],
+        "castOff": [
+          17,
+          16,
+          0
+        ],
+        "maxRGBDelta": 9
+      },
+      {
+        "xy": [
+          466,
+          188
+        ],
+        "castOn": [
+          64,
+          62,
+          0
+        ],
+        "castOff": [
+          70,
+          68,
+          0
+        ],
+        "maxRGBDelta": 6
+      },
+      {
+        "xy": [
+          465,
+          189
+        ],
+        "castOn": [
+          54,
+          52,
+          0
+        ],
+        "castOff": [
+          77,
+          75,
+          0
+        ],
+        "maxRGBDelta": 23
+      },
+      {
+        "xy": [
+          463,
+          190
+        ],
+        "castOn": [
+          117,
+          113,
+          0
+        ],
+        "castOff": [
+          131,
+          127,
+          0
+        ],
+        "maxRGBDelta": 14
+      },
+      {
+        "xy": [
+          464,
+          190
+        ],
+        "castOn": [
+          41,
+          40,
+          0
+        ],
+        "castOff": [
+          84,
+          81,
+          0
+        ],
+        "maxRGBDelta": 43
+      },
+      {
+        "xy": [
+          462,
+          191
+        ],
+        "castOn": [
+          96,
+          93,
+          0
+        ],
+        "castOff": [
+          120,
+          116,
+          0
+        ],
+        "maxRGBDelta": 24
+      },
+      {
+        "xy": [
+          463,
+          191
+        ],
+        "castOn": [
+          40,
+          39,
+          0
+        ],
+        "castOff": [
+          76,
+          74,
+          0
+        ],
+        "maxRGBDelta": 36
+      },
+      {
+        "xy": [
+          464,
+          191
+        ],
+        "castOn": [
+          10,
+          10,
+          0
+        ],
+        "castOff": [
+          21,
+          20,
+          0
+        ],
+        "maxRGBDelta": 11
+      },
+      {
+        "xy": [
+          460,
+          192
+        ],
+        "castOn": [
+          140,
+          135,
+          0
+        ],
+        "castOff": [
+          143,
+          139,
+          0
+        ],
+        "maxRGBDelta": 4
+      },
+      {
+        "xy": [
+          461,
+          192
+        ],
+        "castOn": [
+          101,
+          98,
+          0
+        ],
+        "castOff": [
+          116,
+          112,
+          0
+        ],
+        "maxRGBDelta": 15
+      },
+      {
+        "xy": [
+          462,
+          192
+        ],
+        "castOn": [
+          59,
+          57,
+          0
+        ],
+        "castOff": [
+          79,
+          77,
+          0
+        ],
+        "maxRGBDelta": 20
+      },
+      {
+        "xy": [
+          463,
+          192
+        ],
+        "castOn": [
+          19,
+          18,
+          0
+        ],
+        "castOff": [
+          41,
+          40,
+          0
+        ],
+        "maxRGBDelta": 22
+      }
+    ],
+    "onSha256": "944355c85d8bc2d157aa7b9e5b1a4c5eb948c2677ef34d260b3c3f22fba732a1",
+    "offSha256": "7524644d24abc36d1bcff8eab9c2396f1286ec341b9bd649cf93c4a9263aa2a6"
+  },
+  "criteria": "At least 100 ROI pixels differ by >3; maximum RGB difference at least 16. Excludes the top-right counters overlay."
+}

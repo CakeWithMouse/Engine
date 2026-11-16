@@ -1,0 +1,6 @@
+Using v143 / MSVC 14.44.35207 / Windows SDK 10.0.26100.0
+Assimp enabled: true
+
+  HostTests.cpp
+  HostTests.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\HostTests.exe
+

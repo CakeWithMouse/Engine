@@ -1,0 +1,100 @@
+{
+  "caster": "crowd",
+  "width": 320,
+  "height": 240,
+  "camera": [
+    0,
+    5,
+    -8
+  ],
+  "target": [
+    0,
+    1,
+    0
+  ],
+  "lodDistances": [
+    10,
+    20
+  ],
+  "lodScreenHeights": [
+    30,
+    10
+  ],
+  "lodFade": 0,
+  "frames": [
+    {
+      "time": 0,
+      "target": [
+        0,
+        1,
+        0
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\shadow-lod-switch-clean-0.bmp",
+      "position": [
+        0,
+        1,
+        0
+      ],
+      "camera": [
+        0,
+        5,
+        -8
+      ]
+    },
+    {
+      "time": 0,
+      "target": [
+        0,
+        1,
+        0
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\shadow-lod-switch-clean-1.bmp",
+      "position": [
+        0,
+        1,
+        0
+      ],
+      "camera": [
+        0,
+        40,
+        -64
+      ]
+    },
+    {
+      "time": 0,
+      "target": [
+        0,
+        1,
+        0
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\shadow-lod-switch-clean-2.bmp",
+      "position": [
+        0,
+        1,
+        0
+      ],
+      "camera": [
+        0,
+        5,
+        -8
+      ]
+    }
+  ],
+  "probes": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      2,
+      0
+    ]
+  ]
+}

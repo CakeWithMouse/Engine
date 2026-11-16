@@ -22,6 +22,7 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <limits>
 
 namespace ImportSettingsDialogTests
 {
@@ -455,6 +456,30 @@ inline void Run()
         std::cout << "[DialogResizeDiag] before: " << hBefore << ", expanded: " << hExpanded << ", after: " << hAfter << std::endl;
         Check(hExpanded > hBefore, "Dialog expands when advanced card is opened");
         Check(std::abs(hAfter - hBefore) <= 2, "Dialog height returns to initial after collapsing");
+        ++checks;
+    }
+
+    // An explicit malformed options document must not fall back to defaults.
+    for (const QString& options : {QStringLiteral("{"), QStringLiteral("[]")})
+    {
+        const auto decision = ResolveModelImportDecision({{QStringLiteral("options"), options}}, true);
+        Check(!decision.proceed, "Malformed explicit options reject import before mutation");
+        ++checks;
+    }
+    // Invalid command parameters must be rejected before an asset is imported.
+    for (const QVariant& value : std::vector<QVariant>{QStringLiteral("bad"), true, 0.0, -1.0,
+            1e100, std::numeric_limits<double>::infinity(),
+            std::numeric_limits<double>::quiet_NaN(), 0.00001, 10001.0})
+    {
+        const auto decision = ResolveModelImportScale({{QStringLiteral("scale"), value}}, true);
+        Check(!decision.proceed, "Invalid explicit scale rejects import before mutation");
+        ++checks;
+    }
+    for (const double value : {0.0001, 10000.0})
+    {
+        const auto decision = ResolveModelImportScale({{QStringLiteral("scale"), value}}, true);
+        Check(decision.proceed && EditorCore::ImportSettingsFile::IsValidScale(decision.scale),
+              "Inclusive scale boundaries remain accepted");
         ++checks;
     }
 

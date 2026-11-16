@@ -1,0 +1,42 @@
+Using v143 / MSVC 14.44.35207 / Windows SDK 10.0.26100.0
+Assimp enabled: true
+
+  EditorUiTests.cpp
+E:\Engine\Editor\tests\EditorUiTests.cpp(2419,209): warning C4305: аргумент: усечение из "double" в "float" [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\tests\EditorUiTests.cpp(2419,209): message : контекст создания экземпляра шаблона (сначала самый старый) [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\tests\EditorUiTests.cpp(2419,303): message : во время компиляции функции-члена класс шаблон "std::function<void (EditorMainWindow *)>::function(_Fx &&)" [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\tests\EditorUiTests.cpp(2419,303): message : при обработке аргумента шаблона по умолчанию "std::function<void (EditorMainWindow *)>::function(_Fx &&)" [E:\Engine\Editor\EditorModule.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\functional(1102,92): message : выполняется компиляция ссылки на экземпляр псевдоним шаблон функции "std::_Func_class<_Ret,EditorMainWindow *>::_Enable_if_callable_t<wmain::<lambda_496>,std::function<void (EditorMainWindow *)>>" [E:\Engine\Editor\EditorModule.vcxproj]
+          with
+          [
+              _Ret=void
+          ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\functional(940,47): message : выполняется компиляция ссылки на шаблон переменной "const bool conjunction_v<std::negation<std::is_same<`wmain'::`3'::<lambda_496>,std::function<void __cdecl(EditorMainWindow *)> > >,std::_Is_invocable_r<void,`wmain'::`3'::<lambda_496> &,EditorMainWindow *> >" [E:\Engine\Editor\EditorModule.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\functional(940,47): message : выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Is_invocable_r<_Ret,wmain::<lambda_496> &,EditorMainWindow *>" [E:\Engine\Editor\EditorModule.vcxproj]
+          with
+          [
+              _Ret=void
+          ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(1827,26): message : выполняется компиляция ссылки на экземпляр псевдоним шаблон функции "std::_Is_invocable_r_<_Rx,_Callable,EditorMainWindow*>" [E:\Engine\Editor\EditorModule.vcxproj]
+          with
+          [
+              _Rx=void,
+              _Callable=wmain::<lambda_496> &
+          ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(1789,38): message : выполняется компиляция ссылки на экземпляр псевдоним шаблон функции "std::_Decltype_invoke_nonzero<_Callable,EditorMainWindow*,>" [E:\Engine\Editor\EditorModule.vcxproj]
+          with
+          [
+              _Callable=wmain::<lambda_496> &
+          ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(1785,71): message : во время компиляции функции-члена класс шаблон "unknown-type std::_Invoker_functor::_Call(_Callable &&,_Types ...) noexcept(<expr>)" [E:\Engine\Editor\EditorModule.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(1576,46): message : выполняется компиляция ссылки на экземпляр шаблон функции "auto wmain::<lambda_496>::operator ()<EditorMainWindow>(_T1 *) const" [E:\Engine\Editor\EditorModule.vcxproj]
+          with
+          [
+              _T1=EditorMainWindow
+          ]
+E:\Engine\Editor\tests\EditorUiTests.cpp(2419,205): warning C4305: аргумент: усечение из "double" в "float" [E:\Engine\Editor\EditorModule.vcxproj]
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EditorUiTests.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EditorUiTests.exp
+  Создание кода
+  Создание кода завершено
+  EditorModule.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\EditorUiTests.exe
+

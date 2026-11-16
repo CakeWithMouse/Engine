@@ -1,0 +1,59 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 480x360
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 480x360
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\continuation-particles-final\mode-1-surface-1-collision-1-0.bmp written=1 size=480x360
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\continuation-particles-final\mode-1-surface-1-collision-1-1.bmp written=1 size=480x360
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\continuation-particles-final\mode-1-surface-1-collision-1-2.bmp written=1 size=480x360
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\continuation-particles-final\mode-1-surface-1-collision-1-3.bmp written=1 size=480x360
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "depthCollision": true,
+    "frames": [
+        {
+            "dispatches": 30,
+            "drawCalls": 3,
+            "elapsed": 0.01666666753590107,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\continuation-particles-final\\mode-1-surface-1-collision-1-0.bmp",
+            "instances": 130,
+            "sha256": "32c29953d1b9334e1f7598c7544c1e79c91a3481feacc06e83f52f3532f3d2df",
+            "steps": 1
+        },
+        {
+            "dispatches": 30,
+            "drawCalls": 3,
+            "elapsed": 0.18333334289491177,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\continuation-particles-final\\mode-1-surface-1-collision-1-1.bmp",
+            "instances": 130,
+            "sha256": "636a3c285f8b8315295e6e6583145222dfb8841567b59aae07c4f1fbe6744cbf",
+            "steps": 11
+        },
+        {
+            "dispatches": 30,
+            "drawCalls": 3,
+            "elapsed": 0.5166666936129332,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\continuation-particles-final\\mode-1-surface-1-collision-1-2.bmp",
+            "instances": 130,
+            "sha256": "7ba3978ff8bb19cba5084ea3692d2008d69810fb2e91ce20e618ae0f5afb1b71",
+            "steps": 31
+        },
+        {
+            "dispatches": 30,
+            "drawCalls": 3,
+            "elapsed": 1.0166667196899652,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\continuation-particles-final\\mode-1-surface-1-collision-1-3.bmp",
+            "instances": 130,
+            "sha256": "4a6ba404b2ec5c3cc32cb213619410cc5aaec5e7967e18b85ddbff9914d67195",
+            "steps": 61
+        }
+    ],
+    "measurement": "Real GPU simulation and image readback; no particle-state readback or inferred collision counter.",
+    "ok": true,
+    "surface": true
+}

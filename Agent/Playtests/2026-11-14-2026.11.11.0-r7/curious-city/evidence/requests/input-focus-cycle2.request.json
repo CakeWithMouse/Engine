@@ -1,0 +1,70 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Project.json",
+  "steps": [
+    {
+      "action": "play",
+      "kind": "control"
+    },
+    {
+      "enabled": true,
+      "kind": "focus"
+    },
+    {
+      "count": 2,
+      "kind": "frames"
+    },
+    {
+      "key": 87,
+      "down": true,
+      "kind": "key"
+    },
+    {
+      "count": 2,
+      "kind": "frames"
+    },
+    {
+      "enabled": false,
+      "kind": "focus"
+    },
+    {
+      "count": 2,
+      "kind": "frames"
+    },
+    {
+      "key": 87,
+      "down": true,
+      "kind": "key"
+    },
+    {
+      "count": 2,
+      "kind": "frames"
+    },
+    {
+      "key": 87,
+      "down": false,
+      "kind": "key"
+    },
+    {
+      "enabled": true,
+      "kind": "focus"
+    },
+    {
+      "key": 87,
+      "down": true,
+      "kind": "key"
+    },
+    {
+      "count": 2,
+      "kind": "frames"
+    },
+    {
+      "key": 87,
+      "down": false,
+      "kind": "key"
+    },
+    {
+      "count": 2,
+      "kind": "frames"
+    }
+  ]
+}

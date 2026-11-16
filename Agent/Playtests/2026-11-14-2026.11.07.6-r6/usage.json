@@ -1,0 +1,74 @@
+{
+  "baseline": {
+    "limitId": "codex",
+    "limitName": null,
+    "normalModelSlug": null,
+    "primary": {
+      "usedPercent": 7,
+      "windowDurationMins": 10080,
+      "resetsAt": 1794928911
+    },
+    "secondary": null,
+    "credits": {
+      "hasCredits": false,
+      "unlimited": false,
+      "balance": "0"
+    },
+    "individualLimit": null,
+    "spendControlReached": false,
+    "planType": "prolite",
+    "rateLimitReachedType": null
+  },
+  "checkpoints": [
+    {
+      "time": "2026-11-14",
+      "phase": "post-import-fixes",
+      "usedPercent": 8,
+      "windowDurationMins": 10080,
+      "resetsAt": 1794928911
+    },
+    {
+      "time": "2026-11-14",
+      "phase": "continuation-start",
+      "usedPercent": 12,
+      "windowDurationMins": 10080,
+      "resetsAt": 1794928911
+    },
+    {
+      "time": "2026-11-14",
+      "phase": "continuation-authoring-commandlets",
+      "usedPercent": 13,
+      "windowDurationMins": 10080,
+      "resetsAt": 1794928911
+    },
+    {
+      "time": "2026-11-14",
+      "phase": "continuation-shader-and-graph-fixes",
+      "usedPercent": 18,
+      "windowDurationMins": 10080,
+      "resetsAt": 1794928911
+    }
+  ],
+  "firstPhaseFinal": {
+    "time": "2026-11-14",
+    "phase": "completed-fixes-and-personas",
+    "usedPercent": 12,
+    "windowDurationMins": 10080,
+    "resetsAt": 1794928911,
+    "deltaPercentagePoints": 5
+  },
+  "budgetPercentagePoints": 30,
+  "stopNewWorkAt": 25,
+  "scope": "Shared account observation, not exact chat consumption",
+  "stopNewWorkAtUsedPercent": 32,
+  "maxUsedPercent": 37,
+  "final": {
+    "time": "2026-11-14",
+    "phase": "continuation-matrix-complete",
+    "usedPercent": 19,
+    "windowDurationMins": 10080,
+    "resetsAt": 1794928911,
+    "deltaPercentagePoints": 12,
+    "continuationDeltaPercentagePoints": 7
+  }
+}

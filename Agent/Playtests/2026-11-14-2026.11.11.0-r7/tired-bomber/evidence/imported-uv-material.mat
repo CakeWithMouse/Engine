@@ -1,0 +1,23 @@
+{
+  "params": {
+    "Tint": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "shader": "Imported.hlsl",
+  "sourceMaterial": "UV chart",
+  "textures": {
+    "BaseMap": "../Textures/BaseColor_0.png"
+  },
+  "version": 1,
+  "render": {
+    "blend": "opaque",
+    "alphaClip": 0.5,
+    "lighting": "lit",
+    "twoSided": true,
+    "castShadows": true
+  }
+}

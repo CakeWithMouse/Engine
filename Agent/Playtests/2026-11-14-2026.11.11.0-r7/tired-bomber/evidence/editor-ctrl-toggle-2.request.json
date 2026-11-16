@@ -1,0 +1,30 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\BomberUpgradedR7\\Project.json",
+  "steps": [
+    {
+      "count": 1,
+      "action": "frames"
+    },
+    {
+      "y": 0.5,
+      "x": 0.5,
+      "action": "viewport-click"
+    },
+    {
+      "target": "Warm Light",
+      "action": "hierarchy-click"
+    },
+    {
+      "control": true,
+      "y": 0.5,
+      "x": 0.5,
+      "action": "viewport-click"
+    },
+    {
+      "scope": "main",
+      "id": "Gizmo.FocusSelected",
+      "action": "ui-command",
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\editor-ctrl-toggle-2.png"
+    }
+  ]
+}

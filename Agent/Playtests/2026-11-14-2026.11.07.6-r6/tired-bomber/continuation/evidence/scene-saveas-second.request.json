@@ -1,0 +1,33 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\BomberContinue\\Project.json",
+  "steps": [
+    {
+      "action": "new"
+    },
+    {
+      "action": "create",
+      "type": "Primitive.Cone",
+      "name": "SaveAsOnly"
+    },
+    {
+      "action": "move",
+      "target": "SaveAsOnly",
+      "delta": [
+        -4,
+        2,
+        7
+      ]
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\scene-saveas-verify.scene.json",
+      "action": "save"
+    },
+    {
+      "action": "new"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\scene-saveas-verify.scene.json",
+      "action": "load"
+    }
+  ]
+}

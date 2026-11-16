@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "shader": "WarmStone.hlsl",
+  "params": {
+    "GoldTint": [
+      0.05,
+      0.1,
+      0.95,
+      1
+    ],
+    "Specular": 0,
+    "FlatAmbient": 1
+  }
+}

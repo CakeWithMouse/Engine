@@ -1,0 +1,164 @@
+{
+  "skeletal": [
+    {
+      "a": "skeletal-followup-baseline-t0.bmp",
+      "b": "skeletal-followup-pose-t025.bmp",
+      "box": [
+        450,
+        220,
+        570,
+        390
+      ],
+      "pixelsCompared": 20400,
+      "pixelsChangedAboveThreshold": 3141,
+      "meanAbsoluteChannelDifference": 10.9349,
+      "changedBBox": [
+        480,
+        222,
+        535,
+        371
+      ]
+    },
+    {
+      "a": "skeletal-followup-baseline-t0.bmp",
+      "b": "skeletal-followup-pose-t050.bmp",
+      "box": [
+        450,
+        220,
+        570,
+        390
+      ],
+      "pixelsCompared": 20400,
+      "pixelsChangedAboveThreshold": 3235,
+      "meanAbsoluteChannelDifference": 13.7519,
+      "changedBBox": [
+        480,
+        224,
+        535,
+        371
+      ]
+    },
+    {
+      "a": "skeletal-followup-baseline-t0.bmp",
+      "b": "skeletal-followup-reset-t0.bmp",
+      "box": [
+        450,
+        220,
+        570,
+        390
+      ],
+      "pixelsCompared": 20400,
+      "pixelsChangedAboveThreshold": 0,
+      "meanAbsoluteChannelDifference": 0.0,
+      "changedBBox": null
+    }
+  ],
+  "instances": [
+    {
+      "a": "instances-followup-baseline.bmp",
+      "b": "instances-followup-moved-one.bmp",
+      "box": [
+        275,
+        80,
+        560,
+        440
+      ],
+      "pixelsCompared": 102600,
+      "pixelsChangedAboveThreshold": 126,
+      "meanAbsoluteChannelDifference": 0.0718,
+      "changedBBox": [
+        433,
+        185,
+        440,
+        211
+      ]
+    },
+    {
+      "a": "instances-followup-moved-one.bmp",
+      "b": "instances-followup-moved-and-hidden.bmp",
+      "box": [
+        275,
+        80,
+        560,
+        440
+      ],
+      "pixelsCompared": 102600,
+      "pixelsChangedAboveThreshold": 211,
+      "meanAbsoluteChannelDifference": 0.1238,
+      "changedBBox": [
+        529,
+        101,
+        537,
+        128
+      ]
+    },
+    {
+      "a": "instances-followup-baseline.bmp",
+      "b": "instances-followup-restored.bmp",
+      "box": [
+        275,
+        80,
+        560,
+        440
+      ],
+      "pixelsCompared": 102600,
+      "pixelsChangedAboveThreshold": 0,
+      "meanAbsoluteChannelDifference": 0.0,
+      "changedBBox": null
+    }
+  ],
+  "lod": [
+    {
+      "a": "lod-followup-far-y24.bmp",
+      "b": "lod-followup-mid-y8.bmp",
+      "box": [
+        275,
+        80,
+        560,
+        440
+      ],
+      "pixelsCompared": 102600,
+      "pixelsChangedAboveThreshold": 18979,
+      "meanAbsoluteChannelDifference": 4.8784,
+      "changedBBox": [
+        288,
+        121,
+        559,
+        439
+      ]
+    },
+    {
+      "a": "lod-followup-far-y24.bmp",
+      "b": "lod-followup-near-y3.bmp",
+      "box": [
+        275,
+        80,
+        560,
+        440
+      ],
+      "pixelsCompared": 102600,
+      "pixelsChangedAboveThreshold": 17217,
+      "meanAbsoluteChannelDifference": 3.6578,
+      "changedBBox": [
+        288,
+        101,
+        559,
+        410
+      ]
+    },
+    {
+      "a": "lod-followup-far-y24.bmp",
+      "b": "lod-followup-return-y24.bmp",
+      "box": [
+        275,
+        80,
+        560,
+        440
+      ],
+      "pixelsCompared": 102600,
+      "pixelsChangedAboveThreshold": 0,
+      "meanAbsoluteChannelDifference": 0.0,
+      "changedBBox": null
+    }
+  ]
+}

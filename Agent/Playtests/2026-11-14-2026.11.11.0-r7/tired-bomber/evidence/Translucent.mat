@@ -1,0 +1,1 @@
+{"version":1,"shader":"Translucent.hlsl","render":{"blend":"translucent","lighting":"unlit","twoSided":true,"castShadows":false}}

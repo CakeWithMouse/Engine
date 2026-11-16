@@ -1,0 +1,7 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\BomberContinue\\Project.json",
+  "base": "Character",
+  "kind": "Character",
+  "name": "BomberCrewController",
+  "header": "Engine/Components/Character.h"
+}

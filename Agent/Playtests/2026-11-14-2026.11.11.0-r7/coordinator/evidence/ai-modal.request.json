@@ -1,0 +1,39 @@
+{
+  "machine": "/Game/AI/Guard.fsm",
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/ai-editor-smoke/Project.json",
+  "steps": [
+    {
+      "edits": [
+        {
+          "value": "ModalLook",
+          "name": "FsmStateName"
+        }
+      ],
+      "dialogImage": "E:/Engine/Engine/build/playtests/20261114-r7/ai-state-modal.png",
+      "node": 3,
+      "action": "dialog-state"
+    },
+    {
+      "to": 6,
+      "from": 3,
+      "dialogImage": "E:/Engine/Engine/build/playtests/20261114-r7/ai-link-modal.png",
+      "edits": [
+        {
+          "value": 0.35,
+          "name": "FsmLinkDelay"
+        },
+        {
+          "value": 2,
+          "name": "FsmLinkPriority"
+        }
+      ],
+      "action": "dialog-link"
+    },
+    {
+      "action": "save"
+    },
+    {
+      "action": "reopen"
+    }
+  ]
+}

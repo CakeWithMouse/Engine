@@ -20,8 +20,8 @@ struct GraphCompileResult
 class HlslGraphCompiler
 {
 public:
-    static GraphCompileResult Compile(const MaterialGraphModel& model);
-    static QString CompileGraphToHlsl(const MaterialGraphModel& model) { return Compile(model).hlsl; }
+    static GraphCompileResult Compile(const GraphDocument& model);
+    static QString CompileGraphToHlsl(const GraphDocument& model) { return Compile(model).hlsl; }
 
     // Пины ноды, общие для редактора и компилятора. Тип пина: float, float2, float3, float4 или any
     // (размер берётся по подключённым входам). Связь допустима всегда: компилятор приводит размеры сам.

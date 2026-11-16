@@ -6,6 +6,7 @@
 #include <Engine/Sound/AudioEngine.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
 #include <Engine/Components/Character.h>
+#include <Engine/AI/World.h>
 #include <cstring>
 #include <cmath>
 #include <climits>
@@ -39,7 +40,7 @@ template<class F> uint32_t DocumentCall(const char* path, char* error, uint32_t 
 std::unique_ptr<Game> EmptyGame()
 {
     auto game = std::make_unique<Game>();
-    game->SetSimulationEnabled(false); // frame() is the sole simulation owner
+    game->SetSimulationEnabled(false); // Edit and material previews do not simulate.
     game->GetSettings().SetVSync(false);
     game->SetSceneLightingEnabled(true);
     return game;
@@ -53,10 +54,11 @@ std::unique_ptr<Game> SceneEditSession::CopyForPlay()
     auto candidate = gameFactory_ ? gameFactory_() : EmptyGame();
     if (!candidate) throw std::runtime_error("Game factory returned null");
     candidate->Saves().SetCatalog(catalog_);
-    candidate->SetSimulationEnabled(false);
+    candidate->SetSimulationEnabled(true);
     candidate->SetSimulationTimeScale(1.0f);
     candidate->SetSceneLightingEnabled(true);
     candidate->GetSettings().SetAntialiasing(antialiasingMode_);
+    candidate->GetSettings().Physics() = edit_->GetSettings().Physics();
     for (const auto& [id, st] : storedIcons_) candidate->SetOverlayIcon(id, st.width, st.height, st.pixels.data());
     SceneDocument::Restore(edit_->GetScene().GetSnapshot(), catalog_, candidate->GetScene());
     return candidate;
@@ -118,12 +120,14 @@ uint32_t SceneEditSession::Control(uint32_t command)
     }
     if (command == EnginePause && state_ == EnginePlaying) {
         if (auto* audio = play_->GetAudioEngine()) audio->SetPaused(true);
+        play_->SetSimulationEnabled(false);
         play_->OnFocusLost(); play_->GetInput().SetContextEnabled(Input::Context::Game,false);
         state_ = EnginePaused; return EngineSceneOk;
     }
     if (command == EngineResume && state_ == EnginePaused) {
         if (auto* audio = play_->GetAudioEngine())
             if (!audio->SetPaused(false)) return EngineSceneFailure;
+        play_->SetSimulationEnabled(true);
         play_->OnFocusLost(); play_->GetInput().SetContextEnabled(Input::Context::Game,inputFocused_);
         state_ = EnginePlaying; return EngineSceneOk;
     }
@@ -205,9 +209,13 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
                 if (s.state_ == EnginePlaying)
                 {
                     for (const auto& item : s.play_->GetScene().GetComponents()) item.second->SetGame(s.play_.get());
-                    try { s.play_->StepProjectSimulation(static_cast<float>(dt)); }
+                    // The edit API frame delta is real time (also used for rendering below).
+                    // StepProjectSimulation accepts simulation seconds; apply the Game scale
+                    // here, exactly as the standalone UpdateFrame path does.
+                    try { s.play_->StepProjectSimulation(static_cast<float>(dt) * s.play_->GetSimulationTimeScale()); }
                     catch (...) {
                         if (auto* audio = s.play_->GetAudioEngine()) audio->SetPaused(true);
+                        s.play_->SetSimulationEnabled(false);
                         s.state_ = EnginePaused; return EngineSceneSimulationFailed;
                     }
                     if (s.pendingStop_) return EngineSceneOk;
@@ -217,7 +225,7 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
                         if (auto* particles = dynamic_cast<ParticleSystemComponent*>(item.second.get()))
                             particles->ParticleSystemComponent::Tick(static_cast<float>(dt));
                 // Simulation is stepped above; rendering still needs real elapsed time for materials.
-                if (s.attached_ && !s.Active().RenderViewportFrame(static_cast<float>(dt))) return EngineSceneFailure;
+                if (s.attached_ && !s.Active().RenderViewportFrame(static_cast<float>(dt), false)) return EngineSceneFailure;
                 s.RenderPreviews(dt);
                 return EngineSceneOk;
             });
@@ -444,6 +452,104 @@ EngineViewportOverlayApi SceneEditSession::GetViewportOverlayApi() noexcept
         }
     };
 }
+EnginePhysicsApi SceneEditSession::GetPhysicsApi() noexcept
+{
+    return {1, this,
+        [](void* p, EnginePhysicsSettingsState* output) -> uint32_t {
+            if (!output) return EngineSceneInvalidArgument;
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                if (!s.edit_) return EngineSceneFailure;
+                const auto& physics = s.Active().GetSettings().Physics();
+                const auto gravity = physics.GetGravity();
+                *output = {physics.IsEnabled() ? 1u : 0u,
+                           gravity.x, gravity.y, gravity.z,
+                           physics.GetFixedTimeStep(),
+                           static_cast<uint32_t>(physics.GetMaxSubSteps()),
+                           static_cast<uint32_t>(physics.GetVelocitySteps()),
+                           static_cast<uint32_t>(physics.GetPositionSteps())};
+                return EngineSceneOk;
+            });
+        },
+        [](void* p, const EnginePhysicsSettingsState* value) -> uint32_t {
+            if (!value || (value->enabled != 0 && value->enabled != 1) ||
+                !(value->fixedTimeStep > 0.0f) || value->maxSubSteps == 0 ||
+                !std::isfinite(value->gravityX) || !std::isfinite(value->gravityY) ||
+                !std::isfinite(value->gravityZ)) return EngineSceneInvalidArgument;
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                if (!s.edit_) return EngineSceneFailure;
+                auto& physics = s.Active().GetSettings().Physics();
+                physics.SetEnabled(value->enabled != 0);
+                physics.SetGravity({value->gravityX, value->gravityY, value->gravityZ});
+                physics.SetFixedTimeStep(value->fixedTimeStep);
+                physics.SetMaxSubSteps(static_cast<int>(value->maxSubSteps));
+                physics.SetVelocitySteps(static_cast<int>(value->velocitySteps));
+                physics.SetPositionSteps(static_cast<int>(value->positionSteps));
+                return EngineSceneOk;
+            });
+        },
+        [](void*) -> uint32_t {
+#ifdef ENGINE_ENABLE_JOLT
+            return 1;
+#else
+            return 0;
+#endif
+        }};
+}
+
+EnginePhysicsObjectApi SceneEditSession::GetPhysicsObjectApi() noexcept
+{
+    return {1, this,
+        [](void* p, uint64_t objectId, EnginePhysicsObjectState* output) -> uint32_t {
+            if (!output) return EngineSceneInvalidArgument;
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                const auto* component = s.Active().GetScene().FindComponent(objectId);
+                // Distinguishes "never configured" (no physics block in the document) from
+                // an explicitly disabled body so duplicates only copy real settings.
+                if (!component || !component->HasPhysicsSettings()) return EngineSceneNotFound;
+                uint32_t bodyType = EnginePhysicsBodyDynamic;
+                if (component->GetPhysicsBodyType() == PhysicsBodyType::Static) bodyType = EnginePhysicsBodyStatic;
+                else if (component->GetPhysicsBodyType() == PhysicsBodyType::Kinematic) bodyType = EnginePhysicsBodyKinematic;
+                uint32_t shapeType = EnginePhysicsShapeBox;
+                if (component->GetPhysicsShapeType() == PhysicsShapeType::Sphere) shapeType = EnginePhysicsShapeSphere;
+                else if (component->GetPhysicsShapeType() == PhysicsShapeType::Capsule) shapeType = EnginePhysicsShapeCapsule;
+                *output = {component->IsPhysicsEnabled() ? 1u : 0u, bodyType, shapeType,
+                           component->GetPhysicsFriction(), component->GetPhysicsRestitution(),
+                           component->GetPhysicsDensity()};
+                return EngineSceneOk;
+            });
+        },
+        [](void* p, uint64_t objectId, const EnginePhysicsObjectState* value) -> uint32_t {
+            if (!value || value->enabled > 1 ||
+                (value->bodyType != EnginePhysicsBodyStatic && value->bodyType != EnginePhysicsBodyDynamic &&
+                 value->bodyType != EnginePhysicsBodyKinematic) ||
+                (value->shapeType != EnginePhysicsShapeBox && value->shapeType != EnginePhysicsShapeSphere &&
+                 value->shapeType != EnginePhysicsShapeCapsule) ||
+                !std::isfinite(value->friction) || value->friction < 0.0f ||
+                !std::isfinite(value->restitution) || value->restitution < 0.0f ||
+                !std::isfinite(value->density) || value->density <= 0.0f)
+                return EngineSceneInvalidArgument;
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                PhysicsBodyType bodyType = PhysicsBodyType::Dynamic;
+                if (value->bodyType == EnginePhysicsBodyStatic) bodyType = PhysicsBodyType::Static;
+                else if (value->bodyType == EnginePhysicsBodyKinematic) bodyType = PhysicsBodyType::Kinematic;
+                PhysicsShapeType shapeType = PhysicsShapeType::Box;
+                if (value->shapeType == EnginePhysicsShapeSphere) shapeType = PhysicsShapeType::Sphere;
+                else if (value->shapeType == EnginePhysicsShapeCapsule) shapeType = PhysicsShapeType::Capsule;
+                const auto result = s.Active().GetScene().SetPhysicsBody(objectId,
+                    {value->enabled != 0, bodyType, shapeType, value->friction, value->restitution, value->density});
+                return result == SceneResult::Ok ? EngineSceneOk :
+                    (result == SceneResult::NotFound ? EngineSceneNotFound : EngineSceneInvalidArgument);
+            });
+        },
+        [](void*) -> uint32_t {
+#ifdef ENGINE_ENABLE_JOLT
+            return 1;
+#else
+            return 0;
+#endif
+        }};
+}
+
 void SceneEditSession::ReplaceEdit(const SceneSnapshot& data)
 {
     auto candidate = EmptyGame();

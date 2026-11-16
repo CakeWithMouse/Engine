@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="DeployJoltRuntime" AfterTargets="Build" Condition="'$(EngineEnableJolt)'=='true'">
+    <!-- Multiple targets share Runtime; each must restore its dependency closure after incremental cleanup. -->
+    <PropertyGroup>
+      <JoltBin>$(RepositoryRoot)Engine\vcpkg_installed\x64-windows\bin</JoltBin>
+      <JoltBin Condition="'$(Configuration)'=='Debug'">$(RepositoryRoot)Engine\vcpkg_installed\x64-windows\debug\bin</JoltBin>
+    </PropertyGroup>
+    <ItemGroup><JoltRuntimeDll Include="$(JoltBin)\Jolt.dll" /></ItemGroup>
+    <Error Condition="'@(JoltRuntimeDll)'==''" Text="Jolt physics is enabled but its runtime dependency is missing from $(JoltBin)." />
+    <Copy SourceFiles="@(JoltRuntimeDll)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+</Project>

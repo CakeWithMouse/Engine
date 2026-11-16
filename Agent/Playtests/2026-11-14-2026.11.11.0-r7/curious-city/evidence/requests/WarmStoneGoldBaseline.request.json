@@ -1,0 +1,33 @@
+{
+  "height": 240,
+  "shape": "cube",
+  "target": [
+    0,
+    0,
+    0
+  ],
+  "frames": [
+    {
+      "image": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/WarmStoneGoldBaseline.bmp",
+      "position": [
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "material": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Content\\Materials\\WarmStoneGoldBaseline.mat",
+  "rendering": 0,
+  "width": 320,
+  "size": 2,
+  "up": [
+    0,
+    1,
+    0
+  ],
+  "camera": [
+    0,
+    0,
+    -8
+  ]
+}

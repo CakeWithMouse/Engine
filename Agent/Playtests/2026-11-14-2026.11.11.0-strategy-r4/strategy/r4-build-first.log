@@ -1,0 +1,23 @@
+EngineLib SHA256=358E352C9E30FCCD6ED87D7FE54581FC7F3820BBCDD3E6B31CDE7D142626ABEE
+Using v143, MSVC 14.44.35207, Windows SDK 10.0.26100.0.
+MSBuild: C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe
+
+  ComponentGenerator: 3 component(s), Project
+  Module.cpp
+  ProjectComponent.cpp
+  ProjectGame.cpp
+E:\Engine\Engine\build\playtests\strategy-r4\RepairCorridor\Source\ProjectGame.cpp(175,7): error C2065: selectionRectTests_: необъявленный идентификатор [E:\Engine\Engine\build\playtests\strategy-r4\RepairCorridor\Game.vcxproj]
+E:\Engine\Engine\build\playtests\strategy-r4\RepairCorridor\Source\ProjectGame.cpp(620,43): error C2065: selectionRectTests_: необъявленный идентификатор [E:\Engine\Engine\build\playtests\strategy-r4\RepairCorridor\Game.vcxproj]
+  RotatingCube.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+
+Full build log: E:\Engine\Engine\build\playtests\strategy-r4\RepairCorridor\Binaries\Release\d321ac87f7664d0aab0a543fed910a29\build.log
+Exception: E:\Engine\Game\build\x64\Release\Runtime\SDK\ProjectTools.ps1:317
+Line |
+ 317 |  … exitCode) { throw 'Project build failed; previous module preserved' } …
+     |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Project build failed; previous module preserved
+
+
+ProjectTools threw: Project build failed; previous module preserved

@@ -1,0 +1,44 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Project.json",
+  "steps": [
+    {
+      "action": "frames",
+      "count": 1
+    },
+    {
+      "action": "resize-window",
+      "height": 720,
+      "scope": "main",
+      "width": 960,
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\frames\\camera-scene-960x720-2.png"
+    },
+    {
+      "action": "hierarchy-click",
+      "scope": "main",
+      "target": "Cube"
+    },
+    {
+      "moves": 8,
+      "fromY": 0.5,
+      "toY": 0.46,
+      "toX": 0.57,
+      "scope": "main",
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\frames\\camera-scene-drag-2.png",
+      "action": "viewport-drag",
+      "fromX": 0.5
+    },
+    {
+      "action": "resize-window",
+      "height": 720,
+      "scope": "main",
+      "width": 1280,
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\frames\\camera-scene-1280x720-2.png"
+    },
+    {
+      "action": "ui-command",
+      "id": "Gizmo.ToggleCoordinateSpace",
+      "scope": "main",
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\frames\\camera-scene-world-mode-2.png"
+    }
+  ]
+}

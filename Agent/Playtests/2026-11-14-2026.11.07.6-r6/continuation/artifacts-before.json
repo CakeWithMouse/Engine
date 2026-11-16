@@ -1,0 +1,46 @@
+{
+  "archives": [
+    {
+      "role": "calm-city",
+      "archive": "calm-city/calm-city-r6-source.zip",
+      "entries": 37,
+      "bytes": 101555,
+      "sha256": "ed6a4a817a28b5adc4cd567f5bf338f30e042d69df58342deffe61e59d093392",
+      "excludedSdkBinariesIntermediate": true
+    },
+    {
+      "role": "curious-city",
+      "archive": "curious-city/CuriousCity-r6-source.zip",
+      "entries": 98,
+      "bytes": 1158663,
+      "sha256": "8803a9faf8b92af0e7ba60d2a7374b228be4f9d529b4f707b10f3f9d3031fcdb",
+      "excludedSdkBinariesIntermediate": true
+    },
+    {
+      "role": "tired-bomber",
+      "archive": "tired-bomber/tired-bomber-r6-source.zip",
+      "entries": 48,
+      "bytes": 417348,
+      "sha256": "98acc7faedadf93bcf8c71c12bc9cb80b839474ad25277ae432ec7401fec577c",
+      "excludedSdkBinariesIntermediate": true
+    },
+    {
+      "role": "ai-trash",
+      "archive": "ai-trash/ai-trash-r6-source.zip",
+      "entries": 41,
+      "bytes": 104917,
+      "sha256": "37526b5f3d2e98b399f70e327e595c75248a989af91d46da066e366e62a6e1d1",
+      "excludedSdkBinariesIntermediate": true
+    }
+  ],
+  "fingerprints": {
+    "Engine/build/x64/Release/Engine.lib": "9fd749170e1c7433ec99047591c9b1cbaf6c4a10f38fa72c42bc1e88adac8149",
+    "Game/build/x64/Release/Runtime/SDK/Lib/Engine.lib": "9fd749170e1c7433ec99047591c9b1cbaf6c4a10f38fa72c42bc1e88adac8149",
+    "Game/build/x64/Release/Runtime/EngineRuntime.exe": "ba326b254400dc4d9144d564ebf1da1d3779f86d343d5082351c0ae891d420e4",
+    "Game/build/x64/Release/Runtime/EngineCommandlets.exe": "8eca61044e2e98b1891d1258138035ba7ee67b3855a7c6065b0ed93a10320118",
+    "Game/build/x64/Release/Runtime/Editor.dll": "0fe4bc82bd4284be5d19c8199f62213fb87019cd42432e494bb919937e88e9ae",
+    "Engine/Version.json": "da6356147c5b76398e6d0c2fdcd1f48b7e2eb53f0b985423592e975c881336aa"
+  },
+  "baseCommit": "d74aebbc0f450a7cc791255423a37d5df89cfb54",
+  "runtimeVersion": "2026.11.07.6 with local r6 fixes; not a published release"
+}

@@ -1,0 +1,52 @@
+{
+  "gitBefore": "d74aebbc0f450a7cc791255423a37d5df89cfb54",
+  "gitAfter": "6899a6ac6a4a3e2a6a9da3cba48c0d790881569a",
+  "upstream": "origin/main; origin/develop does not exist after fetch --prune",
+  "engineBefore": "2026.11.07.6",
+  "engineAfter": "2026.11.11.0",
+  "sceneFormatBeforeAndAfter": 3,
+  "moduleApiBeforeAndAfter": 5,
+  "editApiBeforeAndAfter": 6,
+  "supportedEditApis": [
+    4,
+    5,
+    6
+  ],
+  "projects": [
+    {
+      "role": "calm-city",
+      "inputEngineVersion": "2026.11.07.6",
+      "targetEngineVersion": "2026.11.11.0",
+      "method": "isolated copy, explicit current SDK rebuild"
+    },
+    {
+      "role": "curious-city",
+      "inputEngineVersion": "2026.11.07.6",
+      "targetEngineVersion": "2026.11.11.0",
+      "method": "source copy from r6 upgraded-city, explicit current SDK rebuild"
+    },
+    {
+      "role": "tired-bomber",
+      "inputEngineVersion": "2026.11.07.0",
+      "targetEngineVersion": "2026.11.11.0",
+      "method": "isolated BomberLegacyR5 copy, explicit current SDK rebuild"
+    },
+    {
+      "role": "ai-trash",
+      "inputEngineVersion": "2026.11.07.6",
+      "targetEngineVersion": "2026.11.11.0",
+      "method": "isolated upgrade of r6 TrashGameUpgraded, explicit current SDK rebuild, fresh source archive build/run"
+    }
+  ],
+  "localSdk": {
+    "toolset": "v143",
+    "version": "14.44.35207",
+    "localOnly": true
+  },
+  "notes": [
+    "The old code and reports remain intact. R6 local fixes were reapplied after the fast-forward; a stash and file/hash backup remain available.",
+    "Equal base API versions do not imply an old Game.dll implements new optional AI/Script/AssetImport extensions.",
+    "The four r7 games are rebuilt against the new SDK; historical matrix passes retain r6 provenance.",
+    "Bundled playable AI tutorial is Game/build/x64/Release/Tutorials/AiTutorial; its FSM/script/scene hashes match the upstream tutorial sources."
+  ]
+}

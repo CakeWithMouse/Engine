@@ -1,0 +1,10 @@
+{
+  "defaultMaterial": "Materials/Material_0.mat",
+  "materialSlots": {
+    "0": "Materials/Material_0.mat"
+  },
+  "materials": [
+    "Materials/Material_0.mat"
+  ],
+  "version": 2
+}

@@ -1,0 +1,54 @@
+{
+  "steps": [
+    {
+      "action": "new"
+    },
+    {
+      "name": "BombBody",
+      "type": "Primitive.Cylinder",
+      "action": "create"
+    },
+    {
+      "name": "TargetLight",
+      "type": "Light.Point",
+      "action": "create"
+    },
+    {
+      "target": "BombBody",
+      "action": "select"
+    },
+    {
+      "name": "BombSelected",
+      "target": "BombBody",
+      "action": "rename"
+    },
+    {
+      "delta": [
+        0.5,
+        1.25,
+        -2
+      ],
+      "target": "BombSelected",
+      "action": "move"
+    },
+    {
+      "target": "TargetLight",
+      "action": "delete"
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\scene-b.json",
+      "action": "save"
+    },
+    {
+      "action": "new"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\scene-b.json",
+      "action": "load"
+    }
+  ],
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\BomberContinue\\Project.json"
+}

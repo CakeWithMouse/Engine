@@ -1,0 +1,610 @@
+{
+    "accepted": true,
+    "after": [
+        {
+            "id": 1,
+            "material": "",
+            "name": "Ground",
+            "parent": 0,
+            "position": [
+                0,
+                -0.5,
+                0
+            ],
+            "projectData": {
+            },
+            "scale": [
+                20,
+                1,
+                20
+            ],
+            "type": "Primitive.Plane"
+        },
+        {
+            "id": 2,
+            "material": "",
+            "name": "Cube",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Primitive.Cube"
+        },
+        {
+            "id": 3,
+            "material": "",
+            "name": "Warm Light",
+            "parent": 0,
+            "position": [
+                2,
+                3,
+                2
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Light.Point"
+        },
+        {
+            "id": 4,
+            "material": "",
+            "name": "Cool Light",
+            "parent": 0,
+            "position": [
+                -3,
+                2,
+                1
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Light.Point"
+        },
+        {
+            "id": 5,
+            "material": "",
+            "name": "Hero..v2",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+                "materialSlots": {
+                    "0": ""
+                },
+                "version": 1
+            },
+            "scale": [
+                0.02539999969303608,
+                0.02539999969303608,
+                0.02539999969303608
+            ],
+            "type": "Engine.Model"
+        },
+        {
+            "id": 6,
+            "material": "",
+            "name": "Hero..v2 2",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+                "materialSlots": {
+                    "0": ""
+                },
+                "version": 1
+            },
+            "scale": [
+                0.02539999969303608,
+                0.02539999969303608,
+                0.02539999969303608
+            ],
+            "type": "Engine.Model"
+        },
+        {
+            "id": 7,
+            "material": "",
+            "name": "Hero..v2 3",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+                "materialSlots": {
+                    "0": ""
+                },
+                "version": 1
+            },
+            "scale": [
+                0.02539999969303608,
+                0.02539999969303608,
+                0.02539999969303608
+            ],
+            "type": "Engine.Model"
+        }
+    ],
+    "afterMove": [
+        {
+            "id": 1,
+            "material": "",
+            "name": "Ground",
+            "parent": 0,
+            "position": [
+                0,
+                -0.5,
+                0
+            ],
+            "projectData": {
+            },
+            "scale": [
+                20,
+                1,
+                20
+            ],
+            "type": "Primitive.Plane"
+        },
+        {
+            "id": 2,
+            "material": "",
+            "name": "Cube",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Primitive.Cube"
+        },
+        {
+            "id": 3,
+            "material": "",
+            "name": "Warm Light",
+            "parent": 0,
+            "position": [
+                2,
+                3,
+                2
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Light.Point"
+        },
+        {
+            "id": 4,
+            "material": "",
+            "name": "Cool Light",
+            "parent": 0,
+            "position": [
+                -3,
+                2,
+                1
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Light.Point"
+        },
+        {
+            "id": 5,
+            "material": "",
+            "name": "Hero..v2",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+                "materialSlots": {
+                    "0": ""
+                },
+                "version": 1
+            },
+            "scale": [
+                0.02539999969303608,
+                0.02539999969303608,
+                0.02539999969303608
+            ],
+            "type": "Engine.Model"
+        },
+        {
+            "id": 6,
+            "material": "",
+            "name": "Hero..v2 2",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+                "materialSlots": {
+                    "0": ""
+                },
+                "version": 1
+            },
+            "scale": [
+                0.02539999969303608,
+                0.02539999969303608,
+                0.02539999969303608
+            ],
+            "type": "Engine.Model"
+        },
+        {
+            "id": 7,
+            "material": "",
+            "name": "Hero..v2 3",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+                "materialSlots": {
+                    "0": ""
+                },
+                "version": 1
+            },
+            "scale": [
+                0.02539999969303608,
+                0.02539999969303608,
+                0.02539999969303608
+            ],
+            "type": "Engine.Model"
+        }
+    ],
+    "afterReimport": [
+        {
+            "id": 1,
+            "material": "",
+            "name": "Ground",
+            "parent": 0,
+            "position": [
+                0,
+                -0.5,
+                0
+            ],
+            "projectData": {
+            },
+            "scale": [
+                20,
+                1,
+                20
+            ],
+            "type": "Primitive.Plane"
+        },
+        {
+            "id": 2,
+            "material": "",
+            "name": "Cube",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Primitive.Cube"
+        },
+        {
+            "id": 3,
+            "material": "",
+            "name": "Warm Light",
+            "parent": 0,
+            "position": [
+                2,
+                3,
+                2
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Light.Point"
+        },
+        {
+            "id": 4,
+            "material": "",
+            "name": "Cool Light",
+            "parent": 0,
+            "position": [
+                -3,
+                2,
+                1
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Light.Point"
+        },
+        {
+            "id": 5,
+            "material": "",
+            "name": "Hero..v2",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+                "materialSlots": {
+                    "0": ""
+                },
+                "version": 1
+            },
+            "scale": [
+                0.02539999969303608,
+                0.02539999969303608,
+                0.02539999969303608
+            ],
+            "type": "Engine.Model"
+        },
+        {
+            "id": 6,
+            "material": "",
+            "name": "Hero..v2 2",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+                "materialSlots": {
+                    "0": ""
+                },
+                "version": 1
+            },
+            "scale": [
+                0.02539999969303608,
+                0.02539999969303608,
+                0.02539999969303608
+            ],
+            "type": "Engine.Model"
+        }
+    ],
+    "asset": "/Game/Models/Hero..v2/Hero..v2.obj",
+    "before": [
+        {
+            "id": 1,
+            "material": "",
+            "name": "Ground",
+            "parent": 0,
+            "position": [
+                0,
+                -0.5,
+                0
+            ],
+            "projectData": {
+            },
+            "scale": [
+                20,
+                1,
+                20
+            ],
+            "type": "Primitive.Plane"
+        },
+        {
+            "id": 2,
+            "material": "",
+            "name": "Cube",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Primitive.Cube"
+        },
+        {
+            "id": 3,
+            "material": "",
+            "name": "Warm Light",
+            "parent": 0,
+            "position": [
+                2,
+                3,
+                2
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Light.Point"
+        },
+        {
+            "id": 4,
+            "material": "",
+            "name": "Cool Light",
+            "parent": 0,
+            "position": [
+                -3,
+                2,
+                1
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Light.Point"
+        }
+    ],
+    "dialogs": [
+    ],
+    "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\import-regression\\editor-layout.png",
+    "ok": true,
+    "sidecar": {
+        "scale": 0.02539999969303608,
+        "version": 1
+    },
+    "sidecarExists": true,
+    "spawned": [
+        {
+            "id": 1,
+            "material": "",
+            "name": "Ground",
+            "parent": 0,
+            "position": [
+                0,
+                -0.5,
+                0
+            ],
+            "projectData": {
+            },
+            "scale": [
+                20,
+                1,
+                20
+            ],
+            "type": "Primitive.Plane"
+        },
+        {
+            "id": 2,
+            "material": "",
+            "name": "Cube",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Primitive.Cube"
+        },
+        {
+            "id": 3,
+            "material": "",
+            "name": "Warm Light",
+            "parent": 0,
+            "position": [
+                2,
+                3,
+                2
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Light.Point"
+        },
+        {
+            "id": 4,
+            "material": "",
+            "name": "Cool Light",
+            "parent": 0,
+            "position": [
+                -3,
+                2,
+                1
+            ],
+            "projectData": {
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Light.Point"
+        },
+        {
+            "id": 5,
+            "material": "",
+            "name": "Hero..v2",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+                "materialSlots": {
+                    "0": ""
+                },
+                "version": 1
+            },
+            "scale": [
+                0.02539999969303608,
+                0.02539999969303608,
+                0.02539999969303608
+            ],
+            "type": "Engine.Model"
+        }
+    ]
+}

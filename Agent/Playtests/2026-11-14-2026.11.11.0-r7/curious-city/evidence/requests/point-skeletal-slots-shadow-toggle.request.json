@@ -1,0 +1,140 @@
+{
+  "caster": "skeletal",
+  "model": "E:/Engine/Game/Battle/Content/Models/CesiumMan.glb",
+  "scale": 0.75,
+  "travel": 2.5,
+  "duration": 1.0,
+  "sceneLighting": true,
+  "globalShadows": true,
+  "rendering": 1,
+  "width": 320,
+  "height": 240,
+  "lights": [
+    {
+      "position": [
+        -3,
+        4,
+        1
+      ],
+      "color": [
+        1,
+        0.45,
+        0.2
+      ],
+      "intensity": 0.8,
+      "radius": 12,
+      "enabled": true,
+      "shadows": true
+    },
+    {
+      "position": [
+        3,
+        4,
+        -1
+      ],
+      "color": [
+        0.2,
+        0.5,
+        1
+      ],
+      "intensity": 0.6,
+      "radius": 12,
+      "enabled": true,
+      "shadows": true
+    },
+    {
+      "position": [
+        0,
+        5,
+        3
+      ],
+      "color": [
+        0.3,
+        1,
+        0.35
+      ],
+      "intensity": 0,
+      "radius": 12,
+      "enabled": true,
+      "shadows": true
+    }
+  ],
+  "frames": [
+    {
+      "time": 0,
+      "position": [
+        -1,
+        0.05,
+        0
+      ],
+      "image": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/point-toggle-t0.bmp"
+    },
+    {
+      "time": 0.5,
+      "position": [
+        0,
+        0.05,
+        0
+      ],
+      "image": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/point-toggle-t05.bmp"
+    },
+    {
+      "time": 1,
+      "position": [
+        1,
+        0.05,
+        0
+      ],
+      "image": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/point-toggle-t1.bmp"
+    },
+    {
+      "time": 0,
+      "position": [
+        -1,
+        0.05,
+        0
+      ],
+      "image": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/point-toggle-return.bmp"
+    },
+    {
+      "image": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/point-toggle-off.bmp",
+      "time": 0.5,
+      "lights": [
+        {
+          "shadows": false
+        },
+        {
+          "shadows": false
+        },
+        {
+          "shadows": false
+        }
+      ],
+      "position": [
+        0,
+        0.05,
+        0
+      ]
+    },
+    {
+      "image": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/point-toggle-on-again.bmp",
+      "time": 0.5,
+      "lights": [
+        {
+          "shadows": true
+        },
+        {
+          "shadows": true
+        },
+        {
+          "shadows": true
+        }
+      ],
+      "position": [
+        0,
+        0.05,
+        0
+      ]
+    }
+  ]
+}

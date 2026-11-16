@@ -1,0 +1,15 @@
+valid=1 frame=1 drawCalls=81 instances=105
+West block material=/Game/Materials/WarmStone.mat loaded=1
+RENDER / LOD    F7 hide | F8 next
+Frame 1 | CPU submission counters
+Draws 81  instances 105  dispatch 0
+Indices 83472 (all passes)
+Component 1/1  Street lamp LOD row
+Color visible 8 / 8
+Hidden 0  distance 0  frustum 0
+Camera distance 20.4..28.4
+Draw limit 90.0 | LOD by screen pixels
+LOD0 mesh: 5 | next < 18.0 px
+LOD1 mesh: 5
+Buckets may overlap during LOD fade
+Color selection only; shadows counted separately

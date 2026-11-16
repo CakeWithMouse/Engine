@@ -1,0 +1,170 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r6/curious-city/continuation/city-copy/Content/Materials/NormalProbe.bmp (1x1)
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 320x240
+[Info] Overlay: early return (empty lines and billboards)
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\curious-city\continuation\tangent-normal-base.bmp written=1 size=320x240
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 320x240
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\curious-city\continuation\tangent-normal-world-reflection.bmp written=1 size=320x240
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\curious-city\continuation\tangent-normal-save-return.bmp written=1 size=320x240
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "basis": [
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ]
+            ],
+            "center": [
+                255,
+                128,
+                127
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-normal-base.bmp",
+            "restored": false,
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "sha256": "9f0f882202cda0990fd132d799510631cd2e156f17a75efea41f3dae1bc6895b",
+            "transientMaterialRebound": false
+        },
+        {
+            "basis": [
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ]
+            ],
+            "center": [
+                0,
+                0,
+                51
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-normal-world-reflection.bmp",
+            "restored": false,
+            "scale": [
+                -1,
+                1,
+                1
+            ],
+            "sha256": "c7c7aff16c32379e1034b3c20c54e68922b1ddf3c6d48742baa1cf4894d55e6d",
+            "transientMaterialRebound": false
+        },
+        {
+            "basis": [
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    0,
+                    0,
+                    1
+                ]
+            ],
+            "center": [
+                0,
+                0,
+                51
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\tangent-normal-save-return.bmp",
+            "restored": true,
+            "scale": [
+                -1,
+                1,
+                1
+            ],
+            "sha256": "c7c7aff16c32379e1034b3c20c54e68922b1ddf3c6d48742baa1cf4894d55e6d",
+            "transientMaterialRebound": true
+        }
+    ],
+    "ok": true,
+    "originalBasis": [
+        [
+            1,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            1
+        ]
+    ]
+}

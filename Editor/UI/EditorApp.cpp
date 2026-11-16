@@ -10,8 +10,13 @@
 #include "../Core/CommandRegistry.h"
 #include "../Core/EditorLocale.h"
 #include <QApplication>
+#include <QIcon>
+#include <QFile>
+#include <QDir>
 #include <QTimer>
 #include <QPixmap>
+#include <QImage>
+#include <vector>
 #include <QQuaternion>
 #include <functional>
 #include <cstdio>
@@ -34,11 +39,100 @@ namespace
         app.setApplicationName(QStringLiteral("Engine Editor"));
         EditorTheme::Apply(app);
 
+        const QString appDir = QCoreApplication::applicationDirPath();
+        std::vector<QString> iconCandidates = {
+            appDir + QStringLiteral("/icon_pain_multisize.ico"),
+            appDir + QStringLiteral("/Resources/icon_pain_multisize.ico"),
+            appDir + QStringLiteral("/../icon_pain_multisize.ico"),
+            appDir + QStringLiteral("/../../icon_pain_multisize.ico"),
+            appDir + QStringLiteral("/../../../icon_pain_multisize.ico"),
+            appDir + QStringLiteral("/../../../../icon_pain_multisize.ico"),
+            appDir + QStringLiteral("/../../../../../icon_pain_multisize.ico"),
+            appDir + QStringLiteral("/../../../../../Editor/Resources/icon_pain_multisize.ico"),
+            appDir + QStringLiteral("/../../../../Editor/Resources/icon_pain_multisize.ico"),
+            QDir::currentPath() + QStringLiteral("/icon_pain_multisize.ico"),
+            QDir::currentPath() + QStringLiteral("/Editor/Resources/icon_pain_multisize.ico"),
+            QDir::currentPath() + QStringLiteral("/Resources/icon_pain_multisize.ico"),
+            QStringLiteral("Editor/Resources/icon_pain_multisize.ico"),
+            QStringLiteral("Resources/icon_pain_multisize.ico"),
+            QStringLiteral("icon_pain_multisize.ico")
+        };
+        const QString localAppData = qEnvironmentVariable("LOCALAPPDATA");
+        if (!localAppData.isEmpty())
+        {
+            iconCandidates.push_back(localAppData + QStringLiteral("/PainEngine/icon_pain_multisize.ico"));
+            iconCandidates.push_back(localAppData + QStringLiteral("/PainEngine/Engines/icon_pain_multisize.ico"));
+        }
+
+        QString iconPath;
+        for (const auto& candidate : iconCandidates)
+        {
+            if (QFile::exists(candidate))
+            {
+                iconPath = candidate;
+                break;
+            }
+        }
+
+        QIcon appIcon;
+        if (!iconPath.isEmpty())
+        {
+            appIcon = QIcon(iconPath);
+        }
+
+        HICON hBig = nullptr;
+        HICON hSm = nullptr;
+        if (!iconPath.isEmpty())
+        {
+            const std::wstring nativePath = QDir::toNativeSeparators(iconPath).toStdWString();
+            hBig = static_cast<HICON>(LoadImageW(nullptr, nativePath.c_str(), IMAGE_ICON,
+                GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), LR_LOADFROMFILE));
+            hSm = static_cast<HICON>(LoadImageW(nullptr, nativePath.c_str(), IMAGE_ICON,
+                GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_LOADFROMFILE));
+        }
+        if (!hBig)
+        {
+            hBig = LoadIconW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(101));
+            hSm = static_cast<HICON>(LoadImageW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(101), IMAGE_ICON,
+                GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR));
+        }
+
+        if (appIcon.isNull() && hBig)
+        {
+            QImage img = QImage::fromHICON(hBig);
+            if (!img.isNull())
+            {
+                appIcon = QIcon(QPixmap::fromImage(img));
+            }
+        }
+
+        if (!appIcon.isNull())
+        {
+            app.setWindowIcon(appIcon);
+        }
+
+        HWND consoleWnd = ::GetConsoleWindow();
+        if (consoleWnd && (hBig || hSm))
+        {
+            if (hBig) SendMessageW(consoleWnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(hBig));
+            if (hSm) SendMessageW(consoleWnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(hSm));
+        }
+
         auto* qtHost = dynamic_cast<EditorQtHost*>(host);
         qtHost->InitializeRecovery();
         EditorMainWindow window(qtHost);
+        if (!appIcon.isNull())
+        {
+            window.setWindowIcon(appIcon);
+        }
         host->SetUiListener(&window);
         window.show();
+        HWND mainWnd = reinterpret_cast<HWND>(window.winId());
+        if (mainWnd && (hBig || hSm))
+        {
+            if (hBig) SendMessageW(mainWnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(hBig));
+            if (hSm) SendMessageW(mainWnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(hSm));
+        }
         ready->store(true);
 
         const bool smokeMode = qEnvironmentVariableIsSet("PAINENGINE_SMOKE_EDITOR") ||

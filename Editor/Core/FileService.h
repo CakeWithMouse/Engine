@@ -32,7 +32,7 @@ public:
     bool DeleteDirectory(const QString& path, QString* outError = nullptr);
     bool FileExists(const QString& path) const;
     bool DirectoryExists(const QString& path) const;
-    bool CreateDirectoryPath(const QString& path, QString* outError = nullptr);
+    bool CreateDirectoryPath(const QString& path, QString* outError = nullptr, bool exclusive = false);
 
     QStringList ListFiles(const QString& subDir = QString(), const QStringList& nameFilters = {}) const;
 

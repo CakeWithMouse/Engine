@@ -1,0 +1,84 @@
+{
+  "steps": [
+    {
+      "action": "new"
+    },
+    {
+      "action": "create",
+      "type": "Primitive.Cube",
+      "name": "Market"
+    },
+    {
+      "action": "create",
+      "type": "Primitive.Sphere",
+      "name": "Lamp"
+    },
+    {
+      "action": "create",
+      "type": "Primitive.Plane",
+      "name": "Lot"
+    },
+    {
+      "action": "create",
+      "type": "Primitive.Cylinder",
+      "name": "Tower"
+    },
+    {
+      "action": "create",
+      "type": "Primitive.Cone",
+      "name": "Roof"
+    },
+    {
+      "action": "create",
+      "type": "Primitive.Pyramid",
+      "name": "Monument"
+    },
+    {
+      "targets": [
+        "Market",
+        "Lamp"
+      ],
+      "action": "select"
+    },
+    {
+      "action": "move",
+      "target": "Market",
+      "delta": [
+        2.25,
+        0,
+        0
+      ]
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "action": "redo"
+    },
+    {
+      "action": "parent",
+      "target": "Lamp",
+      "parent": "Market"
+    },
+    {
+      "target": "Market",
+      "action": "duplicate"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Content\\Scenes\\CityWorkshop.scene.json",
+      "action": "save"
+    },
+    {
+      "action": "startup"
+    },
+    {
+      "action": "new"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Content\\Scenes\\CityWorkshop.scene.json",
+      "action": "load"
+    }
+  ],
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Project.json",
+  "editorWindow": true
+}

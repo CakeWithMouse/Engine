@@ -247,26 +247,23 @@ EngineRelease InstallEngineRelease(const std::filesystem::path& runtime)
         return ReadEngineRelease(target);
     };
 
-    const auto target = store / release.version / release.configuration;
-    if (std::filesystem::exists(target))
+    // The same version rebuilt locally (development build) goes side by side under the next free build
+    // number: installed releases are immutable and stay available to pinned projects. A build already
+    // installed under one of these numbers is reused, so starting the launcher again installs nothing.
+    std::string version = release.version;
+    for (auto target = store / version / release.configuration; std::filesystem::exists(target);
+         version = nextBuildVersion(version), target = store / version / release.configuration)
     {
         const auto installed = ReadEngineRelease(target);
-        if (installed.version != release.version || installed.configuration != release.configuration)
+        if (installed.version != version || installed.configuration != release.configuration)
             throw std::runtime_error("Installed engine release identity mismatch");
         bool identical = true;
         for (const auto* name : {"EngineRuntime.exe","Editor.dll","Templates/SceneProject/Game.dll"})
             if (!sameBytes(target / name, release.runtime / name)) { identical = false; break; }
         if (identical)
             return installed;
-        // The same version was rebuilt locally (development build). Installed releases are
-        // immutable, so the new binaries are installed side by side under the next free build
-        // number instead of failing; the preserved release stays available to pinned projects.
-        std::string version = release.version;
-        while (std::filesystem::exists(store / version / release.configuration))
-            version = nextBuildVersion(version);
-        return installAs(version);
     }
-    return installAs(release.version);
+    return installAs(version);
 }
 EngineRelease ResolveEngineRelease(const RuntimeProject& project, const std::filesystem::path& currentRuntime)
 {

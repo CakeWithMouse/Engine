@@ -1,0 +1,31 @@
+[Test] Running HostTests (EditorHistory)...
+Command 17 status 8: Остановите Play перед редактированием.
+Command 49 status 8: Остановите Play перед редактированием.
+Command 49 status 1: 
+Command 17 status 6: 
+Command 49 status 8: 
+Command 17 status 6: 
+Command 27 status 10: 
+Host regression checks: 69
+Host script checks: 15
+[Info] Viewport overlay service: FOUND (version 1)
+[Info] Camera: ok
+[Info] Camera: zero
+[Info] Camera: ok
+[Info] Viewport overlay service: FOUND (version 1)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Camera: zero
+[Info] Viewport overlay service: FOUND (version 1)
+[Info] Camera: ok
+Overlay host checks: 18
+Import migration checks: 16
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Camera: zero
+Asset update host checks: 8
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+Gizmo coalescing host checks: 13
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+HostTests: 159 checks passed.

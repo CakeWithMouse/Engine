@@ -1,0 +1,34 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "drawCalls": 133,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\transparency-second-0-a.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        2,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 133,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\transparency-second-0-b.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        2,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        }
+    ],
+    "ok": true
+}

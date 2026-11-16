@@ -1,0 +1,76 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "drawCalls": 83,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-animated-lod-resize-pass2\\near-640-t0.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        1,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 83,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-animated-lod-resize-pass2\\near-640-t06.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        1,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 83,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-animated-lod-resize-pass2\\near-1280-t06.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        1,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 83,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-animated-lod-resize-pass2\\far-640-t12.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        0,
+                        1,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 83,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\transparency-animated-lod-resize-pass2\\far-1280-t18.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        0,
+                        1,
+                        0
+                    ]
+                }
+            ]
+        }
+    ],
+    "ok": true
+}

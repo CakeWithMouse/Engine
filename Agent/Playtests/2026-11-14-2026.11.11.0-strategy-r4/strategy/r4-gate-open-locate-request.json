@@ -1,0 +1,39 @@
+{
+  "project": "E:/Engine/Engine/build/playtests/strategy-r4/RepairCorridor/Project.json",
+  "steps": [
+    {
+      "action": "play",
+      "kind": "control"
+    },
+    {
+      "enabled": true,
+      "kind": "focus"
+    },
+    {
+      "count": 3,
+      "kind": "frames"
+    },
+    {
+      "key": 69,
+      "down": true,
+      "kind": "key"
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 69,
+      "down": false,
+      "kind": "key"
+    },
+    {
+      "count": 150,
+      "kind": "frames"
+    },
+    {
+      "action": "stop",
+      "kind": "control"
+    }
+  ]
+}

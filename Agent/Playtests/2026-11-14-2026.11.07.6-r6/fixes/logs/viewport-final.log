@@ -1,0 +1,175 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  TrianglesScene.cpp
+  BattleGame.cpp
+  Ball.cpp
+  PongGame.cpp
+  PongScene.cpp
+  Rocket.cpp
+  Wall.cpp
+  SunGame.cpp
+  OrderedSceneGame.cpp
+  PreviewScenes.cpp
+  ViewportTests.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\ViewportTests.lib и объект E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\ViewportTests.exp
+  ViewportTests.vcxproj -> E:\Engine\Engine\build\x64\Release\ViewportTests.exe
+
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 640x480
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+PASS: static Edit, isolated Play, Pause/Resume, Stop, resize, failed Play rollback
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+PASS: Scene transforms render without Tick, lazy GPU registration, light removal
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+PASS: preview factory/render/resize BasicExamples
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+PASS: preview factory/render/resize Pong
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Failed to load cube map face: E:/Engine/Engine/build/x64/Release/cosy.jpg
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/BaseSphereFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/InstanceSphereFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/InstanceSphereFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/ReflectiveSphere.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/ReflectiveSphere.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/InstanceSphereFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/InstanceSphereFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/ReflectiveSphere.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/ReflectiveSphere.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/BaseSphereFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Failed to load cube map face: E:/Engine/Engine/build/x64/Release/cosy.jpg
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/BaseSphereFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/InstanceSphereFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/InstanceSphereFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/ReflectiveSphere.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/ReflectiveSphere.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/InstanceSphereFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/InstanceSphereFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/ReflectiveSphere.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/ReflectiveSphere.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/BaseSphereFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+PASS: preview factory/render/resize SunGame
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[VfsRead] Dynamic mount '/_ext_3899332567108965149' -> 'E:/Engine/Engine/build/x64/Release/Materials' (path 'E:/Engine/Engine/build/x64/Release/Materials/Vehicle.hlsl' outside registered mounts)
+Tank LOD0: 2160 triangles
+Tank LOD1: 240 triangles
+Tank LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Apc LOD0: 3024 triangles
+Apc LOD1: 336 triangles
+Apc LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Truck LOD0: 2592 triangles
+Truck LOD1: 288 triangles
+Truck LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Artillery LOD0: 2160 triangles
+Artillery LOD1: 240 triangles
+Artillery LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Baked shadow map: 4 static components at 4096 px.
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/Impostor.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/Impostor.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Tank LOD0: 2160 triangles
+Tank LOD1: 240 triangles
+Tank LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Apc LOD0: 3024 triangles
+Apc LOD1: 336 triangles
+Apc LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Truck LOD0: 2592 triangles
+Truck LOD1: 288 triangles
+Truck LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Artillery LOD0: 2160 triangles
+Artillery LOD1: 240 triangles
+Artillery LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Baked shadow map: 4 static components at 4096 px.
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/Impostor.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/Impostor.hlsl [VARIANT_DEFERRED_GBUFFER]
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 121: AntialiasingMode = 0 (Off), bb = 640x480
+PASS: preview factory/render/resize Battle
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Engine\build\x64\Release\EngineContent\Shaders\EditorOverlay.hlsl)
+Billboard readback at dist 1: diameter = 18 px (bounds [341,241 .. 358,258])
+Billboard readback at dist 3: diameter = 20 px (bounds [340,240 .. 359,259])
+Billboard readback at dist 15: diameter = 20 px (bounds [340,240 .. 359,259])
+Billboard readback at dist 60: diameter = 20 px (bounds [340,240 .. 359,259])
+PASS: GameSettings in standalone and embedded, FXAA, resize, rendering modes, close isolation
+PASS: animated BasicExamples pixels, resize, minimize, reattach, borrowed HWND ownership
+Rendered frame: E:\Engine\Engine\build\viewport-Release.bmp

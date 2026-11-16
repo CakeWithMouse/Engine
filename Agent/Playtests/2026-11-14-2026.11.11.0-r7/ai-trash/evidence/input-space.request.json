@@ -1,0 +1,39 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\ai-trash\\TrashGameUpgraded\\Project.json",
+  "steps": [
+    {
+      "kind": "control",
+      "action": "play"
+    },
+    {
+      "kind": "focus",
+      "enabled": true
+    },
+    {
+      "kind": "frames",
+      "count": 3
+    },
+    {
+      "key": 32,
+      "down": true,
+      "kind": "key"
+    },
+    {
+      "kind": "frames",
+      "count": 1
+    },
+    {
+      "key": 32,
+      "down": false,
+      "kind": "key"
+    },
+    {
+      "kind": "frames",
+      "count": 100
+    },
+    {
+      "kind": "control",
+      "action": "stop"
+    }
+  ]
+}

@@ -188,7 +188,7 @@ QString HlslGraphCompiler::NameProblem(const QString& name)
     return {};
 }
 
-GraphCompileResult HlslGraphCompiler::Compile(const MaterialGraphModel& model)
+GraphCompileResult HlslGraphCompiler::Compile(const GraphDocument& model)
 {
     GraphCompileResult result;
     QVector<QPair<QString, int>> cbufferParams;       // строка и нода
@@ -275,7 +275,7 @@ GraphCompileResult HlslGraphCompiler::Compile(const MaterialGraphModel& model)
             {
                 result.problems.insert(n.id, Tr("Нет свободных слотов текстур материала (максимум 121).",
                     "No free material texture slots (maximum 121)."));
-                break;
+                return result; // Never emit an HLSL binding already owned by another texture.
             }
         }
         declaredTextures << texName;

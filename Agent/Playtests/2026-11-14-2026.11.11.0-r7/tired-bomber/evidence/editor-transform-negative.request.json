@@ -1,0 +1,57 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\BomberUpgradedR7\\Project.json",
+  "steps": [
+    {
+      "action": "frames",
+      "count": 1
+    },
+    {
+      "action": "hierarchy-click",
+      "target": "Ground"
+    },
+    {
+      "action": "field",
+      "value": 4,
+      "scope": "main",
+      "name": "Transform0"
+    },
+    {
+      "action": "field",
+      "value": 20,
+      "scope": "main",
+      "name": "Transform3"
+    },
+    {
+      "action": "field",
+      "value": -35,
+      "scope": "main",
+      "name": "Transform4"
+    },
+    {
+      "action": "field",
+      "value": 2,
+      "scope": "main",
+      "name": "Transform6"
+    },
+    {
+      "action": "field",
+      "value": -1,
+      "scope": "main",
+      "name": "Transform7"
+    },
+    {
+      "action": "field",
+      "value": 0.75,
+      "scope": "main",
+      "name": "Transform8"
+    },
+    {
+      "action": "save-scene",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\BomberUpgradedR7\\Content\\Scenes\\role-scene-transform-2.scene.json"
+    },
+    {
+      "action": "load-scene",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\BomberUpgradedR7\\Content\\Scenes\\role-scene-transform-2.scene.json"
+    }
+  ]
+}

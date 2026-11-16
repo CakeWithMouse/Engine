@@ -1,0 +1,1064 @@
+{
+  "components": {
+    "1": {
+      "GameComponent": {
+        "collision": false,
+        "color": [
+          0.4000000059604645,
+          0.5799999833106995,
+          0.41999998688697815,
+          1.0
+        ],
+        "fresnel": 5.0,
+        "instanceCount": 0,
+        "opacity": false,
+        "pixelShader": "",
+        "reflection": 0.0,
+        "rotationSpeed": 0.10000000149011612,
+        "skybox": false,
+        "staticShadow": false,
+        "traceChannels": 1,
+        "uvOffset": [
+          0.0,
+          0.0
+        ],
+        "uvScale": [
+          1.0,
+          1.0
+        ],
+        "velocitySpeed": 1.0,
+        "version": 1,
+        "vertexShader": "",
+        "visualPrimitive": false
+      },
+      "MeshComponent": {
+        "indices": [
+          0,
+          1,
+          3,
+          0,
+          3,
+          2,
+          4,
+          7,
+          5,
+          4,
+          6,
+          7
+        ],
+        "version": 1,
+        "vertices": [
+          [
+            -0.5,
+            0.0,
+            0.5,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.0,
+            0.5,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            -0.5,
+            0.0,
+            -0.5,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.0,
+            -0.5,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            -0.5,
+            0.0,
+            0.5,
+            1.0,
+            -0.0,
+            -1.0,
+            -0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.0,
+            0.5,
+            1.0,
+            -0.0,
+            -1.0,
+            -0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            -0.5,
+            0.0,
+            -0.5,
+            1.0,
+            -0.0,
+            -1.0,
+            -0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.0,
+            -0.5,
+            1.0,
+            -0.0,
+            -1.0,
+            -0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ]
+      }
+    },
+    "3": {
+      "GameComponent": {
+        "collision": false,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fresnel": 5.0,
+        "instanceCount": 0,
+        "opacity": false,
+        "pixelShader": "",
+        "reflection": 0.0,
+        "rotationSpeed": 0.10000000149011612,
+        "skybox": false,
+        "staticShadow": false,
+        "traceChannels": 1,
+        "uvOffset": [
+          0.0,
+          0.0
+        ],
+        "uvScale": [
+          1.0,
+          1.0
+        ],
+        "velocitySpeed": 1.0,
+        "version": 1,
+        "vertexShader": "",
+        "visualPrimitive": false
+      }
+    },
+    "4": {
+      "GameComponent": {
+        "collision": false,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fresnel": 5.0,
+        "instanceCount": 0,
+        "opacity": false,
+        "pixelShader": "",
+        "reflection": 0.0,
+        "rotationSpeed": 0.10000000149011612,
+        "skybox": false,
+        "staticShadow": false,
+        "traceChannels": 1,
+        "uvOffset": [
+          0.0,
+          0.0
+        ],
+        "uvScale": [
+          1.0,
+          1.0
+        ],
+        "velocitySpeed": 1.0,
+        "version": 1,
+        "vertexShader": "",
+        "visualPrimitive": false
+      }
+    },
+    "5": {
+      "GameComponent": {
+        "collision": false,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fresnel": 5.0,
+        "instanceCount": 0,
+        "opacity": false,
+        "pixelShader": "",
+        "reflection": 0.0,
+        "rotationSpeed": 0.10000000149011612,
+        "skybox": false,
+        "staticShadow": false,
+        "traceChannels": 1,
+        "uvOffset": [
+          0.0,
+          0.0
+        ],
+        "uvScale": [
+          1.0,
+          1.0
+        ],
+        "velocitySpeed": 1.0,
+        "version": 1,
+        "vertexShader": "",
+        "visualPrimitive": false
+      },
+      "SkeletalMeshComponent": {
+        "clip": 0,
+        "playing": true,
+        "speed": 1.0,
+        "time": 0.0,
+        "version": 1,
+        "yaw": 0.0
+      }
+    },
+    "6": {
+      "GameComponent": {
+        "collision": false,
+        "color": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "fresnel": 5.0,
+        "instanceCount": 0,
+        "opacity": false,
+        "pixelShader": "",
+        "reflection": 0.0,
+        "rotationSpeed": 0.10000000149011612,
+        "skybox": false,
+        "staticShadow": false,
+        "traceChannels": 1,
+        "uvOffset": [
+          0.0,
+          0.0
+        ],
+        "uvScale": [
+          1.0,
+          1.0
+        ],
+        "velocitySpeed": 1.0,
+        "version": 1,
+        "vertexShader": "",
+        "visualPrimitive": false
+      }
+    },
+    "7": {
+      "GameComponent": {
+        "collision": false,
+        "color": [
+          0.7799999713897705,
+          0.4300000071525574,
+          0.25,
+          1.0
+        ],
+        "fresnel": 5.0,
+        "instanceCount": 0,
+        "opacity": false,
+        "pixelShader": "",
+        "reflection": 0.0,
+        "rotationSpeed": 0.10000000149011612,
+        "skybox": false,
+        "staticShadow": false,
+        "traceChannels": 1,
+        "uvOffset": [
+          0.0,
+          0.0
+        ],
+        "uvScale": [
+          1.0,
+          1.0
+        ],
+        "velocitySpeed": 1.0,
+        "version": 1,
+        "vertexShader": "",
+        "visual": {
+          "GameComponent": {
+            "collision": false,
+            "color": [
+              0.7799999713897705,
+              0.4300000071525574,
+              0.25,
+              1.0
+            ],
+            "fresnel": 5.0,
+            "instanceCount": 0,
+            "opacity": false,
+            "pixelShader": "",
+            "reflection": 0.0,
+            "rotationSpeed": 0.10000000149011612,
+            "skybox": false,
+            "staticShadow": false,
+            "traceChannels": 1,
+            "uvOffset": [
+              0.0,
+              0.0
+            ],
+            "uvScale": [
+              1.0,
+              1.0
+            ],
+            "velocitySpeed": 1.0,
+            "version": 1,
+            "vertexShader": "",
+            "visualPrimitive": false
+          },
+          "MeshComponent": {
+            "indices": [
+              0,
+              1,
+              2,
+              0,
+              2,
+              3,
+              4,
+              5,
+              6,
+              4,
+              6,
+              7,
+              8,
+              9,
+              10,
+              8,
+              10,
+              11,
+              12,
+              13,
+              14,
+              12,
+              14,
+              15,
+              16,
+              17,
+              18,
+              16,
+              18,
+              19,
+              20,
+              21,
+              22,
+              20,
+              22,
+              23
+            ],
+            "version": 1,
+            "vertices": [
+              [
+                0.5,
+                0.5,
+                -0.5,
+                1.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.5,
+                0.5,
+                0.5,
+                1.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.5,
+                -0.5,
+                0.5,
+                1.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.5,
+                -0.5,
+                -0.5,
+                1.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.5,
+                0.5,
+                0.5,
+                1.0,
+                -1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.5,
+                0.5,
+                -0.5,
+                1.0,
+                -1.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.5,
+                -0.5,
+                -0.5,
+                1.0,
+                -1.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.5,
+                -0.5,
+                0.5,
+                1.0,
+                -1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.5,
+                0.5,
+                0.5,
+                1.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.5,
+                0.5,
+                0.5,
+                1.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.5,
+                0.5,
+                -0.5,
+                1.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.5,
+                0.5,
+                -0.5,
+                1.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.5,
+                -0.5,
+                -0.5,
+                1.0,
+                0.0,
+                -1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.5,
+                -0.5,
+                -0.5,
+                1.0,
+                0.0,
+                -1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.5,
+                -0.5,
+                0.5,
+                1.0,
+                0.0,
+                -1.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.5,
+                -0.5,
+                0.5,
+                1.0,
+                0.0,
+                -1.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.5,
+                0.5,
+                0.5,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.5,
+                0.5,
+                0.5,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.5,
+                -0.5,
+                0.5,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                1.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.5,
+                -0.5,
+                0.5,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.5,
+                0.5,
+                -0.5,
+                1.0,
+                0.0,
+                0.0,
+                -1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.5,
+                0.5,
+                -0.5,
+                1.0,
+                0.0,
+                0.0,
+                -1.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.5,
+                -0.5,
+                -0.5,
+                1.0,
+                0.0,
+                0.0,
+                -1.0,
+                0.0,
+                1.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.5,
+                -0.5,
+                -0.5,
+                1.0,
+                0.0,
+                0.0,
+                -1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ]
+            ]
+          }
+        },
+        "visualPrimitive": true
+      }
+    }
+  },
+  "controller": {},
+  "format": 1,
+  "game": {
+    "Game": {
+      "HUD": {
+        "GameComponent": {
+          "collision": false,
+          "color": [
+            0.0,
+            0.0,
+            1.0,
+            1.0
+          ],
+          "fresnel": 5.0,
+          "instanceCount": 0,
+          "opacity": false,
+          "pixelShader": "E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl",
+          "reflection": 0.0,
+          "rotationSpeed": 0.10000000149011612,
+          "skybox": false,
+          "staticShadow": false,
+          "traceChannels": 1,
+          "uvOffset": [
+            0.0,
+            0.0
+          ],
+          "uvScale": [
+            1.0,
+            1.0
+          ],
+          "velocitySpeed": 1.0,
+          "version": 1,
+          "vertexShader": "E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl",
+          "visualPrimitive": false
+        },
+        "UIComponent": {
+          "markup": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Panel name=\"cityPanel\" anchor=\"TopLeft\" rect=\"16 16 330 206\" padding=\"12 12 12 12\" visible=\"true\" interactive=\"false\" color=\"#090f18e8\" border=\"1\" borderColor=\"#6d8ca6aa\">\n    <Label name=\"balance\" anchor=\"TopLeft\" rect=\"0 0 300 24\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Balance: 400\" color=\"#fff2d7ff\" align=\"left\"/>\n    <Label name=\"income\" anchor=\"TopLeft\" rect=\"0 26 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Income: 10 / second\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Label name=\"houses\" anchor=\"TopLeft\" rect=\"0 48 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Homes: 1\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Button name=\"buildHouse\" anchor=\"TopLeft\" rect=\"0 78 96 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Дом • 100 ₽\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"saveCity\" anchor=\"TopLeft\" rect=\"102 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Save\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"loadCity\" anchor=\"TopLeft\" rect=\"188 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Load\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n  </Panel>\n</UI>\n",
+          "version": 1,
+          "visible": true
+        }
+      },
+      "Player": {
+        "far": 10000.0,
+        "fov": 60.0,
+        "lookSpeed": 2.0,
+        "mode": 0,
+        "moveSpeed": 1.0,
+        "near": 0.10000000149011612,
+        "orbitMax": 100000.0,
+        "orbitMin": 5.0,
+        "orbitPitch": -1.4707963466644287,
+        "orbitRadius": 200.0,
+        "orbitSensitivity": 0.019999999552965164,
+        "orbitTarget": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "orbitYaw": 0.0,
+        "orthoHeight": 10.0,
+        "orthographic": false,
+        "pitch": 0.0,
+        "position": [
+          0.0,
+          0.0,
+          5.0
+        ],
+        "sensitivity": 0.019999999552965164,
+        "stopPitch": false,
+        "stopYaw": false,
+        "switchMode": true,
+        "version": 1,
+        "wasd": true,
+        "yaw": -1.5707963705062866,
+        "zoomSpeed": 1.0
+      },
+      "ambient": 0.05999999865889549,
+      "antialiasing": 1,
+      "realTime": 0.11200001090765,
+      "renderer": 0,
+      "sceneLighting": true,
+      "sceneTime": 0.12800000607967377,
+      "shininess": 32.0,
+      "simulationEnabled": true,
+      "timeScale": 1.0,
+      "version": 1,
+      "vsync": true
+    }
+  },
+  "gameId": "curious-city-r2",
+  "scene": {
+    "name": "Main",
+    "objects": [
+      {
+        "id": 1,
+        "inheritParentScale": true,
+        "name": "Ground",
+        "parent": 0,
+        "transform": {
+          "position": [
+            0.0,
+            -0.5,
+            0.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            20.0,
+            1.0,
+            20.0
+          ]
+        },
+        "type": "Primitive.Plane"
+      },
+      {
+        "id": 3,
+        "inheritParentScale": true,
+        "name": "Warm Light",
+        "parent": 0,
+        "properties": {
+          "Engine.PointLight": {
+            "value": {
+              "castShadows": true,
+              "color": [
+                1.0,
+                0.6499999761581421,
+                0.3499999940395355
+              ],
+              "enabled": true,
+              "intensity": 2.0,
+              "radius": 10.0
+            },
+            "version": 1
+          }
+        },
+        "transform": {
+          "position": [
+            2.0,
+            3.0,
+            2.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "type": "Light.Point"
+      },
+      {
+        "id": 4,
+        "inheritParentScale": true,
+        "name": "Cool Light",
+        "parent": 0,
+        "properties": {
+          "Engine.PointLight": {
+            "value": {
+              "castShadows": true,
+              "color": [
+                0.30000001192092896,
+                0.550000011920929,
+                1.0
+              ],
+              "enabled": true,
+              "intensity": 2.0,
+              "radius": 10.0
+            },
+            "version": 1
+          }
+        },
+        "transform": {
+          "position": [
+            -3.0,
+            2.0,
+            1.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "type": "Light.Point"
+      },
+      {
+        "assets": {
+          "model": "/Game/Models/blend-suzanne-multiple/blend-suzanne-multiple.glb",
+          "texture": ""
+        },
+        "id": 5,
+        "inheritParentScale": true,
+        "name": "SaveGameSlotProbe",
+        "parent": 0,
+        "projectData": {
+          "materialSlots": {
+            "0": "/Game/Materials/Hologram.mat",
+            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+          },
+          "version": 1
+        },
+        "transform": {
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "type": "Engine.Model"
+      },
+      {
+        "id": 6,
+        "inheritParentScale": true,
+        "name": "CityControls",
+        "parent": 0,
+        "transform": {
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "type": "CuriousCity.Interaction"
+      },
+      {
+        "assets": {
+          "material": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+          "model": "",
+          "texture": ""
+        },
+        "id": 7,
+        "inheritParentScale": true,
+        "name": "House_1",
+        "parent": 0,
+        "transform": {
+          "position": [
+            -4.0,
+            0.75,
+            -2.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            1.2000000476837158,
+            1.5,
+            1.2000000476837158
+          ]
+        },
+        "type": "CuriousCity.House"
+      }
+    ],
+    "version": 3
+  },
+  "subsystems": {
+    "CityEconomySubsystem": {
+      "CuriousCity.Economy": {
+        "balance": 400,
+        "houses": 1,
+        "incomeClock": 0.12800000607967377,
+        "version": 1
+      },
+      "GameSubsystem": {
+        "tickEnabled": true,
+        "version": 1
+      }
+    },
+    "Engine.Ai": {
+      "Ai": {
+        "count": 0,
+        "version": 1
+      },
+      "GameSubsystem": {
+        "tickEnabled": true,
+        "version": 1
+      }
+    }
+  }
+}

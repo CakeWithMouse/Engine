@@ -1,0 +1,15 @@
+Using v143, MSVC 14.44.35207, Windows SDK 10.0.26100.0.
+MSBuild: C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe
+
+  ComponentGenerator: 3 component(s), Project
+  Module.cpp
+  ProjectComponent.cpp
+  ProjectGame.cpp
+  RotatingCube.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+     Создается библиотека E:\Engine\Engine\build\playtests\strategy-r2\RepairCorridor\Binaries\Release\fc3de537d7264174b2e6b1c67f60bfdf\Game.lib и объект E:\Engine\Engine\build\playtests\strategy-r2\RepairCorridor\Binaries\Release\fc3de537d7264174b2e6b1c67f60bfdf\Game.exp
+  Game.vcxproj -> E:\Engine\Engine\build\playtests\strategy-r2\RepairCorridor\Binaries\Release\fc3de537d7264174b2e6b1c67f60bfdf\Game.dll
+
+Full build log: E:\Engine\Engine\build\playtests\strategy-r2\RepairCorridor\Binaries\Release\fc3de537d7264174b2e6b1c67f60bfdf\build.log
+Build validated and activated. Use Hot Reload in the editor, or reopen the project.

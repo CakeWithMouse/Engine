@@ -1,0 +1,37 @@
+{
+  "steps": [
+    {
+      "action": "play",
+      "kind": "control"
+    },
+    {
+      "kind": "focus",
+      "enabled": true
+    },
+    {
+      "kind": "frames",
+      "count": 12
+    },
+    {
+      "action": "pause",
+      "kind": "control"
+    },
+    {
+      "kind": "frames",
+      "count": 4
+    },
+    {
+      "action": "resume",
+      "kind": "control"
+    },
+    {
+      "kind": "frames",
+      "count": 6
+    },
+    {
+      "action": "stop",
+      "kind": "control"
+    }
+  ],
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\SdkProbe\\Project.json"
+}

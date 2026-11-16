@@ -1,0 +1,9 @@
+Content
+Source
+Build.ps1
+Engine.lock.json
+Game.sln
+Game.vcxproj
+Project.code.json
+Project.json
+ProjectTypes.tsv

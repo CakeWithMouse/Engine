@@ -1,0 +1,30 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\camera-settings-80\\Project.json",
+  "steps": [
+    {
+      "kind": "control",
+      "action": "play"
+    },
+    {
+      "kind": "focus",
+      "enabled": true
+    },
+    {
+      "kind": "frames",
+      "count": 4
+    },
+    {
+      "kind": "resize",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "kind": "frames",
+      "count": 3
+    },
+    {
+      "kind": "control",
+      "action": "stop"
+    }
+  ]
+}

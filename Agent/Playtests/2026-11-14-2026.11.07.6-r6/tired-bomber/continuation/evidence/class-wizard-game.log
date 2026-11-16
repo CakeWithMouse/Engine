@@ -1,0 +1,43 @@
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+[ToolBarFacts] initial tb geom=0,0 100x36, margins=(0,0,0,0), layoutMargins=(6,6,6,6), PM_ToolBarFrameWidth=6, PM_ItemMargin=0, PM_ItemSpacing=4
+[ToolBarFacts] configured tb height=36, btn height=28, topMargin=4, bottomMargin=4
+[Info] SettingsService: Set 'view/grid'
+[Info] SettingsService: Set 'view/gizmo'
+[Info] SettingsService: Set 'view/icons'
+[Info] SettingsService: Set 'view/overlays'
+[Info] SettingsService: Set 'viewport/antialiasing'
+[Info] QtHost::SetAntialiasing: mode = 1, serviceVersion = 3, handler = 00007FFF5FE92600
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "arguments": [
+        "-Name",
+        "BomberDamageCounter",
+        "-Kind",
+        "Component",
+        "-Base",
+        "GameComponent",
+        "-BaseHeader",
+        "Engine/Components/GameComponents.h"
+    ],
+    "console": "[04:30:09.120] C++: AddClass -Name BomberDamageCounter -Kind Component -Base GameComponent -BaseHeader Engine/Components/GameComponents.h",
+    "dialogs": [
+        "Созданы .h и .cpp в Source. Соберите проект, чтобы класс появился в редакторе."
+    ],
+    "generated": {
+        ".cpp": "#include \"BomberDamageCounter.h\"\nvoid BomberDamageCounter::BeginPlay() { GameComponent::BeginPlay(); }\nvoid BomberDamageCounter::Tick(float deltaTime) { GameComponent::Tick(deltaTime); }\n",
+        ".h": "#pragma once\n#include <Engine/Components/ComponentAnnotations.h>\n#include \"Engine/Components/GameComponents.h\"\nENGINE_COMPONENT(\"BomberDamageCounter\")\nclass BomberDamageCounter : public GameComponent\n{\npublic:\n    BomberDamageCounter() = default;\n    void BeginPlay() override;\n    void Tick(float deltaTime) override;\n};\n"
+    },
+    "ok": true,
+    "replaced": false,
+    "windowEnabled": true,
+    "wizardAccepted": true,
+    "wizardError": ""
+}

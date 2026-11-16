@@ -1,0 +1,2468 @@
+[VfsRead] using local VFS (no host service)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+[ToolBarFacts] initial tb geom=0,0 100x36, margins=(0,0,0,0), layoutMargins=(6,6,6,6), PM_ToolBarFrameWidth=6, PM_ItemMargin=0, PM_ItemSpacing=4
+[ToolBarFacts] configured tb height=36, btn height=28, topMargin=4, bottomMargin=4
+[Info] SettingsService: Set 'view/grid'
+[Info] SettingsService: Set 'view/gizmo'
+[Info] SettingsService: Set 'view/icons'
+[Info] SettingsService: Set 'view/overlays'
+[Info] SettingsService: Set 'viewport/antialiasing'
+[Info] QtHost::SetAntialiasing: mode = 1, serviceVersion = 3, handler = 00007FFF79FBBE40
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+Texture loaded: E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/Models/blend-suzanne-multiple/Textures/BaseColor_0.png (64x64)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 611x443
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 611x443
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=0 | snapObjs=5 | lines=138 (grid=138, gizmo=0, dir=0) | bbs=2 | tris=0
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "before": {
+        "camera": {
+            "height": 480,
+            "position": [
+                0,
+                0,
+                5
+            ],
+            "projection": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "view": [
+                -1,
+                0,
+                -4.371138828673793e-08,
+                0,
+                0,
+                1,
+                0,
+                0,
+                4.371138828673793e-08,
+                0,
+                -1,
+                0,
+                2.18556948539117e-07,
+                0,
+                -5,
+                1
+            ],
+            "width": 640
+        },
+        "coordinateSpaceLocal": false,
+        "hudChoice": "UI/CityHudAlt.ui",
+        "hudDescriptorExists": true,
+        "live": [
+        ],
+        "machine": "",
+        "objects": [
+            {
+                "id": 1,
+                "material": "",
+                "name": "Ground",
+                "parent": 0,
+                "position": [
+                    0,
+                    -0.5,
+                    0
+                ],
+                "projectData": {
+                },
+                "rotation": [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "scale": [
+                    20,
+                    1,
+                    20
+                ],
+                "type": "Primitive.Plane"
+            },
+            {
+                "id": 2,
+                "material": "",
+                "name": "Cube",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "projectData": {
+                },
+                "rotation": [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "scale": [
+                    1,
+                    1,
+                    1
+                ],
+                "type": "Primitive.Cube"
+            },
+            {
+                "id": 3,
+                "material": "",
+                "name": "Warm Light",
+                "parent": 0,
+                "position": [
+                    2,
+                    3,
+                    2
+                ],
+                "projectData": {
+                },
+                "rotation": [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "scale": [
+                    1,
+                    1,
+                    1
+                ],
+                "type": "Light.Point"
+            },
+            {
+                "id": 4,
+                "material": "",
+                "name": "Cool Light",
+                "parent": 0,
+                "position": [
+                    -3,
+                    2,
+                    1
+                ],
+                "projectData": {
+                },
+                "rotation": [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "scale": [
+                    1,
+                    1,
+                    1
+                ],
+                "type": "Light.Point"
+            },
+            {
+                "id": 5,
+                "material": "",
+                "name": "SaveGameSlotProbe",
+                "parent": 0,
+                "position": [
+                    0,
+                    2,
+                    0
+                ],
+                "projectData": {
+                    "materialSlots": {
+                        "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                        "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                    },
+                    "version": 1
+                },
+                "rotation": [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "scale": [
+                    1,
+                    1,
+                    1
+                ],
+                "type": "Engine.Model"
+            }
+        ],
+        "playState": 0,
+        "sceneCanRedo": false,
+        "sceneCanUndo": false,
+        "selected": 0,
+        "selectedIds": [
+        ],
+        "viewportSize": [
+            611,
+            443
+        ]
+    },
+    "dialogs": [
+    ],
+    "observation": "Actual themed Qt graph/card and runtime AI extension; widget image excludes D3D viewport.",
+    "ok": true,
+    "steps": [
+        {
+            "action": "ui-open",
+            "error": "",
+            "snapshot": {
+                "camera": {
+                    "height": 443,
+                    "position": [
+                        0,
+                        0,
+                        5
+                    ],
+                    "projection": [
+                        1.255807638168335,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.7320507764816284,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.0000100135803223,
+                        1,
+                        0,
+                        0,
+                        -0.10000099986791611,
+                        0
+                    ],
+                    "view": [
+                        -1,
+                        0,
+                        -4.371138828673793e-08,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        4.371138828673793e-08,
+                        0,
+                        -1,
+                        0,
+                        -2.18556948539117e-07,
+                        0,
+                        5,
+                        1
+                    ],
+                    "width": 611
+                },
+                "coordinateSpaceLocal": false,
+                "hudChoice": "UI/CityHudAlt.ui",
+                "hudDescriptorExists": true,
+                "live": [
+                ],
+                "machine": "",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0,
+                "sceneCanRedo": false,
+                "sceneCanUndo": false,
+                "selected": 0,
+                "selectedIds": [
+                ],
+                "uiMarkup": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Panel name=\"cityPanel\" anchor=\"TopRight\" rect=\"-346 16 330 206\" padding=\"12 12 12 12\" visible=\"true\" interactive=\"false\" color=\"#090f18e8\" border=\"1\" borderColor=\"#6d8ca6aa\">\n    <Label name=\"balance\" anchor=\"TopLeft\" rect=\"0 0 300 24\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Balance: 500\" color=\"#fff2d7ff\" align=\"left\"/>\n    <Label name=\"income\" anchor=\"TopLeft\" rect=\"0 26 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Income: 0 / second\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Label name=\"houses\" anchor=\"TopLeft\" rect=\"0 48 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Homes: 0\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Button name=\"buildHouse\" anchor=\"TopLeft\" rect=\"0 78 96 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Build home • 100\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"saveCity\" anchor=\"TopLeft\" rect=\"102 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Save\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"loadCity\" anchor=\"TopLeft\" rect=\"188 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Load\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n  </Panel>\n  <Label name=\"HarborLabel\" anchor=\"TopRight\" rect=\"-280 230 280 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Harbor District • r7\" color=\"#ffffffff\" align=\"left\"/>\n</UI>\n",
+                "uiPath": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/UI/CityHudAlt.ui",
+                "uiSavedMarkup": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Panel name=\"cityPanel\" anchor=\"TopRight\" rect=\"-346 16 330 206\" padding=\"12 12 12 12\" visible=\"true\" interactive=\"false\" color=\"#090f18e8\" border=\"1\" borderColor=\"#6d8ca6aa\">\n    <Label name=\"balance\" anchor=\"TopLeft\" rect=\"0 0 300 24\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Balance: 500\" color=\"#fff2d7ff\" align=\"left\"/>\n    <Label name=\"income\" anchor=\"TopLeft\" rect=\"0 26 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Income: 0 / second\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Label name=\"houses\" anchor=\"TopLeft\" rect=\"0 48 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Homes: 0\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Button name=\"buildHouse\" anchor=\"TopLeft\" rect=\"0 78 96 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Build home • 100\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"saveCity\" anchor=\"TopLeft\" rect=\"102 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Save\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"loadCity\" anchor=\"TopLeft\" rect=\"188 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Load\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n  </Panel>\n  <Label name=\"HarborLabel\" anchor=\"TopRight\" rect=\"-280 230 280 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Harbor District • r7\" color=\"#ffffffff\" align=\"left\"/>\n</UI>\n",
+                "uiSelected": "",
+                "viewportSize": [
+                    611,
+                    443
+                ]
+            },
+            "status": 0
+        },
+        {
+            "action": "ui-select",
+            "error": "",
+            "snapshot": {
+                "camera": {
+                    "height": 443,
+                    "position": [
+                        0,
+                        0,
+                        5
+                    ],
+                    "projection": [
+                        1.255807638168335,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.7320507764816284,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.0000100135803223,
+                        1,
+                        0,
+                        0,
+                        -0.10000099986791611,
+                        0
+                    ],
+                    "view": [
+                        -1,
+                        0,
+                        -4.371138828673793e-08,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        4.371138828673793e-08,
+                        0,
+                        -1,
+                        0,
+                        -2.18556948539117e-07,
+                        0,
+                        5,
+                        1
+                    ],
+                    "width": 611
+                },
+                "coordinateSpaceLocal": false,
+                "hudChoice": "UI/CityHudAlt.ui",
+                "hudDescriptorExists": true,
+                "live": [
+                ],
+                "machine": "",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0,
+                "sceneCanRedo": false,
+                "sceneCanUndo": false,
+                "selected": 0,
+                "selectedIds": [
+                ],
+                "uiMarkup": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Panel name=\"cityPanel\" anchor=\"TopRight\" rect=\"-346 16 330 206\" padding=\"12 12 12 12\" visible=\"true\" interactive=\"false\" color=\"#090f18e8\" border=\"1\" borderColor=\"#6d8ca6aa\">\n    <Label name=\"balance\" anchor=\"TopLeft\" rect=\"0 0 300 24\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Balance: 500\" color=\"#fff2d7ff\" align=\"left\"/>\n    <Label name=\"income\" anchor=\"TopLeft\" rect=\"0 26 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Income: 0 / second\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Label name=\"houses\" anchor=\"TopLeft\" rect=\"0 48 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Homes: 0\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Button name=\"buildHouse\" anchor=\"TopLeft\" rect=\"0 78 96 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Build home • 100\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"saveCity\" anchor=\"TopLeft\" rect=\"102 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Save\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"loadCity\" anchor=\"TopLeft\" rect=\"188 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Load\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n  </Panel>\n  <Label name=\"HarborLabel\" anchor=\"TopRight\" rect=\"-280 230 280 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Harbor District • r7\" color=\"#ffffffff\" align=\"left\"/>\n</UI>\n",
+                "uiPath": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/UI/CityHudAlt.ui",
+                "uiSavedMarkup": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Panel name=\"cityPanel\" anchor=\"TopRight\" rect=\"-346 16 330 206\" padding=\"12 12 12 12\" visible=\"true\" interactive=\"false\" color=\"#090f18e8\" border=\"1\" borderColor=\"#6d8ca6aa\">\n    <Label name=\"balance\" anchor=\"TopLeft\" rect=\"0 0 300 24\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Balance: 500\" color=\"#fff2d7ff\" align=\"left\"/>\n    <Label name=\"income\" anchor=\"TopLeft\" rect=\"0 26 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Income: 0 / second\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Label name=\"houses\" anchor=\"TopLeft\" rect=\"0 48 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Homes: 0\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Button name=\"buildHouse\" anchor=\"TopLeft\" rect=\"0 78 96 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Build home • 100\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"saveCity\" anchor=\"TopLeft\" rect=\"102 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Save\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"loadCity\" anchor=\"TopLeft\" rect=\"188 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Load\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n  </Panel>\n  <Label name=\"HarborLabel\" anchor=\"TopRight\" rect=\"-280 230 280 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Harbor District • r7\" color=\"#ffffffff\" align=\"left\"/>\n</UI>\n",
+                "uiSelected": "cityPanel",
+                "viewportSize": [
+                    611,
+                    443
+                ]
+            },
+            "status": 0
+        },
+        {
+            "action": "ui-field",
+            "error": "",
+            "snapshot": {
+                "camera": {
+                    "height": 443,
+                    "position": [
+                        0,
+                        0,
+                        5
+                    ],
+                    "projection": [
+                        1.255807638168335,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.7320507764816284,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.0000100135803223,
+                        1,
+                        0,
+                        0,
+                        -0.10000099986791611,
+                        0
+                    ],
+                    "view": [
+                        -1,
+                        0,
+                        -4.371138828673793e-08,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        4.371138828673793e-08,
+                        0,
+                        -1,
+                        0,
+                        -2.18556948539117e-07,
+                        0,
+                        5,
+                        1
+                    ],
+                    "width": 611
+                },
+                "coordinateSpaceLocal": false,
+                "hudChoice": "UI/CityHudAlt.ui",
+                "hudDescriptorExists": true,
+                "live": [
+                ],
+                "machine": "",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0,
+                "sceneCanRedo": false,
+                "sceneCanUndo": false,
+                "selected": 0,
+                "selectedIds": [
+                ],
+                "uiMarkup": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Panel name=\"cityPanel\" anchor=\"TopRight\" rect=\"16 16 330 206\" padding=\"12 12 12 12\" visible=\"true\" interactive=\"false\" color=\"#090f18e8\" border=\"1\" borderColor=\"#6d8ca6aa\">\n    <Label name=\"balance\" anchor=\"TopLeft\" rect=\"0 0 300 24\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Balance: 500\" color=\"#fff2d7ff\" align=\"left\"/>\n    <Label name=\"income\" anchor=\"TopLeft\" rect=\"0 26 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Income: 0 / second\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Label name=\"houses\" anchor=\"TopLeft\" rect=\"0 48 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Homes: 0\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Button name=\"buildHouse\" anchor=\"TopLeft\" rect=\"0 78 96 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Build home • 100\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"saveCity\" anchor=\"TopLeft\" rect=\"102 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Save\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"loadCity\" anchor=\"TopLeft\" rect=\"188 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Load\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n  </Panel>\n  <Label name=\"HarborLabel\" anchor=\"TopRight\" rect=\"-280 230 280 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Harbor District • r7\" color=\"#ffffffff\" align=\"left\"/>\n</UI>\n",
+                "uiPath": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/UI/CityHudAlt.ui",
+                "uiSavedMarkup": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Panel name=\"cityPanel\" anchor=\"TopRight\" rect=\"-346 16 330 206\" padding=\"12 12 12 12\" visible=\"true\" interactive=\"false\" color=\"#090f18e8\" border=\"1\" borderColor=\"#6d8ca6aa\">\n    <Label name=\"balance\" anchor=\"TopLeft\" rect=\"0 0 300 24\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Balance: 500\" color=\"#fff2d7ff\" align=\"left\"/>\n    <Label name=\"income\" anchor=\"TopLeft\" rect=\"0 26 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Income: 0 / second\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Label name=\"houses\" anchor=\"TopLeft\" rect=\"0 48 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Homes: 0\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Button name=\"buildHouse\" anchor=\"TopLeft\" rect=\"0 78 96 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Build home • 100\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"saveCity\" anchor=\"TopLeft\" rect=\"102 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Save\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"loadCity\" anchor=\"TopLeft\" rect=\"188 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Load\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n  </Panel>\n  <Label name=\"HarborLabel\" anchor=\"TopRight\" rect=\"-280 230 280 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Harbor District • r7\" color=\"#ffffffff\" align=\"left\"/>\n</UI>\n",
+                "uiSelected": "cityPanel",
+                "viewportSize": [
+                    611,
+                    443
+                ]
+            },
+            "status": 0
+        },
+        {
+            "action": "ui-select",
+            "error": "",
+            "snapshot": {
+                "camera": {
+                    "height": 443,
+                    "position": [
+                        0,
+                        0,
+                        5
+                    ],
+                    "projection": [
+                        1.255807638168335,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.7320507764816284,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.0000100135803223,
+                        1,
+                        0,
+                        0,
+                        -0.10000099986791611,
+                        0
+                    ],
+                    "view": [
+                        -1,
+                        0,
+                        -4.371138828673793e-08,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        4.371138828673793e-08,
+                        0,
+                        -1,
+                        0,
+                        -2.18556948539117e-07,
+                        0,
+                        5,
+                        1
+                    ],
+                    "width": 611
+                },
+                "coordinateSpaceLocal": false,
+                "hudChoice": "UI/CityHudAlt.ui",
+                "hudDescriptorExists": true,
+                "live": [
+                ],
+                "machine": "",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0,
+                "sceneCanRedo": false,
+                "sceneCanUndo": false,
+                "selected": 0,
+                "selectedIds": [
+                ],
+                "uiMarkup": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Panel name=\"cityPanel\" anchor=\"TopRight\" rect=\"16 16 330 206\" padding=\"12 12 12 12\" visible=\"true\" interactive=\"false\" color=\"#090f18e8\" border=\"1\" borderColor=\"#6d8ca6aa\">\n    <Label name=\"balance\" anchor=\"TopLeft\" rect=\"0 0 300 24\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Balance: 500\" color=\"#fff2d7ff\" align=\"left\"/>\n    <Label name=\"income\" anchor=\"TopLeft\" rect=\"0 26 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Income: 0 / second\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Label name=\"houses\" anchor=\"TopLeft\" rect=\"0 48 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Homes: 0\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Button name=\"buildHouse\" anchor=\"TopLeft\" rect=\"0 78 96 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Build home • 100\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"saveCity\" anchor=\"TopLeft\" rect=\"102 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Save\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"loadCity\" anchor=\"TopLeft\" rect=\"188 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Load\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n  </Panel>\n  <Label name=\"HarborLabel\" anchor=\"TopRight\" rect=\"-280 230 280 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Harbor District • r7\" color=\"#ffffffff\" align=\"left\"/>\n</UI>\n",
+                "uiPath": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/UI/CityHudAlt.ui",
+                "uiSavedMarkup": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Panel name=\"cityPanel\" anchor=\"TopRight\" rect=\"-346 16 330 206\" padding=\"12 12 12 12\" visible=\"true\" interactive=\"false\" color=\"#090f18e8\" border=\"1\" borderColor=\"#6d8ca6aa\">\n    <Label name=\"balance\" anchor=\"TopLeft\" rect=\"0 0 300 24\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Balance: 500\" color=\"#fff2d7ff\" align=\"left\"/>\n    <Label name=\"income\" anchor=\"TopLeft\" rect=\"0 26 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Income: 0 / second\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Label name=\"houses\" anchor=\"TopLeft\" rect=\"0 48 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Homes: 0\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Button name=\"buildHouse\" anchor=\"TopLeft\" rect=\"0 78 96 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Build home • 100\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"saveCity\" anchor=\"TopLeft\" rect=\"102 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Save\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"loadCity\" anchor=\"TopLeft\" rect=\"188 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Load\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n  </Panel>\n  <Label name=\"HarborLabel\" anchor=\"TopRight\" rect=\"-280 230 280 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Harbor District • r7\" color=\"#ffffffff\" align=\"left\"/>\n</UI>\n",
+                "uiSelected": "buildHouse",
+                "viewportSize": [
+                    611,
+                    443
+                ]
+            },
+            "status": 0
+        },
+        {
+            "action": "ui-field",
+            "error": "",
+            "snapshot": {
+                "camera": {
+                    "height": 443,
+                    "position": [
+                        0,
+                        0,
+                        5
+                    ],
+                    "projection": [
+                        1.255807638168335,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.7320507764816284,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.0000100135803223,
+                        1,
+                        0,
+                        0,
+                        -0.10000099986791611,
+                        0
+                    ],
+                    "view": [
+                        -1,
+                        0,
+                        -4.371138828673793e-08,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        4.371138828673793e-08,
+                        0,
+                        -1,
+                        0,
+                        -2.18556948539117e-07,
+                        0,
+                        5,
+                        1
+                    ],
+                    "width": 611
+                },
+                "coordinateSpaceLocal": false,
+                "hudChoice": "UI/CityHudAlt.ui",
+                "hudDescriptorExists": true,
+                "live": [
+                ],
+                "machine": "",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0,
+                "sceneCanRedo": false,
+                "sceneCanUndo": false,
+                "selected": 0,
+                "selectedIds": [
+                ],
+                "uiMarkup": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Panel name=\"cityPanel\" anchor=\"TopRight\" rect=\"16 16 330 206\" padding=\"12 12 12 12\" visible=\"true\" interactive=\"false\" color=\"#090f18e8\" border=\"1\" borderColor=\"#6d8ca6aa\">\n    <Label name=\"balance\" anchor=\"TopLeft\" rect=\"0 0 300 24\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Balance: 500\" color=\"#fff2d7ff\" align=\"left\"/>\n    <Label name=\"income\" anchor=\"TopLeft\" rect=\"0 26 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Income: 0 / second\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Label name=\"houses\" anchor=\"TopLeft\" rect=\"0 48 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Homes: 0\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Button name=\"buildHouse\" anchor=\"TopLeft\" rect=\"0 78 130 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Build home • 100\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"saveCity\" anchor=\"TopLeft\" rect=\"102 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Save\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"loadCity\" anchor=\"TopLeft\" rect=\"188 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Load\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n  </Panel>\n  <Label name=\"HarborLabel\" anchor=\"TopRight\" rect=\"-280 230 280 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Harbor District • r7\" color=\"#ffffffff\" align=\"left\"/>\n</UI>\n",
+                "uiPath": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/UI/CityHudAlt.ui",
+                "uiSavedMarkup": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Panel name=\"cityPanel\" anchor=\"TopRight\" rect=\"-346 16 330 206\" padding=\"12 12 12 12\" visible=\"true\" interactive=\"false\" color=\"#090f18e8\" border=\"1\" borderColor=\"#6d8ca6aa\">\n    <Label name=\"balance\" anchor=\"TopLeft\" rect=\"0 0 300 24\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Balance: 500\" color=\"#fff2d7ff\" align=\"left\"/>\n    <Label name=\"income\" anchor=\"TopLeft\" rect=\"0 26 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Income: 0 / second\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Label name=\"houses\" anchor=\"TopLeft\" rect=\"0 48 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Homes: 0\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Button name=\"buildHouse\" anchor=\"TopLeft\" rect=\"0 78 96 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Build home • 100\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"saveCity\" anchor=\"TopLeft\" rect=\"102 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Save\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"loadCity\" anchor=\"TopLeft\" rect=\"188 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Load\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n  </Panel>\n  <Label name=\"HarborLabel\" anchor=\"TopRight\" rect=\"-280 230 280 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Harbor District • r7\" color=\"#ffffffff\" align=\"left\"/>\n</UI>\n",
+                "uiSelected": "buildHouse",
+                "viewportSize": [
+                    611,
+                    443
+                ]
+            },
+            "status": 0
+        },
+        {
+            "action": "ui-select",
+            "error": "",
+            "snapshot": {
+                "camera": {
+                    "height": 443,
+                    "position": [
+                        0,
+                        0,
+                        5
+                    ],
+                    "projection": [
+                        1.255807638168335,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.7320507764816284,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.0000100135803223,
+                        1,
+                        0,
+                        0,
+                        -0.10000099986791611,
+                        0
+                    ],
+                    "view": [
+                        -1,
+                        0,
+                        -4.371138828673793e-08,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        4.371138828673793e-08,
+                        0,
+                        -1,
+                        0,
+                        -2.18556948539117e-07,
+                        0,
+                        5,
+                        1
+                    ],
+                    "width": 611
+                },
+                "coordinateSpaceLocal": false,
+                "hudChoice": "UI/CityHudAlt.ui",
+                "hudDescriptorExists": true,
+                "live": [
+                ],
+                "machine": "",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0,
+                "sceneCanRedo": false,
+                "sceneCanUndo": false,
+                "selected": 0,
+                "selectedIds": [
+                ],
+                "uiMarkup": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Panel name=\"cityPanel\" anchor=\"TopRight\" rect=\"16 16 330 206\" padding=\"12 12 12 12\" visible=\"true\" interactive=\"false\" color=\"#090f18e8\" border=\"1\" borderColor=\"#6d8ca6aa\">\n    <Label name=\"balance\" anchor=\"TopLeft\" rect=\"0 0 300 24\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Balance: 500\" color=\"#fff2d7ff\" align=\"left\"/>\n    <Label name=\"income\" anchor=\"TopLeft\" rect=\"0 26 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Income: 0 / second\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Label name=\"houses\" anchor=\"TopLeft\" rect=\"0 48 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Homes: 0\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Button name=\"buildHouse\" anchor=\"TopLeft\" rect=\"0 78 130 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Build home • 100\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"saveCity\" anchor=\"TopLeft\" rect=\"102 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Save\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"loadCity\" anchor=\"TopLeft\" rect=\"188 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Load\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n  </Panel>\n  <Label name=\"HarborLabel\" anchor=\"TopRight\" rect=\"-280 230 280 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Harbor District • r7\" color=\"#ffffffff\" align=\"left\"/>\n</UI>\n",
+                "uiPath": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/UI/CityHudAlt.ui",
+                "uiSavedMarkup": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Panel name=\"cityPanel\" anchor=\"TopRight\" rect=\"-346 16 330 206\" padding=\"12 12 12 12\" visible=\"true\" interactive=\"false\" color=\"#090f18e8\" border=\"1\" borderColor=\"#6d8ca6aa\">\n    <Label name=\"balance\" anchor=\"TopLeft\" rect=\"0 0 300 24\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Balance: 500\" color=\"#fff2d7ff\" align=\"left\"/>\n    <Label name=\"income\" anchor=\"TopLeft\" rect=\"0 26 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Income: 0 / second\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Label name=\"houses\" anchor=\"TopLeft\" rect=\"0 48 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Homes: 0\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Button name=\"buildHouse\" anchor=\"TopLeft\" rect=\"0 78 96 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Build home • 100\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"saveCity\" anchor=\"TopLeft\" rect=\"102 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Save\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"loadCity\" anchor=\"TopLeft\" rect=\"188 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Load\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n  </Panel>\n  <Label name=\"HarborLabel\" anchor=\"TopRight\" rect=\"-280 230 280 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Harbor District • r7\" color=\"#ffffffff\" align=\"left\"/>\n</UI>\n",
+                "uiSelected": "HarborLabel",
+                "viewportSize": [
+                    611,
+                    443
+                ]
+            },
+            "status": 0
+        },
+        {
+            "action": "ui-field",
+            "error": "",
+            "snapshot": {
+                "camera": {
+                    "height": 443,
+                    "position": [
+                        0,
+                        0,
+                        5
+                    ],
+                    "projection": [
+                        1.255807638168335,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.7320507764816284,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.0000100135803223,
+                        1,
+                        0,
+                        0,
+                        -0.10000099986791611,
+                        0
+                    ],
+                    "view": [
+                        -1,
+                        0,
+                        -4.371138828673793e-08,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        4.371138828673793e-08,
+                        0,
+                        -1,
+                        0,
+                        -2.18556948539117e-07,
+                        0,
+                        5,
+                        1
+                    ],
+                    "width": 611
+                },
+                "coordinateSpaceLocal": false,
+                "hudChoice": "UI/CityHudAlt.ui",
+                "hudDescriptorExists": true,
+                "live": [
+                ],
+                "machine": "",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0,
+                "sceneCanRedo": false,
+                "sceneCanUndo": false,
+                "selected": 0,
+                "selectedIds": [
+                ],
+                "uiMarkup": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Panel name=\"cityPanel\" anchor=\"TopRight\" rect=\"16 16 330 206\" padding=\"12 12 12 12\" visible=\"true\" interactive=\"false\" color=\"#090f18e8\" border=\"1\" borderColor=\"#6d8ca6aa\">\n    <Label name=\"balance\" anchor=\"TopLeft\" rect=\"0 0 300 24\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Balance: 500\" color=\"#fff2d7ff\" align=\"left\"/>\n    <Label name=\"income\" anchor=\"TopLeft\" rect=\"0 26 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Income: 0 / second\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Label name=\"houses\" anchor=\"TopLeft\" rect=\"0 48 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Homes: 0\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Button name=\"buildHouse\" anchor=\"TopLeft\" rect=\"0 78 130 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Build home • 100\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"saveCity\" anchor=\"TopLeft\" rect=\"102 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Save\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"loadCity\" anchor=\"TopLeft\" rect=\"188 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Load\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n  </Panel>\n  <Label name=\"HarborLabel\" anchor=\"TopRight\" rect=\"16 230 280 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Harbor District • r7\" color=\"#ffffffff\" align=\"left\"/>\n</UI>\n",
+                "uiPath": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/UI/CityHudAlt.ui",
+                "uiSavedMarkup": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Panel name=\"cityPanel\" anchor=\"TopRight\" rect=\"-346 16 330 206\" padding=\"12 12 12 12\" visible=\"true\" interactive=\"false\" color=\"#090f18e8\" border=\"1\" borderColor=\"#6d8ca6aa\">\n    <Label name=\"balance\" anchor=\"TopLeft\" rect=\"0 0 300 24\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Balance: 500\" color=\"#fff2d7ff\" align=\"left\"/>\n    <Label name=\"income\" anchor=\"TopLeft\" rect=\"0 26 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Income: 0 / second\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Label name=\"houses\" anchor=\"TopLeft\" rect=\"0 48 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Homes: 0\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Button name=\"buildHouse\" anchor=\"TopLeft\" rect=\"0 78 96 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Build home • 100\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"saveCity\" anchor=\"TopLeft\" rect=\"102 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Save\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"loadCity\" anchor=\"TopLeft\" rect=\"188 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Load\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n  </Panel>\n  <Label name=\"HarborLabel\" anchor=\"TopRight\" rect=\"-280 230 280 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Harbor District • r7\" color=\"#ffffffff\" align=\"left\"/>\n</UI>\n",
+                "uiSelected": "HarborLabel",
+                "viewportSize": [
+                    611,
+                    443
+                ]
+            },
+            "status": 0
+        },
+        {
+            "action": "ui-action",
+            "error": "",
+            "snapshot": {
+                "camera": {
+                    "height": 443,
+                    "position": [
+                        0,
+                        0,
+                        5
+                    ],
+                    "projection": [
+                        1.255807638168335,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.7320507764816284,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.0000100135803223,
+                        1,
+                        0,
+                        0,
+                        -0.10000099986791611,
+                        0
+                    ],
+                    "view": [
+                        -1,
+                        0,
+                        -4.371138828673793e-08,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        4.371138828673793e-08,
+                        0,
+                        -1,
+                        0,
+                        -2.18556948539117e-07,
+                        0,
+                        5,
+                        1
+                    ],
+                    "width": 611
+                },
+                "coordinateSpaceLocal": false,
+                "hudChoice": "UI/CityHudAlt.ui",
+                "hudDescriptorExists": true,
+                "live": [
+                ],
+                "machine": "",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0,
+                "sceneCanRedo": false,
+                "sceneCanUndo": false,
+                "selected": 0,
+                "selectedIds": [
+                ],
+                "uiMarkup": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Panel name=\"cityPanel\" anchor=\"TopRight\" rect=\"16 16 330 206\" padding=\"12 12 12 12\" visible=\"true\" interactive=\"false\" color=\"#090f18e8\" border=\"1\" borderColor=\"#6d8ca6aa\">\n    <Label name=\"balance\" anchor=\"TopLeft\" rect=\"0 0 300 24\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Balance: 500\" color=\"#fff2d7ff\" align=\"left\"/>\n    <Label name=\"income\" anchor=\"TopLeft\" rect=\"0 26 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Income: 0 / second\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Label name=\"houses\" anchor=\"TopLeft\" rect=\"0 48 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Homes: 0\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Button name=\"buildHouse\" anchor=\"TopLeft\" rect=\"0 78 130 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Build home • 100\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"saveCity\" anchor=\"TopLeft\" rect=\"102 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Save\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"loadCity\" anchor=\"TopLeft\" rect=\"188 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Load\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n  </Panel>\n  <Label name=\"HarborLabel\" anchor=\"TopRight\" rect=\"16 230 280 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Harbor District • r7\" color=\"#ffffffff\" align=\"left\"/>\n</UI>\n",
+                "uiPath": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/UI/CityHudAlt.ui",
+                "uiSavedMarkup": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Panel name=\"cityPanel\" anchor=\"TopRight\" rect=\"16 16 330 206\" padding=\"12 12 12 12\" visible=\"true\" interactive=\"false\" color=\"#090f18e8\" border=\"1\" borderColor=\"#6d8ca6aa\">\n    <Label name=\"balance\" anchor=\"TopLeft\" rect=\"0 0 300 24\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Balance: 500\" color=\"#fff2d7ff\" align=\"left\"/>\n    <Label name=\"income\" anchor=\"TopLeft\" rect=\"0 26 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Income: 0 / second\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Label name=\"houses\" anchor=\"TopLeft\" rect=\"0 48 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Homes: 0\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Button name=\"buildHouse\" anchor=\"TopLeft\" rect=\"0 78 130 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Build home • 100\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"saveCity\" anchor=\"TopLeft\" rect=\"102 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Save\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"loadCity\" anchor=\"TopLeft\" rect=\"188 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Load\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n  </Panel>\n  <Label name=\"HarborLabel\" anchor=\"TopRight\" rect=\"16 230 280 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Harbor District • r7\" color=\"#ffffffff\" align=\"left\"/>\n</UI>\n",
+                "uiSelected": "HarborLabel",
+                "viewportSize": [
+                    611,
+                    443
+                ]
+            },
+            "status": 0
+        },
+        {
+            "action": "ui-field",
+            "error": "",
+            "snapshot": {
+                "camera": {
+                    "height": 443,
+                    "position": [
+                        0,
+                        0,
+                        5
+                    ],
+                    "projection": [
+                        1.255807638168335,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.7320507764816284,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.0000100135803223,
+                        1,
+                        0,
+                        0,
+                        -0.10000099986791611,
+                        0
+                    ],
+                    "view": [
+                        -1,
+                        0,
+                        -4.371138828673793e-08,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        4.371138828673793e-08,
+                        0,
+                        -1,
+                        0,
+                        -2.18556948539117e-07,
+                        0,
+                        5,
+                        1
+                    ],
+                    "width": 611
+                },
+                "coordinateSpaceLocal": false,
+                "hudChoice": "UI/CityHudAlt.ui",
+                "hudDescriptorExists": true,
+                "live": [
+                ],
+                "machine": "",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0,
+                "sceneCanRedo": false,
+                "sceneCanUndo": false,
+                "selected": 0,
+                "selectedIds": [
+                ],
+                "uiMarkup": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Panel name=\"cityPanel\" anchor=\"TopRight\" rect=\"16 16 330 206\" padding=\"12 12 12 12\" visible=\"true\" interactive=\"false\" color=\"#090f18e8\" border=\"1\" borderColor=\"#6d8ca6aa\">\n    <Label name=\"balance\" anchor=\"TopLeft\" rect=\"0 0 300 24\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Balance: 500\" color=\"#fff2d7ff\" align=\"left\"/>\n    <Label name=\"income\" anchor=\"TopLeft\" rect=\"0 26 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Income: 0 / second\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Label name=\"houses\" anchor=\"TopLeft\" rect=\"0 48 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Homes: 0\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Button name=\"buildHouse\" anchor=\"TopLeft\" rect=\"0 78 130 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Build home • 100\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"saveCity\" anchor=\"TopLeft\" rect=\"102 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Save\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"loadCity\" anchor=\"TopLeft\" rect=\"188 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Load\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n  </Panel>\n  <Label name=\"HarborLabel\" anchor=\"TopRight\" rect=\"16 230 280 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Harbor District • r7\" color=\"#ffffffff\" align=\"left\"/>\n</UI>\n",
+                "uiPath": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/UI/CityHudAlt.ui",
+                "uiSavedMarkup": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Panel name=\"cityPanel\" anchor=\"TopRight\" rect=\"16 16 330 206\" padding=\"12 12 12 12\" visible=\"true\" interactive=\"false\" color=\"#090f18e8\" border=\"1\" borderColor=\"#6d8ca6aa\">\n    <Label name=\"balance\" anchor=\"TopLeft\" rect=\"0 0 300 24\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Balance: 500\" color=\"#fff2d7ff\" align=\"left\"/>\n    <Label name=\"income\" anchor=\"TopLeft\" rect=\"0 26 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Income: 0 / second\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Label name=\"houses\" anchor=\"TopLeft\" rect=\"0 48 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Homes: 0\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Button name=\"buildHouse\" anchor=\"TopLeft\" rect=\"0 78 130 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Build home • 100\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"saveCity\" anchor=\"TopLeft\" rect=\"102 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Save\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"loadCity\" anchor=\"TopLeft\" rect=\"188 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Load\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n  </Panel>\n  <Label name=\"HarborLabel\" anchor=\"TopRight\" rect=\"16 230 280 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Harbor District • r7\" color=\"#ffffffff\" align=\"left\"/>\n</UI>\n",
+                "uiSelected": "HarborLabel",
+                "viewportSize": [
+                    611,
+                    443
+                ]
+            },
+            "status": 0
+        },
+        {
+            "action": "ui-action",
+            "error": "",
+            "snapshot": {
+                "camera": {
+                    "height": 443,
+                    "position": [
+                        0,
+                        0,
+                        5
+                    ],
+                    "projection": [
+                        1.255807638168335,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.7320507764816284,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.0000100135803223,
+                        1,
+                        0,
+                        0,
+                        -0.10000099986791611,
+                        0
+                    ],
+                    "view": [
+                        -1,
+                        0,
+                        -4.371138828673793e-08,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        4.371138828673793e-08,
+                        0,
+                        -1,
+                        0,
+                        -2.18556948539117e-07,
+                        0,
+                        5,
+                        1
+                    ],
+                    "width": 611
+                },
+                "coordinateSpaceLocal": false,
+                "hudChoice": "UI/CityHudAlt.ui",
+                "hudDescriptorExists": true,
+                "live": [
+                ],
+                "machine": "",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0,
+                "sceneCanRedo": false,
+                "sceneCanUndo": false,
+                "selected": 0,
+                "selectedIds": [
+                ],
+                "uiMarkup": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Panel name=\"cityPanel\" anchor=\"TopRight\" rect=\"16 16 330 206\" padding=\"12 12 12 12\" visible=\"true\" interactive=\"false\" color=\"#090f18e8\" border=\"1\" borderColor=\"#6d8ca6aa\">\n    <Label name=\"balance\" anchor=\"TopLeft\" rect=\"0 0 300 24\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Balance: 500\" color=\"#fff2d7ff\" align=\"left\"/>\n    <Label name=\"income\" anchor=\"TopLeft\" rect=\"0 26 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Income: 0 / second\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Label name=\"houses\" anchor=\"TopLeft\" rect=\"0 48 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Homes: 0\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Button name=\"buildHouse\" anchor=\"TopLeft\" rect=\"0 78 130 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Build home • 100\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"saveCity\" anchor=\"TopLeft\" rect=\"102 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Save\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"loadCity\" anchor=\"TopLeft\" rect=\"188 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Load\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n  </Panel>\n  <Label name=\"HarborLabel\" anchor=\"TopRight\" rect=\"16 230 280 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Harbor District • r7\" color=\"#ffffffff\" align=\"left\"/>\n</UI>\n",
+                "uiPath": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/UI/CityHudAlt.ui",
+                "uiSavedMarkup": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI name=\"\" anchor=\"TopLeft\" rect=\"0 0 0 0\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\">\n  <Panel name=\"cityPanel\" anchor=\"TopRight\" rect=\"16 16 330 206\" padding=\"12 12 12 12\" visible=\"true\" interactive=\"false\" color=\"#090f18e8\" border=\"1\" borderColor=\"#6d8ca6aa\">\n    <Label name=\"balance\" anchor=\"TopLeft\" rect=\"0 0 300 24\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Balance: 500\" color=\"#fff2d7ff\" align=\"left\"/>\n    <Label name=\"income\" anchor=\"TopLeft\" rect=\"0 26 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Income: 0 / second\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Label name=\"houses\" anchor=\"TopLeft\" rect=\"0 48 300 22\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Homes: 0\" color=\"#a9cee9ff\" align=\"left\"/>\n    <Button name=\"buildHouse\" anchor=\"TopLeft\" rect=\"0 78 130 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Build home • 100\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"saveCity\" anchor=\"TopLeft\" rect=\"102 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Save\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n    <Button name=\"loadCity\" anchor=\"TopLeft\" rect=\"188 78 80 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"true\" text=\"Load\" color=\"#183044ff\" hoverColor=\"#28516cff\" pressedColor=\"#0d2132ff\" textColor=\"#f2f5f4ff\" border=\"1\" borderColor=\"#7aa5c8ff\"/>\n  </Panel>\n  <Label name=\"HarborLabel\" anchor=\"TopRight\" rect=\"16 230 280 32\" padding=\"0 0 0 0\" visible=\"true\" interactive=\"false\" text=\"Harbor District • r7\" color=\"#ffffffff\" align=\"left\"/>\n</UI>\n",
+                "uiSelected": "HarborLabel",
+                "viewportSize": [
+                    611,
+                    443
+                ]
+            },
+            "status": 0
+        },
+        {
+            "action": "ui-close",
+            "error": "",
+            "snapshot": {
+                "camera": {
+                    "height": 443,
+                    "position": [
+                        0,
+                        0,
+                        5
+                    ],
+                    "projection": [
+                        1.255807638168335,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.7320507764816284,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1.0000100135803223,
+                        1,
+                        0,
+                        0,
+                        -0.10000099986791611,
+                        0
+                    ],
+                    "view": [
+                        -1,
+                        0,
+                        -4.371138828673793e-08,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        4.371138828673793e-08,
+                        0,
+                        -1,
+                        0,
+                        -2.18556948539117e-07,
+                        0,
+                        5,
+                        1
+                    ],
+                    "width": 611
+                },
+                "coordinateSpaceLocal": false,
+                "hudChoice": "UI/CityHudAlt.ui",
+                "hudDescriptorExists": true,
+                "live": [
+                ],
+                "machine": "",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "Ground",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            -0.5,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            20,
+                            1,
+                            20
+                        ],
+                        "type": "Primitive.Plane"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "Cube",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Primitive.Cube"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "Warm Light",
+                        "parent": 0,
+                        "position": [
+                            2,
+                            3,
+                            2
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 4,
+                        "material": "",
+                        "name": "Cool Light",
+                        "parent": 0,
+                        "position": [
+                            -3,
+                            2,
+                            1
+                        ],
+                        "projectData": {
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Light.Point"
+                    },
+                    {
+                        "id": 5,
+                        "material": "",
+                        "name": "SaveGameSlotProbe",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            2,
+                            0
+                        ],
+                        "projectData": {
+                            "materialSlots": {
+                                "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                                "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                            },
+                            "version": 1
+                        },
+                        "rotation": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Engine.Model"
+                    }
+                ],
+                "playState": 0,
+                "sceneCanRedo": false,
+                "sceneCanUndo": false,
+                "selected": 0,
+                "selectedIds": [
+                ],
+                "viewportSize": [
+                    611,
+                    443
+                ]
+            },
+            "status": 0
+        }
+    ]
+}

@@ -1,0 +1,35 @@
+{
+  "steps": [
+    {
+      "type": "Gameplay.AiCharacter",
+      "name": "Trash sorter",
+      "action": "create"
+    },
+    {
+      "path": "/stateMachine",
+      "target": "Trash sorter",
+      "value": "/Game/AI/TrashSorter.fsm",
+      "action": "property"
+    },
+    {
+      "path": "/moveSpeed",
+      "target": "Trash sorter",
+      "value": 2.5,
+      "action": "property"
+    },
+    {
+      "target": "Trash sorter",
+      "delta": [
+        -4,
+        0.5,
+        3
+      ],
+      "action": "move"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\ai-trash\\TrashGameUpgraded\\Content\\Scenes\\TrashAIPractice.scene.json",
+      "action": "save"
+    }
+  ],
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\ai-trash\\TrashGameUpgraded\\Project.json"
+}

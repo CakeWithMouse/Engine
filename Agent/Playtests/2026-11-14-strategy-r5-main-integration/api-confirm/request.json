@@ -1,0 +1,63 @@
+{
+  "steps": [
+    {
+      "request": {
+        "layers": 1
+      },
+      "kind": "diagnostics"
+    },
+    {
+      "action": "play",
+      "kind": "control"
+    },
+    {
+      "count": 100,
+      "kind": "frames"
+    },
+    {
+      "request": {
+        "selectedOnly": false,
+        "layers": 255
+      },
+      "kind": "diagnostics"
+    },
+    {
+      "action": "pause",
+      "kind": "control"
+    },
+    {
+      "request": {
+        "selectedOnly": false,
+        "layers": 255
+      },
+      "kind": "diagnostics"
+    },
+    {
+      "request": {
+        "layers": 0
+      },
+      "kind": "diagnostics"
+    },
+    {
+      "action": "resume",
+      "kind": "control"
+    },
+    {
+      "request": {
+        "layers": 1
+      },
+      "kind": "diagnostics"
+    },
+    {
+      "action": "stop",
+      "kind": "control"
+    },
+    {
+      "request": {
+        "layers": 1
+      },
+      "kind": "diagnostics"
+    }
+  ],
+  "project": "E:\\Engine\\Engine\\build\\playtests\\strategy-r5-main-integration\\ai-diagnostics\\Project.json"
+}

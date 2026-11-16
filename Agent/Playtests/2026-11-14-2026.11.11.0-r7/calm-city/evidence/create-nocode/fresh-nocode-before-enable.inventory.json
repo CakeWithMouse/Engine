@@ -1,0 +1,42 @@
+[
+  {
+    "Name": "Content",
+    "Mode": "d----"
+  },
+  {
+    "Name": "assimp-vc143-mt.dll",
+    "Mode": "-a---"
+  },
+  {
+    "Name": "Engine.lock.json",
+    "Mode": "-a---"
+  },
+  {
+    "Name": "Game.dll",
+    "Mode": "-a---"
+  },
+  {
+    "Name": "kubazip.dll",
+    "Mode": "-a---"
+  },
+  {
+    "Name": "minizip.dll",
+    "Mode": "-a---"
+  },
+  {
+    "Name": "poly2tri.dll",
+    "Mode": "-a---"
+  },
+  {
+    "Name": "Project.json",
+    "Mode": "-a---"
+  },
+  {
+    "Name": "pugixml.dll",
+    "Mode": "-a---"
+  },
+  {
+    "Name": "z.dll",
+    "Mode": "-a---"
+  }
+]

@@ -1,0 +1,54 @@
+{
+  "position": [
+    0,
+    2,
+    0
+  ],
+  "bias": 0.04,
+  "baseVelocity": [
+    0,
+    -3,
+    0
+  ],
+  "width": 480,
+  "surface": true,
+  "surfaceScale": [
+    8,
+    0.2,
+    8
+  ],
+  "spread": 0.12,
+  "bounce": 0.35,
+  "particleCount": 128,
+  "depthCollision": false,
+  "radialSpeed": 0,
+  "surfacePosition": [
+    0,
+    -0.1,
+    0
+  ],
+  "brightness": 3,
+  "acceleration": [
+    0,
+    -2,
+    0
+  ],
+  "rendering": 0,
+  "lifetime": 10,
+  "friction": 0.15,
+  "height": 360,
+  "frames": [
+    {
+      "dt": 0.0167,
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation\\particles-collision-off\\frame-018.bmp",
+      "steps": 18
+    },
+    {
+      "dt": 0.0167,
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation\\particles-collision-off\\frame-054.bmp",
+      "steps": 36
+    }
+  ],
+  "size": 0.15,
+  "sorting": true
+}

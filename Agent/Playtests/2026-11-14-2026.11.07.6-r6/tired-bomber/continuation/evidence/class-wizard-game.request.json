@@ -1,0 +1,7 @@
+{
+  "base": "GameComponent",
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\BomberFresh\\Project.json",
+  "kind": "Component",
+  "header": "Engine/Components/GameComponents.h",
+  "name": "BomberDamageCounter"
+}

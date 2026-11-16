@@ -1,0 +1,59 @@
+{
+    "ok": true,
+    "steps": [
+        {
+            "accepted": false,
+            "arguments": [
+                "-Name",
+                "class",
+                "-Kind",
+                "Component",
+                "-Base",
+                "GameComponent",
+                "-BaseHeader",
+                "Engine/Components/GameComponents.h"
+            ],
+            "error": "Это имя зарезервировано. Выберите другое имя класса."
+        },
+        {
+            "accepted": false,
+            "arguments": [
+                "-Name",
+                "1Bad",
+                "-Kind",
+                "Component",
+                "-Base",
+                "GameComponent",
+                "-BaseHeader",
+                "Engine/Components/GameComponents.h"
+            ],
+            "error": "Введите имя вроде MyCharacter: без пробелов, кириллицы и расширения файла."
+        },
+        {
+            "accepted": true,
+            "arguments": [
+                "-Name",
+                "RoundHero",
+                "-Kind",
+                "Character",
+                "-Base",
+                "Character",
+                "-BaseHeader",
+                "Engine/Components/Character.h"
+            ],
+            "error": ""
+        },
+        {
+            "accepted": true,
+            "arguments": [
+                "-Name",
+                "RoundRules",
+                "-Kind",
+                "Object",
+                "-BaseHeader",
+                "Engine/Components/ProjectObject.h"
+            ],
+            "error": ""
+        }
+    ]
+}

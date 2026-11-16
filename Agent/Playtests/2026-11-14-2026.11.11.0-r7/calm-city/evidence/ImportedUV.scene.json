@@ -1,0 +1,42 @@
+{
+  "name": "Scene",
+  "objects": [
+    {
+      "assets": {
+        "model": "/Game/Models/ScaleCity/CityCalibration2.glb",
+        "texture": ""
+      },
+      "id": 1,
+      "inheritParentScale": true,
+      "name": "ImportedUVProbe",
+      "parent": 0,
+      "projectData": {
+        "materialSlots": {
+          "0": "/Game/Models/ScaleCity/Materials/Material_0.mat",
+          "1": "/Game/Materials/WarmStone.mat"
+        },
+        "version": 1
+      },
+      "transform": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "Engine.Model"
+    }
+  ],
+  "version": 3
+}

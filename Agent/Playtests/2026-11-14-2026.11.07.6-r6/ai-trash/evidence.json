@@ -1,0 +1,65 @@
+[
+  {
+    "feature_id": "fresh-create-enable-upgrade-sdk-build",
+    "action": "Fresh CLI create/enable, upgrade real r5 TrashGame to own copy, current Runtime SDK ProjectTools build and launcher check.",
+    "expected": "Перенесённый проект имеет свежие метаданные, совместим с 2026.11.07.6 и активирует собранный module.",
+    "actual": "Create, enable, upgrade, final SDK build and check-project all exit 0; lock is 2026.11.07.6. No shared Engine/SDK changes.",
+    "status": "passed",
+    "evidence": "evidence/create.exitcode.txt; evidence/enable.exitcode.txt; evidence/upgrade.exitcode.txt; evidence/final-sdk-build.exitcode.txt; evidence/final-project-build.log; evidence/check.exitcode.txt; REBUILD.md",
+    "classification": "project workflow"
+  },
+  {
+    "feature_id": "trash-input-throw-score-save-load",
+    "action": "Custom project.input sequence sends Right and Space; separate stand-alone save/load processes preserve in-flight projectile and resume it.",
+    "expected": "Input adjusts aim and launches an item; score updates on impact; new process restores projectile state and records hit.",
+    "actual": "project.input exit 0, 129 frames, one projectile and Hit sparks. Save and load exit 0; log restores elapsed 0.5, hits=0 then resumes to hits=1 throws=1 PASS. In-flight BMP shows HUD Hits 0 | Misses 0 | Tosses 1.",
+    "status": "passed",
+    "evidence": "evidence/project-input-request.json; evidence/project-input-summary.json; evidence/RoundSaveTest.log; evidence/save.exitcode.txt; evidence/load.exitcode.txt; evidence/trash-round-save-load.bmp",
+    "classification": "runtime input and cross-process SaveGame"
+  },
+  {
+    "feature_id": "trash-score-ui-clarity",
+    "action": "Small copy-local UI change adds Misses to score and renames Throws to Tosses; score panel width 300 to 360.",
+    "expected": "The author sees hits, misses, toss count and reason without clipping.",
+    "actual": "Current SDK project build exit 0. Three-item scene shows Hits 1 | Misses 2 | Tosses 3, 33% accuracy and the message 'The trash hit an obstacle.'",
+    "status": "passed",
+    "evidence": "evidence/final-project-build.log; evidence/trash-three-items.bmp; evidence/ThreeItemRound.log",
+    "classification": "small game/UI improvement"
+  },
+  {
+    "feature_id": "three-trash-item-feedback",
+    "action": "Standalone TRASH_SAVE_TEST=types, 420 frames, neutral aim.",
+    "expected": "Three types are launched and each hit/miss changes the score once.",
+    "actual": "Imported multi-material item hit; Soda can and Crumpled paper hit an obstacle at Aim=0. Counters finish at hits=1, misses=2, throws=3; status explains the collision. This is aim/trajectory tuning feedback, not an Engine defect.",
+    "status": "passed-with-gameplay-feedback",
+    "evidence": "evidence/ThreeItemRound.log; evidence/types.exitcode.txt; evidence/trash-three-items.bmp",
+    "classification": "gameplay outcome observed"
+  },
+  {
+    "feature_id": "material-graph-workflow",
+    "action": "Custom material.graph request on scratch Cardboard material: enable, save, preset 1, apply, revert.",
+    "expected": "Graph conversion and save work; preset applies generated HLSL; revert restores saved state.",
+    "actual": "Exit 0, nativePreviewWindow=true; all steps accepted; save/revert dirty=false. The final HLSL generated from the preset compiled. Project copy was isolated. PNG captures Qt editor, not native D3D preview pixels.",
+    "status": "passed",
+    "evidence": "evidence/material-graph-request.json; evidence/material-graph-result.json; evidence/material-graph-graph-editor.png; evidence/material-graph-run.log",
+    "classification": "material editor commandlet workflow"
+  },
+  {
+    "feature_id": "project-import-scale-reimport-move",
+    "action": "Custom project.import request imports the GLB at 0.01 scale, reimports source, and moves it to /Game/Models/Moved.",
+    "expected": "Settings sidecar persists scale and each placement uses the same scale across reimport/move.",
+    "actual": "Exit 0, accepted=true, no dialogs, sidecarExists=true with scale≈0.01. Spawned/afterReimport/afterMove contain 1/2/3 imported models, each scale≈0.01; moved GLB and sidecar exist.",
+    "status": "passed",
+    "evidence": "evidence/project-import-request.json; evidence/project-import-result.json; evidence/project-import-editor-layout.png; evidence/project-import-run.log; evidence/project-import-files.json",
+    "classification": "import settings workflow"
+  },
+  {
+    "feature_id": "cascade-camera-dolly",
+    "action": "One independent-role Battle camera dolly sequence and cascade analyzer.",
+    "expected": "121 GPU camera-motion frames and matrix drift metrics for all three cascades.",
+    "actual": "Battle exit 0 on RTX 4070 Laptop GPU; 121 frames. Analyzer exit 0: scaleChanges=0 in all cascades, maxFractionalTexelDrift 5.12e-7, 0, 0 (<0.002 tolerance). Full sequence remains in build.",
+    "status": "passed",
+    "evidence": "evidence/cascade-dolly.exitcode.txt; evidence/cascade-dolly-battle.stdout.txt; evidence/cascade-dolly-matrices.csv; evidence/cascade-dolly-analysis.json; evidence/cascade-dolly-frame-000.bmp; evidence/cascade-dolly-frame-120.bmp",
+    "classification": "not yet tested"
+  }
+]

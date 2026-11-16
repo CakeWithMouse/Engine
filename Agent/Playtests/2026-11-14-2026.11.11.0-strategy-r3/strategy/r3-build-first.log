@@ -1,0 +1,14 @@
+Using v143, MSVC 14.44.35207, Windows SDK 10.0.26100.0.
+MSBuild: C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe
+
+  ComponentGenerator: 3 component(s), Project
+  Module.cpp
+  ProjectComponent.cpp
+  ProjectGame.cpp
+E:\Engine\Engine\build\playtests\strategy-r3\RepairCorridor\Source\ProjectGame.cpp(204,97): error C2065: FloorTraceChannel: необъявленный идентификатор [E:\Engine\Engine\build\playtests\strategy-r3\RepairCorridor\Game.vcxproj]
+E:\Engine\Engine\build\playtests\strategy-r3\RepairCorridor\Source\ProjectGame.cpp(290,24): error C2065: FloorTraceChannel: необъявленный идентификатор [E:\Engine\Engine\build\playtests\strategy-r3\RepairCorridor\Game.vcxproj]
+  RotatingCube.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+
+Full build log: E:\Engine\Engine\build\playtests\strategy-r3\RepairCorridor\Binaries\Release\61aea5cb412340dcbc2364225ef8a7af\build.log

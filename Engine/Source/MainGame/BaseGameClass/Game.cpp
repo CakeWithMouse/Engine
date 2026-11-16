@@ -6,6 +6,7 @@
 #include <Engine/AI/Debugger.h>
 #include <Engine/AI/World.h>
 #include <Engine/MainGame/CharacterController.h>
+#include <Engine/Physics/PhysicsWorld.h>
 #include <Engine/Components/Character.h>
 #include <Engine/Components/SpecificComponents/UIComponent.h>
 #include <Engine/Components/SpecificComponents/InstancedMeshComponent.h>
@@ -25,12 +26,16 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <iterator>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
 #include <Engine/Components/Light/DirectionalLightComponent.h>
 #include <Engine/Render/Material.h>
 #include <Engine/Render/MaterialAsset.h>
 #include <Engine/Render/ShaderCompiler.h>
+#include <Engine/Script/ScriptRuntime.h>
+#include <Engine/Scene/SceneAssets.h>
+#include <Engine/Components/ComponentType.h>
 #include <Engine/Sound/AudioEngine.h>
 #include <dxgi1_6.h>
 #include "../../Resources/VfsRead.h"
@@ -306,6 +311,7 @@ Game::~Game()
 
 void Game::DestroyResources(bool preserveScene)
 {
+    PhysicsWorldPtr.reset();
     CloseGameplayScene();
     if (OwnedSession) OwnedSession->Stop();
     Session = nullptr;
@@ -3250,10 +3256,13 @@ void Game::RenderEditorOverlay()
         std::fflush(stdout);
     }
 
+    auto overlayTriangles = PendingOverlayTriangles;
+    overlayTriangles.insert(overlayTriangles.end(), AiDiagnosticTriangles.begin(), AiDiagnosticTriangles.end());
     auto overlayLines=PendingOverlayLines;
+    overlayLines.insert(overlayLines.end(), AiDiagnosticLines.begin(), AiDiagnosticLines.end());
     auto debugLines=CollectTraceDebugLines();overlayLines.insert(overlayLines.end(),debugLines.begin(),debugLines.end());
     overlayLines.insert(overlayLines.end(),FrameDebugLines.begin(),FrameDebugLines.end());
-    if (overlayLines.empty() && PendingOverlayBillboards.empty() && PendingOverlayTriangles.empty())
+    if (overlayLines.empty() && PendingOverlayBillboards.empty() && overlayTriangles.empty())
     {
         if (logPeriodic) { std::printf("[Info] Overlay: early return (empty lines and billboards)\n"); std::fflush(stdout); }
         return;
@@ -3492,13 +3501,13 @@ void Game::RenderEditorOverlay()
         }
     }
 
-    if (!PendingOverlayTriangles.empty() && OverlayTriangleVS && OverlayTrianglePS && OverlayTriangleLayout)
+    if (!overlayTriangles.empty() && OverlayTriangleVS && OverlayTrianglePS && OverlayTriangleLayout)
     {
         struct TriVertex { float x, y, z; uint32_t col; };
         std::vector<TriVertex> depthTris;
         std::vector<TriVertex> topTris;
 
-        for (const auto& tri : PendingOverlayTriangles)
+        for (const auto& tri : overlayTriangles)
         {
             const bool depthTest = (tri.flags & 1) != 0 && (tri.flags & 2) == 0;
             auto& dst = depthTest ? depthTris : topTris;
@@ -3734,6 +3743,11 @@ static void SaveBackbufferToBmp(ID3D11Device* device, ID3D11DeviceContext* conte
 
 bool Game::RenderViewportFrame(float deltaTime)
 {
+    return RenderViewportFrame(deltaTime, true);
+}
+
+bool Game::RenderViewportFrame(float deltaTime, bool advanceSimulation)
+{
     if (!bEmbedded || !bInitialized || ExitCode != 0) return false;
     bRunning = true;
     ApplyPendingResize();
@@ -3741,7 +3755,7 @@ bool Game::RenderViewportFrame(float deltaTime)
     if (bMinimized) return true;
     ++FrameIndex;
     Stats.Reset();CountedVisibleObjects.clear();
-    UpdateFrame(std::clamp(deltaTime, 0.0f, MaxFrameDeltaSeconds));
+    UpdateFrame(std::clamp(deltaTime, 0.0f, MaxFrameDeltaSeconds), advanceSimulation);
     BeginGpuTimer();
 
     char forceFxaa[16]{};
@@ -3973,7 +3987,7 @@ void Game::ProcessHotkeys()
     bRenderTypeKeyWasDown = renderTypeDown;
 }
 
-void Game::UpdateFrame(float realDeltaTime)
+void Game::UpdateFrame(float realDeltaTime, bool advanceSimulation)
 {
     FrameDebugLines.clear();
     SynchronizeSceneResources();
@@ -3981,7 +3995,7 @@ void Game::UpdateFrame(float realDeltaTime)
     RealTime += realDeltaTime;
     LastRealDeltaTime = realDeltaTime;
     ProcessHotkeys();
-    if (bSimulationEnabled) UpdateSimulation(deltaTime);
+    if (bSimulationEnabled && advanceSimulation) UpdateSimulation(deltaTime);
     else FirstPlayer->UpdateCamera(0.0f);
     if(saveGame_) saveGame_->ProcessPending();
     UpdateAudio();
@@ -4023,8 +4037,27 @@ void Game::UpdateSimulation(float deltaTime)
     if (!Session->IsRunning()) return;
     if (Controller) Controller->Tick(deltaTime);
     if (FirstPlayer) FirstPlayer->UpdateCamera(deltaTime);
+    TickPhysicsWorld(deltaTime);
     TickComponents(deltaTime);
     if (Controller && FirstPlayer) Controller->UpdateCamera(*FirstPlayer);
+}
+
+void Game::TickPhysicsWorld(float deltaTime)
+{
+    if (!Settings.Physics().IsEnabled()) return;
+    if (!PhysicsWorldPtr)
+    {
+        PhysicsWorldPtr = std::make_unique<PhysicsWorld>();
+        std::string error;
+        if (!PhysicsWorldPtr->Initialize(Settings.Physics(), error))
+        {
+            std::cout << "Physics: " << error << std::endl;
+            PhysicsWorldPtr.reset();
+            return;
+        }
+    }
+    PhysicsWorldPtr->ApplySettings(Settings.Physics());
+    PhysicsWorldPtr->Update(deltaTime);
 }
 
 void Game::UpdateAudio()
@@ -4111,8 +4144,101 @@ void Game::StartGameplayComponents()
         auto& component=*entry.second;
         if(component.GameplayStarted)continue;
         component.SetGame(this);component.GameplayStarted=true;component.BeginPlay();
+        StartScript(component);
         if (Session && !Session->IsRunning()) break;
     }
+}
+
+struct Game::CachedScript
+{
+    std::filesystem::file_time_type time;
+    std::shared_ptr<const Script::Program> program;
+    std::vector<Script::Problem> problems;
+};
+
+std::vector<Script::Problem> Game::GetScriptProblems(const std::string& asset) const
+{
+    std::string physical = VfsRead::Active().Resolve(asset);
+    if (physical.empty()) physical = asset;
+    const auto cached = scriptCache.find(ShaderCompiler::NormalizePath(physical));
+    if (cached == scriptCache.end())
+    {
+        std::error_code error;
+        if (std::filesystem::is_regular_file(std::filesystem::u8path(physical), error)) return {};
+        return {{0, "cannot read the file"}};
+    }
+    return cached->second->problems;
+}
+
+uint64_t Game::SpawnCopy(const GameComponent& source, const glm::vec3& position, std::string& error)
+{
+    const SceneComponentSnapshot* row = nullptr;
+    const SceneSnapshot snapshot = GetScene().GetSnapshot();
+    for (const auto& object : snapshot.components)
+        if (object.id == source.GetComponentId()) row = &object;
+    if (!row) { error = "the template is not in the scene"; return 0; }
+    std::unique_ptr<GameComponent> copy;
+    if (row->typeName == SceneAssets::ModelType) copy = SceneAssets::CreateModel(row->modelAsset, false);
+    else if (const ComponentType* type = Saves().Catalog().Find(row->typeName)) copy = type->create();
+    if (!copy) { error = "the object type \"" + row->typeName + "\" cannot be created here"; return 0; }
+    // The same order as a scene restore: skeletal meshes load assets before their project data.
+    const bool skeletal = dynamic_cast<SkeletalMeshComponent*>(copy.get()) != nullptr;
+    if (skeletal) SceneAssets::Apply(*copy, row->modelAsset, row->textureAsset, row->materialAsset);
+    copy->LoadProjectData(source.SaveProjectData());
+    if (!skeletal) SceneAssets::Apply(*copy, row->modelAsset, row->textureAsset, row->materialAsset);
+    copy->SetScriptAsset(source.GetScriptAsset());
+    copy->SetScriptVariables(source.GetScriptVariables());
+    copy->SetPosition(position);
+    copy->SetRotation(source.GetRotation());
+    copy->SetScale(source.GetScale());
+    for (int n = 1; n < 100000; ++n)
+    {
+        const auto added = GetScene().AddComponent(row->name + "_" + std::to_string(n), copy, row->typeName);
+        if (added.result == SceneResult::Ok || added.result == SceneResult::Deferred) return added.id;
+        if (added.result != SceneResult::DuplicateName) { error = "the scene rejected the copy"; return 0; }
+    }
+    error = "no free name for the copy";
+    return 0;
+}
+
+void Game::StartScript(GameComponent& component)
+{
+    component.ScriptState.reset();
+    const std::string asset = component.ScriptAssetPath;
+    if (asset.empty()) return;
+    std::string physical = VfsRead::Active().Resolve(asset);
+    if (physical.empty()) physical = asset;
+    const auto file = std::filesystem::u8path(physical);
+    std::error_code error;
+    const auto time = std::filesystem::last_write_time(file, error);
+    if (error)
+    {
+        std::cout << "[Script] " << asset << ": cannot read the file" << std::endl;
+        return;
+    }
+    auto& cached = scriptCache[ShaderCompiler::NormalizePath(physical)];
+    if (!cached || cached->time != time)
+    {
+        std::ifstream input(file, std::ios::binary);
+        std::string text((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+        if (text.compare(0, 3, "\xef\xbb\xbf") == 0) text.erase(0, 3); // UTF-8 BOM
+        auto entry = std::make_shared<CachedScript>();
+        entry->time = time;
+        auto compiled = Script::Compile(text);
+        entry->program = std::move(compiled.program);
+        entry->problems = std::move(compiled.problems);
+        cached = std::move(entry);
+    }
+    if (!cached->program)
+    {
+        for (const auto& problem : cached->problems)
+            std::cout << "[Script] " << asset << ": " << (problem.node ? "node " + std::to_string(problem.node) + ": " : std::string())
+                      << problem.message << std::endl;
+        std::cout << "[Script] " << asset << ": not started because of the errors above" << std::endl;
+        return;
+    }
+    component.ScriptState = std::make_unique<Script::Instance>(cached->program, component, asset);
+    component.ScriptState->BeginPlay();
 }
 
 void Game::PrepareRenderFrame()

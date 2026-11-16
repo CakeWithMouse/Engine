@@ -1,0 +1,32 @@
+{
+  "bucket": "codex",
+  "windowDurationMins": 10080,
+  "resetsAt": 1794928911,
+  "overallBaselineUsedPercent": 42,
+  "phaseStartUsedPercent": 46,
+  "priorObservedDelta": 4,
+  "softStopOverallDelta": 25,
+  "maximumOverallDelta": 30,
+  "checkpoints": [
+    {
+      "usedPercent": 46,
+      "phase": "Continue same strategy developer, second playable milestone"
+    },
+    {
+      "usedPercent": 47,
+      "phase": "Trace API granted; gameplay implementation underway"
+    },
+    {
+      "usedPercent": 47,
+      "phase": "Independent orders, pause and cancellation checked; tactical outcome under test"
+    },
+    {
+      "usedPercent": 47,
+      "phase": "Fresh archive build and win verified; final report"
+    }
+  ],
+  "note": "Continuation of strategy-r1; preserve cumulative baseline42. Shared rounded account counter, not exact thread usage.",
+  "finalUsedPercent": 47,
+  "observedPhaseDelta": 1,
+  "observedOverallDelta": 5
+}

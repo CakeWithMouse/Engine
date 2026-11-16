@@ -1,0 +1,8 @@
+{
+  "device": "Speakers (2- Realtek(R) Audio)",
+  "baseline_corr": 0.0,
+  "active_windows": 12,
+  "mean_corr": 0.13801420785649257,
+  "mean_rms": 0.11233779299755581,
+  "tail_max_rms": 0.0
+}

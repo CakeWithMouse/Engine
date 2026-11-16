@@ -1,0 +1,16 @@
+trace_filter_debug all=Hit default=Miss channel2=Hit ignoreGround=Miss debugLines=5 clearedLines=0
+vfs_read path=/Game/Config/city-settings.txt value=district=harbor
+skeletal_material_api slots=2 source_id=0 original=/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat set_slot=1 invalid_slot=0 set_override=1 override=/Game/Models/CesiumMan/Materials/Material_0.mat clear_override=1 restored=/Game/Models/CesiumMan/Materials/Material_0.mat
+event=scene_ready balance=500 houses=0
+event=hud_reference_rebound balance=500 houses=0
+input_state frame=1 focused=1 left=0 cursor_valid=0 x=0 y=0 size=0x0
+input_state frame=2 focused=1 left=0 cursor_valid=0 x=0 y=0 size=0x0
+input_state frame=3 focused=1 left=0 cursor_valid=0 x=0 y=0 size=0x0
+input_state frame=4 focused=1 left=1 cursor_valid=1 x=245 y=110 size=640x480
+event=load_ui_click
+input_state frame=5 focused=1 left=0 cursor_valid=1 x=245 y=110 size=640x480
+event=savegame_loaded_references_cleared balance=400 houses=1
+savegame_skeletal_slots name=SaveGameSlotProbe count=2 slot_0=/Game/Models/CesiumMan/Materials/Material_0.mat slot_1=/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat23662event=hud_reference_rebound balance=400 houses=1
+input_state frame=6 focused=1 left=0 cursor_valid=1 x=245 y=110 size=640x480
+input_state frame=7 focused=1 left=0 cursor_valid=1 x=245 y=110 size=640x480
+input_state frame=8 focused=1 left=0 cursor_valid=1 x=245 y=110 size=640x480

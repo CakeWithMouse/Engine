@@ -1,0 +1,36 @@
+{
+  "editorWindow": true,
+  "steps": [
+    {
+      "action": "new"
+    },
+    {
+      "name": "StartupSceneOne",
+      "action": "create",
+      "type": "Primitive.Cube"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\BomberContinue\\Content\\Scenes\\StartupOne.scene.json",
+      "action": "save"
+    },
+    {
+      "action": "startup"
+    },
+    {
+      "action": "new"
+    },
+    {
+      "name": "StartupSceneTwo",
+      "action": "create",
+      "type": "Primitive.Cylinder"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\BomberContinue\\Content\\Scenes\\StartupTwo.scene.json",
+      "action": "save"
+    },
+    {
+      "action": "startup"
+    }
+  ],
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\BomberContinue\\Project.json"
+}

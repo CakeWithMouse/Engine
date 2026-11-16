@@ -1,0 +1,20 @@
+{
+  "path": "strategy/RepairCorridor-r2-source.zip",
+  "sha256": "501d1a0b8f7cef8a85b293890aaffffe5c87c70efc7618bb894a7f2fc6fd4f12",
+  "bytes": 9906,
+  "entries": 15,
+  "crc": "passed",
+  "freshBuild": "strategy/fresh-build.log",
+  "freshPlay": "strategy/fresh-order-clear-win-result.json",
+  "freshStandalone": "strategy/fresh-standalone.status",
+  "evidenceEntries": 12,
+  "evidenceStatuses": {
+    "passed": 10,
+    "failed": 1,
+    "partial": 1
+  },
+  "evidencePathsChecked": 51,
+  "evidencePathsMissing": [],
+  "failedMeaning": "early tactical route lost; not an unresolved engine defect",
+  "partialMeaning": "procedural map has no Edit authoring scene"
+}

@@ -1,0 +1,13 @@
+{
+  "total": 113,
+  "historicalBaselineTwoPassed": 59,
+  "successfulByTwo": 113,
+  "currentVersionSuccessfulByTwo": 57,
+  "currentVersionIndependentAgentsByTwo": 54,
+  "targetRows": 54,
+  "targetRowsComplete": 54,
+  "remainingTargetRows": [],
+  "belowTwoSuccessful": [],
+  "currentObservations": 129,
+  "note": "59 historical rows retain versioned r6 evidence; 48 legacy gaps and 6 AI rows require fresh r7 passes from two independent agents. Calm-city and ai-trash share one agent. Root regressions do not count as a persona."
+}

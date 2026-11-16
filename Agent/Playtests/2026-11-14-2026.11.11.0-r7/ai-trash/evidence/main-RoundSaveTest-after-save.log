@@ -1,0 +1,5 @@
+phase=save action=throw kind=box throws=1
+phase=save request=accepted elapsed=0.483334 x=-0.024167 y=3.711394 z=-1.918749
+phase=save result=saved throws=1 hits=0
+phase=save load-request=accepted ticket=2
+phase=save result=loaded throws=1 hits=0 elapsed=0.500000 projectile=15 PASS

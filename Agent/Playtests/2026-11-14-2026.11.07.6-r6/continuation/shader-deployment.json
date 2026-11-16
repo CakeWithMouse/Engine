@@ -1,0 +1,50 @@
+[
+  {
+    "sha256": "F80F417ACBB70259C5FA9D8351F7EC1BC73DE03FB8DC2C2A648A9DEE862001A1",
+    "path": "E:\\Engine\\Game\\build\\x64\\Release\\BasicExamples\\EngineContent\\Shaders\\BasicSky.hlsl"
+  },
+  {
+    "sha256": "9A145164C620F1E2A1B2538975B978689C57128EFA2D65F791FC782087DD9DAC",
+    "path": "E:\\Engine\\Game\\build\\x64\\Release\\BasicExamples\\EngineContent\\Shaders\\Material\\MaterialTemplate.hlsl"
+  },
+  {
+    "sha256": "F80F417ACBB70259C5FA9D8351F7EC1BC73DE03FB8DC2C2A648A9DEE862001A1",
+    "path": "E:\\Engine\\Game\\build\\x64\\Release\\Battle\\EngineContent\\Shaders\\BasicSky.hlsl"
+  },
+  {
+    "sha256": "9A145164C620F1E2A1B2538975B978689C57128EFA2D65F791FC782087DD9DAC",
+    "path": "E:\\Engine\\Game\\build\\x64\\Release\\Battle\\EngineContent\\Shaders\\Material\\MaterialTemplate.hlsl"
+  },
+  {
+    "sha256": "F80F417ACBB70259C5FA9D8351F7EC1BC73DE03FB8DC2C2A648A9DEE862001A1",
+    "path": "E:\\Engine\\Game\\build\\x64\\Release\\Katamari\\EngineContent\\Shaders\\BasicSky.hlsl"
+  },
+  {
+    "sha256": "9A145164C620F1E2A1B2538975B978689C57128EFA2D65F791FC782087DD9DAC",
+    "path": "E:\\Engine\\Game\\build\\x64\\Release\\Katamari\\EngineContent\\Shaders\\Material\\MaterialTemplate.hlsl"
+  },
+  {
+    "sha256": "F80F417ACBB70259C5FA9D8351F7EC1BC73DE03FB8DC2C2A648A9DEE862001A1",
+    "path": "E:\\Engine\\Game\\build\\x64\\Release\\Pong\\EngineContent\\Shaders\\BasicSky.hlsl"
+  },
+  {
+    "sha256": "9A145164C620F1E2A1B2538975B978689C57128EFA2D65F791FC782087DD9DAC",
+    "path": "E:\\Engine\\Game\\build\\x64\\Release\\Pong\\EngineContent\\Shaders\\Material\\MaterialTemplate.hlsl"
+  },
+  {
+    "sha256": "F80F417ACBB70259C5FA9D8351F7EC1BC73DE03FB8DC2C2A648A9DEE862001A1",
+    "path": "E:\\Engine\\Game\\build\\x64\\Release\\Runtime\\EngineContent\\Shaders\\BasicSky.hlsl"
+  },
+  {
+    "sha256": "9A145164C620F1E2A1B2538975B978689C57128EFA2D65F791FC782087DD9DAC",
+    "path": "E:\\Engine\\Game\\build\\x64\\Release\\Runtime\\EngineContent\\Shaders\\Material\\MaterialTemplate.hlsl"
+  },
+  {
+    "sha256": "F80F417ACBB70259C5FA9D8351F7EC1BC73DE03FB8DC2C2A648A9DEE862001A1",
+    "path": "E:\\Engine\\Game\\build\\x64\\Release\\SunGame\\EngineContent\\Shaders\\BasicSky.hlsl"
+  },
+  {
+    "sha256": "9A145164C620F1E2A1B2538975B978689C57128EFA2D65F791FC782087DD9DAC",
+    "path": "E:\\Engine\\Game\\build\\x64\\Release\\SunGame\\EngineContent\\Shaders\\Material\\MaterialTemplate.hlsl"
+  }
+]

@@ -1,0 +1,24 @@
+[
+  {
+    "image": "transparency-cross-30.bmp",
+    "size": [
+      320,
+      256
+    ],
+    "drawCalls": 50,
+    "oracleSamples": 540,
+    "wrongPixelsOver8": 0,
+    "maxError": 1
+  },
+  {
+    "image": "transparency-cross-plus30.bmp",
+    "size": [
+      320,
+      256
+    ],
+    "drawCalls": 50,
+    "oracleSamples": 539,
+    "wrongPixelsOver8": 0,
+    "maxError": 1
+  }
+]

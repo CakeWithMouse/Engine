@@ -1,0 +1,7 @@
+Exception: E:\Engine\Game\build\x64\Release\Runtime\SDK\ProjectTools.ps1:294
+Line |
+ 294 |  … ExitCode) { throw 'Project build failed; previous module preserved' } …
+     |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Project build failed; previous module preserved
+
+

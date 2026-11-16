@@ -1,0 +1,23 @@
+slots-r0-mesh: PASS
+slots-r0-skeletal: PASS
+slots-r0-crowd: PASS
+fade-r0-0: PASS
+fade-r0-0-material: PASS
+fade-r0-1: PASS
+fade-r0-1-material: PASS
+distance-r0-import0: PASS
+distance-r0-import1: PASS
+joint-r0-skeletal: PASS
+joint-r0-crowd: PASS
+slots-r1-mesh: PASS
+slots-r1-skeletal: PASS
+slots-r1-crowd: PASS
+fade-r1-0: PASS
+fade-r1-0-material: PASS
+fade-r1-1: PASS
+fade-r1-1-material: PASS
+distance-r1-import0: PASS
+distance-r1-import1: PASS
+joint-r1-skeletal: PASS
+joint-r1-crowd: PASS
+{"passed": 22, "total": 22, "frames": 366}

@@ -3,8 +3,8 @@ param([Parameter(Mandatory=$true)][string]$Runtime, [ValidateSet('Debug','Releas
 $ErrorActionPreference = 'Stop'
 $engineRoot = Split-Path $PSScriptRoot
 . "$PSScriptRoot/Toolchain.ps1"
-# Distributable SDKs must link with VS 2019. A local Debug SDK can use the build's tools.
-if ($UseBuildToolset -and $Configuration -ne 'Debug') { throw '-UseBuildToolset is only for local Debug SDKs.' }
+# Distributable SDKs must link with VS 2019. An explicitly local SDK may use the
+# installed build tools in either configuration; its manifest records that limit.
 $sdkFamily = if ($UseBuildToolset) { $PlatformToolset } else { 'v142' }
 $sdkToolchain = Resolve-EngineToolchain -Toolset $sdkFamily
 $baselineDir = Join-Path $engineRoot "build/sdk/x64/$Configuration/$($sdkToolchain.version)"
@@ -83,6 +83,7 @@ Copy-Item -LiteralPath "$engineRoot/docs/LAUNCHER-CLI.md" -Destination "$sdk/Doc
 New-Item -ItemType Directory -Force (Join-Path $sdk 'Examples/ApiReference') | Out-Null
 Copy-Item -Path "$engineRoot/docs/api-reference/examples/*" -Destination "$sdk/Examples/ApiReference" -Force
 $manifest = @{format=2;version=$release.version;configuration=$Configuration;platform='x64';toolset=$sdkToolchain.toolset;crt= $(if($Configuration -eq 'Debug'){'MDd'}else{'MD'});
+    localOnly=[bool]$UseBuildToolset;
     buildTools=@{version=$sdkToolchain.version;minimumVersion=$sdkToolchain.version;compilerVersion=$sdkToolchain.compilerVersion;wholeProgramOptimization=$false;windowsSdk=$sdkToolchain.windowsSdk.version};
     assimp=$useAssimp;engineLibrarySha256=(Get-FileHash -LiteralPath "$sdk/Lib/Engine.lib").Hash}
 [IO.File]::WriteAllText("$sdk/Sdk.json", ($manifest | ConvertTo-Json), [Text.UTF8Encoding]::new($false))

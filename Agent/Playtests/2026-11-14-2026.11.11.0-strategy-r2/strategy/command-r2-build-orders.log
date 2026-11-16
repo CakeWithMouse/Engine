@@ -1,0 +1,13 @@
+Using v143, MSVC 14.44.35207, Windows SDK 10.0.26100.0.
+MSBuild: C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe
+
+  ComponentGenerator: 3 component(s), Project
+  Module.cpp
+  ProjectComponent.cpp
+  ProjectGame.cpp
+  RotatingCube.cpp
+E:\Engine\Engine\build\playtests\strategy-r2\RepairCorridor\Source\ProjectGame.cpp(228,39): error C2065: input: необъявленный идентификатор [E:\Engine\Engine\build\playtests\strategy-r2\RepairCorridor\Game.vcxproj]
+  GeneratedComponents.cpp
+  Создание кода...
+
+Full build log: E:\Engine\Engine\build\playtests\strategy-r2\RepairCorridor\Binaries\Release\2617fbc2ec2242cdbc0d62d2a3e1bdf3\build.log

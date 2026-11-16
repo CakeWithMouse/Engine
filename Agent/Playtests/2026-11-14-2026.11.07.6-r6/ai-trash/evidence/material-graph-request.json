@@ -1,0 +1,23 @@
+{
+  "steps": [
+    {
+      "action": "enable"
+    },
+    {
+      "action": "save"
+    },
+    {
+      "index": 1,
+      "action": "preset"
+    },
+    {
+      "action": "apply"
+    },
+    {
+      "action": "revert"
+    }
+  ],
+  "material": "/Game/Materials/Cardboard.mat",
+  "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\ai-trash\\MaterialGraphFinalArtifacts\\graph-editor.png",
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\ai-trash\\MaterialGraphFinal\\Project.json"
+}

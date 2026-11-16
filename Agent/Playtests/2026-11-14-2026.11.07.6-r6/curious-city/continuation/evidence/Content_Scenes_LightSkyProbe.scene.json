@@ -1,0 +1,118 @@
+{
+  "name": "Scene",
+  "objects": [
+    {
+      "id": 1,
+      "inheritParentScale": true,
+      "name": "LightGround",
+      "parent": 0,
+      "transform": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          12,
+          1,
+          12
+        ]
+      },
+      "type": "Primitive.Plane"
+    },
+    {
+      "id": 2,
+      "inheritParentScale": true,
+      "name": "LightHouse",
+      "parent": 0,
+      "transform": {
+        "position": [
+          0,
+          0.5,
+          0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "Primitive.Cube"
+    },
+    {
+      "id": 3,
+      "inheritParentScale": true,
+      "name": "CitySun",
+      "parent": 0,
+      "projectData": {
+        "color": [
+          1.0,
+          0.9700000286102295,
+          0.9200000166893005
+        ],
+        "enabled": true,
+        "intensity": 3.0,
+        "shadowDistance": 150.0,
+        "shadows": true,
+        "version": 1
+      },
+      "transform": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "Light.Directional"
+    },
+    {
+      "id": 4,
+      "inheritParentScale": true,
+      "name": "CitySky",
+      "parent": 0,
+      "transform": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "Environment.Sky"
+    }
+  ],
+  "version": 3
+}

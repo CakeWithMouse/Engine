@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "shader": "WarmStone.hlsl",
+  "params": {
+    "Tint": [
+      0.95,
+      0.08,
+      0.05,
+      1
+    ],
+    "Gloss": 0.35,
+    "Rim": 0.18
+  }
+}

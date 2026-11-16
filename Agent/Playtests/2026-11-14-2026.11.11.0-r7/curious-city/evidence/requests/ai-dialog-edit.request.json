@@ -1,0 +1,12 @@
+{
+  "project":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Project.json",
+  "machine":"/Game/AI/CityGate2.fsm",
+  "steps":[
+    {"action":"dialog-state","node":2,"edits":[{"name":"FsmStateName","value":"CancelledName"}],"cancel":true,"dialogImage":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/ai-state-dialog-cancel.png"},
+    {"action":"dialog-state","node":2,"edits":[{"name":"FsmStateName","value":"RouteB"},{"blockList":"FsmTasks","add":"Ai.Wait"}],"dialogImage":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/ai-state-dialog-accepted.png"},
+    {"action":"dialog-link","from":1,"to":2,"edits":[{"name":"FsmLinkDelay","value":0.25},{"name":"FsmLinkPriority","value":3}],"dialogImage":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/ai-link-dialog.png"},
+    {"action":"save"},
+    {"action":"close"},
+    {"action":"reopen","image":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/ai-dialog-reopen.png"}
+  ]
+}

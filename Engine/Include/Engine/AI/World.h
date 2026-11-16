@@ -84,6 +84,7 @@ public:
     /** Makes an object visible to AI senses, for example the player character. */
     void AddTarget(GameComponent& object, Team team);
     void RemoveTarget(ComponentId object);
+    bool IsTarget(ComponentId object) const;
     void SetAttitude(Team first, Team second, Attitude attitude);
     Attitude GetAttitude(Team first, Team second) const;
     Team TeamOf(ComponentId object) const;

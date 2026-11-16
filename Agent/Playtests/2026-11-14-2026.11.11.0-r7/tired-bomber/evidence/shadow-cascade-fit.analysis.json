@@ -1,0 +1,205 @@
+{
+  "status": "passed",
+  "cascade": 0,
+  "radius": 11.0575,
+  "shadowParams": [
+    1.0,
+    3.0,
+    0.0012,
+    0.000488281
+  ],
+  "splits": [
+    8.0,
+    28.0,
+    100.0
+  ],
+  "shadowMapPixels": 2048,
+  "estimatedWorldTexel": 0.0107984,
+  "halfTexel": 0.0053992,
+  "smallWorldMove": 0.000999999999999994,
+  "largeWorldMove": 0.999,
+  "largeMoveInEstimatedTexels": 92.51370573418285,
+  "maxMatrixDifferenceBaseToSubtexel": 0.0,
+  "maxMatrixDifferenceSubToLarge": 0.07910155,
+  "maxMatrixDifferenceSubToReturn": 0.0,
+  "samples": {
+    "base": {
+      "camera": [
+        0.05,
+        12.0,
+        -18.0
+      ],
+      "sphere": [
+        0.05,
+        9.73527,
+        -14.6424,
+        11.0575
+      ],
+      "matrix": [
+        -0.0799219,
+        0.0,
+        0.0,
+        0.00390625,
+        0.0,
+        0.0565133,
+        -0.0565133,
+        -1.37793,
+        0.0,
+        -0.00418238,
+        -0.00418238,
+        0.483934,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "shadowParams": [
+        1.0,
+        3.0,
+        0.0012,
+        0.000488281
+      ],
+      "splits": [
+        8.0,
+        28.0,
+        100.0
+      ],
+      "texelWorld": 0.0107984
+    },
+    "subtexel": {
+      "camera": [
+        0.051,
+        12.0,
+        -18.0
+      ],
+      "sphere": [
+        0.051,
+        9.73527,
+        -14.6424,
+        11.0575
+      ],
+      "matrix": [
+        -0.0799219,
+        0.0,
+        0.0,
+        0.00390625,
+        0.0,
+        0.0565133,
+        -0.0565133,
+        -1.37793,
+        0.0,
+        -0.00418238,
+        -0.00418238,
+        0.483934,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "shadowParams": [
+        1.0,
+        3.0,
+        0.0012,
+        0.000488281
+      ],
+      "splits": [
+        8.0,
+        28.0,
+        100.0
+      ],
+      "texelWorld": 0.0107984
+    },
+    "large": {
+      "camera": [
+        1.05,
+        12.0,
+        -18.0
+      ],
+      "sphere": [
+        1.05,
+        9.73527,
+        -14.6424,
+        11.0575
+      ],
+      "matrix": [
+        -0.0799219,
+        0.0,
+        0.0,
+        0.0830078,
+        0.0,
+        0.0565133,
+        -0.0565133,
+        -1.37793,
+        0.0,
+        -0.00418238,
+        -0.00418238,
+        0.483934,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "shadowParams": [
+        1.0,
+        3.0,
+        0.0012,
+        0.000488281
+      ],
+      "splits": [
+        8.0,
+        28.0,
+        100.0
+      ],
+      "texelWorld": 0.0107984
+    },
+    "return-subtexel": {
+      "camera": [
+        0.051,
+        12.0,
+        -18.0
+      ],
+      "sphere": [
+        0.051,
+        9.73527,
+        -14.6424,
+        11.0575
+      ],
+      "matrix": [
+        -0.0799219,
+        0.0,
+        0.0,
+        0.00390625,
+        0.0,
+        0.0565133,
+        -0.0565133,
+        -1.37793,
+        0.0,
+        -0.00418238,
+        -0.00418238,
+        0.483934,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "shadowParams": [
+        1.0,
+        3.0,
+        0.0012,
+        0.000488281
+      ],
+      "splits": [
+        8.0,
+        28.0,
+        100.0
+      ],
+      "texelWorld": 0.0107984
+    }
+  },
+  "assertions": [
+    "subtexel move is below half estimated world texel and matrix is unchanged",
+    "large move exceeds 64 estimated texels and snapped matrix changes",
+    "returning to prior subtexel position restores matrix",
+    "cascade radius remains stable"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "project":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Project.json",
+  "editorWindow":true,
+  "steps":[
+    {"action":"new"},
+    {"action":"create","type":"Gameplay.AiCharacter","name":"CityGuard"},
+    {"action":"property","target":"CityGuard","path":"/stateMachine","value":"/Game/AI/CityGate2.fsm"},
+    {"action":"save","path":"E:/Engine/Engine/build/playtests/20261114-r7/curious-city/upgraded-city/Content/Scenes/AiProbe.scene.json"},
+    {"action":"startup"}
+  ]
+}

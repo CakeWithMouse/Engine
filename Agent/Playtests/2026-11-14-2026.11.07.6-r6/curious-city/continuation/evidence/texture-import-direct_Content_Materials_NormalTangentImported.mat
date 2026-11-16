@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "shader": "NormalTangentProbe.hlsl",
+  "render": {"lighting": "unlit", "twoSided": true},
+  "textures": {"NormalMap": "../Textures/NormalProbeV.bmp"}
+}

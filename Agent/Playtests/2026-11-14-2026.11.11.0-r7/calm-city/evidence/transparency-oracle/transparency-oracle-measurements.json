@@ -1,0 +1,75 @@
+{
+  "expected": "Independent orthographic ray/plane intersections for two custom crossing translucent yaw planes. Pixel RGB expected from source-over alpha=.5 over sampled clear RGB=(0,0,51). Silhouette and near-equal depth samples excluded; tolerance <=5 RGB levels; requires >=50 valid pixels per frame.",
+  "modes": {
+    "forward": [
+      {
+        "image": "transparency-oracle-front.bmp",
+        "resolution": [
+          320,
+          240
+        ],
+        "samples": 320,
+        "wrongPixels": 0,
+        "maxError": 1,
+        "meanError": 0.5
+      },
+      {
+        "image": "transparency-oracle-back.bmp",
+        "resolution": [
+          320,
+          240
+        ],
+        "samples": 320,
+        "wrongPixels": 0,
+        "maxError": 1,
+        "meanError": 0.5
+      },
+      {
+        "image": "transparency-oracle-orbit-resize.bmp",
+        "resolution": [
+          480,
+          320
+        ],
+        "samples": 393,
+        "wrongPixels": 0,
+        "maxError": 1,
+        "meanError": 0.5
+      }
+    ],
+    "deferred": [
+      {
+        "image": "transparency-oracle-front-deferred.bmp",
+        "resolution": [
+          320,
+          240
+        ],
+        "samples": 320,
+        "wrongPixels": 0,
+        "maxError": 1,
+        "meanError": 0.5
+      },
+      {
+        "image": "transparency-oracle-back-deferred.bmp",
+        "resolution": [
+          320,
+          240
+        ],
+        "samples": 320,
+        "wrongPixels": 0,
+        "maxError": 1,
+        "meanError": 0.5
+      },
+      {
+        "image": "transparency-oracle-orbit-resize-deferred.bmp",
+        "resolution": [
+          480,
+          320
+        ],
+        "samples": 393,
+        "wrongPixels": 0,
+        "maxError": 1,
+        "meanError": 0.5
+      }
+    ]
+  }
+}

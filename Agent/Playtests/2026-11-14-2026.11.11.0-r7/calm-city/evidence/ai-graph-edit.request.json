@@ -1,0 +1,37 @@
+{
+  "machine": "/Game/AI/CalmRoutine.fsm",
+  "project": "E:/Engine/Engine/build/playtests/20261114-r7/calm-city/AIPlayground/Project.json",
+  "steps": [
+    {
+      "from": 1,
+      "to": 2,
+      "action": "connect"
+    },
+    {
+      "from": 1,
+      "to": 2,
+      "action": "link",
+      "properties": {
+        "trigger": "completed",
+        "priority": 3,
+        "delay": 0.1
+      }
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "action": "redo"
+    },
+    {
+      "action": "save"
+    },
+    {
+      "action": "reopen"
+    },
+    {
+      "image": "E:/Engine/Engine/build/playtests/20261114-r7/calm-city/results/ai-graph-final.png",
+      "action": "check"
+    }
+  ]
+}

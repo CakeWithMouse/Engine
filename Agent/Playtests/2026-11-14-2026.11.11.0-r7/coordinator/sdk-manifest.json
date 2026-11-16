@@ -1,0 +1,18 @@
+{
+    "buildTools":  {
+                       "compilerVersion":  "19.44.35223.0",
+                       "wholeProgramOptimization":  false,
+                       "windowsSdk":  "10.0.26100.0",
+                       "version":  "14.44.35207",
+                       "minimumVersion":  "14.44.35207"
+                   },
+    "engineLibrarySha256":  "87F34A76ABF802F85264E20AF0897C85BE3B18C32D77E12DBDD91CAAE18B6527",
+    "toolset":  "v143",
+    "platform":  "x64",
+    "version":  "2026.11.11.0",
+    "format":  2,
+    "assimp":  true,
+    "configuration":  "Release",
+    "localOnly":  true,
+    "crt":  "MD"
+}

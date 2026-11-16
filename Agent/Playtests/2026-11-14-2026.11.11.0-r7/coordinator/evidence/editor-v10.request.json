@@ -1,0 +1,1 @@
+{"project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\editor-scene-smoke\\Project.json", "steps": [{"action": "frames", "count": 1}, {"action": "viewport-drag", "button": "right", "fromX": 0.5, "fromY": 0.5, "toX": 0.58, "toY": 0.55}, {"action": "frames", "count": 1}]}

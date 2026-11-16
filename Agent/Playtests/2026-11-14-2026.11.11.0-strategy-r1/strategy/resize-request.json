@@ -1,0 +1,1 @@
+{"project":"E:/Engine/Engine/build/playtests/strategy-r1/RepairCorridor/Project.json","steps":[{"kind":"control","action":"play"},{"kind":"focus","enabled":true},{"kind":"frames","count":10},{"kind":"resize","width":1000,"height":720},{"kind":"frames","count":45},{"kind":"control","action":"stop"}]}

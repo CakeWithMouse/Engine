@@ -1,0 +1,63 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\BomberContinue\\Project.json",
+  "steps": [
+    {
+      "action": "new"
+    },
+    {
+      "name": "OriginalSceneObject",
+      "action": "create",
+      "type": "Primitive.Cube"
+    },
+    {
+      "action": "save",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\clone-save-original.scene.json"
+    },
+    {
+      "action": "new"
+    },
+    {
+      "name": "CloneSource",
+      "action": "create",
+      "type": "Primitive.Sphere"
+    },
+    {
+      "target": "CloneSource",
+      "delta": [
+        2,
+        1,
+        -3
+      ],
+      "action": "move"
+    },
+    {
+      "action": "duplicate",
+      "target": "CloneSource"
+    },
+    {
+      "name": "CloneCopy",
+      "target": "CloneSource 2",
+      "action": "rename"
+    },
+    {
+      "target": "CloneCopy",
+      "delta": [
+        1,
+        2,
+        3
+      ],
+      "action": "move"
+    },
+    {
+      "action": "save",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\clone-save-as-second.scene.json"
+    },
+    {
+      "action": "new"
+    },
+    {
+      "action": "load",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\clone-save-as-second.scene.json"
+    }
+  ]
+}

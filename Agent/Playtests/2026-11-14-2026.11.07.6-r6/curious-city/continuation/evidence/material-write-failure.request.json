@@ -1,0 +1,44 @@
+{
+  "material": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+  "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\material-write-failure.png",
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Project.json",
+  "steps": [
+    {
+      "action": "enable"
+    },
+    {
+      "action": "save"
+    },
+    {
+      "index": 1,
+      "action": "preset"
+    },
+    {
+      "action": "apply"
+    },
+    {
+      "lockedFile": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Content\\Models\\blend-suzanne-multiple\\Materials\\Material_0.mat.graph.json",
+      "action": "revert"
+    },
+    {
+      "action": "revert"
+    },
+    {
+      "text": "not graph",
+      "action": "ai"
+    },
+    {
+      "index": 2,
+      "action": "preset"
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "action": "redo"
+    },
+    {
+      "action": "revert"
+    }
+  ]
+}

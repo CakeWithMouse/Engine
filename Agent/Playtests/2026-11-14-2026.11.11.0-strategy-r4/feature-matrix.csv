@@ -1,0 +1,9 @@
+feature,developer,status,evidence,notes
+box-selection,strategy_developer,passed,strategy/r4-selection-controls-telemetry.log,"Обе диагонали; Shift add; empty; resize; focus cancellation"
+click-selection,strategy_developer,passed,strategy/r4-selection-controls-telemetry.log,"Клик; Shift toggle; рамка не подменяется кликом"
+selection-visuals,strategy_developer,passed,strategy/r4-selection-two-stable.bmp,"HUD2/3 и2gold/1blue; stable-empty0/3 и3blue; осмотрено автором и координатором"
+group-object-chase,strategy_developer,passed,strategy/r4-attack-single-telemetry.log,"STRATEGY-016 повторен в игре; Destination обновляется при одном приказе"
+group-attack,strategy_developer,passed,strategy/r4-attack-single-telemetry.log,"HP4→0; победа и остановка; fresh-attack повторяет результат"
+replace-attack,strategy_developer,passed,strategy/r4-order-replace-final-telemetry.log,"Active1→0; acceptedOrders1→2; новая цель на полу"
+independent-orders,strategy_developer,passed,strategy/r4-selection-independent-telemetry.log,"Невыбранный Squad3 сохраняет group4 и прежний target и продолжает движение"
+fast-drag-and-hud,strategy_developer,passed,strategy/r4-hud-fast-release-telemetry.log,"Release без промежуточного Held выбирает3; ПКМ надHUD даётInputBlocked и не меняет acceptedOrders"

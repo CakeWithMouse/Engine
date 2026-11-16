@@ -1,0 +1,29 @@
+{
+  "steps": [
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Content\\Scenes\\MaterialSlotsBefore.scene.json",
+      "action": "load"
+    },
+    {
+      "target": "TwinMaterialSuzanne",
+      "path": "/Game/Models/CesiumMan/Materials/Material_0.mat",
+      "action": "material"
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "action": "redo"
+    },
+    {
+      "target": "TwinMaterialSuzanne",
+      "path": "",
+      "action": "material"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Content\\Scenes\\MaterialAssignContinuation.scene.json",
+      "action": "save"
+    }
+  ],
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Project.json"
+}

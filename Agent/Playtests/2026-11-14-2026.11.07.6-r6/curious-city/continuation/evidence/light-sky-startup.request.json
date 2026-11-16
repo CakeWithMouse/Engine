@@ -1,0 +1,48 @@
+{
+  "steps": [
+    {
+      "action": "new"
+    },
+    {
+      "action": "create",
+      "name": "LightGround",
+      "type": "Primitive.Plane"
+    },
+    {
+      "action": "create",
+      "name": "LightHouse",
+      "type": "Primitive.Cube"
+    },
+    {
+      "action": "create",
+      "name": "CitySun",
+      "type": "Light.Directional"
+    },
+    {
+      "action": "property",
+      "value": 3.0,
+      "path": "/intensity",
+      "target": "CitySun"
+    },
+    {
+      "action": "property",
+      "value": true,
+      "path": "/shadows",
+      "target": "CitySun"
+    },
+    {
+      "action": "create",
+      "name": "CitySky",
+      "type": "Environment.Sky"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Content\\Scenes\\LightSkyProbe.scene.json",
+      "action": "save"
+    },
+    {
+      "action": "startup"
+    }
+  ],
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Project.json",
+  "editorWindow": true
+}

@@ -1,0 +1,185 @@
+{
+  "project": "E:/Engine/Engine/build/playtests/strategy-r5/RepairCorridor/Project.json",
+  "steps": [
+    {
+      "action": "play",
+      "kind": "control"
+    },
+    {
+      "enabled": true,
+      "kind": "focus"
+    },
+    {
+      "count": 3,
+      "kind": "frames"
+    },
+    {
+      "y": 476,
+      "valid": true,
+      "x": 365,
+      "kind": "cursor"
+    },
+    {
+      "down": true,
+      "key": 500,
+      "kind": "key"
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "y": 443,
+      "valid": true,
+      "x": 270,
+      "kind": "cursor"
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "down": false,
+      "key": 500,
+      "kind": "key"
+    },
+    {
+      "count": 5,
+      "kind": "frames"
+    },
+    {
+      "down": true,
+      "key": 69,
+      "kind": "key"
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "down": false,
+      "key": 69,
+      "kind": "key"
+    },
+    {
+      "count": 120,
+      "kind": "frames"
+    },
+    {
+      "y": 350,
+      "valid": true,
+      "x": 320,
+      "kind": "cursor"
+    },
+    {
+      "down": true,
+      "key": 501,
+      "kind": "key"
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "down": false,
+      "key": 501,
+      "kind": "key"
+    },
+    {
+      "count": 30,
+      "kind": "frames"
+    },
+    {
+      "down": true,
+      "key": 70,
+      "kind": "key"
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "down": false,
+      "key": 70,
+      "kind": "key"
+    },
+    {
+      "count": 30,
+      "kind": "frames"
+    },
+    {
+      "y": 335,
+      "valid": true,
+      "x": 320,
+      "kind": "cursor"
+    },
+    {
+      "down": true,
+      "key": 501,
+      "kind": "key"
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "down": false,
+      "key": 501,
+      "kind": "key"
+    },
+    {
+      "count": 120,
+      "kind": "frames"
+    },
+    {
+      "action": "pause",
+      "kind": "control"
+    },
+    {
+      "request": {
+        "toX": 0,
+        "fromZ": -6,
+        "hoverZ": 2.4,
+        "centerX": 0,
+        "layers": 255,
+        "height": 0.15,
+        "hoverX": 0,
+        "selectedOnly": false,
+        "fromX": 0,
+        "agentRadius": true,
+        "xray": true,
+        "centerZ": 0,
+        "hover": true,
+        "toZ": 3.4,
+        "extent": 12
+      },
+      "kind": "diagnostics"
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "action": "resume",
+      "kind": "control"
+    },
+    {
+      "count": 20,
+      "kind": "frames"
+    },
+    {
+      "action": "pause",
+      "kind": "control"
+    },
+    {
+      "request": {
+        "layers": 0
+      },
+      "kind": "diagnostics"
+    },
+    {
+      "action": "stop",
+      "kind": "control"
+    }
+  ]
+}

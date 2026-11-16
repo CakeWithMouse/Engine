@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "shader": "ParameterProbe.hlsl",
+  "render": {
+    "blend": "opaque",
+    "lighting": "unlit",
+    "castShadows": false,
+    "twoSided": true
+  },
+  "params": {
+    "Tint": [
+      1,
+      0.1,
+      0.05,
+      1
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "drawCalls": 183,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\gpu-final\\transparency-forward\\frame-00.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        2,
+                        2,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 133,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\gpu-final\\transparency-forward\\frame-01.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        2,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 133,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\gpu-final\\transparency-forward\\frame-02.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        2,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 183,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\gpu-final\\transparency-forward\\frame-03.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        2,
+                        2,
+                        0
+                    ]
+                }
+            ]
+        }
+    ],
+    "ok": true
+}

@@ -1,0 +1,28 @@
+{
+  "originalPath": "clone-save-original.scene.json",
+  "originalSha256Before": "01D11F288806CE0597F256877D8AB0A6B486B882FD0B3494BE9168CFF03D9885",
+  "originalSha256After": "01D11F288806CE0597F256877D8AB0A6B486B882FD0B3494BE9168CFF03D9885",
+  "saveAsPath": "scene-saveas-verify.scene.json",
+  "saveAsSha256": "A6D13C9A445522F4912A2C2C3D93DC67D04073B28A7F6EA8DDF703CBC82C1D68",
+  "loadedObjects": [
+    {
+      "id": 1,
+      "material": "",
+      "name": "SaveAsOnly",
+      "parent": 0,
+      "position": [
+        -4,
+        2,
+        7
+      ],
+      "projectData": {},
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "type": "Primitive.Cone"
+    }
+  ],
+  "allStepsOk": true
+}

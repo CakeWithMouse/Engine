@@ -16,6 +16,9 @@ EngineContent/Shaders/Material/MaterialCommon.hlsli
 EngineContent/Shaders/Material/MaterialTemplate.hlsl
 EngineContent/Shaders/Material/DefaultSurface.hlsl
 EngineContent/Shaders/Material/ErrorSurface.hlsl
+GameContent/Scripts/Spin.vscript
+GameContent/Scripts/Bob.vscript
+GameContent/Scripts/Move.vscript
 GameContent/Materials/Floor.mat
 GameContent/Materials/Floor.hlsl
 GameContent/Materials/Gold.mat

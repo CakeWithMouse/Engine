@@ -1,0 +1,69 @@
+{
+    "ok": true,
+    "recoveryCandidates": [
+    ],
+    "recoveryRecords": [
+        {
+            "engineVersion": "2026.11.07.6",
+            "format": 1,
+            "module": "Binaries/Release/17aa7ba454a34d00bbb0ad4a6ce442a0/Game.dll",
+            "moduleSha256": "5d0ecb43e524e6ddecfc4360f6140ee9cb906ff355390f299910e32c1ff09cbf",
+            "project": "E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/continuation/BomberContinue/Project.json",
+            "recordPath": "E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/continuation/BomberContinue/.painengine/Recovery/6698bbf7-09c0-459c-af39-e43a7902d8ba.json",
+            "savedUtc": "2026-11-14T01:32:43.231Z",
+            "snapshot": "6698bbf7-09c0-459c-af39-e43a7902d8ba-ee6f9f7f-2c81-4727-8918-6c1f7bd264f5.scene.json",
+            "sourceScene": ""
+        }
+    ],
+    "steps": [
+        {
+            "action": "recover",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "UnsavedDamageMarker",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "SecondUncommittedMarker",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Sphere"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        }
+    ]
+}

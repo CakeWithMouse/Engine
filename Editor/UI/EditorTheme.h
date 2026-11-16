@@ -32,6 +32,13 @@ struct ThemePalette
     QColor axisX;
     QColor axisY;
     QColor axisZ;
+    // Categorical viewport icon tints (billboard plate color per object kind).
+    QColor iconPointLight;
+    QColor iconSunSky;
+    QColor iconCamera;
+    QColor iconGameCamera;
+    QColor iconParticles;
+    QColor iconCharacter;
 };
 
 class EditorTheme

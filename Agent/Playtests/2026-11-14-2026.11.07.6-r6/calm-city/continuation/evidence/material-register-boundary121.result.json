@@ -1,0 +1,1409 @@
+{
+    "dialogs": [
+    ],
+    "nativePreviewWindow": true,
+    "ok": true,
+    "steps": [
+        {
+            "accepted": true,
+            "action": "enable",
+            "dirty": false,
+            "error": "",
+            "graph": {
+                "connections": [
+                ],
+                "nodes": [
+                    {
+                        "id": 1,
+                        "properties": {
+                        },
+                        "title": "Material Output",
+                        "type": "MaterialOutput",
+                        "x": 600,
+                        "y": 160
+                    },
+                    {
+                        "id": 2,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map0"
+                        },
+                        "title": "Map0",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 0
+                    },
+                    {
+                        "id": 3,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map1"
+                        },
+                        "title": "Map1",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 40
+                    },
+                    {
+                        "id": 4,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map2"
+                        },
+                        "title": "Map2",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 80
+                    },
+                    {
+                        "id": 5,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map3"
+                        },
+                        "title": "Map3",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 120
+                    },
+                    {
+                        "id": 6,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map4"
+                        },
+                        "title": "Map4",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 160
+                    },
+                    {
+                        "id": 7,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map5"
+                        },
+                        "title": "Map5",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 200
+                    },
+                    {
+                        "id": 8,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map6"
+                        },
+                        "title": "Map6",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 240
+                    },
+                    {
+                        "id": 9,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map7"
+                        },
+                        "title": "Map7",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 280
+                    },
+                    {
+                        "id": 10,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map8"
+                        },
+                        "title": "Map8",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 320
+                    },
+                    {
+                        "id": 11,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map9"
+                        },
+                        "title": "Map9",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 360
+                    },
+                    {
+                        "id": 12,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map10"
+                        },
+                        "title": "Map10",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 400
+                    },
+                    {
+                        "id": 13,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map11"
+                        },
+                        "title": "Map11",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 440
+                    },
+                    {
+                        "id": 14,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map12"
+                        },
+                        "title": "Map12",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 480
+                    },
+                    {
+                        "id": 15,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map13"
+                        },
+                        "title": "Map13",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 520
+                    },
+                    {
+                        "id": 16,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map14"
+                        },
+                        "title": "Map14",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 560
+                    },
+                    {
+                        "id": 17,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map15"
+                        },
+                        "title": "Map15",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 600
+                    },
+                    {
+                        "id": 18,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map16"
+                        },
+                        "title": "Map16",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 640
+                    },
+                    {
+                        "id": 19,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map17"
+                        },
+                        "title": "Map17",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 680
+                    },
+                    {
+                        "id": 20,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map18"
+                        },
+                        "title": "Map18",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 720
+                    },
+                    {
+                        "id": 21,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map19"
+                        },
+                        "title": "Map19",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 760
+                    },
+                    {
+                        "id": 22,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map20"
+                        },
+                        "title": "Map20",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 800
+                    },
+                    {
+                        "id": 23,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map21"
+                        },
+                        "title": "Map21",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 840
+                    },
+                    {
+                        "id": 24,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map22"
+                        },
+                        "title": "Map22",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 880
+                    },
+                    {
+                        "id": 25,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map23"
+                        },
+                        "title": "Map23",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 920
+                    },
+                    {
+                        "id": 26,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map24"
+                        },
+                        "title": "Map24",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 960
+                    },
+                    {
+                        "id": 27,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map25"
+                        },
+                        "title": "Map25",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1000
+                    },
+                    {
+                        "id": 28,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map26"
+                        },
+                        "title": "Map26",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1040
+                    },
+                    {
+                        "id": 29,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map27"
+                        },
+                        "title": "Map27",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1080
+                    },
+                    {
+                        "id": 30,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map28"
+                        },
+                        "title": "Map28",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1120
+                    },
+                    {
+                        "id": 31,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map29"
+                        },
+                        "title": "Map29",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1160
+                    },
+                    {
+                        "id": 32,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map30"
+                        },
+                        "title": "Map30",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1200
+                    },
+                    {
+                        "id": 33,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map31"
+                        },
+                        "title": "Map31",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1240
+                    },
+                    {
+                        "id": 34,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map32"
+                        },
+                        "title": "Map32",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1280
+                    },
+                    {
+                        "id": 35,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map33"
+                        },
+                        "title": "Map33",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1320
+                    },
+                    {
+                        "id": 36,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map34"
+                        },
+                        "title": "Map34",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1360
+                    },
+                    {
+                        "id": 37,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map35"
+                        },
+                        "title": "Map35",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1400
+                    },
+                    {
+                        "id": 38,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map36"
+                        },
+                        "title": "Map36",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1440
+                    },
+                    {
+                        "id": 39,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map37"
+                        },
+                        "title": "Map37",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1480
+                    },
+                    {
+                        "id": 40,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map38"
+                        },
+                        "title": "Map38",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1520
+                    },
+                    {
+                        "id": 41,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map39"
+                        },
+                        "title": "Map39",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1560
+                    },
+                    {
+                        "id": 42,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map40"
+                        },
+                        "title": "Map40",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1600
+                    },
+                    {
+                        "id": 43,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map41"
+                        },
+                        "title": "Map41",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1640
+                    },
+                    {
+                        "id": 44,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map42"
+                        },
+                        "title": "Map42",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1680
+                    },
+                    {
+                        "id": 45,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map43"
+                        },
+                        "title": "Map43",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1720
+                    },
+                    {
+                        "id": 46,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map44"
+                        },
+                        "title": "Map44",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1760
+                    },
+                    {
+                        "id": 47,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map45"
+                        },
+                        "title": "Map45",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1800
+                    },
+                    {
+                        "id": 48,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map46"
+                        },
+                        "title": "Map46",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1840
+                    },
+                    {
+                        "id": 49,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map47"
+                        },
+                        "title": "Map47",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1880
+                    },
+                    {
+                        "id": 50,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map48"
+                        },
+                        "title": "Map48",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1920
+                    },
+                    {
+                        "id": 51,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map49"
+                        },
+                        "title": "Map49",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 1960
+                    },
+                    {
+                        "id": 52,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map50"
+                        },
+                        "title": "Map50",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2000
+                    },
+                    {
+                        "id": 53,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map51"
+                        },
+                        "title": "Map51",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2040
+                    },
+                    {
+                        "id": 54,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map52"
+                        },
+                        "title": "Map52",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2080
+                    },
+                    {
+                        "id": 55,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map53"
+                        },
+                        "title": "Map53",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2120
+                    },
+                    {
+                        "id": 56,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map54"
+                        },
+                        "title": "Map54",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2160
+                    },
+                    {
+                        "id": 57,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map55"
+                        },
+                        "title": "Map55",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2200
+                    },
+                    {
+                        "id": 58,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map56"
+                        },
+                        "title": "Map56",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2240
+                    },
+                    {
+                        "id": 59,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map57"
+                        },
+                        "title": "Map57",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2280
+                    },
+                    {
+                        "id": 60,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map58"
+                        },
+                        "title": "Map58",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2320
+                    },
+                    {
+                        "id": 61,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map59"
+                        },
+                        "title": "Map59",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2360
+                    },
+                    {
+                        "id": 62,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map60"
+                        },
+                        "title": "Map60",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2400
+                    },
+                    {
+                        "id": 63,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map61"
+                        },
+                        "title": "Map61",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2440
+                    },
+                    {
+                        "id": 64,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map62"
+                        },
+                        "title": "Map62",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2480
+                    },
+                    {
+                        "id": 65,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map63"
+                        },
+                        "title": "Map63",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2520
+                    },
+                    {
+                        "id": 66,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map64"
+                        },
+                        "title": "Map64",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2560
+                    },
+                    {
+                        "id": 67,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map65"
+                        },
+                        "title": "Map65",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2600
+                    },
+                    {
+                        "id": 68,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map66"
+                        },
+                        "title": "Map66",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2640
+                    },
+                    {
+                        "id": 69,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map67"
+                        },
+                        "title": "Map67",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2680
+                    },
+                    {
+                        "id": 70,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map68"
+                        },
+                        "title": "Map68",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2720
+                    },
+                    {
+                        "id": 71,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map69"
+                        },
+                        "title": "Map69",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2760
+                    },
+                    {
+                        "id": 72,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map70"
+                        },
+                        "title": "Map70",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2800
+                    },
+                    {
+                        "id": 73,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map71"
+                        },
+                        "title": "Map71",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2840
+                    },
+                    {
+                        "id": 74,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map72"
+                        },
+                        "title": "Map72",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2880
+                    },
+                    {
+                        "id": 75,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map73"
+                        },
+                        "title": "Map73",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2920
+                    },
+                    {
+                        "id": 76,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map74"
+                        },
+                        "title": "Map74",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 2960
+                    },
+                    {
+                        "id": 77,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map75"
+                        },
+                        "title": "Map75",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3000
+                    },
+                    {
+                        "id": 78,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map76"
+                        },
+                        "title": "Map76",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3040
+                    },
+                    {
+                        "id": 79,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map77"
+                        },
+                        "title": "Map77",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3080
+                    },
+                    {
+                        "id": 80,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map78"
+                        },
+                        "title": "Map78",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3120
+                    },
+                    {
+                        "id": 81,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map79"
+                        },
+                        "title": "Map79",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3160
+                    },
+                    {
+                        "id": 82,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map80"
+                        },
+                        "title": "Map80",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3200
+                    },
+                    {
+                        "id": 83,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map81"
+                        },
+                        "title": "Map81",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3240
+                    },
+                    {
+                        "id": 84,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map82"
+                        },
+                        "title": "Map82",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3280
+                    },
+                    {
+                        "id": 85,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map83"
+                        },
+                        "title": "Map83",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3320
+                    },
+                    {
+                        "id": 86,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map84"
+                        },
+                        "title": "Map84",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3360
+                    },
+                    {
+                        "id": 87,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map85"
+                        },
+                        "title": "Map85",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3400
+                    },
+                    {
+                        "id": 88,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map86"
+                        },
+                        "title": "Map86",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3440
+                    },
+                    {
+                        "id": 89,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map87"
+                        },
+                        "title": "Map87",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3480
+                    },
+                    {
+                        "id": 90,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map88"
+                        },
+                        "title": "Map88",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3520
+                    },
+                    {
+                        "id": 91,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map89"
+                        },
+                        "title": "Map89",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3560
+                    },
+                    {
+                        "id": 92,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map90"
+                        },
+                        "title": "Map90",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3600
+                    },
+                    {
+                        "id": 93,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map91"
+                        },
+                        "title": "Map91",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3640
+                    },
+                    {
+                        "id": 94,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map92"
+                        },
+                        "title": "Map92",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3680
+                    },
+                    {
+                        "id": 95,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map93"
+                        },
+                        "title": "Map93",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3720
+                    },
+                    {
+                        "id": 96,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map94"
+                        },
+                        "title": "Map94",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3760
+                    },
+                    {
+                        "id": 97,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map95"
+                        },
+                        "title": "Map95",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3800
+                    },
+                    {
+                        "id": 98,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map96"
+                        },
+                        "title": "Map96",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3840
+                    },
+                    {
+                        "id": 99,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map97"
+                        },
+                        "title": "Map97",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3880
+                    },
+                    {
+                        "id": 100,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map98"
+                        },
+                        "title": "Map98",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3920
+                    },
+                    {
+                        "id": 101,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map99"
+                        },
+                        "title": "Map99",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 3960
+                    },
+                    {
+                        "id": 102,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map100"
+                        },
+                        "title": "Map100",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4000
+                    },
+                    {
+                        "id": 103,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map101"
+                        },
+                        "title": "Map101",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4040
+                    },
+                    {
+                        "id": 104,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map102"
+                        },
+                        "title": "Map102",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4080
+                    },
+                    {
+                        "id": 105,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map103"
+                        },
+                        "title": "Map103",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4120
+                    },
+                    {
+                        "id": 106,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map104"
+                        },
+                        "title": "Map104",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4160
+                    },
+                    {
+                        "id": 107,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map105"
+                        },
+                        "title": "Map105",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4200
+                    },
+                    {
+                        "id": 108,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map106"
+                        },
+                        "title": "Map106",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4240
+                    },
+                    {
+                        "id": 109,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map107"
+                        },
+                        "title": "Map107",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4280
+                    },
+                    {
+                        "id": 110,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map108"
+                        },
+                        "title": "Map108",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4320
+                    },
+                    {
+                        "id": 111,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map109"
+                        },
+                        "title": "Map109",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4360
+                    },
+                    {
+                        "id": 112,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map110"
+                        },
+                        "title": "Map110",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4400
+                    },
+                    {
+                        "id": 113,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map111"
+                        },
+                        "title": "Map111",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4440
+                    },
+                    {
+                        "id": 114,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map112"
+                        },
+                        "title": "Map112",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4480
+                    },
+                    {
+                        "id": 115,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map113"
+                        },
+                        "title": "Map113",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4520
+                    },
+                    {
+                        "id": 116,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map114"
+                        },
+                        "title": "Map114",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4560
+                    },
+                    {
+                        "id": 117,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map115"
+                        },
+                        "title": "Map115",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4600
+                    },
+                    {
+                        "id": 118,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map116"
+                        },
+                        "title": "Map116",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4640
+                    },
+                    {
+                        "id": 119,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map117"
+                        },
+                        "title": "Map117",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4680
+                    },
+                    {
+                        "id": 120,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map118"
+                        },
+                        "title": "Map118",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4720
+                    },
+                    {
+                        "id": 121,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map119"
+                        },
+                        "title": "Map119",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4760
+                    },
+                    {
+                        "id": 122,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map120"
+                        },
+                        "title": "Map120",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4800
+                    },
+                    {
+                        "id": 123,
+                        "properties": {
+                            "slot": 2147483647,
+                            "textureName": "Map121"
+                        },
+                        "title": "Map121",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 4840
+                    }
+                ],
+                "version": 1
+            },
+            "hasGraph": true,
+            "hlsl": "// =========================================================\n// Generated by PainEngine Material Node Graph\n// =========================================================\n\nTexture2D Map0 : register(t127);\nTexture2D Map1 : register(t6);\nTexture2D Map2 : register(t7);\nTexture2D Map3 : register(t8);\nTexture2D Map4 : register(t9);\nTexture2D Map5 : register(t10);\nTexture2D Map6 : register(t11);\nTexture2D Map7 : register(t12);\nTexture2D Map8 : register(t13);\nTexture2D Map9 : register(t14);\nTexture2D Map10 : register(t15);\nTexture2D Map11 : register(t16);\nTexture2D Map12 : register(t17);\nTexture2D Map13 : register(t18);\nTexture2D Map14 : register(t19);\nTexture2D Map15 : register(t20);\nTexture2D Map16 : register(t21);\nTexture2D Map17 : register(t22);\nTexture2D Map18 : register(t23);\nTexture2D Map19 : register(t24);\nTexture2D Map20 : register(t25);\nTexture2D Map21 : register(t26);\nTexture2D Map22 : register(t27);\nTexture2D Map23 : register(t28);\nTexture2D Map24 : register(t29);\nTexture2D Map25 : register(t30);\nTexture2D Map26 : register(t31);\nTexture2D Map27 : register(t33);\nTexture2D Map28 : register(t34);\nTexture2D Map29 : register(t35);\nTexture2D Map30 : register(t36);\nTexture2D Map31 : register(t37);\nTexture2D Map32 : register(t38);\nTexture2D Map33 : register(t39);\nTexture2D Map34 : register(t40);\nTexture2D Map35 : register(t41);\nTexture2D Map36 : register(t42);\nTexture2D Map37 : register(t43);\nTexture2D Map38 : register(t44);\nTexture2D Map39 : register(t45);\nTexture2D Map40 : register(t46);\nTexture2D Map41 : register(t47);\nTexture2D Map42 : register(t48);\nTexture2D Map43 : register(t49);\nTexture2D Map44 : register(t50);\nTexture2D Map45 : register(t51);\nTexture2D Map46 : register(t52);\nTexture2D Map47 : register(t53);\nTexture2D Map48 : register(t54);\nTexture2D Map49 : register(t55);\nTexture2D Map50 : register(t56);\nTexture2D Map51 : register(t57);\nTexture2D Map52 : register(t58);\nTexture2D Map53 : register(t59);\nTexture2D Map54 : register(t60);\nTexture2D Map55 : register(t61);\nTexture2D Map56 : register(t62);\nTexture2D Map57 : register(t63);\nTexture2D Map58 : register(t64);\nTexture2D Map59 : register(t65);\nTexture2D Map60 : register(t66);\nTexture2D Map61 : register(t67);\nTexture2D Map62 : register(t68);\nTexture2D Map63 : register(t69);\nTexture2D Map64 : register(t70);\nTexture2D Map65 : register(t71);\nTexture2D Map66 : register(t72);\nTexture2D Map67 : register(t73);\nTexture2D Map68 : register(t74);\nTexture2D Map69 : register(t75);\nTexture2D Map70 : register(t76);\nTexture2D Map71 : register(t77);\nTexture2D Map72 : register(t78);\nTexture2D Map73 : register(t79);\nTexture2D Map74 : register(t80);\nTexture2D Map75 : register(t81);\nTexture2D Map76 : register(t82);\nTexture2D Map77 : register(t83);\nTexture2D Map78 : register(t84);\nTexture2D Map79 : register(t85);\nTexture2D Map80 : register(t86);\nTexture2D Map81 : register(t87);\nTexture2D Map82 : register(t88);\nTexture2D Map83 : register(t89);\nTexture2D Map84 : register(t90);\nTexture2D Map85 : register(t91);\nTexture2D Map86 : register(t92);\nTexture2D Map87 : register(t93);\nTexture2D Map88 : register(t94);\nTexture2D Map89 : register(t95);\nTexture2D Map90 : register(t96);\nTexture2D Map91 : register(t97);\nTexture2D Map92 : register(t98);\nTexture2D Map93 : register(t99);\nTexture2D Map94 : register(t100);\nTexture2D Map95 : register(t101);\nTexture2D Map96 : register(t102);\nTexture2D Map97 : register(t103);\nTexture2D Map98 : register(t104);\nTexture2D Map99 : register(t105);\nTexture2D Map100 : register(t106);\nTexture2D Map101 : register(t107);\nTexture2D Map102 : register(t108);\nTexture2D Map103 : register(t109);\nTexture2D Map104 : register(t110);\nTexture2D Map105 : register(t111);\nTexture2D Map106 : register(t112);\nTexture2D Map107 : register(t113);\nTexture2D Map108 : register(t114);\nTexture2D Map109 : register(t115);\nTexture2D Map110 : register(t116);\nTexture2D Map111 : register(t117);\nTexture2D Map112 : register(t118);\nTexture2D Map113 : register(t119);\nTexture2D Map114 : register(t120);\nTexture2D Map115 : register(t121);\nTexture2D Map116 : register(t122);\nTexture2D Map117 : register(t123);\nTexture2D Map118 : register(t124);\nTexture2D Map119 : register(t125);\nTexture2D Map120 : register(t126);\nTexture2D Map121 : register(t127);\n\nvoid Surface(MaterialInput i, inout MaterialOutput o)\n{\n}\n"
+        },
+        {
+            "accepted": true,
+            "action": "ai",
+            "dirty": true,
+            "error": "",
+            "graph": {
+                "connections": [
+                ],
+                "nodes": [
+                    {
+                        "id": 1,
+                        "properties": {
+                        },
+                        "title": "Material Output",
+                        "type": "MaterialOutput",
+                        "x": 600,
+                        "y": 160
+                    },
+                    {
+                        "id": 2,
+                        "properties": {
+                            "slot": 121,
+                            "textureName": "Map0"
+                        },
+                        "title": "Map0",
+                        "type": "Texture2D",
+                        "x": 0,
+                        "y": 0
+                    }
+                ],
+                "version": 1
+            },
+            "hasGraph": true,
+            "hlsl": "// =========================================================\n// Generated by PainEngine Material Node Graph\n// =========================================================\n\nTexture2D Map0 : register(t121);\n\nvoid Surface(MaterialInput i, inout MaterialOutput o)\n{\n}\n"
+        }
+    ]
+}

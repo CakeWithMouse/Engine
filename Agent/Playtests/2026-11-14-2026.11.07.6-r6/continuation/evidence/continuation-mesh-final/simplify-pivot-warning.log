@@ -1,0 +1,33 @@
+{
+    "error": 0.039811212569475174,
+    "ok": true,
+    "reduced": {
+        "degenerateTriangles": 0,
+        "hasTexCoords": true,
+        "missingNormals": 0,
+        "problems": [
+            "Pivot is not on the ground: the lowest point is at y = -0.70 m. Move the model so that its tracks or wheels touch y = 0."
+        ],
+        "triangles": 158,
+        "usable": false,
+        "vertices": 105,
+        "warnings": [
+        ]
+    },
+    "silhouetteDrift": 0,
+    "source": {
+        "degenerateTriangles": 0,
+        "hasTexCoords": true,
+        "missingNormals": 0,
+        "problems": [
+            "Pivot is not on the ground: the lowest point is at y = -0.70 m. Move the model so that its tracks or wheels touch y = 0."
+        ],
+        "triangles": 288,
+        "usable": false,
+        "vertices": 187,
+        "warnings": [
+        ]
+    },
+    "targetTriangles": 158,
+    "usedSloppy": false
+}

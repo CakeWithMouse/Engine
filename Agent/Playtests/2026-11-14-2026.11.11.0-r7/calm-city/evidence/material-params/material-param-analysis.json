@@ -1,0 +1,55 @@
+{
+  "steps": [
+    {
+      "label": "before",
+      "tint": [
+        1,
+        0.1,
+        0.05,
+        1
+      ],
+      "image": "material-param-before.bmp",
+      "sha256": "33a79fd8e157686d4e71ef5c452107eca27e4bf8b3797378ed90e18e055e57fb",
+      "center": [
+        255,
+        25,
+        13
+      ],
+      "exit": 0
+    },
+    {
+      "label": "edited",
+      "tint": [
+        0.05,
+        0.2,
+        1,
+        1
+      ],
+      "image": "material-param-edited.bmp",
+      "sha256": "dd3172ed651f3fac12805ca21d51806ddb5506558abe2499bdd9150c76f7e440",
+      "center": [
+        13,
+        51,
+        255
+      ],
+      "exit": 0
+    },
+    {
+      "label": "reverted",
+      "tint": [
+        1,
+        0.1,
+        0.05,
+        1
+      ],
+      "image": "material-param-reverted.bmp",
+      "sha256": "33a79fd8e157686d4e71ef5c452107eca27e4bf8b3797378ed90e18e055e57fb",
+      "center": [
+        255,
+        25,
+        13
+      ],
+      "exit": 0
+    }
+  ]
+}

@@ -1,0 +1,756 @@
+[
+  {
+    "feature_id": "ai-card-memory",
+    "status": "passed",
+    "expected": "Actual AI card memory override is editable; Undo/Redo, reset, clone isolation, save and reopening a new process preserve per-object values.",
+    "actual": "In real Inspector, CityGuard Speed set to 3.25, Undo emptied and Redo restored machineMemory; Clone copied 3.25; reset cleared only CityGuard. In a separate project host process the loaded clone changed to 5.5 and persisted while source stayed empty. All steps status 0.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/ai-card-scene.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/ai-card-scene.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/ai-card-memory2.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/ai-card-memory2.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/ai-memory-isolation.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/ai-memory-isolation.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/ai-memory-clone-loaded.png",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/ai-card-memory.md"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "ai-graph-edit",
+    "status": "passed",
+    "expected": "Actual AI editor window edits states, links, task blocks, variables, settings and history; save/close/reopen preserve graph; state and link modal dialogs accept/cancel and show persisted values.",
+    "actual": "Created CityGate2 with actual CreateAiMachine, edited Idle/Patrol through widget API, variables/settings, save/undo/redo/reopen. A second run double-clicked real state/link items: cancel left Patrol unchanged; accepted modal renamed RouteB, added Wait, wrote delay .25/priority3; reopen retained graph and no diagnostics. Real frame inspected.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/ai-graph-edit2.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/ai-graph-edit2.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/ai-dialog-edit.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/ai-dialog-edit.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/ai-state-dialog-cancel.png",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/ai-state-dialog-accepted.png",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/ai-link-dialog.png",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/ai-dialog-reopen.png",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/ai-graph-edit.md"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "ai-validation",
+    "status": "passed",
+    "expected": "Invalid block is reported under its node and prevents Play; correcting same graph removes error and permits Play with visible running state/memory.",
+    "actual": "Ai.Fly task produced node 2 diagnostic; Play controlStatus 6 and playState Edit. Replaced it with Ai.Wait; check cleared problems, Play returned status 0 and PlayState, 40 frames showed both AI units running Idle and correct isolated Speed memory; Stop returned to Edit. A later UI live frame shows CityGuard NoiseAt/history after a real >1s UI poll.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/ai-validation.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/ai-validation.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/ai-validation-live.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/ai-validation-live.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/ai-live-card.png",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/ai-validation.md"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "ai-script-link",
+    "status": "passed",
+    "expected": "Key-triggered vscript event updates AI memory and sends Noise; FSM responds and calls a custom vscript event that produces an observable effect.",
+    "actual": "E pressed after 20 warmup frames. Logs: “Шум! Охранник идёт проверить.” and “CityGuard responded to Noise”. Runtime extension showed NoiseAt and Idle→Investigate event Noise→Idle; selected CityGuard live card inspected with same memory/history. All host steps returned status 0.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/ai-script-link5.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/ai-script-link5.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/ai-script-link5.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/ai-script-live-cityguard2.png",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/upgraded-city/Content/Scripts/CityPlayer.vscript",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/ai-script-link.md"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "model-import",
+    "status": "passed",
+    "expected": "Imported geometry/material opens and renders at configured scale; malformed source errors without a partial Content folder.",
+    "actual": "The actual import dialog accepted the CityTriangleFront OBJ at scale 1.5 and wrote the v2 sidecar. A newly saved scene loaded that imported asset through the game runtime; public SetMaterialSlot assigned the existing Hologram material to source slot 0. Runtime measured one mesh, 3 vertices, bounds [-1.5,-1.5,0]..[1.5,1.5,0], and captured a visible cyan triangle in D3D. A malformed OBJ returned “Model contains no triangles” and created no BrokenAsset folder. OBJ MTL auto-transfer is documented as unsupported; the material was assigned manually.",
+    "evidence_paths": [
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\import-city-triangle-front.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\import-city-triangle-front.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\import-broken-model.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\import-broken-model.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\sources\\CityTriangleFront.obj",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\scene-imported-model-front-lit.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\scene-imported-model-front-lit.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\import-city-triangle-final-game.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\import-city-triangle-hologram.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\import-city-triangle-hologram.log",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\frames\\import-city-triangle-hologram.bmp",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\sources\\BrokenAsset.obj"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "import-scale-dialog-presets",
+    "status": "passed",
+    "expected": "Real dialog preset buttons set scales 1, 0.1, and 0.01, and the accepted scale is written to sidecar.",
+    "actual": "With Use File Unit Scale unchecked, modal buttons reported 1, 0.1, 0.01 in order; accepted final0.01 and the v2 sidecar persisted0.01. The actual themed dialog image was inspected.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/import-presets-v2.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/import-presets-v2.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/import-options-dialog-preset-v2.png",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/upgraded-city/Content/Models/PresetProbe/PresetProbe.obj.importsettings.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/import-workflow.md"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/continuation/evidence.json"
+  },
+  {
+    "feature_id": "import-scale-sidecar",
+    "status": "passed",
+    "expected": "Accepted model scale and model import options are stored in the versioned sidecar; malformed explicit options refuse without creating scene objects.",
+    "actual": "Accepted PresetProbe import wrote version2 kind=model sidecar with scale0.01 and useFileUnitScale=false. Malformed explicit options strings { and [] each returned accepted:false and unchanged object count2.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/import-presets-v2.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/upgraded-city/Content/Models/PresetProbe/PresetProbe.obj.importsettings.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/import-options-bad-object.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/import-options-bad-object.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/import-options-bad-array.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/import-options-bad-array.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/import-workflow.md"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "passed",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "import-scale-reimport-move",
+    "status": "passed",
+    "expected": "Reimport and move preserve settings sidecar while keeping original scene instances and adding new placed instances.",
+    "actual": "Actual project.import accepted 0.01, spawned asset, reimported same source and moved to /Game/Models/CityImport/2.obj; counts advanced before2→spawned3→afterReimport4→afterMove5, final sidecar retained version2 scale0.01. Unit transform is expected because version2 bakes geometry scale.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/import-dialog2.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/import-dialog2.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/upgraded-city/Content/Models/CityImport/2.obj.importsettings.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/import-workflow.md"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "scene-create-delete",
+    "status": "passed",
+    "expected": "Named creation and deletion change identity/count; Undo restores the same ID and Redo removes it; New/Load preserves the result.",
+    "actual": "DeleteProbe ID 6 appeared after create, disappeared after delete, Undo restored ID 6, Redo removed it, second Undo then Save/New/Load restored ID 6.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/scene-create-delete.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/scene-create-delete.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/upgraded-city/Content/Scenes/DeleteProbe.scene.json"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "scene-transform",
+    "status": "passed",
+    "expected": "Position, Euler rotation and non-uniform scale edit through the Inspector; Undo/Redo and Save/Load preserve the values.",
+    "actual": "Cube ID 2 read back position [1.25,2.5,-0.75], Y rotation 45 degrees (quaternion [0,.382683,0,.92388]), scale [1.5,.75,2]. Undo/Redo returned status 0; Save Scene then Load retained transform.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/editor-transform-city.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/editor-transform-city.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/upgraded-city/Content/Scenes/TransformProbe.scene.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/editor-transform-reloaded.png"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "scene-select",
+    "status": "passed",
+    "expected": "Viewport click picks the correct object; hierarchy click and Ctrl-click share selection; Focus Selected changes camera.",
+    "actual": "Viewport click selected Cube ID 2; hierarchy click selected Warm Light ID 3; Ctrl viewport click selected IDs [3,2]; Focus Selected moved the camera. Marquee is not available in current release docs.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/editor-select-focus.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/editor-select-focus.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/editor-select-focus.png"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "scene-hierarchy",
+    "status": "passed",
+    "expected": "Child parent/local transform persist and world transform reflects parent movement.",
+    "actual": "HierarchyProbe has Cube parented to SaveGameSlotProbe. The editor Save/Load retained parent ID 5 and local position [0,0,0]. After loading the same scene through the rebuilt game DLL, the public GameComponent::GetWorldPosition reported [3,2,2] when the parent was moved there. This directly closes world-transform readback.",
+    "evidence_paths": [
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\hierarchy-world-runtime.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\hierarchy-world-runtime.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\hierarchy-world-runtime.log",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\scene-hierarchy.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\scene-hierarchy.result.json"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "scene-codec",
+    "status": "passed",
+    "expected": "Model assets, material-slot projectData, FSM and script references, parent hierarchy, transforms and object type survive scene save, New and Load in a second process.",
+    "actual": "Process 1 loaded AiProbe.scene, created CodecModelProbe from /Game/Models/blend-suzanne-multiple/blend-suzanne-multiple.glb, parented it to CityGuard, assigned slot 0 /Game/Materials/Hologram.mat and saved. Process 2 started a fresh commandlet, New+Load+Save round-tripped the file. CityGuard retained Gameplay.AiCharacter, /Game/Scripts/CityPlayer.vscript and /Game/AI/CityGate2.fsm; CodecModelProbe retained parent ID 1, GLB URI and slots 0=Hologram, 1=Material_1; saved and loaded JSON match those values.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/scene-codec-full-process1.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/scene-codec-full-process1.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/scene-codec-full-process1.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/scene-codec-full-process2.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/scene-codec-full-process2.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/scene-codec-full-process2.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/scenes/CityCodecFull.scene.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/scenes/CityCodecFull-roundtrip.scene.json"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "scene-clone",
+    "status": "passed",
+    "expected": "Single and grouped clones receive new IDs, preserve object types/data, and internal parent references map to cloned group members.",
+    "actual": "Single Engine.Model clone in original scenario changed ID 5→6 and preserved both materialSlots across save/new/load. In a new group scenario, IDs 6/7 (parent/child) cloned to 8/9; original child parent=6 and cloned child parent=8, with both types Primitive.Cube. Single Primitive clone ID10→11 also survived Save/New/Load. All commandlet steps status 0.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/scene-clone.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/scene-clone.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/upgraded-city/Content/Scenes/CloneProbe.scene.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/scene-clone-reference-final.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/scene-clone-reference-final.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/scene-clone-reference-final.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/scenes/CuriousCloneReferenceFinal.scene.json"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "input",
+    "status": "passed",
+    "expected": "Focused game input delivers mouse and key down/up; loss of focus prevents input and release does not stick.",
+    "actual": "In the real city game, W down dispatched key_w_down; focus loss generated key_w_cancelled_on_focus_loss; W down/up while unfocused generated no callbacks; after refocus a fresh W down and normal key_w_up both dispatched. The build button click previously created House_1 and charged the balance.",
+    "evidence_paths": [
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\input-focus-cycle2.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\input-focus-cycle2.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\input-focus-cycle2.log",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\city-main-content-runtime.log"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "compatibility",
+    "status": "passed",
+    "expected": "The r6 project copy builds and runs on the new runtime without altering the source copy.",
+    "actual": "The r6 upgraded-city was copied to r7 and rebuilt on the current Release runtime. The final 119-entry source-only archive (SHA-256 F3EB6F293F0B7BDAD93AD1E95564D75750D97A6F25450A951389C0F5AE620E0C) was freshly extracted and rebuilt against the current Release SDK (DLL build id 7d634a7354a94a46918cc5bb3a92ab9c). Its Project.json starts clean Content/Scenes/Main.scene.json with 4 intended objects; the test model remains in SlotRenderProbe.scene.json. A fresh project.input run on clean Main rendered the default CityHud.ui, built House_1 (500→400), saved, built a second house after income, then loaded House_1 and balance 400. /Game resolved under the new root Content. The original r6 source remains unchanged.",
+    "evidence_paths": [
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\upgraded-city\\Binaries\\Release\\a4eda38328ca4d0a89750209d511b665\\build.log",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\rebuild-literal-3\\Binaries\\Release\\bec9fc29d3bb42e8a9ba3e5ad91c77c9\\build.log",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\rebuild-literal-3\\Project.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\rebuild-literal-city-final.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\rebuild-literal-city-final.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\rebuild-literal-city-final.log",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\frames\\rebuild-literal-city-final.bmp",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\content-map-and-copy-check.txt",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/source-archive-final/curious-city-r7-source-only-final.zip",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/source-archive-final/archive.sha256.txt",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/source-archive-final/build/Project.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/source-archive-final/build/build.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/source-archive-final/run/city.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/source-archive-final/run/city.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/source-archive-final/run/city.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/source-archive-final/run/commandlet.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/source-archive-final/frames/main.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/source-archive-final/content/Main.scene.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/source-archive-final/content/SlotRenderProbe.scene.json"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "skeletal",
+    "status": "partial",
+    "expected": "Skeletal pose at t=0/.5/1 changes actual rendered geometry and returns to the initial pose at t=0.",
+    "actual": "Animated skeletal caster produced distinct point-shadow face hashes at t=.5 and t=1; repeated t=0 returned to the initial face hashes/occupied texels. A direct model color-pass pose readback is not present.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/point-skeletal-slots.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/point-skeletal-slots.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/point-skeletal-t0.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/point-skeletal-t05.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/point-skeletal-t1.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/point-skeletal-return.bmp"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "lod",
+    "status": "partial",
+    "expected": "LOD changes at an observed distance/screen-size boundary and returns at close view.",
+    "actual": "Own transparency skeletal/crowd groups rendered with 2 LODs, orbit and resize; results reported two level-2 draws, but this run did not sweep the boundary or return to near-view LOD.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/transparency-city-skeletal-crowd.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/transparency-city-skeletal-crowd.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/transparency-city-forward.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/transparency-city-orbit.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/transparency-city-resize.bmp"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "material-blends",
+    "status": "partial",
+    "expected": "Opaque, masked and translucent materials produce distinct pixel/depth behavior on intersecting geometry.",
+    "actual": "Own Glass/Hologram skeletal/crowd groups rendered crossed, overlapping surfaces from multiple camera angles and after resize; material types were only translucent and no independent expected-pixel/depth comparison was made.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/transparency-city-skeletal-crowd.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/transparency-city-skeletal-crowd.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/transparency-city-forward.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/transparency-city-orbit.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/transparency-city-return-orbit.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/transparency-city-resize.bmp"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "shadows",
+    "status": "partial",
+    "expected": "Caster shadow maps change with animation; shadow-off removes the map/effect; return restores it.",
+    "actual": "Own animated skeletal request used two active shadow slots; third zero-intensity light had slot -1. Shadow face maps varied at t=.5/1 and returned exactly to initial t=0. Both per-light shadow-off slots disappeared, then restored. Receiver pixel attenuation was not measured.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/point-skeletal-slots-shadow-toggle.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/point-skeletal-slots-shadow-toggle.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/point-toggle-t0.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/point-toggle-t05.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/point-toggle-t1.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/point-toggle-return.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/point-toggle-off.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/point-toggle-on-again.bmp"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "material-slot-persist",
+    "status": "passed",
+    "expected": "Per-slot material assignments survive scene Save/New/Load, game SaveGame, reload and render.",
+    "actual": "Scene Inspector Save/Load persisted source slot 0 Hologram. The final 114-entry source-only archive rebuilt under rebuild-literal-3; in that new root the actual game loaded two slots and SaveGame/Load retained slot 0 Hologram and slot 1 Material_1 virtual paths. The same run rendered the submeshes. This was repeated in the final 119-entry archive extraction with the test model in the dedicated SlotRenderProbe scene (not normal Main); the second fresh process logged slot 0 Hologram and slot 1 Material_1 after SaveGame/Load.",
+    "evidence_paths": [
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\material-slot-inspector2.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\material-slot-inspector2.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\rebuild-literal-city-final.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\rebuild-literal-city-final.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\rebuild-literal-city-final.log",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\frames\\rebuild-literal-city-final.bmp",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\rebuild-literal-3\\Project.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/source-archive-slot-probe/Project.slotprobe.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/source-archive-slot-probe/run/slots.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/source-archive-slot-probe/run/slots.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/source-archive-slot-probe/run/slots.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/source-archive-slot-probe/run/commandlet.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/source-archive-slot-probe/frames/slots.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/source-archive-slot-probe/saves/city.save.json"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "material-slots",
+    "status": "passed",
+    "expected": "A model with at least two imported material slots keeps distinct assignments on visible submeshes.",
+    "actual": "The imported blend-suzanne-multiple GLB has two meshes/slots. In the final source-only archive rebuild under a different project root, source slot 0 was assigned Hologram and slot 1 remained Material_1. The actual game D3D frame visibly shows cyan striped Hologram on one submesh and a contrasting pink/red surface on the other.",
+    "evidence_paths": [
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\scenes\\SlotRenderProbe.scene.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\rebuild-literal-city-final.log",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\rebuild-literal-city-final.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\frames\\rebuild-literal-city-final.bmp"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "material-graph-current",
+    "status": "passed",
+    "expected": "WarmStone graph edits survive apply/undo/redo/reopen, generate expected graph/HLSL, and native preview renders non-empty A/B pixels.",
+    "actual": "In separate fresh material.graph previewOnly processes, preset 0 + apply/save produced a native MaterialPreview sphere on a 241x282 backbuffer with a white/gray diffuse appearance; preset 2 + apply/save produced a gold Fresnel sphere. Both screenshots match nativePreviewSize 241x282 (not the 640x480 project viewport); SHA256 differs C55E198D... vs C5DDAC1A.... Graph JSON/HLSL and previous process reopen evidence confirm applied parameters and persistence.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/material-warmstone-graph.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/material-warmstone-graph.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/material-warmstone-reopen.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/material-warmstone-reopen.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/material-warmstone-reopened.png",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/upgraded-city/Content/Materials/WarmStone.mat.graph.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/upgraded-city/Content/Materials/WarmStone.hlsl",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\warmstone-Preset0-render.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\frames\\warmstone-Preset0-render.bmp",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\warmstone-Preset2-render.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\frames\\warmstone-Preset2-render.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/native-preview-warmstone-applied-0.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/native-preview-warmstone-applied-0.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/native-preview-warmstone-applied-0.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/native-preview-warmstone-applied-0-preview.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/native-preview-warmstone-applied-2.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/native-preview-warmstone-applied-2.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/native-preview-warmstone-applied-2.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/native-preview-warmstone-applied-2-preview.bmp"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "material-graph",
+    "status": "passed",
+    "expected": "Graph node edits/apply/undo/redo/reopen alter shader output and preview pixel predictably.",
+    "actual": "The actual Material Editor changed the WarmStone graph through preset 2, Apply, Undo, Redo, Save, and Revert; a separate reopen retained the saved six-node graph. Independent A/B editor runs applied/saved preset 0 (5 nodes, HLSL 533 bytes) and preset 2 (6 nodes, HLSL 596 bytes). The same real GPU sphere render changed center RGB from [86,86,88] to [15,11,4], with different full-frame hashes and non-empty inspected BMPs. This verifies graph editing and saved shader changes affect actual material output.",
+    "evidence_paths": [
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\material-warmstone-graph.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\material-warmstone-graph.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\material-warmstone-reopen.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\material-warmstone-reopen.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\warmstone-Preset0.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\warmstone-Preset0-graph.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\frames\\warmstone-Preset0-graph.png",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\warmstone-Preset2.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\warmstone-Preset2-graph.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\frames\\warmstone-Preset2-graph.png",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\warmstone-Preset0-render.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\warmstone-Preset0-render.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\frames\\warmstone-Preset0-render.bmp",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\warmstone-Preset2-render.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\warmstone-Preset2-render.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\frames\\warmstone-Preset2-render.bmp",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\materials\\WarmStonePreset0.hlsl",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\materials\\WarmStonePreset2.hlsl"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "passed",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "material-editor",
+    "status": "passed",
+    "expected": "Native material editor saves shader/parameter changes and reopening restores a non-empty preview.",
+    "actual": "The native preview HWND rendered a visible sphere in both fresh previewOnly captures at 241x282. Preset 0 produced a white/gray sphere; preset 2 produced a gold Fresnel sphere, with distinct image hashes. Material graph save/reopen and generated HLSL are also recorded.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/material-warmstone-graph.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/material-warmstone-graph.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/material-warmstone-reopen.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/material-warmstone-reopened.png",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/native-preview-warmstone-applied-0.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/native-preview-warmstone-applied-0.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/native-preview-warmstone-applied-0-preview.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/native-preview-warmstone-applied-2.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/native-preview-warmstone-applied-2.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/native-preview-warmstone-applied-2-preview.bmp"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "time",
+    "status": "passed",
+    "expected": "Масштаб времени 0/1/2 задаёт измеримый игровой прогресс; Pause не меняет время/положение, Resume продолжает, Stop возвращает сессию.",
+    "actual": "After rebuilding the private city DLL with the fixed 2026.11.11.0 SDK, the same project.input requests showed requested scale 0: six simulation callbacks with delta=0 and elapsed=0; scale 1: six callbacks at delta=0.016, elapsed=0.096; scale 2: six callbacks at delta=0.032, elapsed=0.192. The Pause interval emitted no simulation callbacks; Resume advanced at the selected scale. This independently verifies the editor host now applies simulation time scale exactly once.",
+    "evidence_paths": [
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\time-scale-0-fixed.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\time-scale-0-fixed.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\time-scale-0-fixed.log",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\time-scale-1-fixed.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\time-scale-1-fixed.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\time-scale-1-fixed.log",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\time-scale-2-fixed.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\time-scale-2-fixed.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\time-scale-2-fixed.log",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\upgraded-city\\Binaries\\Release\\a4eda38328ca4d0a89750209d511b665\\build.log"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "passed",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "camera-perspective",
+    "status": "passed",
+    "expected": "Character camera FOV is applied by the active Play controller; actual projection matches configured 40° and 80° at 640×480 and 1280×720, while resize changes horizontal projection for aspect and preserves vertical FOV.",
+    "actual": "Two fresh project.input processes loaded PlayerProbe with CuriousPlayer.cameraSettings.fov=40 and 80. Actual Play camera projection P[5] yielded 2*atan(1/P[5])=40.000° and 80.000° at both viewport sizes; P[0]/P[5] changed from 0.75 to 0.5625 on resize (4:3→16:9). Real D3D backbuffers were 640×480 (1,228,854 bytes) and 1280×720 (3,686,454 bytes), and the 40°/80° frames show the expected narrower/wider view. This verifies configured scene-camera FOV after controller update, not a transient SetProjection override. Earlier preserved checks also show ScreenPointToRay changing its direction for a non-center pixel and after viewport resize, and a native right-button viewport drag changing view while scene object transforms remained unchanged.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/camera-perspective-fov40.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/camera-perspective-fov40.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/camera-perspective-fov40.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/camera-perspective-fov40.commandlet.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/camera-perspective-fov40.resize-commandlet.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/camera-perspective-fov40-640x480.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/camera-perspective-fov40-1280x720.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/camera-perspective-fov80.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/camera-perspective-fov80.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/camera-perspective-fov80.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/camera-perspective-fov80.commandlet.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/camera-perspective-fov80.resize-commandlet.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/camera-perspective-fov80-640x480.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/camera-perspective-fov80-1280x720.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/camera-city-center.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/camera-city-center.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/camera-city-fov.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/camera-city-fov.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/camera-city-resize.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/camera-city-resize.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/camera-look-right-drag.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/camera-look-right-drag.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/camera-look-right-drag.png",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/camera-scene-editor2.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/camera-scene-editor2.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/camera-scene-drag.png",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/camera-scene-960x720.png",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/camera-scene-1280x720.png"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "trace-world",
+    "status": "passed",
+    "expected": "Raycast попадает в настоящий world object и возвращает верные ID/позицию/нормаль/дистанцию; контрольный miss возвращает Miss.",
+    "actual": "In the game Main scene, the ray through the yard hit Ground; ignoring Ground produced Miss, and the controlled standalone scene ray returned hit=true at [0,0,0], normal [0,0,1], distance 5. A second ray through the empty region returned hit=false.",
+    "evidence_paths": [
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\city-main-content-runtime.log",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\trace-world-city.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\trace-world-city.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\trace-world-miss.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\trace-world-miss.result.json"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "trace-filter",
+    "status": "passed",
+    "expected": "Ignore id и каналы исключают ближайший объект и попадают в следующий; без фильтра ближайший объект выигрывает.",
+    "actual": "The real game scene query returned all-channels Hit, default-channel Miss after Ground was moved to channel 2, channel-2 Hit, and Ignore Ground Miss. The component channel was restored after the query.",
+    "evidence_paths": [
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\city-main-content-runtime.log",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\hierarchy-world-runtime.log"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "trace-debug",
+    "status": "passed",
+    "expected": "A world trace rendered by DebugDrawTrace remains visibly present in a completed actual game frame when retained; clearing debug traces removes it under the same camera and scene.",
+    "actual": "Fresh paired project.input Play processes captured actual D3D frame 40 at 640×480. With CURIOUS_CITY_TRACE_KEEP=1, the 60-second DebugDrawTrace was visible as a green vertical segment and hit cross at the yard; log reports debugLines=5, clearedLines=5 (retained). Without the flag, log reports debugLines=5, clearedLines=0 and frame 40 has no segment. Earlier centered attempts are retained as diagnostics only; their invisibility cause is unproven.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/trace-debug-final-keep.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/trace-debug-final-keep.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/trace-debug-final-keep.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/trace-debug-final-keep.commandlet.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/trace-debug-final-keep-frame40.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/trace-debug-final-clear.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/trace-debug-final-clear.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/trace-debug-final-clear.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/trace-debug-final-clear.commandlet.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/trace-debug-final-clear-frame40.bmp"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "hud-project",
+    "status": "passed",
+    "expected": "Two separate UI files with distinct labels appear in Play after choosing the project HUD file; selection and rendering survive a fresh process.",
+    "actual": "Opened HUD settings in MainWindow and selected UI/CityHudAlt.ui; Cancel preserved that accepted selection. A fresh MainWindow process reported beforeChoice=UI/CityHudAlt.ui and current descriptor same. A fresh project.input process resolved the alt UI path and rendered Harbor District r7 / updated Build home • 100 button, whereas the original UI/CityHud.ui capture displayed the original Balance/Homes HUD. Both UI resources exist in the project copy.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/hud-settings-alt.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/hud-settings-alt.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/hud-settings-alt.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/hud-settings-reopen.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/hud-settings-reopen.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/hud-settings-reopen.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/hud-settings-reopen.png",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/hud-base-play.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/hud-base-play.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/hud-base-play.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/hud-base-640x480.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/hud-alt-play-640x480-final.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/hud-alt-play-640x480-final.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/hud-alt-play-640x480-final.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/hud-alt-640x480.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/upgraded-city/Content/UI/CityHud.ui",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/upgraded-city/Content/UI/CityHudAlt.ui"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "hud-elements",
+    "status": "passed",
+    "expected": "UI Editor adds a named label and edits a named button, saves/reopens markup; runtime shows both and the button still triggers gameplay.",
+    "actual": "Real UIEditorWindow added HarborLabel with text Harbor District • r7; selected existing buildHouse button and changed its text to Build home • 100, then saved and reopened the .ui. In project.input Play, D3D frame shows both changed elements; clicking the renamed button emitted build_ui_click and charged 100 (balance 500→400; houses 0→1).",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/hud-alt-editor2.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/hud-alt-editor2.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/hud-alt-editor2.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/upgraded-city/Content/UI/CityHudAlt.ui",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/hud-alt-play-640x480-final.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/hud-alt-play-640x480-final.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/hud-alt-play-640x480-final.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/hud-alt-640x480.bmp"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "hud-layout",
+    "status": "passed",
+    "expected": "The active HUD layout remains within the viewport at 640×480 and 1280×720, with readable text, visible actions, and no clipped or overlapping controls after top-right anchoring.",
+    "actual": "Saved alternate HUD layout in a fresh city Play process was captured by actual D3D at both 640×480 and 1280×720. Panel/label stay 16 px from top-right; Build 100, Save, Load and Harbor District r7 remain readable and non-overlapping at both sizes. 1280×720 resize also returned actual camera viewport 1280×720; the 640×480 gameplay frame includes a successful house purchase from the Build button.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/hud-layout-640x480.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/hud-layout-640x480.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/hud-layout-640x480.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/hud-layout-640x480.commandlet.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/hud-layout-640x480.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/hud-layout-1280x720.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/hud-layout-1280x720.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/hud-layout-1280x720.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/hud-layout-1280x720.commandlet.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/hud-layout-1280x720.bmp"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "instances",
+    "status": "partial",
+    "expected": "Несколько instance transforms дают ожидаемые видимые копии и счетчики; изменение/скрытие одной не портит другие.",
+    "actual": "No fresh r7 practical observation was completed yet for this criterion; status remains partial pending an independent run.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/criteria.md"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "material-params",
+    "status": "passed",
+    "expected": "An edited material parameter changes a real rendered pixel; restoring the original parameter returns its original pixel/hash.",
+    "actual": "Own .mat A/B variants using current graph parameter GoldTint produced center RGB 94,8,5 and 5,10,94. The restored baseline GoldTint [1,0.7216,0.2784,1] returned center RGB 15,11,4 and the original baseline SHA. Unsupported legacy Tint values were a negative control: they left pixel/hash unchanged.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/WarmStoneGoldBaseline.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/WarmStoneGoldBaseline.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/WarmStoneGoldA.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/WarmStoneGoldA.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/WarmStoneGoldB.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/WarmStoneGoldB.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/WarmStoneGoldBaseline.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/WarmStoneGoldA.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/WarmStoneGoldB.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/upgraded-city/Content/Materials/WarmStoneGoldBaseline.mat",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/upgraded-city/Content/Materials/WarmStoneGoldA.mat",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/upgraded-city/Content/Materials/WarmStoneGoldB.mat"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "light-point",
+    "status": "passed",
+    "expected": "Intensity zero removes point-light illumination; warm/cool lights change the rendered scene independently; changing radius changes the falloff region.",
+    "actual": "Fresh private city runs set Warm=(1,.65,.35), Cool=(.3,.55,1). With both intensities 0, the yard mesh is dark; Warm intensity 1 produces warm magenta/yellow highlights and illuminated ground; Cool intensity 1 produces blue highlights/cyan ground. Warm intensity 1 with radius 5 contracts the illumination to a small dim patch versus radius 50. Probe logs confirm the actual runtime intensity/radius/color values; BMPs are 640x480 and visually distinct.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/light-off.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/light-off.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/light-off.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/off.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/light-warm1.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/light-warm1.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/light-warm1.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/warm1.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/light-cool1.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/light-cool1.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/light-cool1.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/cool1.bmp",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/requests/light-warm1-radius5.request.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/results/light-warm1-radius5.result.json",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/logs/light-warm1-radius5.log",
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/evidence/frames/warm1-radius5.bmp"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "material-slot-edit",
+    "status": "passed",
+    "expected": "В настоящем Inspector конкретный slot меняется; Undo/Redo отражается в UI/scene/file и возвращается после reopen.",
+    "actual": "Actual Inspector field Property/materialSlots/0 for selected Engine.Model ID 5 accepted /Game/Materials/Hologram.mat. Undo restored the prior slot path, Redo restored Hologram, Save and Load retained it, and the selected/edited UI frames were captured.",
+    "evidence_paths": [
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\requests\\material-slot-inspector2.request.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\results\\material-slot-inspector2.result.json",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\frames\\material-slot-inspector-selected.png",
+      "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-r7\\curious-city\\evidence\\frames\\material-slot-inspector-edited.png"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "imported-shadows",
+    "status": "partial",
+    "expected": "Импортированный GLB/BLEND caster бросает тень на отдельный receiver, а `castShadows=false` снимает её.",
+    "actual": "No fresh r7 practical observation was completed yet for this criterion; status remains partial pending an independent run.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/criteria.md"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  },
+  {
+    "feature_id": "imported-uv",
+    "status": "partial",
+    "expected": "Импортированный UV-chart с импортированной BaseMap виден на размещённом объекте; разные chart-квадранты соответствуют текстуре.",
+    "actual": "No fresh r7 practical observation was completed yet for this criterion; status remains partial pending an independent run.",
+    "evidence_paths": [
+      "E:/Engine/Agent/Playtests/2026-11-14-2026.11.11.0-r7/curious-city/criteria.md"
+    ],
+    "engineVersion": "2026.11.11.0",
+    "previous_status": "partial",
+    "previous_evidence": "curious-city/evidence.json"
+  }
+]

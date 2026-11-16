@@ -1,0 +1,9 @@
+{
+  "source": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\sources\\CityTriangleFront.obj",
+  "dialog": {
+    "value": 1.5,
+    "image": "E:/Engine/Engine/build/playtests/20261114-r7/curious-city/frames/import-city-triangle-front-dialog.png",
+    "action": "accept"
+  },
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Project.json"
+}

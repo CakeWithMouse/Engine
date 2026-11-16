@@ -1,0 +1,36 @@
+{
+  "name": "Scene",
+  "objects": [
+    {
+      "id": 1,
+      "inheritParentScale": true,
+      "name": "CityRules",
+      "parent": 0,
+      "projectData": {
+        "balance": 850,
+        "buildingLimit": 20,
+        "version": 1
+      },
+      "transform": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "CuriousCity.CityRules"
+    }
+  ],
+  "version": 3
+}

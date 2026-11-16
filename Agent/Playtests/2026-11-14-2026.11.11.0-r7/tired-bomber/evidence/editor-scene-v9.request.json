@@ -1,0 +1,51 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\editor-scene-v9\\Project.json",
+  "editorWindow": true,
+  "steps": [
+    {
+      "count": 1,
+      "action": "frames"
+    },
+    {
+      "target": "Cube",
+      "action": "hierarchy-click"
+    },
+    {
+      "id": "Gizmo.ToggleCoordinateSpace",
+      "action": "ui-command"
+    },
+    {
+      "id": "Gizmo.ToggleCoordinateSpace",
+      "action": "ui-command"
+    },
+    {
+      "moves": 8,
+      "fromY": 0.5,
+      "fromX": 0.5,
+      "toX": 0.56,
+      "action": "viewport-drag",
+      "toY": 0.54
+    },
+    {
+      "action": "scene-undo"
+    },
+    {
+      "width": 1440,
+      "action": "resize-window",
+      "height": 900
+    },
+    {
+      "count": 1,
+      "action": "frames"
+    },
+    {
+      "width": 1000,
+      "action": "resize-window",
+      "height": 700
+    },
+    {
+      "count": 1,
+      "action": "frames"
+    }
+  ]
+}

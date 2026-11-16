@@ -1,0 +1,694 @@
+{
+  "engineVersion": "2026.11.11.0",
+  "persona": "calm-city",
+  "features": [
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence\\imported-materials\\project-import-scale2.json",
+        "evidence\\imported-materials\\project-import-scale2.log",
+        "evidence\\imported-materials\\CalmCityUVFinal.scene.json"
+      ],
+      "actual": "project.import scale=0.01 created/reimported the GLB scene asset; relocated project loaded the same /Game model in its new Content mount.",
+      "expected": "tired-bomber: Supported model import creates content asset and scene instance at chosen scale.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "model-import"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence\\skeletal\\VerifySkeletalAnimation.py",
+        "evidence\\skeletal\\skeletal-animation-verified.json",
+        "evidence\\skeletal\\skeletal-animation.json",
+        "evidence\\skeletal\\skeletal-frame-0.bmp",
+        "evidence\\skeletal\\skeletal-frame-2.bmp"
+      ],
+      "actual": "A real animated CesiumMan.glb was rendered at times 0, 0.25, 0.5, 0.75, 1 on D3D11. Point-shadow cube hashes produced three distinct states; every frame used shadow slot 0 and the representative frame visibly contains the animated character.",
+      "expected": "Import and animate a real skeletal character and observe its geometry/shadow change over time.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "skeletal"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence\\instances\\InstanceProbe.log",
+        "evidence\\instances\\LodPanel.log",
+        "evidence\\instances\\ProjectGame.cpp",
+        "evidence\\instances\\CalmLodRow.h",
+        "evidence\\instances\\calm-city-lod.bmp"
+      ],
+      "actual": "Moved instance 0 from (-7,0.35,2.8) to (0,0.35,2.8) and hid instance 1 in the eight-lamp InstancedMeshComponent; component log records both changes. Completed-frame diagnostics changed instances 99→97 and visible row count 8/8→7/8.",
+      "expected": "Move and hide actual entries in the city InstancedMesh row and observe updated render counts.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "instances"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence/render-diagnostics-lod-transition.request.json",
+        "evidence/render-diagnostics-lod-transition.json",
+        "evidence/render-diagnostics-lod-transition.bmp"
+      ],
+      "actual": "In own two-view cube scene, near orthographicHeight=10 produced LOD0=2/3; far height=24 produced LOD1=3. This confirms the tested LOD bucket transition and not general asset LOD quality.",
+      "expected": "Move the camera across the LOD threshold and observe the same scene instances switch buckets.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "lod"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "not-tested",
+      "evidence_paths": [
+        "evidence\\material-params\\VerifyMaterialParamAB.py",
+        "evidence\\material-params\\material-param-verified.json",
+        "evidence\\material-params\\material-param-before.bmp",
+        "evidence\\material-params\\material-param-edited.bmp",
+        "evidence\\material-params\\material-param-reverted.bmp"
+      ],
+      "actual": "ParameterProbe Tint red→blue changed center pixels [255,25,13]→[13,51,255]; revert restored the red image SHA exactly.",
+      "expected": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem.",
+      "previous_evidence": "",
+      "feature_id": "material-params"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "not-tested",
+      "evidence_paths": [
+        "evidence\\material-graph\\AnalyzeNativeMaterialPreviewAB.py",
+        "evidence\\material-graph\\native-material-preview-ab-analysis.json",
+        "evidence\\material-graph\\NativePreviewTeal-preview-v2.json",
+        "evidence\\material-graph\\NativePreviewTeal-preview-v2.log",
+        "evidence\\material-graph\\NativePreviewTeal-native-v2.bmp",
+        "evidence\\material-graph\\NativePreviewAmber-preview-v2.json",
+        "evidence\\material-graph\\NativePreviewAmber-preview-v2.log",
+        "evidence\\material-graph\\NativePreviewAmber-native-v2.bmp",
+        "evidence\\material-graph\\NativePreviewTeal.mat.graph.json",
+        "evidence\\material-graph\\NativePreviewAmber.mat.graph.json",
+        "evidence\\material-graph\\material-editor-teal.json",
+        "evidence\\material-graph\\material-editor-reopen.json",
+        "evidence\\material-graph\\material-editor-teal.png"
+      ],
+      "actual": "Native previewOnly A/B ran in separate processes. Each BMP dimension exactly matched nativePreviewSize 241x282; captured sphere center changed from teal RGB [10,209,173] to amber [255,92,9]. The actual swapchain images were inspected. Separate render.mesh proof remains recorded independently.",
+      "expected": "Write/apply/save a graph on a real material and verify it in the native D3D Material Editor preview after reopening the saved asset.",
+      "previous_evidence": "",
+      "feature_id": "material-editor"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence\\material-blends\\VerifyMaterialBlends.py",
+        "evidence\\material-blends\\material-blends-verified.json",
+        "evidence\\material-blends\\material-blends-mode0.bmp",
+        "evidence\\material-blends\\material-blends-mode1.bmp"
+      ],
+      "actual": "Own opaque-blue, masked-green-with-alpha-texture, translucent-red layers produced the source-over oracle at two interior pixels in Forward and Deferred (error 0).",
+      "expected": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "material-blends"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence\\point-shadow-lod\\point-shadow-ab.json",
+        "evidence\\point-shadow-lod\\point-shadow-ab.log",
+        "evidence\\point-shadow-lod\\point-shadow-on.bmp",
+        "evidence\\point-shadow-lod\\point-shadow-off.bmp",
+        "evidence\\point-shadow-lod\\point-shadow-return.bmp"
+      ],
+      "actual": "Own point light intensity/color/shadow toggle changed the expected material frame and active shadow slot; off removed the shadow cube and return restored the original cube hash.",
+      "expected": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "light-point"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence\\imported-materials\\imported-shadow-analysis.json",
+        "evidence\\imported-materials\\imported-shadow-on.bmp",
+        "evidence\\imported-materials\\imported-shadow-off.bmp"
+      ],
+      "actual": "Imported Suzanne material/geometry was rendered with point shadows on/off; selected image ROI changed in 1,334 pixels (max RGB delta 133), and the shadow map count toggled 1→0→1.",
+      "expected": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "shadows"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "not-tested",
+      "evidence_paths": [
+        "evidence\\material-graph\\AnalyzeNativeMaterialPreviewAB.py",
+        "evidence\\material-graph\\native-material-preview-ab-analysis.json",
+        "evidence\\material-graph\\NativePreviewTeal-preview-v2.json",
+        "evidence\\material-graph\\NativePreviewTeal-preview-v2.log",
+        "evidence\\material-graph\\NativePreviewTeal-native-v2.bmp",
+        "evidence\\material-graph\\NativePreviewAmber-preview-v2.json",
+        "evidence\\material-graph\\NativePreviewAmber-preview-v2.log",
+        "evidence\\material-graph\\NativePreviewAmber-native-v2.bmp",
+        "evidence\\material-graph\\NativePreviewTeal.mat.graph.json",
+        "evidence\\material-graph\\NativePreviewAmber.mat.graph.json",
+        "evidence\\material-graph\\material-editor-teal.json",
+        "evidence\\material-graph\\material-editor-reopen.json",
+        "evidence\\material-graph\\material-editor-teal.png"
+      ],
+      "actual": "Native previewOnly A/B ran in separate processes. Each BMP dimension exactly matched nativePreviewSize 241x282; captured sphere center changed from teal RGB [10,209,173] to amber [255,92,9]. The actual swapchain images were inspected. Separate render.mesh proof remains recorded independently.",
+      "expected": "Write/apply/save a graph on a real material and verify it in the native D3D Material Editor preview after reopening the saved asset.",
+      "previous_evidence": "",
+      "feature_id": "material-graph"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence\\imported-materials\\scene-imported-slots.json",
+        "evidence\\imported-materials\\calm-city-lod.bmp",
+        "evidence\\savegame-portable\\manual-1.save.json",
+        "evidence\\savegame-portable\\relocated-load-process-v2.log"
+      ],
+      "actual": "Imported mesh had two material slots; both were assigned the UV chart material and the actual imported mesh rendered the chart. SaveGame JSON preserved both slot values as /Game paths in a relocated project.",
+      "expected": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "material-slots"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "passed",
+      "evidence_paths": [
+        "evidence\\imported-materials\\editor-material-slot-ui-final.json",
+        "evidence\\imported-materials\\inspector-material-slot-scrolled-final.png",
+        "evidence\\imported-materials\\editor-material-slot-ui-final.log"
+      ],
+      "actual": "Changed actual Inspector Property/materialSlots/1 field, Undo restored Material_1, Redo restored Material_0; scene save/reopen retained Material_0.",
+      "expected": "calm-city: Edit an imported material slot, undo/redo, save and reopen the scene. | curious-city: Use SDK and Inspector to change a material slot and verify Undo/Redo.",
+      "previous_evidence": "calm-city/continuation/evidence.json",
+      "feature_id": "material-slot-edit"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence\\savegame-portable\\manual-1.save.json",
+        "evidence\\savegame-portable\\relocated-project-runtime.log",
+        "evidence\\savegame-portable\\relocated-save-process-v2.log",
+        "evidence\\savegame-portable\\relocated-load-process-v2.log"
+      ],
+      "actual": "Scene material slots survived SaveGame save/load in a separate relocated project root. Saved values are /Game/... paths and runtime mounted /Game to RelocatedCalmCity/Content; second process restored the slots.",
+      "expected": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "material-slot-persist"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence\\imported-materials\\imported-shadow-analysis.json",
+        "evidence\\imported-materials\\imported-shadow-on.bmp",
+        "evidence\\imported-materials\\imported-shadow-off.bmp"
+      ],
+      "actual": "Imported Suzanne cast a visible point shadow in the on frame; off frame removed it. ROI differs in 1,334 pixels and point-shadow slot count returns after re-enable.",
+      "expected": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "imported-shadows"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "passed",
+      "evidence_paths": [
+        "evidence\\imported-materials\\imported-uv-runtime-final.log",
+        "evidence\\imported-materials\\calm-city-lod.bmp",
+        "evidence\\imported-materials\\CalmCityUVFinal.scene.json"
+      ],
+      "actual": "Actual imported Suzanne GLB was rendered with assigned imported UV-chart material; red/green/blue/yellow chart regions are visible in GPU frame, and chart texture resource loads successfully.",
+      "expected": "calm-city: Render an imported UV chart/material from an overhead view and observe its texture. | curious-city: Import a UV-mapped textured model, assign its BaseMap, and inspect the texture mapped on the placed object.",
+      "previous_evidence": "calm-city/continuation/evidence.json",
+      "feature_id": "imported-uv"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "not-tested",
+      "evidence_paths": [
+        "evidence\\material-graph\\AnalyzeNativeMaterialPreviewAB.py",
+        "evidence\\material-graph\\native-material-preview-ab-analysis.json",
+        "evidence\\material-graph\\NativePreviewTeal-preview-v2.json",
+        "evidence\\material-graph\\NativePreviewTeal-preview-v2.log",
+        "evidence\\material-graph\\NativePreviewTeal-native-v2.bmp",
+        "evidence\\material-graph\\NativePreviewAmber-preview-v2.json",
+        "evidence\\material-graph\\NativePreviewAmber-preview-v2.log",
+        "evidence\\material-graph\\NativePreviewAmber-native-v2.bmp",
+        "evidence\\material-graph\\NativePreviewTeal.mat.graph.json",
+        "evidence\\material-graph\\NativePreviewAmber.mat.graph.json",
+        "evidence\\material-graph\\material-editor-teal.json",
+        "evidence\\material-graph\\material-editor-reopen.json",
+        "evidence\\material-graph\\material-editor-teal.png"
+      ],
+      "actual": "Native previewOnly A/B ran in separate processes. Each BMP dimension exactly matched nativePreviewSize 241x282; captured sphere center changed from teal RGB [10,209,173] to amber [255,92,9]. The actual swapchain images were inspected. Separate render.mesh proof remains recorded independently.",
+      "expected": "Write/apply/save a graph on a real material and verify it in the native D3D Material Editor preview after reopening the saved asset.",
+      "previous_evidence": "",
+      "feature_id": "material-graph-current"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence/transparency-sort-mode0.json",
+        "evidence/transparency-sort-mode0.log",
+        "evidence/transparency-sort-deferred.json",
+        "evidence/transparency-sort-deferred.log"
+      ],
+      "actual": "Both render.transparency sort scenarios completed on RTX 4070 Laptop; Forward produced 83 draws/frame, Deferred 84 draws/frame, with three completed frames each. Frame captures are valid; both modes reproduced the same camera-dependent center-color reversal.",
+      "expected": "Run the same owned scene in Forward and Deferred and capture completed frame stats.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "render-modes"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence/transparency-sort-mode0.json",
+        "evidence/transparency-sort-mode0.log",
+        "evidence/transparency-sort-front.bmp",
+        "evidence/transparency-sort-orbit-resize.bmp",
+        "evidence/transparency-crowd-perspective.json",
+        "evidence/transparency-crowd-perspective.log"
+      ],
+      "actual": "Both Forward and Deferred sequences emitted first/second 320x240 BMPs and third 480x320 BMP; the crowd run also emitted 320x240, 480x320, and 400x240. The resize appears in frame-dump log and BMP headers.",
+      "expected": "Change the live viewport resolution within one camera sequence and confirm actual output image dimensions.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "render-resize"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence/render-diagnostics-mode0.json",
+        "evidence/render-diagnostics-mode0.log",
+        "evidence/render-diagnostics-mode1.json",
+        "evidence/render-diagnostics-mode1.log",
+        "evidence/render-diagnostics-lod-transition.json",
+        "evidence/render-diagnostics-lod-transition.bmp"
+      ],
+      "actual": "Own diagnostics requests completed in Forward and Deferred; the transition request recorded view-specific frame stats and visible overlay lines in the captured LOD transition frame.",
+      "expected": "Render the diagnostics overlay in both supported modes and capture its frame/panel output.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "diagnostics"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence\\savegame-portable\\SaveGameSelfTest.log",
+        "evidence\\savegame-portable\\manual-1.save.json",
+        "evidence\\savegame-portable\\relocated-save-load-v2.exit.txt"
+      ],
+      "actual": "Same-process SaveGame restored scene/car state; second process in relocated project restored the same scene and /Game material-slot paths.",
+      "expected": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "savegame-scene"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence\\savegame-portable\\ProjectGame.cpp",
+        "evidence\\savegame-portable\\CalmScoreSubsystem.h",
+        "evidence\\savegame-portable\\SaveGameSelfTest.log",
+        "evidence\\savegame-portable\\manual-1.save.json",
+        "evidence\\savegame-portable\\final-relocated-load-process.log",
+        "evidence\\savegame-portable\\build-current-sdk.log"
+      ],
+      "actual": "Custom CarMover restored its saved transform/route across processes; CalmScoreSubsystem value saved as 42, mutated to 99, and restored to 42 both same-process and new-process. The project uses /Game-derived writable paths and the new-process run executed from a separately relocated root.",
+      "expected": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "savegame-derived"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence/render-diagnostics-lod-transition.json",
+        "evidence/render-diagnostics-lod-transition.bmp"
+      ],
+      "actual": "Own LOD transition diagnostics returned completed frames 1 and 2, with nonzero draw/instance counters for both camera views; frame images were written.",
+      "expected": "Capture valid completed-frame index/counters for multiple scene views.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "completed-frame"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence/render-diagnostics-lod-transition.json",
+        "evidence/render-diagnostics-lod-transition.bmp"
+      ],
+      "actual": "The two-view diagnostics run reports LOD0=2/3 for near view and LOD1=3 for far view, with visible overlay lines in the resulting image.",
+      "expected": "Observe overlay bucket counts changing by view and correlate to captured scene frames.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "lod-panel"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence/point-shadow-slots.request.json",
+        "evidence/point-shadow-slots.result.json",
+        "evidence/point-three-lights.bmp",
+        "evidence/point-zero-intensity.bmp"
+      ],
+      "actual": "Frame 0: lights 0 and 1 occupied slots 0 and 1, light 2 slot -1; both cubes expose six face hashes and occupied texels; probes include occluded positions. Frame 1 after intensity[0]=0: light 0 slot -1, light 1 slot 0, light 2 slot 1; maps and frame regenerated. RTX 4070 Laptop. This checks allocation/zero-intensity slot turnover, not full visual quality.",
+      "expected": "Two shadow-enabled point lights should occupy the two cube slots while a third eligible light has no slot; intensity zero should release/promote a slot and regenerate cube maps.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "point-shadow-cubes"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence\\cascade-fit\\matrices.csv",
+        "evidence\\cascade-fit\\cascade-orbit-analysis.json",
+        "evidence\\cascade-fit\\frame-060.bmp"
+      ],
+      "actual": "Own 121-frame orbit camera sequence kept cascade scale unchanged; max fractional texel drift was 9.22e-7, 2.46e-7, and 6.35e-8 for cascades 0–2.",
+      "expected": "Only the concrete scenario in the linked role evidence; partial does not validate the whole named subsystem.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "shadow-cascade-fit"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence/audio-2d-analysis.json",
+        "evidence/audio-2d-capture.json",
+        "evidence/audio-2d-capture.wav",
+        "evidence/audio-idle-baseline.json",
+        "evidence/audio-idle-baseline.wav"
+      ],
+      "actual": "Shared-mode WASAPI capture on Speakers (2-Realtek) contained the generated 733 Hz code at best correlation 0.665 and linear gain 0.094; idle baseline RMS was zero. This proves output reached the endpoint; no human listening judgment is claimed. Capture did not have QPC alignment, so use as endpoint playback evidence only.",
+      "expected": "The real Runtime output endpoint should contain the unique 733 Hz coded PCM pattern during Play2D, with no matching signal in the idle baseline.",
+      "previous_evidence": "calm-city/continuation/evidence.json",
+      "feature_id": "audio-play2d"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence/audio-3d-near-relative-call.log",
+        "evidence/audio-3d-far-relative-call.log",
+        "evidence/audio-3d-near-relative-analysis.json",
+        "evidence/audio-3d-far-relative-analysis.json",
+        "evidence/audio-3d-near-relative-capture.json",
+        "evidence/audio-3d-far-relative-capture.json",
+        "evidence/audio-3d-near-relative.wav",
+        "evidence/audio-3d-far-relative.wav",
+        "evidence/audio-3d-near-relative-runtime.log",
+        "evidence/audio-3d-far-relative-runtime.log",
+        "evidence/build-audio-relative-listener.log",
+        "evidence/build-audio-relative-listener.exit.txt",
+        "evidence/loopback-capture.cpp",
+        "evidence/BuildLoopbackCapture.ps1"
+      ],
+      "actual": "After rebuilding the role DLL against SDK SHA DBD52453B2E385A031A86185363AAEA6F652A5BAA5A684B2D226075733989C44, both runtime/capture processes exited 0. Logs record listener [14,12,18], emitters [14,12,20] (2 m), [14,12,38] (20 m), warmFrames=10. WASAPI code correlations were 0.959 near / 0.995 far; linear gains 0.0504 / 0.0200 (2.5× lower at 20 m). QPC captures align to each Play3D call; no subjective listening claim.",
+      "expected": "After 10 warmed PreUpdate frames, Play3D emitters at exact 2 m and 20 m from the actual Player listener should both match the coded PCM source, with lower measured amplitude at 20 m.",
+      "previous_evidence": "calm-city/continuation/evidence.json",
+      "feature_id": "audio-play3d"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence/audio-stream-clean-analysis.json",
+        "evidence/audio-stream-clean-capture.json",
+        "evidence/audio-stream-clean-capture.wav",
+        "evidence/audio-stream-call-log.log",
+        "evidence/audio-stream-clean-timing.txt",
+        "evidence/audio-stream-clean-runtime.log",
+        "evidence/audio-stream-clean-runtime.exitcode.txt",
+        "evidence/audio-stream-clean-capture.exitcode.txt"
+      ],
+      "actual": "Real PlayStream returned a valid handle and logged StopStream at simulation 2.01667s. WASAPI capture matched the 733Hz code (best correlation 0.795; gain 0.096), then tone amplitude was zero from about capture 9.5s through the 12s capture end. Runtime continued until it exited 0 at 11:13:00Z, after the capture ended at 11:12:37Z. This confirms loopback output followed by stopped-stream silence while the process was still alive; no millisecond stop latency claimed and no subjective listening claim.",
+      "expected": "Start a looping PCM stream, observe the unique coded signal at the render endpoint, call StopStream, then observe silence before the same Runtime process exits; do not claim exact Stop latency without capture and call clocks aligned.",
+      "previous_evidence": "calm-city/continuation/evidence.json",
+      "feature_id": "audio-stream"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence\\point-shadow-lod\\point-shadow-lod-transition-v2.json",
+        "evidence\\point-shadow-lod\\point-shadow-lod-transition-v2.log",
+        "evidence\\point-shadow-lod\\point-lod-near-v2.bmp",
+        "evidence\\point-shadow-lod\\point-lod-far-v2.bmp",
+        "evidence\\point-shadow-lod\\point-lod-return-v2.bmp"
+      ],
+      "actual": "With pixel thresholds 60/20, camera distance 4/16/4 selected LOD0/LOD1/LOD0 (screen heights 47/49/47); point shadow slot 0 remained valid through the switch and return.",
+      "expected": "Camera distance changes selected LOD and returning restores shadow data; full fade matrix is coordinator coverage.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "point-shadow-lod-transition"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence\\transparency-oracle\\VerifyTransparencyOracle.py",
+        "evidence\\transparency-oracle\\transparency-oracle-measurements.json",
+        "evidence\\transparency-oracle\\transparency-oracle-forward.json",
+        "evidence\\transparency-oracle\\transparency-oracle-deferred.json",
+        "evidence\\transparency-oracle\\transparency-oracle-front.bmp",
+        "evidence\\transparency-oracle\\transparency-oracle-back.bmp",
+        "evidence\\transparency-oracle\\transparency-oracle-orbit-resize.bmp",
+        "evidence\\transparency-oracle\\transparency-oracle-front-deferred.bmp",
+        "evidence\\transparency-oracle\\transparency-oracle-back-deferred.bmp",
+        "evidence\\transparency-oracle\\transparency-oracle-orbit-resize-deferred.bmp"
+      ],
+      "actual": "Own ray/plane intersections sorted two crossing translucent planes by camera depth and composited source-over over a measured background. All required interior pixels in front/back/oblique views matched the CPU oracle within 1 RGB level (0 pixels exceeded tolerance 5) in Forward and Deferred. This covers two crossing planes, not same-mesh self-intersections.",
+      "expected": "Independently ray-cast and depth-sort two crossing translucent planes, then compare interior pixels to source-over CPU RGB oracles from several camera angles in Forward and Deferred.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "transparency-camera-sorting"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "partial",
+      "evidence_paths": [
+        "evidence\\transparency-oracle\\VerifyTransparencyOracle.py",
+        "evidence\\transparency-oracle\\transparency-oracle-measurements.json",
+        "evidence\\transparency-oracle\\transparency-oracle-forward.json",
+        "evidence\\transparency-oracle\\transparency-oracle-deferred.json",
+        "evidence\\transparency-oracle\\transparency-oracle-front.bmp",
+        "evidence\\transparency-oracle\\transparency-oracle-back.bmp",
+        "evidence\\transparency-oracle\\transparency-oracle-orbit-resize.bmp",
+        "evidence\\transparency-oracle\\transparency-oracle-front-deferred.bmp",
+        "evidence\\transparency-oracle\\transparency-oracle-back-deferred.bmp",
+        "evidence\\transparency-oracle\\transparency-oracle-orbit-resize-deferred.bmp"
+      ],
+      "actual": "Own ray/plane intersections sorted two crossing translucent planes by camera depth and composited source-over over a measured background. All required interior pixels in front/back/oblique views matched the CPU oracle within 1 RGB level (0 pixels exceeded tolerance 5) in Forward and Deferred. This covers two crossing planes, not same-mesh self-intersections.",
+      "expected": "Independently ray-cast and depth-sort two crossing translucent planes, then compare interior pixels to source-over CPU RGB oracles from several camera angles in Forward and Deferred.",
+      "previous_evidence": "calm-city/evidence.json",
+      "feature_id": "transparency-intersections"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "not-tested",
+      "evidence_paths": [
+        "evidence\\transparency-crowd-lod\\VerifyTransparencyCrowd.py",
+        "evidence\\transparency-crowd-lod\\transparency-crowd-verified.json",
+        "evidence\\transparency-crowd-lod\\transparency-crowd-lod-m0.json",
+        "evidence\\transparency-crowd-lod\\transparency-crowd-lod-m0-0.bmp",
+        "evidence\\transparency-crowd-lod\\transparency-crowd-lod-m0-1.bmp",
+        "evidence\\transparency-crowd-lod\\transparency-crowd-lod-m0-2.bmp",
+        "evidence\\transparency-crowd-lod\\transparency-crowd-animation-m0-v2.json",
+        "evidence\\transparency-crowd-lod\\transparency-crowd-animation-m0-t0-v2.bmp",
+        "evidence\\transparency-crowd-lod\\transparency-crowd-animation-m0-t0.5-v2.bmp",
+        "evidence\\transparency-crowd-lod\\transparency-crowd-animation-m0-t0-return-v2.bmp",
+        "evidence\\transparency-crowd-lod\\transparency-crowd-animation-m1-v2.json",
+        "evidence\\transparency-crowd-lod\\transparency-crowd-animation-m1-t0-v2.bmp",
+        "evidence\\transparency-crowd-lod\\transparency-crowd-animation-m1-t0.5-v2.bmp",
+        "evidence\\transparency-crowd-lod\\transparency-crowd-animation-m1-t0-return-v2.bmp"
+      ],
+      "actual": "Own VAT crowd was rendered across 320x240→480x320→400x240 with LOD counts [4,2,0]→[0,4,0]→[0,0,4]. At fixed 320x240 camera and unchanged [4,2,0] LOD, t=0, .25, .5, .75, 1, 0 changed animation pixels and returned to the exact t=0 hash in Forward and Deferred.",
+      "expected": "Show transparent crowd LOD transitions while resizing the viewport, then isolate VAT animation with fixed camera/size/LOD and demonstrate pixel change plus return.",
+      "previous_evidence": "",
+      "feature_id": "transparency-animated-lod-resize"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "not-tested",
+      "evidence_paths": [
+        "evidence/ai-card-memory.request.json",
+        "evidence/ai-card-memory.result.json",
+        "evidence/ai-card-memory.log",
+        "evidence/ai-memory-card.png",
+        "evidence/AIPractice.Memory.scene.json",
+        "evidence/CalmRoutine.fsm"
+      ],
+      "actual": "Calm Sentinel assigned /Game/AI/CalmRoutine.fsm. Home override [3,0,2] appeared in scene projectData; scene Undo cleared it and Redo restored it. Clicking AiMemoryReset_Home cleared it. A second override [4,0,1] was copied to clone Calm Sentinel 2; Save Scene → Load Scene → FSM Reopen preserved both objects and the override. UI card screenshot was inspected.",
+      "expected": "Create and assign a file FSM, override one character Home vec3, verify Undo/Redo and reset, duplicate the character, then save/load/reopen the scene with the override intact.",
+      "previous_evidence": null,
+      "feature_id": "ai-card-memory"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "not-tested",
+      "evidence_paths": [
+        "evidence/ai-graph-create.request.json",
+        "evidence/ai-graph-create.result.json",
+        "evidence/ai-graph-edit.request.json",
+        "evidence/ai-graph-edit.result.json",
+        "evidence/ai-graph-edit.log",
+        "evidence/ai-dialog-real.request.json",
+        "evidence/ai-dialog-real.result.json",
+        "evidence/ai-state-dialog.png",
+        "evidence/ai-link-dialog.png",
+        "evidence/ai-graph-dialog-final.png",
+        "evidence/ai-graph-runtime-final.request.json",
+        "evidence/ai-graph-runtime-final.result.json",
+        "evidence/CalmRoutine.fsm"
+      ],
+      "actual": "AI editor created CalmRoutine, added Home/LastSeen/Target memory and targetKey/lastSeenKey/thinkInterval settings, authored two states and a transition, and exercised Undo/Redo/save/reopen. Separate new native modal scenarios double-clicked the real state and link: state name changed to ApproachHome; link delay/priority changed to 0.05/4. Both dialog PNGs were inspected; final reopened graph shows both nodes/edge and “Ошибок нет”.",
+      "expected": "Through the real FSM editor create a two-state graph with typed memory/settings and a transition, exercise Undo/Redo, save/reopen, and finish with no validation errors.",
+      "previous_evidence": null,
+      "feature_id": "ai-graph-edit"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "not-tested",
+      "evidence_paths": [
+        "evidence/ai-runtime-debug.request.json",
+        "evidence/ai-runtime-debug.result.json",
+        "evidence/ai-runtime-debug.log",
+        "evidence/ai-runtime-debug-config.result.json",
+        "evidence/CalmRoutine.fsm"
+      ],
+      "actual": "On the real project scene, frame 0.05s showed WaitBeacon active with Home=(0,0,-8), LastSeen=(0,0,0), history “start”. At 0.55s the state changed to MoveHome (“task succeeded”) and position shifted from (-8,0.9,-8) to (-7.79,0.9,-8); by 1.30s it was (-6.74,0.9,-8). Stop restored the edit scene. Positions are runtime snapshots, not a D3D image.",
+      "expected": "Play should expose the character active FSM state/history/memory; a short Wait should transition to MoveHome and character position should change over subsequent frames.",
+      "previous_evidence": null,
+      "feature_id": "ai-runtime-debug"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "status": "passed",
+      "previous_status": "not-tested",
+      "evidence_paths": [
+        "evidence/ai-file-reload-write-retry.request.json",
+        "evidence/ai-file-reload-write-retry.result.json",
+        "evidence/ai-file-reload-write-retry.log",
+        "evidence/ai-file-reload-before.request.json",
+        "evidence/ai-file-reload-before.result.json",
+        "evidence/ai-file-reload-before.log",
+        "evidence/ai-file-reload-after.request.json",
+        "evidence/ai-file-reload-after.result.json",
+        "evidence/ai-file-reload-after.log",
+        "evidence/CalmRoutine.fsm"
+      ],
+      "actual": "Locked state edit reported “Не удалось записать /Game/AI/CalmRoutine.fsm: Отказано в доступе.” and kept the original SHA; retry changed SHA and stored Wait=1.2. With 5×0.05s frames in a fresh process, active state remained WaitBeacon at x=-8. After external edit Wait=0.05 and another fresh process with the same five frames, state changed to MoveHome and x=-7.79. Both process runs exited 0.",
+      "expected": "Holding the .fsm against replacement should refuse save without changing its hash; retry should save. After editing the saved wait time externally, a new process should load the edit and change runtime transition/movement under the same frame schedule.",
+      "previous_evidence": null,
+      "feature_id": "ai-file-reload"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "evidence_paths": [
+        "evidence\\create-nocode\\fresh-nocode-create.exit.txt",
+        "evidence\\create-nocode\\fresh-nocode-before-enable.inventory.json",
+        "evidence\\create-nocode\\fresh-nocode-before-enable.Project.json",
+        "evidence\\create-nocode\\fresh-nocode-before-enable.assert.txt",
+        "evidence\\create-nocode\\fresh-nocode-enable.stderr.txt"
+      ],
+      "expected": "Create a fresh empty project and prove no user game module is present before C++ enable.",
+      "actual": "A new launcher-created project had zero files under Source and no Project.code.json before enable. The subsequent enable attempt was separately rejected because the launcher selected SDK 2026.11.11.1 while Engine.lock.json requires .11.11.0; no module was built from this fixture.",
+      "feature_id": "create-nocode",
+      "status": "passed"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "evidence_paths": [
+        "evidence/fresh-enable.exitcode.txt",
+        "evidence/fresh-code-build.log",
+        "evidence/fresh-project.json"
+      ],
+      "expected": "Enable C++ on a fresh project and produce an active validated module.",
+      "actual": "fresh-enable exit 0; fresh CodeBuild.log ends “Build validated and activated”; Project.json points at versioned Binaries module.",
+      "feature_id": "enable-cpp",
+      "status": "passed"
+    },
+    {
+      "engineVersion": "2026.11.11.0",
+      "evidence_paths": [
+        "evidence/current-project-code.json",
+        "evidence/final-project-build.log",
+        "evidence/final-project-startup.log",
+        "evidence/final-project-validate.log",
+        "evidence/source-archive-rebuild/README.md",
+        "evidence/source-archive-rebuild/build.log",
+        "evidence/source-archive-rebuild/build.exit.txt",
+        "evidence/source-archive-rebuild/run.log",
+        "evidence/source-archive-rebuild/run.exit.txt",
+        "calm-city-r7-source.zip",
+        "evidence/normal-startup-project.json",
+        "evidence/normal-startup-archive.sha256.txt",
+        "evidence/source-archive-rebuild/normal-startup-extraction.txt",
+        "evidence/source-archive-rebuild/normal-startup-build.log",
+        "evidence/source-archive-rebuild/normal-startup-build.exit.txt",
+        "evidence/source-archive-rebuild/normal-startup-run.log",
+        "evidence/source-archive-rebuild/normal-startup-run.exit.txt"
+      ],
+      "expected": "Build the upgraded source project against the current candidate Runtime SDK, validate and activate the module.",
+      "actual": "Project.code.json state ready, SDK 2026.11.11.0, new buildId dcb62c09a26e42e6a4a77359b395b070; build log shows Game.dll linked; ProjectTools startup and validation logs completed. Fresh source archive extracted to a clean project root, rebuilt with explicit 2026.11.11.0 Runtime SDK (exit 0), and standalone runtime completed 20 frames (exit 0). Final default user startup restored to Content/Scenes/Main.scene.json. Fresh archive was rebuilt with explicit .11.11.0 Runtime and completed 40 game frames (exit 0).",
+      "feature_id": "build-activate",
+      "status": "passed"
+    }
+  ],
+  "workflows": [
+    {
+      "engineVersion": "2026.11.11.0",
+      "evidence_paths": [
+        "evidence/upgrade.exitcode.txt",
+        "evidence/upgrade-report.json",
+        "evidence/upgraded-engine-lock.json"
+      ],
+      "expected": "Upgrade a runnable prior Calm City project into an isolated new-version copy without mutating its source.",
+      "actual": "Launcher upgrade returned exit 0; UpgradeReport records engineVersion 2026.11.11.0, originalPreserved=true, sourceModuleSHA256 and source project; project lock updated.",
+      "feature_id": "project-upgrade",
+      "status": "passed"
+    }
+  ],
+  "sdkHash": "DBD52453B2E385A031A86185363AAEA6F652A5BAA5A684B2D226075733989C44"
+}

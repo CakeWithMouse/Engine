@@ -1,0 +1,33 @@
+{
+  "bucket": "codex",
+  "windowDurationMins": 10080,
+  "resetsAt": 1794928911,
+  "baselineUsedPercent": 42,
+  "checkpoints": [
+    {
+      "usedPercent": 42,
+      "phase": "Start single strategy developer run"
+    },
+    {
+      "usedPercent": 43,
+      "phase": "Project created; first playable mechanics being implemented"
+    },
+    {
+      "usedPercent": 44,
+      "phase": "Game registration restored; actual custom objects observed; input/camera project integration ongoing"
+    },
+    {
+      "usedPercent": 45,
+      "phase": "Density defect reproduced and fixed; three shape mass regressions passed, SDK rebuilding"
+    },
+    {
+      "usedPercent": 46,
+      "phase": "One playable episode validated; density fix repeated by developer; source archive rebuilt and won"
+    }
+  ],
+  "softStopDelta": 25,
+  "maximumDelta": 30,
+  "note": "New explicitly scoped run after completed r7; shared rounded account counter, not exact thread usage.",
+  "observedDelta": 4,
+  "finalUsedPercent": 46
+}

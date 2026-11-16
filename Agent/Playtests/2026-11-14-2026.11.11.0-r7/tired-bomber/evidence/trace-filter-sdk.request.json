@@ -1,0 +1,17 @@
+{
+  "project": "Engine/build/playtests/20261114-r7/tired-bomber/BomberUpgradedR7/Project.json",
+  "runtime": "E:\\Engine\\Game\\build\\x64\\Release\\Runtime\\EngineRuntime.exe",
+  "args": "--mode game --frames 3",
+  "ray": "Same downward ray from first unit XZ",
+  "observed": {
+    "channel2IgnoreUnit": {
+      "after": "miss status Miss",
+      "ignored": 7,
+      "before": "unit id7"
+    },
+    "channels": {
+      "channel2": "unit id7",
+      "channel1": "ground id1"
+    }
+  }
+}

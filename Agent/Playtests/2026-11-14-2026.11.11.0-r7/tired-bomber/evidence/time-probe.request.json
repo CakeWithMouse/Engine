@@ -1,0 +1,15 @@
+{
+  "project": "Engine/build/playtests/20261114-r7/tired-bomber/BomberUpgradedR7/Project.json",
+  "runtime": "E:\\Engine\\Game\\build\\x64\\Release\\Runtime\\EngineRuntime.exe",
+  "args": "--mode game --frames 80",
+  "environment": {
+    "TB_TIME_PROBE": "1"
+  },
+  "observed": {
+    "pauseSetAtFrame": 41,
+    "ratio": 4,
+    "scale2frames20": "simDelta 0.666667",
+    "scale05frames20": "simDelta 0.166667"
+  },
+  "limit": "No post-pause render-frame counter was exposed by this game probe."
+}

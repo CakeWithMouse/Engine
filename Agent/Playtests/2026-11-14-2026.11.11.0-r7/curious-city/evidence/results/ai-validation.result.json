@@ -1,0 +1,2634 @@
+{
+    "before": {
+        "canRedo": false,
+        "canUndo": false,
+        "checkCount": 1,
+        "detail": "",
+        "file": {
+            "connections": [
+                {
+                    "fromNode": 1,
+                    "fromPin": "out",
+                    "properties": {
+                        "delay": 0.25,
+                        "priority": 3,
+                        "trigger": "completed"
+                    },
+                    "toNode": 2,
+                    "toPin": "in"
+                }
+            ],
+            "format": "ITMOEngine.Graph",
+            "nodes": [
+                {
+                    "id": 1,
+                    "properties": {
+                        "name": "Idle",
+                        "tasks": [
+                            {
+                                "seconds": 1,
+                                "type": "Ai.Wait"
+                            }
+                        ]
+                    },
+                    "title": "Idle",
+                    "type": "Fsm.State",
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "id": 2,
+                    "properties": {
+                        "name": "RouteB",
+                        "tasks": [
+                            {
+                                "seconds": 0.35,
+                                "type": "Ai.Wait"
+                            },
+                            {
+                                "type": "Ai.Wait"
+                            }
+                        ]
+                    },
+                    "title": "RouteB",
+                    "type": "Fsm.State",
+                    "x": 260,
+                    "y": 20
+                }
+            ],
+            "schema": "ai.fsm",
+            "schemaVersion": 1,
+            "settings": {
+                "lastSeenKey": "LastSeen",
+                "targetKey": "Target",
+                "thinkInterval": 0.2
+            },
+            "variables": [
+                {
+                    "name": "Target",
+                    "type": "object"
+                },
+                {
+                    "name": "LastSeen",
+                    "type": "vec3"
+                },
+                {
+                    "name": "Speed",
+                    "type": "float",
+                    "value": 1.75
+                }
+            ],
+            "version": 1
+        },
+        "fileSha256": "2b778b50eb7b2e94de2e15ec083cd0c5443e0c4375f13e545673f1128655b1aa",
+        "graph": {
+            "connections": [
+                {
+                    "fromNode": 1,
+                    "fromPin": "out",
+                    "properties": {
+                        "delay": 0.25,
+                        "priority": 3,
+                        "trigger": "completed"
+                    },
+                    "toNode": 2,
+                    "toPin": "in"
+                }
+            ],
+            "format": "ITMOEngine.Graph",
+            "nodes": [
+                {
+                    "id": 1,
+                    "properties": {
+                        "name": "Idle",
+                        "tasks": [
+                            {
+                                "seconds": 1,
+                                "type": "Ai.Wait"
+                            }
+                        ]
+                    },
+                    "title": "Idle",
+                    "type": "Fsm.State",
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "id": 2,
+                    "properties": {
+                        "name": "RouteB",
+                        "tasks": [
+                            {
+                                "seconds": 0.35,
+                                "type": "Ai.Wait"
+                            },
+                            {
+                                "type": "Ai.Wait"
+                            }
+                        ]
+                    },
+                    "title": "RouteB",
+                    "type": "Fsm.State",
+                    "x": 260,
+                    "y": 20
+                }
+            ],
+            "schema": "ai.fsm",
+            "schemaVersion": 1,
+            "settings": {
+                "lastSeenKey": "LastSeen",
+                "targetKey": "Target",
+                "thinkInterval": 0.2
+            },
+            "variables": [
+                {
+                    "name": "Target",
+                    "type": "object"
+                },
+                {
+                    "name": "LastSeen",
+                    "type": "vec3"
+                },
+                {
+                    "name": "Speed",
+                    "type": "float",
+                    "value": 1.75
+                }
+            ],
+            "version": 1
+        },
+        "live": [
+        ],
+        "machine": "/Game/AI/CityGate2.fsm",
+        "objects": [
+            {
+                "id": 1,
+                "material": "",
+                "name": "CityGuard",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "projectData": {
+                    "camera": 0,
+                    "cameraDistance": 5,
+                    "cameraHeight": 2,
+                    "farClip": 10000,
+                    "fieldOfView": 120,
+                    "fov": 60,
+                    "hearingRadius": 0,
+                    "lookSensitivity": 0.004999999888241291,
+                    "machineMemory": "",
+                    "moveSpeed": 5,
+                    "nearClip": 0.10000000149011612,
+                    "orthoHeight": 10,
+                    "orthographic": false,
+                    "playerControlled": false,
+                    "sightRadius": 0,
+                    "standardControl": true,
+                    "stateMachine": "/Game/AI/CityGate2.fsm",
+                    "team": 0,
+                    "version": 1,
+                    "viewPlane": 0
+                },
+                "scale": [
+                    1,
+                    1,
+                    1
+                ],
+                "type": "Gameplay.AiCharacter"
+            },
+            {
+                "id": 2,
+                "material": "",
+                "name": "CityGuard 2",
+                "parent": 0,
+                "position": [
+                    1,
+                    0,
+                    0
+                ],
+                "projectData": {
+                    "camera": 0,
+                    "cameraDistance": 5,
+                    "cameraHeight": 2,
+                    "farClip": 10000,
+                    "fieldOfView": 120,
+                    "fov": 60,
+                    "hearingRadius": 0,
+                    "lookSensitivity": 0.004999999888241291,
+                    "machineMemory": "{\"Speed\":5.5}",
+                    "moveSpeed": 5,
+                    "nearClip": 0.10000000149011612,
+                    "orthoHeight": 10,
+                    "orthographic": false,
+                    "playerControlled": false,
+                    "sightRadius": 0,
+                    "standardControl": true,
+                    "stateMachine": "/Game/AI/CityGate2.fsm",
+                    "team": 0,
+                    "version": 1,
+                    "viewPlane": 0
+                },
+                "scale": [
+                    1,
+                    1,
+                    1
+                ],
+                "type": "Gameplay.AiCharacter"
+            }
+        ],
+        "playState": 0,
+        "problems": {
+        },
+        "readOnly": false,
+        "ready": true,
+        "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+        "warnings": {
+        }
+    },
+    "dialogs": [
+    ],
+    "observation": "Actual themed Qt graph/card and runtime AI extension; widget image excludes D3D viewport.",
+    "ok": true,
+    "steps": [
+        {
+            "action": "select",
+            "error": "",
+            "snapshot": {
+                "canRedo": false,
+                "canUndo": false,
+                "checkCount": 1,
+                "detail": "",
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.25,
+                                "priority": 3,
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "RouteB",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.35,
+                                        "type": "Ai.Wait"
+                                    },
+                                    {
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "RouteB",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "2b778b50eb7b2e94de2e15ec083cd0c5443e0c4375f13e545673f1128655b1aa",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.25,
+                                "priority": 3,
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "RouteB",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.35,
+                                        "type": "Ai.Wait"
+                                    },
+                                    {
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "RouteB",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "live": [
+                ],
+                "machine": "/Game/AI/CityGate2.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "CityGuard",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "",
+                            "moveSpeed": 5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/CityGate2.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "CityGuard 2",
+                        "parent": 0,
+                        "position": [
+                            1,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "{\"Speed\":5.5}",
+                            "moveSpeed": 5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/CityGate2.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "accepted": true,
+            "action": "state",
+            "error": "",
+            "snapshot": {
+                "canRedo": false,
+                "canUndo": true,
+                "checkCount": 1,
+                "detail": "",
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.25,
+                                "priority": 3,
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "RouteB",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.35,
+                                        "type": "Ai.Wait"
+                                    },
+                                    {
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "RouteB",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "2b778b50eb7b2e94de2e15ec083cd0c5443e0c4375f13e545673f1128655b1aa",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.25,
+                                "priority": 3,
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "RouteB",
+                                "tasks": [
+                                    {
+                                        "type": "Ai.Fly"
+                                    }
+                                ]
+                            },
+                            "title": "RouteB",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "live": [
+                ],
+                "machine": "/Game/AI/CityGate2.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "CityGuard",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "",
+                            "moveSpeed": 5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/CityGate2.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "CityGuard 2",
+                        "parent": 0,
+                        "position": [
+                            1,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "{\"Speed\":5.5}",
+                            "moveSpeed": 5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/CityGate2.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "action": "check",
+            "error": "",
+            "snapshot": {
+                "canRedo": false,
+                "canUndo": true,
+                "checkCount": 2,
+                "detail": "",
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.25,
+                                "priority": 3,
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "RouteB",
+                                "tasks": [
+                                    {
+                                        "type": "Ai.Fly"
+                                    }
+                                ]
+                            },
+                            "title": "RouteB",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "d59163907b604e6be0b8eb5e099f42f4d7c9a0b245309afc932333f0d15d762a",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.25,
+                                "priority": 3,
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "RouteB",
+                                "tasks": [
+                                    {
+                                        "type": "Ai.Fly"
+                                    }
+                                ]
+                            },
+                            "title": "RouteB",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "live": [
+                ],
+                "machine": "/Game/AI/CityGate2.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "CityGuard",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "",
+                            "moveSpeed": 5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/CityGate2.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "CityGuard 2",
+                        "parent": 0,
+                        "position": [
+                            1,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "{\"Speed\":5.5}",
+                            "moveSpeed": 5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/CityGate2.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                    "2": "задача 1: неизвестный блок «Ai.Fly»: возможно, игровой модуль проекта устарел"
+                },
+                "readOnly": false,
+                "ready": true,
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "action": "play",
+            "controlStatus": 6,
+            "error": "",
+            "snapshot": {
+                "canRedo": false,
+                "canUndo": true,
+                "checkCount": 2,
+                "detail": "",
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.25,
+                                "priority": 3,
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "RouteB",
+                                "tasks": [
+                                    {
+                                        "type": "Ai.Fly"
+                                    }
+                                ]
+                            },
+                            "title": "RouteB",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "d59163907b604e6be0b8eb5e099f42f4d7c9a0b245309afc932333f0d15d762a",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.25,
+                                "priority": 3,
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "RouteB",
+                                "tasks": [
+                                    {
+                                        "type": "Ai.Fly"
+                                    }
+                                ]
+                            },
+                            "title": "RouteB",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "live": [
+                ],
+                "machine": "/Game/AI/CityGate2.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "CityGuard",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "",
+                            "moveSpeed": 5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/CityGate2.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "CityGuard 2",
+                        "parent": 0,
+                        "position": [
+                            1,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "{\"Speed\":5.5}",
+                            "moveSpeed": 5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/CityGate2.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                    "2": "задача 1: неизвестный блок «Ai.Fly»: возможно, игровой модуль проекта устарел"
+                },
+                "readOnly": false,
+                "ready": true,
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "accepted": true,
+            "action": "state",
+            "error": "",
+            "snapshot": {
+                "canRedo": false,
+                "canUndo": true,
+                "checkCount": 2,
+                "detail": "",
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.25,
+                                "priority": 3,
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "RouteB",
+                                "tasks": [
+                                    {
+                                        "type": "Ai.Fly"
+                                    }
+                                ]
+                            },
+                            "title": "RouteB",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "d59163907b604e6be0b8eb5e099f42f4d7c9a0b245309afc932333f0d15d762a",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.25,
+                                "priority": 3,
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "RouteB",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.15,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "RouteB",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "live": [
+                ],
+                "machine": "/Game/AI/CityGate2.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "CityGuard",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "",
+                            "moveSpeed": 5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/CityGate2.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "CityGuard 2",
+                        "parent": 0,
+                        "position": [
+                            1,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "{\"Speed\":5.5}",
+                            "moveSpeed": 5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/CityGate2.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                    "2": "задача 1: неизвестный блок «Ai.Fly»: возможно, игровой модуль проекта устарел"
+                },
+                "readOnly": false,
+                "ready": true,
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "action": "check",
+            "error": "",
+            "snapshot": {
+                "canRedo": false,
+                "canUndo": true,
+                "checkCount": 3,
+                "detail": "",
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.25,
+                                "priority": 3,
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "RouteB",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.15,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "RouteB",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "00710e94fe5ac4703884d212ecf4675be8284f95a6c69c95987ccbbb89ee9255",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.25,
+                                "priority": 3,
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "RouteB",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.15,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "RouteB",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "live": [
+                ],
+                "machine": "/Game/AI/CityGate2.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "CityGuard",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "",
+                            "moveSpeed": 5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/CityGate2.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "CityGuard 2",
+                        "parent": 0,
+                        "position": [
+                            1,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "{\"Speed\":5.5}",
+                            "moveSpeed": 5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/CityGate2.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "action": "play",
+            "controlStatus": 0,
+            "error": "",
+            "snapshot": {
+                "canRedo": false,
+                "canUndo": true,
+                "checkCount": 3,
+                "detail": "",
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.25,
+                                "priority": 3,
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "RouteB",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.15,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "RouteB",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "00710e94fe5ac4703884d212ecf4675be8284f95a6c69c95987ccbbb89ee9255",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.25,
+                                "priority": 3,
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "RouteB",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.15,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "RouteB",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "live": [
+                    {
+                        "activePath": "",
+                        "history": [
+                        ],
+                        "id": 1,
+                        "machine": "/Game/AI/CityGate2.fsm",
+                        "memory": [
+                            {
+                                "key": "Speed",
+                                "text": "1.75",
+                                "type": "float"
+                            }
+                        ],
+                        "name": "CityGuard",
+                        "running": true,
+                        "states": [
+                        ]
+                    },
+                    {
+                        "activePath": "",
+                        "history": [
+                        ],
+                        "id": 2,
+                        "machine": "/Game/AI/CityGate2.fsm",
+                        "memory": [
+                            {
+                                "key": "Speed",
+                                "text": "5.5",
+                                "type": "float"
+                            }
+                        ],
+                        "name": "CityGuard 2",
+                        "running": true,
+                        "states": [
+                        ]
+                    }
+                ],
+                "machine": "/Game/AI/CityGate2.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "CityGuard",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "",
+                            "moveSpeed": 5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/CityGate2.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "CityGuard 2",
+                        "parent": 0,
+                        "position": [
+                            1,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "{\"Speed\":5.5}",
+                            "moveSpeed": 5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/CityGate2.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "CityControls",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "CuriousCity.Interaction"
+                    }
+                ],
+                "playState": 1,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "action": "frames",
+            "error": "",
+            "snapshot": {
+                "canRedo": false,
+                "canUndo": true,
+                "checkCount": 3,
+                "detail": "",
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.25,
+                                "priority": 3,
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "RouteB",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.15,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "RouteB",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "00710e94fe5ac4703884d212ecf4675be8284f95a6c69c95987ccbbb89ee9255",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.25,
+                                "priority": 3,
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "RouteB",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.15,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "RouteB",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "live": [
+                    {
+                        "activePath": "Idle",
+                        "history": [
+                            "  0.05  -> Idle   start",
+                            "  1.25  -> Idle   completed without a transition, selecting from the root"
+                        ],
+                        "id": 1,
+                        "machine": "/Game/AI/CityGate2.fsm",
+                        "memory": [
+                            {
+                                "key": "Speed",
+                                "text": "1.75",
+                                "type": "float"
+                            }
+                        ],
+                        "name": "CityGuard",
+                        "running": true,
+                        "states": [
+                            {
+                                "name": "Idle",
+                                "node": 1,
+                                "path": "Idle"
+                            }
+                        ]
+                    },
+                    {
+                        "activePath": "Idle",
+                        "history": [
+                            "  0.05  -> Idle   start",
+                            "  1.25  -> Idle   completed without a transition, selecting from the root"
+                        ],
+                        "id": 2,
+                        "machine": "/Game/AI/CityGate2.fsm",
+                        "memory": [
+                            {
+                                "key": "Speed",
+                                "text": "5.5",
+                                "type": "float"
+                            }
+                        ],
+                        "name": "CityGuard 2",
+                        "running": true,
+                        "states": [
+                            {
+                                "name": "Idle",
+                                "node": 1,
+                                "path": "Idle"
+                            }
+                        ]
+                    }
+                ],
+                "machine": "/Game/AI/CityGate2.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "CityGuard",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "",
+                            "moveSpeed": 5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/CityGate2.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "CityGuard 2",
+                        "parent": 0,
+                        "position": [
+                            1,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "{\"Speed\":5.5}",
+                            "moveSpeed": 5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/CityGate2.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    },
+                    {
+                        "id": 3,
+                        "material": "",
+                        "name": "CityControls",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "CuriousCity.Interaction"
+                    }
+                ],
+                "playState": 1,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "warnings": {
+                }
+            },
+            "status": 0
+        },
+        {
+            "action": "stop",
+            "controlStatus": 0,
+            "error": "",
+            "snapshot": {
+                "canRedo": false,
+                "canUndo": true,
+                "checkCount": 3,
+                "detail": "",
+                "file": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.25,
+                                "priority": 3,
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "RouteB",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.15,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "RouteB",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "fileSha256": "00710e94fe5ac4703884d212ecf4675be8284f95a6c69c95987ccbbb89ee9255",
+                "graph": {
+                    "connections": [
+                        {
+                            "fromNode": 1,
+                            "fromPin": "out",
+                            "properties": {
+                                "delay": 0.25,
+                                "priority": 3,
+                                "trigger": "completed"
+                            },
+                            "toNode": 2,
+                            "toPin": "in"
+                        }
+                    ],
+                    "format": "ITMOEngine.Graph",
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "properties": {
+                                "name": "Idle",
+                                "tasks": [
+                                    {
+                                        "seconds": 1,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "Idle",
+                            "type": "Fsm.State",
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "id": 2,
+                            "properties": {
+                                "name": "RouteB",
+                                "tasks": [
+                                    {
+                                        "seconds": 0.15,
+                                        "type": "Ai.Wait"
+                                    }
+                                ]
+                            },
+                            "title": "RouteB",
+                            "type": "Fsm.State",
+                            "x": 260,
+                            "y": 20
+                        }
+                    ],
+                    "schema": "ai.fsm",
+                    "schemaVersion": 1,
+                    "settings": {
+                        "lastSeenKey": "LastSeen",
+                        "targetKey": "Target",
+                        "thinkInterval": 0.2
+                    },
+                    "variables": [
+                        {
+                            "name": "Target",
+                            "type": "object"
+                        },
+                        {
+                            "name": "LastSeen",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "Speed",
+                            "type": "float",
+                            "value": 1.75
+                        }
+                    ],
+                    "version": 1
+                },
+                "live": [
+                ],
+                "machine": "/Game/AI/CityGate2.fsm",
+                "objects": [
+                    {
+                        "id": 1,
+                        "material": "",
+                        "name": "CityGuard",
+                        "parent": 0,
+                        "position": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "",
+                            "moveSpeed": 5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/CityGate2.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    },
+                    {
+                        "id": 2,
+                        "material": "",
+                        "name": "CityGuard 2",
+                        "parent": 0,
+                        "position": [
+                            1,
+                            0,
+                            0
+                        ],
+                        "projectData": {
+                            "camera": 0,
+                            "cameraDistance": 5,
+                            "cameraHeight": 2,
+                            "farClip": 10000,
+                            "fieldOfView": 120,
+                            "fov": 60,
+                            "hearingRadius": 0,
+                            "lookSensitivity": 0.004999999888241291,
+                            "machineMemory": "{\"Speed\":5.5}",
+                            "moveSpeed": 5,
+                            "nearClip": 0.10000000149011612,
+                            "orthoHeight": 10,
+                            "orthographic": false,
+                            "playerControlled": false,
+                            "sightRadius": 0,
+                            "standardControl": true,
+                            "stateMachine": "/Game/AI/CityGate2.fsm",
+                            "team": 0,
+                            "version": 1,
+                            "viewPlane": 0
+                        },
+                        "scale": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "type": "Gameplay.AiCharacter"
+                    }
+                ],
+                "playState": 0,
+                "problems": {
+                },
+                "readOnly": false,
+                "ready": true,
+                "status": "Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
+                "warnings": {
+                }
+            },
+            "status": 0
+        }
+    ]
+}

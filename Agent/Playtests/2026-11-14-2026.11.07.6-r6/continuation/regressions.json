@@ -1,0 +1,16 @@
+{
+  "scope": "Continuation checks on the local fixed 2026.11.07.6 build; first-phase checks remain in fixes/regressions.json",
+  "engine": {"passed": 72, "total": 72, "skipped": 0, "evidence": "evidence/continuation-sky-after-tests.log"},
+  "editorCore": {"reportedChecks": 478, "extraTextureBoundaryAssertions": 4, "passed": true, "evidence": "evidence/continuation-register-after-tests.log"},
+  "nativeGraph": {"steps": 16, "passed": true, "criteria": "save, failed sidecar write/retry, invalid AI, 121/122 texture boundary, unique registers excluding t32, graph and undo/redo preservation", "evidence": "evidence/graph-boundary/result.json"},
+  "authoring": {"passed": 9, "evidence": "evidence/continuation-authoring-regression-05/summary.json"},
+  "integerValidation": {"passed": 13, "evidence": "evidence/continuation-integer-final/summary.json"},
+  "pointShadowIntegerControls": {"passed": 2, "gpuFrames": 2, "evidence": "evidence/continuation-point-integers/0.result.json"},
+  "mesh": {"passed": 8, "gpuFrames": 16, "evidence": "evidence/continuation-mesh-final/summary.json"},
+  "particles": {"passed": 8, "gpuFrames": 32, "evidence": "evidence/continuation-particles-final/summary.json"},
+  "materials": {"passed": 48, "gpuFrames": 288, "evidence": "evidence/continuation-material-regression/summary.json"},
+  "importRegression": {"passed": 9, "evidence": "evidence/import-regression.log"},
+  "apiReference": {"passed": true, "command": "node Engine/docs/api-reference/build.mjs --check", "pages": 39, "apiEntries": 308, "headers": 97, "sourceSnapshot": "a4433c0e08bd"},
+  "builds": {"allReleaseAssimp": true, "editorModuleFinal": true, "commandletFinal": true, "sdkEngineLibraryMatches": true},
+  "limits": ["GPU/Qt tests use native hidden windows and saved image inspection; no direct desktop session was observed.", "Audio APIs and decoding were exercised; audible playback and spatial falloff were not confirmed.", "The wide first-phase Qt and ABI suites were not rerun after every shader-only change."]
+}

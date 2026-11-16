@@ -1,0 +1,71 @@
+{
+  "passed": 13,
+  "cases": [
+    {
+      "name": "simplify-fractional-slices",
+      "command": "mesh.simplify",
+      "error": "integer field must be whole, finite, and within supported range"
+    },
+    {
+      "name": "simplify-huge-slices",
+      "command": "mesh.simplify",
+      "error": "integer field must be whole, finite, and within supported range"
+    },
+    {
+      "name": "simplify-fractional-stacks",
+      "command": "mesh.simplify",
+      "error": "integer field must be whole, finite, and within supported range"
+    },
+    {
+      "name": "particles-huge-width",
+      "command": "render.particles",
+      "error": "integer field must be whole, finite, and within supported range"
+    },
+    {
+      "name": "particles-fractional-width",
+      "command": "render.particles",
+      "error": "integer field must be whole, finite, and within supported range"
+    },
+    {
+      "name": "particles-huge-count",
+      "command": "render.particles",
+      "error": "integer field must be whole, finite, and within supported range"
+    },
+    {
+      "name": "particles-fractional-count",
+      "command": "render.particles",
+      "error": "integer field must be whole, finite, and within supported range"
+    },
+    {
+      "name": "particles-fractional-render-mode",
+      "command": "render.particles",
+      "error": "integer field must be whole, finite, and within supported range"
+    },
+    {
+      "name": "particles-huge-steps",
+      "command": "render.particles",
+      "error": "integer field must be whole, finite, and within supported range"
+    },
+    {
+      "name": "particles-fractional-steps",
+      "command": "render.particles",
+      "error": "integer field must be whole, finite, and within supported range"
+    },
+    {
+      "name": "mesh-huge-width",
+      "command": "render.mesh",
+      "error": "integer field must be whole, finite, and within supported range"
+    },
+    {
+      "name": "shadow-huge-width",
+      "command": "render.point-shadows",
+      "error": "integer field must be whole, finite, and within supported range"
+    },
+    {
+      "name": "shadow-fractional-render-mode",
+      "command": "render.point-shadows",
+      "error": "integer field must be whole, finite, and within supported range"
+    }
+  ],
+  "result": "Fractional and huge integer inputs are rejected before int conversion."
+}

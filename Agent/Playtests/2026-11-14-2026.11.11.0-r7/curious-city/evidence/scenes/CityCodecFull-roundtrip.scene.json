@@ -1,0 +1,141 @@
+{
+  "name": "Scene",
+  "objects": [
+    {
+      "assets": {
+        "model": "",
+        "script": "/Game/Scripts/CityPlayer.vscript",
+        "texture": ""
+      },
+      "id": 1,
+      "inheritParentScale": true,
+      "name": "CityGuard",
+      "parent": 0,
+      "projectData": {
+        "camera": 0,
+        "cameraDistance": 5.0,
+        "cameraHeight": 2.0,
+        "farClip": 10000.0,
+        "fieldOfView": 120.0,
+        "fov": 60.0,
+        "hearingRadius": 0.0,
+        "lookSensitivity": 0.004999999888241291,
+        "machineMemory": "",
+        "moveSpeed": 5.0,
+        "nearClip": 0.10000000149011612,
+        "orthoHeight": 10.0,
+        "orthographic": false,
+        "playerControlled": false,
+        "sightRadius": 0.0,
+        "standardControl": true,
+        "stateMachine": "/Game/AI/CityGate2.fsm",
+        "team": 0,
+        "version": 1,
+        "viewPlane": 0
+      },
+      "transform": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "Gameplay.AiCharacter"
+    },
+    {
+      "id": 2,
+      "inheritParentScale": true,
+      "name": "CityGuard 2",
+      "parent": 0,
+      "projectData": {
+        "camera": 0,
+        "cameraDistance": 5.0,
+        "cameraHeight": 2.0,
+        "farClip": 10000.0,
+        "fieldOfView": 120.0,
+        "fov": 60.0,
+        "hearingRadius": 0.0,
+        "lookSensitivity": 0.004999999888241291,
+        "machineMemory": "{\"Speed\":5.5}",
+        "moveSpeed": 5.0,
+        "nearClip": 0.10000000149011612,
+        "orthoHeight": 10.0,
+        "orthographic": false,
+        "playerControlled": false,
+        "sightRadius": 0.0,
+        "standardControl": true,
+        "stateMachine": "/Game/AI/CityGate2.fsm",
+        "team": 0,
+        "version": 1,
+        "viewPlane": 0
+      },
+      "transform": {
+        "position": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "Gameplay.AiCharacter"
+    },
+    {
+      "assets": {
+        "model": "/Game/Models/blend-suzanne-multiple/blend-suzanne-multiple.glb",
+        "texture": ""
+      },
+      "id": 3,
+      "inheritParentScale": true,
+      "name": "CodecModelProbe",
+      "parent": 1,
+      "projectData": {
+        "materialSlots": {
+          "0": "/Game/Materials/Hologram.mat",
+          "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+        },
+        "version": 1
+      },
+      "transform": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "Engine.Model"
+    }
+  ],
+  "version": 3
+}

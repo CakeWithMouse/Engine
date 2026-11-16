@@ -1,0 +1,180 @@
+{
+    "accepted": true,
+    "after": [
+        {
+            "id": 1,
+            "material": "",
+            "name": "ImportedCityTriangle",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+                "materialSlots": {
+                    "1": ""
+                },
+                "version": 1
+            },
+            "rotation": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Engine.Model"
+        },
+        {
+            "id": 2,
+            "material": "",
+            "name": "CityTriangleFront",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+                "materialSlots": {
+                    "0": ""
+                },
+                "version": 1
+            },
+            "rotation": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Engine.Model"
+        }
+    ],
+    "asset": "/Game/Models/CityTriangleFront/CityTriangleFront.obj",
+    "before": [
+        {
+            "id": 1,
+            "material": "",
+            "name": "ImportedCityTriangle",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+                "materialSlots": {
+                    "1": ""
+                },
+                "version": 1
+            },
+            "rotation": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Engine.Model"
+        }
+    ],
+    "dialog": {
+        "action": "accept",
+        "presets": [
+        ],
+        "scale": 1.5,
+        "spinFocused": true
+    },
+    "dialogs": [
+    ],
+    "ok": true,
+    "sidecar": {
+        "kind": "model",
+        "model": {
+            "flipUv": false,
+            "importMaterials": true,
+            "importTextures": true,
+            "mergeMeshes": false,
+            "normals": "file",
+            "scale": 1.5,
+            "smoothingAngle": 60,
+            "useFileUnitScale": true
+        },
+        "version": 2
+    },
+    "sidecarExists": true,
+    "spawned": [
+        {
+            "id": 1,
+            "material": "",
+            "name": "ImportedCityTriangle",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+                "materialSlots": {
+                    "1": ""
+                },
+                "version": 1
+            },
+            "rotation": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Engine.Model"
+        },
+        {
+            "id": 2,
+            "material": "",
+            "name": "CityTriangleFront",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+                "materialSlots": {
+                    "0": ""
+                },
+                "version": 1
+            },
+            "rotation": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Engine.Model"
+        }
+    ]
+}

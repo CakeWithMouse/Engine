@@ -10,17 +10,17 @@
 <PropertyGroup>
   <EngineEnableAssimp Condition="'$(EngineEnableAssimp)'=='' and Exists('$(MSBuildThisFileDirectory)..\..\Engine\vcpkg_installed\x64-windows\include\assimp\scene.h')">true</EngineEnableAssimp>
   <EngineEnableAssimp Condition="'$(EngineEnableAssimp)'==''">false</EngineEnableAssimp>
-  <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and '$(VCPKG_ROOT)'!=''">$(VCPKG_ROOT)\</VcpkgRoot>
-  <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and '$(VsInstallRoot)'!='' and Exists('$(VsInstallRoot)\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">$(VsInstallRoot)\VC\vcpkg\</VcpkgRoot>
-  <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and Exists('C:\Program Files\Microsoft Visual Studio\18\Community\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">C:\Program Files\Microsoft Visual Studio\18\Community\VC\vcpkg\</VcpkgRoot>
-  <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and Exists('C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\</VcpkgRoot>
-  <VcpkgRoot Condition="'$(VcpkgRoot)'==''">C:\vcpkg\</VcpkgRoot>
-  <VcpkgEnableManifest>$(EngineEnableAssimp)</VcpkgEnableManifest>
-  <VcpkgEnabled>$(EngineEnableAssimp)</VcpkgEnabled>
+  <EngineEnableJolt Condition="'$(EngineEnableJolt)'=='' and Exists('..\..\Engine\vcpkg_installed\x64-windows\include\Jolt\Jolt.h')">true</EngineEnableJolt>
+  <EngineEnableJolt Condition="'$(EngineEnableJolt)'==''">false</EngineEnableJolt>
+    <EngineEnableVcpkg>$(EngineEnableAssimp)</EngineEnableVcpkg>
+    <EngineEnableVcpkg Condition="'$(EngineEnableJolt)'=='true'">true</EngineEnableVcpkg>
+  <VcpkgEnableManifest>$(EngineEnableVcpkg)</VcpkgEnableManifest>
+  <VcpkgEnabled>$(EngineEnableVcpkg)</VcpkgEnabled>
   <VcpkgManifestRoot>$(MSBuildThisFileDirectory)..\..\Engine\</VcpkgManifestRoot>
   <VcpkgInstalledDir>$(MSBuildThisFileDirectory)..\..\Engine\vcpkg_installed\</VcpkgInstalledDir>
 </PropertyGroup>
-<Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" />
+<Import Project="..\..\Engine\BuildSupport\VcpkgRoot.props" />
+<Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props" Condition="'$(EngineEnableVcpkg)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" />
 <Import Project="$(VCTargetsPath)/Microsoft.Cpp.props" />
 <Import Project="..\..\Engine\BuildSupport\Cpp.props" />
 <ItemDefinitionGroup Condition="'$(EngineEnableAssimp)'=='true'">
@@ -32,7 +32,7 @@
 <ItemGroup><ClCompile Include="Source/Module.cpp" /></ItemGroup>
 <ItemGroup><ProjectReference Include="..\..\Engine\Engine.vcxproj"><Project>{90A42B03-FDD9-4E98-834D-49B44E58C029}</Project></ProjectReference></ItemGroup>
 <Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets" />
-<Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets')" />
+<Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets" Condition="'$(EngineEnableVcpkg)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets')" />
 <Import Project="..\..\Engine\BuildSupport\ComponentGeneration.targets" />
 <ItemGroup><RuntimeContent Include="Content/**/*" /></ItemGroup>
 <Target Name="DeployRuntimeProject" AfterTargets="Build"><MakeDir Directories="$(OutDir)Content" /><Copy SourceFiles="$(MSBuildProjectDirectory)/Project.json" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" /><Copy SourceFiles="@(RuntimeContent)" DestinationFiles="@(RuntimeContent->'$(OutDir)Content/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" /></Target>

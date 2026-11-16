@@ -1,0 +1,190 @@
+{
+  "rendering": 1,
+  "orthographic": false,
+  "width": 320,
+  "height": 256,
+  "groups": [
+    {
+      "geometry": "cross",
+      "kind": "skeletal",
+      "layers": [
+        {
+          "alpha": 0.45,
+          "color": [
+            1,
+            0.25,
+            0.08
+          ],
+          "rotation": [
+            0,
+            -35,
+            0
+          ],
+          "position": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "alpha": 0.35,
+          "color": [
+            0.1,
+            0.8,
+            0.3
+          ],
+          "rotation": [
+            0,
+            30,
+            0
+          ],
+          "position": [
+            0,
+            0,
+            0.15
+          ]
+        }
+      ],
+      "width": 5,
+      "material": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\transparency\\Layer.mat",
+      "height": 4
+    },
+    {
+      "height": 4,
+      "lodDistances": [
+        8,
+        12
+      ],
+      "lodScreenHeights": [
+        160,
+        80
+      ],
+      "kind": "crowd",
+      "geometry": "cross",
+      "fade": 0.2,
+      "lods": 3,
+      "width": 5,
+      "material": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\transparency\\Layer.mat",
+      "layers": [
+        {
+          "alpha": 0.45,
+          "color": [
+            0.08,
+            0.35,
+            1
+          ],
+          "rotation": [
+            0,
+            40,
+            0
+          ],
+          "position": [
+            0,
+            0,
+            0.2
+          ]
+        },
+        {
+          "alpha": 0.3,
+          "color": [
+            1,
+            0.8,
+            0.08
+          ],
+          "rotation": [
+            0,
+            -20,
+            0
+          ],
+          "position": [
+            0,
+            0,
+            -0.2
+          ]
+        }
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\animated-features\\skeletal-crowd-refine-t0.bmp",
+      "time": 0,
+      "camera": [
+        0,
+        0,
+        -5
+      ],
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "width": 320,
+      "height": 256
+    },
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\animated-features\\skeletal-crowd-refine-t05.bmp",
+      "time": 0.5,
+      "camera": [
+        5,
+        0,
+        -8
+      ],
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "width": 640,
+      "height": 360
+    },
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\animated-features\\skeletal-crowd-refine-t1-far.bmp",
+      "time": 1,
+      "camera": [
+        0,
+        0,
+        -16
+      ],
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "width": 320,
+      "height": 256
+    },
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\animated-features\\skeletal-crowd-refine-t05-orbit.bmp",
+      "time": 0.5,
+      "camera": [
+        -5,
+        0,
+        -8
+      ],
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "width": 640,
+      "height": 360
+    },
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\animated-features\\skeletal-crowd-refine-return.bmp",
+      "time": 0,
+      "camera": [
+        0,
+        0,
+        -5
+      ],
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "width": 320,
+      "height": 256
+    }
+  ]
+}

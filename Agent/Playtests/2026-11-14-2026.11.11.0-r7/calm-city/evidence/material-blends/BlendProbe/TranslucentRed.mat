@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "shader": "TranslucentRed.hlsl",
+  "render": {
+    "blend": "translucent",
+    "lighting": "unlit",
+    "twoSided": true
+  },
+  "textures": {}
+}

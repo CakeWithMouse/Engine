@@ -3,6 +3,7 @@
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
 #include <Engine/Components/Light/DirectionalLightComponent.h>
+#include <Engine/Script/ScriptRuntime.h>
 #include <atomic>
 #include <cmath>
 #include <stdexcept>
@@ -200,7 +201,19 @@ SceneSnapshot Scene::GetSnapshot() const
                 c.GetModelAsset(), c.GetTexturePath(), c.GetMaterialAsset()});
         if (const auto* light = dynamic_cast<const PointLightComponent*>(&c))
             result.components.back().pointLight = {light->GetLightColor(), light->GetIntensity(), light->GetRadius(), light->IsEnabled(), light->CastsShadow()};
+        if (c.HasPhysicsSettings())
+        {
+            auto& physics = result.components.back().physics.emplace();
+            physics.enabled = c.IsPhysicsEnabled();
+            physics.bodyType = c.GetPhysicsBodyType();
+            physics.shapeType = c.GetPhysicsShapeType();
+            physics.friction = c.GetPhysicsFriction();
+            physics.restitution = c.GetPhysicsRestitution();
+            physics.density = c.GetPhysicsDensity();
+        }
         result.components.back().projectData = c.SaveProjectData();
+        result.components.back().scriptAsset = c.GetScriptAsset();
+        result.components.back().scriptVariables = c.GetScriptVariables();
         if (!result.components.back().projectData.empty()) result.documentVersion = 3;
     }
     return result;
@@ -211,6 +224,17 @@ bool SceneComponentSnapshot::PointLight::IsValid() const noexcept
     return Finite(color) && color.x >= 0 && color.x <= 1 && color.y >= 0 && color.y <= 1 &&
         color.z >= 0 && color.z <= 1 && std::isfinite(intensity) && intensity >= 0 &&
         std::isfinite(radius) && radius > 0;
+}
+
+bool SceneComponentSnapshot::PhysicsBody::IsValid() const noexcept
+{
+    const auto typeValid = bodyType == PhysicsBodyType::Static || bodyType == PhysicsBodyType::Dynamic ||
+        bodyType == PhysicsBodyType::Kinematic;
+    const auto shapeValid = shapeType == PhysicsShapeType::Box || shapeType == PhysicsShapeType::Sphere ||
+        shapeType == PhysicsShapeType::Capsule;
+    return typeValid && shapeValid && std::isfinite(friction) && friction >= 0.0f &&
+        std::isfinite(restitution) && restitution >= 0.0f &&
+        std::isfinite(density) && density > 0.0f;
 }
 
 void Scene::SetDocumentVersion(uint32_t version)
@@ -235,6 +259,22 @@ SceneResult Scene::SetPointLight(ComponentId id, const SceneComponentSnapshot::P
     return SceneResult::Ok;
 }
 
+SceneResult Scene::SetPhysicsBody(ComponentId id, const SceneComponentSnapshot::PhysicsBody& body)
+{
+    if (IsUpdating()) return SceneResult::Busy;
+    auto* object = FindComponent(id);
+    if (!object) return SceneResult::NotFound;
+    if (!body.IsValid()) return SceneResult::InvalidTransform;
+    object->SetPhysicsEnabled(body.enabled);
+    object->SetPhysicsBodyType(body.bodyType);
+    object->SetPhysicsShapeType(body.shapeType);
+    object->SetPhysicsFriction(body.friction);
+    object->SetPhysicsRestitution(body.restitution);
+    object->SetPhysicsDensity(body.density);
+    ++revision_;
+    return SceneResult::Ok;
+}
+
 SceneResult Scene::SetTextureAsset(ComponentId id, const std::string& path)
 {
     if (IsUpdating()) return SceneResult::Busy;
@@ -251,6 +291,26 @@ SceneResult Scene::SetMaterialAsset(ComponentId id, const std::string& path)
     auto* object = FindComponent(id);
     if (!object) return SceneResult::NotFound;
     if (!object->SetMaterialAsset(path)) throw std::runtime_error("This object cannot take a material");
+    ++revision_;
+    return SceneResult::Ok;
+}
+
+SceneResult Scene::SetScriptVariables(ComponentId id, const std::string& json)
+{
+    if (IsUpdating()) return SceneResult::Busy;
+    auto* object = FindComponent(id);
+    if (!object) return SceneResult::NotFound;
+    object->SetScriptVariables(json);
+    ++revision_;
+    return SceneResult::Ok;
+}
+
+SceneResult Scene::SetScriptAsset(ComponentId id, const std::string& path)
+{
+    if (IsUpdating()) return SceneResult::Busy;
+    auto* object = FindComponent(id);
+    if (!object) return SceneResult::NotFound;
+    object->SetScriptAsset(path);
     ++revision_;
     return SceneResult::Ok;
 }
@@ -280,6 +340,7 @@ void Scene::Tick(float dt, bool pauseNonSkybox)
             entry.second->Tick(seconds);
             auto* visual=entry.second->GetRenderComponent();
             if(visual!=entry.second.get())visual->Tick(seconds);
+            if(entry.second->ScriptState)entry.second->ScriptState->Tick(seconds);
         }
     }
     catch (...) { ticking_ = false; throw; }

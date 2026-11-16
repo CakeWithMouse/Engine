@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "E:\Engine\Editor\tests\AuthoringCommandletTests.py", line 96, in <module>
+    suite(args.tool.resolve(strict=True), args.launcher.resolve(strict=True), args.output.resolve())
+  File "E:\Engine\Editor\tests\AuthoringCommandletTests.py", line 44, in suite
+    assert not canceled['accepted'] and canceled['before'] == canceled['after']
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

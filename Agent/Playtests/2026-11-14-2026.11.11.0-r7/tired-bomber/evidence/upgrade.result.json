@@ -1,0 +1,11 @@
+{
+  "command": "--upgrade-project",
+  "source": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\BomberLegacyR5\\Project.json",
+  "destination": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\BomberUpgradedR7",
+  "exit": 0,
+  "sourceHashBefore": "25F6C98162D2AF78F8AD7FDD3FA835921C7085972AE01141F8AB48C628E8D26B",
+  "sourceHashAfter": "25F6C98162D2AF78F8AD7FDD3FA835921C7085972AE01141F8AB48C628E8D26B",
+  "sourceUnchanged": true,
+  "stdout": "",
+  "stderr": ""
+}

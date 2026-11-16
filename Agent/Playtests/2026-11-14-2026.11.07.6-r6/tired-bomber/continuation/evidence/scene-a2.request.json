@@ -1,0 +1,58 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\BomberFresh\\Project.json",
+  "steps": [
+    {
+      "action": "new"
+    },
+    {
+      "action": "create",
+      "type": "Primitive.Cube",
+      "name": "BombA"
+    },
+    {
+      "action": "create",
+      "type": "Primitive.Cube",
+      "name": "BombB"
+    },
+    {
+      "targets": [
+        "BombA",
+        "BombB"
+      ],
+      "action": "select"
+    },
+    {
+      "action": "move",
+      "target": "BombA",
+      "delta": [
+        1.2,
+        0,
+        0
+      ]
+    },
+    {
+      "action": "parent",
+      "target": "BombB",
+      "parent": "BombA"
+    },
+    {
+      "action": "duplicate",
+      "target": "BombA",
+      "name": "BombCopy"
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "action": "redo"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\scene-a.json",
+      "action": "save"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\scene-a.json",
+      "action": "load"
+    }
+  ]
+}

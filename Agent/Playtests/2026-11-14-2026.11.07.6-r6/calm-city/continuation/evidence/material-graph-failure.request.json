@@ -1,0 +1,20 @@
+{
+  "material": "/Game/Materials/GraphProbe.mat",
+  "steps": [
+    {
+      "action": "enable"
+    },
+    {
+      "index": 0,
+      "action": "preset"
+    },
+    {
+      "action": "save",
+      "lockedFile": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation\\CityApiProbe\\Content\\Materials\\GraphProbe.mat.graph.json"
+    },
+    {
+      "action": "revert"
+    }
+  ],
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\continuation\\CityApiProbe\\Project.json"
+}

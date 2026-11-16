@@ -1,0 +1,145 @@
+{
+  "project": "Engine/build/playtests/strategy-r1/RepairCorridor",
+  "engine_version": "2026.11.11.0",
+  "configuration": "Release x64 localOnly; v143 / MSVC 14.44.35207; Runtime SDK Engine.lib SHA256 6846D88DEE3BAF892E3A4A06C1C965E7FC71966B78A1E5620972178FE7EE0C5D",
+  "entries": [
+    {
+      "feature_id": "create-cpp",
+      "action": "Created a fresh project through EngineLauncher --create-project, then enabled C++ through --enable-code with an isolated EngineStore.",
+      "expected": "A new project, source tree, locked SDK metadata and first private Game.dll build are produced.",
+      "actual": "Project created and template Game.dll activated; launcher operations exited 0.",
+      "status": "passed",
+      "evidence": [
+        "evidence/Project.json",
+        "evidence/CodeBuild.log"
+      ]
+    },
+    {
+      "feature_id": "project-game",
+      "action": "Restored ENGINE_GAME(\"ProjectGame\"), wrote Content/ProjectGame.txt, rebuilt and launched through project.input.",
+      "expected": "ProjectGame, not the base Game, owns Play and calls its PreUpdate to create the corridor.",
+      "actual": "Generated GameTypeCatalog зарегистрировал ProjectGame; явный Content/ProjectGame.txt выбран. Настоящий project.input загрузил Floor, HallLight, CrateStop, SupplyCrate, три бойца, CorridorGuard, GuardVisual и TacticalHud.",
+      "status": "passed",
+      "evidence": [
+        "evidence/GeneratedComponents.cpp",
+        "evidence/ProjectGame.txt",
+        "evidence/clear-win-result.json"
+      ]
+    },
+    {
+      "feature_id": "input",
+      "action": "In project.input, Play + focus, held W for 180 frames, released W, then paused for 30 frames and resumed.",
+      "expected": "Selected soldier moves while W is held; when stopped by the gate, later paused frames preserve simulation state and Resume advances it.",
+      "actual": "Squad1 moved z=-6 to z=1.104 and stopped. During 30 paused frames Squad1 remained at z=1.104 and CorridorGuard remained at x=-0.819,z=1.817. After Resume the guard moved to x=-0.879,z=1.890.",
+      "status": "passed",
+      "evidence": [
+        "evidence/blocked-live-request.json",
+        "evidence/blocked-live-result.json",
+        "evidence/blocked-live.log"
+      ]
+    },
+    {
+      "feature_id": "ai-fsm",
+      "action": "Started the real CorridorGuard AiCharacter with a MachineBuilder FSM; ran actual project.input frames and sampled game telemetry.",
+      "expected": "The guard follows Patrol/Pause tasks, transitions to Chase when perception sees the squad, moves toward the target and can intercept the blocked unit.",
+      "actual": "Telemetry recorded Patrol to Chase. In the blocked scenario the guard moved from z=6 to z=1.89, then the gameplay loss condition changed to lost=1 when it reached the soldier. This is game FSM behavior, not a hand-coded path replacement.",
+      "status": "passed",
+      "evidence": [
+        "evidence/ProjectGame.cpp",
+        "evidence/blocked-telemetry.log",
+        "evidence/blocked-live-result.json"
+      ]
+    },
+    {
+      "feature_id": "physics-rigidbody",
+      "action": "Set the supply crate to an enabled Dynamic Box body, density 12, friction 0.55 and restitution 0.25; pressed E after ten warm-up frames to apply impulse (-150,3,0), then advanced 60 frames.",
+      "expected": "Real Jolt body responds to impulse and moves left at least 1.55 m, opening the corridor gate.",
+      "actual": "До Engine fix исходная настройка (density 12, импульс -150) дала x=0→-0.0209861 м. После обновления SDK тот же исходный impulse-request без изменений дал x=0→-2.22254 м за 60 кадров; gate открылся. В финальной игре физический стопор и restitution 0 удержали груз на x=-1.80638, затем наступила победа.",
+      "status": "passed",
+      "issue_id": "STRATEGY-003",
+      "evidence": [
+        "impulse-request.json",
+        "impulse-result.json",
+        "impulse-telemetry.log",
+        "evidence/impulse-after-input-original-request.json",
+        "evidence/impulse-after-result.json",
+        "evidence/impulse-after-telemetry.log",
+        "evidence/impulse-after-640.bmp",
+        "evidence/clear-win-telemetry.log"
+      ]
+    },
+    {
+      "feature_id": "play",
+      "action": "Captured actual Game Play on the D3D viewport with project.input screenshots at 640x480 and 1000x720.",
+      "expected": "HUD, floor, dynamic crate, exit, player units and FSM guard are visible and remain legible across resize.",
+      "actual": "На реальном D3D кадре Play HUD, коридор и объекты видимы; 640×480 и 1000×720 после resize. Финальный кадр после победы показывает сцену и HUD «ПОБЕДА».",
+      "status": "passed",
+      "visual_verified": true,
+      "evidence": [
+        "blocked-640.bmp",
+        "game-1000x720.bmp",
+        "resize-result.json",
+        "evidence/clear-win-final.bmp",
+        "evidence/fresh-clear-win.bmp"
+      ]
+    },
+    {
+      "feature_id": "project-startup-scene",
+      "action": "Kept the scene JSON empty and generated this first gameplay map from ProjectGame bootstrap during Play.",
+      "expected": "The project opens to an empty edit scene; Play constructs its procedural corridor.",
+      "actual": "Сцена Main пустая, карта строится игровым bootstrap при Play. Edit visual и редактирование карты не проверялись.",
+      "status": "partial",
+      "visual_verified": "play-only; edit-unverified",
+      "evidence": [
+        "evidence/Main.scene.json",
+        "evidence/game-1000x720.bmp"
+      ]
+    },
+    {
+      "feature_id": "build-activate",
+      "action": "Rebuilt the private game module with the project Build.ps1 against the explicit pinned Runtime after gameplay code changes.",
+      "expected": "The new private Game.dll is validated and activated; failed source builds retain diagnostics.",
+      "actual": "Частный модуль пересобран явным pinned Runtime. Первый ошибочный C++ заголовок с буквальной \\\\n исправлен. Архив распакован в свежую папку, rebuild завершился сообщением Build validated and activated; DLL затем загрузилась в standalone и Editor Play.",
+      "status": "passed",
+      "evidence": [
+        "evidence/strategy-build-third.log",
+        "evidence/strategy-build-after-density.log",
+        "evidence/strategy-build-stopper.log",
+        "evidence/fresh-build.log",
+        "evidence/fresh-build-status.txt",
+        "evidence/fresh-standalone.status",
+        "evidence/fresh-clear-win-result.json"
+      ]
+    },
+    {
+      "feature_id": "gameplay-episode",
+      "action": "Один управляемый эпизод: открыть проход физическим импульсом, пройти к выходу и выиграть под давлением guard FSM.",
+      "expected": "Ящик удерживает проход открытым после толчка; боец пересекает z=9 до перехвата.",
+      "actual": "Груз стоит x=-1.80638; боец дошёл z=-6→9.312; guard Patrol→Chase; won=1, lost=0. D3D frame после победы показывает HUD ПОБЕДА.",
+      "status": "passed",
+      "evidence": [
+        "evidence/clear-win-request.json",
+        "evidence/clear-win-result.json",
+        "evidence/clear-win-telemetry.log",
+        "evidence/clear-win-final.bmp"
+      ]
+    },
+    {
+      "feature_id": "source-archive-rebuild",
+      "action": "Распаковал source-only ZIP в чистый каталог, собрал на pinned Runtime и повторил победный сценарий.",
+      "expected": "В архиве нет SDK/бинарников; свежая сборка и игра работают.",
+      "actual": "ProjectTools подтвердил Build validated and activated; standalone Runtime прошёл 40 кадров (exit 0, custom Game telemetry), project.input повторил won=1/lost=0 и D3D кадр ПОБЕДА.",
+      "status": "passed",
+      "evidence": [
+        "RepairCorridor-source.zip",
+        "evidence/fresh-build.log",
+        "evidence/fresh-standalone.log",
+        "evidence/fresh-standalone-telemetry.log",
+        "evidence/fresh-clear-win-result.json",
+        "evidence/fresh-clear-win-telemetry.log",
+        "evidence/fresh-clear-win.bmp"
+      ]
+    }
+  ],
+  "source_archive_sha256": "F59D612B096863E879D384746C2BF2932C54538EE57D11A1627442523B3E1BF8"
+}

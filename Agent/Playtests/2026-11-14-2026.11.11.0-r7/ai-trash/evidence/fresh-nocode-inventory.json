@@ -1,0 +1,19 @@
+{
+  "projectJson": true,
+  "vcxproj": false,
+  "items": [
+    "Content",
+    "assimp-vc143-mt.dll",
+    "Engine.lock.json",
+    "Game.dll",
+    "kubazip.dll",
+    "minizip.dll",
+    "poly2tri.dll",
+    "Project.json",
+    "pugixml.dll",
+    "z.dll"
+  ],
+  "store": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\ai-trash\\EngineStore",
+  "sourceFolder": false,
+  "engineLock": true
+}

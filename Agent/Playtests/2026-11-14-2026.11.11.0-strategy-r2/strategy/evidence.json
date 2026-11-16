@@ -1,0 +1,160 @@
+{
+  "stage": "strategy-r2",
+  "project": "Engine/build/playtests/strategy-r2/RepairCorridor",
+  "engine": "2026.11.11.0 Release x64; base 388d7e9 + local STRATEGY-003 density fix",
+  "sdk_engine_lib": "Runtime/SDK/Lib/Engine.lib",
+  "sdk_sha256": "6846D88DEE3BAF892E3A4A06C1C965E7FC71966B78A1E5620972178FE7EE0C5D",
+  "source_archive": "RepairCorridor-r2-source.zip",
+  "source_archive_sha256": "501D1A0B8F7CEF8A85B293890AAFFFFE5C87C70EFC7618BB894A7F2FC6FD4F12",
+  "entries": [
+    {
+      "expected": "r1 source-only archive opens as an independent r2 project and rebuilds on the exact local Runtime.",
+      "feature_id": "source-project-copy",
+      "evidence": [
+        "evidence/Project.json",
+        "evidence/Engine.lock.json",
+        "evidence/baseline-build.log",
+        "evidence/baseline-play-request.json",
+        "evidence/baseline-play-result.json",
+        "evidence/baseline-play-telemetry.log",
+        "evidence/baseline-play.bmp"
+      ],
+      "actual": "Fresh r2 project build validated and activated; baseline Editor Play reproduced r1 win, crate x=-1.80638, unit z=9.312, won=1/lost=0.",
+      "status": "passed"
+    },
+    {
+      "expected": "Right click intersects floor and produces a world-space movement goal; arrival stops the selected soldier.",
+      "feature_id": "scene-trace-command",
+      "evidence": [
+        "evidence/ProjectGame.cpp",
+        "evidence/order-arrive-request.json",
+        "evidence/order-arrive-result.json",
+        "evidence/order-arrive-telemetry.log",
+        "evidence/order-arrive.bmp"
+      ],
+      "actual": "RaycastCursor returned Hit at (-1.5125,-3.0125). Squad1 moved from z=-6 to -3.12003 and stayed there; moving=0 completed=1. HUD/D3D shows target marker and ready state.",
+      "status": "passed"
+    },
+    {
+      "expected": "Switching selection leaves other soldiers orders active; a new click replaces only the selected soldier destination.",
+      "feature_id": "independent-squad-orders",
+      "evidence": [
+        "evidence/squad-orders-request.json",
+        "evidence/squad-orders-result.json",
+        "evidence/squad-orders-telemetry.log",
+        "evidence/squad-orders.bmp"
+      ],
+      "actual": "Squad1 continued moving while Squad2 was selected and ordered. Squad1 destination changed from z=0.0125 to -3.975; both squads completed their separate goals. Pause held all positions for 30 frames; Resume advanced CorridorGuard.",
+      "status": "passed"
+    },
+    {
+      "actual": "After direct movement, telemetry is completed=0/cancelled=1; selected HUD reports cancellation. This fixed a game-code issue.",
+      "issue_id": "STRATEGY-004",
+      "evidence": [
+        "evidence/squad-orders-result.json",
+        "evidence/squad-orders-telemetry.log",
+        "evidence/ProjectGame.cpp"
+      ],
+      "expected": "Manual WASD override cancels an existing order and HUD does not show stale completion.",
+      "feature_id": "manual-order-cancel",
+      "status": "passed"
+    },
+    {
+      "expected": "Interactive HUD blocks commands; misses do not replace prior goal; floor commands still work after viewport resize.",
+      "feature_id": "ui-trace-resize",
+      "evidence": [
+        "evidence/resize-click-request.json",
+        "evidence/resize-click-result.json",
+        "evidence/resize-click-telemetry.log",
+        "evidence/resize-click.bmp"
+      ],
+      "actual": "At 320x480, floor directly under the HUD returned pointerBlocked=1/trace=InputBlocked and kept the previous target. Off-floor click returned Miss and preserved the target. After resize to 1000x720, click returned Hit at approximately x=1.497,z=-1.989 and the soldier reached it.",
+      "status": "passed"
+    },
+    {
+      "expected": "An order to the exit cannot cross the unopened physical gate; guard FSM can catch a stalled unit.",
+      "feature_id": "closed-gate-fsm-loss",
+      "evidence": [
+        "evidence/order-loss-request.json",
+        "evidence/order-loss-result.json",
+        "evidence/order-loss-telemetry.log",
+        "evidence/order-loss.bmp"
+      ],
+      "actual": "Unit stopped at z=1.104, guard transitioned Patrol→Chase, outcome lost=1.",
+      "status": "passed"
+    },
+    {
+      "expected": "Click exit immediately after applying crate impulse and win.",
+      "feature_id": "early-clear-route",
+      "evidence": [
+        "evidence/order-clear-win-request.json",
+        "evidence/order-clear-win-result.json",
+        "evidence/order-clear-win-telemetry.log",
+        "evidence/order-clear-win.bmp"
+      ],
+      "actual": "The direct route is tactically unsafe at this timing: guard caught the soldier at z=2.16 (lost=1). The character kept executing its order after the loss flag and reached z=9.36; this visual crossing is not a win. No Engine defect is claimed.",
+      "status": "failed"
+    },
+    {
+      "expected": "Clear the crate, let it stop at the physical bumper, then issue a floor-click order to the exit; guard FSM remains consequential.",
+      "feature_id": "delayed-clear-win-fsm",
+      "evidence": [
+        "evidence/order-clear-win-delayed-request.json",
+        "evidence/order-clear-win-delayed-result.json",
+        "evidence/order-clear-win-delayed-telemetry.log",
+        "evidence/order-clear-win-delayed.bmp"
+      ],
+      "actual": "Crate remained at x=-1.80638, Squad1 reached z=9.552, guard state Chase, won=1/lost=0. After 55 frames between E and the order, the timing created a viable route without changing guard speed or perception.",
+      "status": "passed"
+    },
+    {
+      "expected": "Source-only archive extracts to a clean directory, rebuilds and repeats actual Editor Play victory.",
+      "feature_id": "source-archive-rebuild-play",
+      "evidence": [
+        "RepairCorridor-r2-source.zip",
+        "evidence/fresh-build.log",
+        "evidence/fresh-order-clear-win-request.json",
+        "evidence/fresh-order-clear-win-result.json",
+        "evidence/fresh-order-clear-win-telemetry.log",
+        "evidence/fresh-order-clear-win.bmp"
+      ],
+      "actual": "RepairCorridorFresh build log reports validated+activated; real project.input Editor Play repeated won=1/lost=0. ZIP has 15 source/project files and no DLL/LIB/PDB/object binaries.",
+      "status": "passed"
+    },
+    {
+      "expected": "Fresh archive build loads custom Game and advances in standalone Runtime.",
+      "feature_id": "standalone-runtime",
+      "evidence": [
+        "evidence/fresh-standalone.log",
+        "evidence/fresh-standalone.err",
+        "evidence/fresh-standalone.status",
+        "evidence/fresh-standalone-telemetry.log"
+      ],
+      "actual": "EngineRuntime --mode game --frames 40 logged GameUpdates=40, EngineStopped, exit=0; telemetry has game objects, target slots, CorridorGuard Patrol.",
+      "status": "passed"
+    },
+    {
+      "expected": "Inspect and edit the tactical map in Edit mode.",
+      "feature_id": "edit-scene-authoring",
+      "evidence": [
+        "evidence/Main.scene.json",
+        "evidence/ProjectGame.cpp"
+      ],
+      "actual": "Main.scene.json remains empty; the gameplay corridor is procedurally generated during Play. Edit authoring/visual review of the tactical scene is not implemented.",
+      "status": "partial"
+    },
+    {
+      "actual": "Initial build failed with C2065 because telemetry referenced local input out of scope. Game code moved the state to ProjectGame; subsequent explicit Runtime builds validated and activated. Not an Engine defect.",
+      "issue_id": "STRATEGY-005",
+      "evidence": [
+        "evidence/command-r2-build-orders.log",
+        "evidence/command-r2-build-orders-fix.log",
+        "evidence/command-r2-build-final.log",
+        "evidence/command-r2-build-cancel-fix.log"
+      ],
+      "expected": "Preserve project compile diagnostics and rebuild the corrected game module.",
+      "feature_id": "build-errors",
+      "status": "passed"
+    }
+  ]
+}

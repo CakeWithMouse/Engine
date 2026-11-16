@@ -1,0 +1,93 @@
+{
+  "steps": [
+    {
+      "kind": "control",
+      "action": "play"
+    },
+    {
+      "kind": "focus",
+      "enabled": true
+    },
+    {
+      "kind": "frames",
+      "count": 3
+    },
+    {
+      "valid": true,
+      "x": 64,
+      "kind": "cursor",
+      "y": 110
+    },
+    {
+      "down": true,
+      "kind": "key",
+      "key": 500
+    },
+    {
+      "kind": "frames",
+      "count": 1
+    },
+    {
+      "down": false,
+      "kind": "key",
+      "key": 500
+    },
+    {
+      "kind": "frames",
+      "count": 4
+    },
+    {
+      "valid": true,
+      "x": 160,
+      "kind": "cursor",
+      "y": 110
+    },
+    {
+      "down": true,
+      "kind": "key",
+      "key": 500
+    },
+    {
+      "kind": "frames",
+      "count": 1
+    },
+    {
+      "down": false,
+      "kind": "key",
+      "key": 500
+    },
+    {
+      "kind": "frames",
+      "count": 2
+    },
+    {
+      "valid": true,
+      "x": 245,
+      "kind": "cursor",
+      "y": 110
+    },
+    {
+      "down": true,
+      "kind": "key",
+      "key": 500
+    },
+    {
+      "kind": "frames",
+      "count": 1
+    },
+    {
+      "down": false,
+      "kind": "key",
+      "key": 500
+    },
+    {
+      "kind": "frames",
+      "count": 2
+    },
+    {
+      "kind": "control",
+      "action": "stop"
+    }
+  ],
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\rebuild-literal-3\\Project.json"
+}

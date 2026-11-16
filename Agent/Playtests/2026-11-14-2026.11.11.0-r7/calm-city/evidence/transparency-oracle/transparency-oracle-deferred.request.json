@@ -1,0 +1,108 @@
+{
+  "rendering": 1,
+  "width": 320,
+  "height": 240,
+  "orthographic": true,
+  "groups": [
+    {
+      "material": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\CalmCityUpgraded\\Content\\Materials\\TransparencyProbe\\RedGlass.mat",
+      "kind": "mesh",
+      "width": 4,
+      "height": 4,
+      "geometry": "plane",
+      "layers": [
+        {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "alpha": 1,
+          "rotation": [
+            0,
+            -35,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "material": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\CalmCityUpgraded\\Content\\Materials\\TransparencyProbe\\BlueGlass.mat",
+      "kind": "mesh",
+      "width": 4,
+      "height": 4,
+      "geometry": "plane",
+      "layers": [
+        {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "alpha": 1,
+          "rotation": [
+            0,
+            35,
+            0
+          ]
+        }
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "camera": [
+        0,
+        0,
+        8
+      ],
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "time": 0,
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\results\\transparency-oracle-front-deferred.bmp"
+    },
+    {
+      "camera": [
+        0,
+        0,
+        -8
+      ],
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "time": 0.5,
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\results\\transparency-oracle-back-deferred.bmp"
+    },
+    {
+      "camera": [
+        2,
+        1,
+        6
+      ],
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "time": 1,
+      "width": 480,
+      "height": 320,
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\results\\transparency-oracle-orbit-resize-deferred.bmp"
+    }
+  ]
+}

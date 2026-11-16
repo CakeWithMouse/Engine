@@ -1,0 +1,26 @@
+trace_filter_debug all=Hit default=Miss channel2=Hit ignoreGround=Miss debugLines=5 clearedLines=0
+world_transform child=Cube local=0,0,0 world=3,2,2
+vfs_mount_game=E:\Engine\Engine\build\playtests\20261114-r7\curious-city\repro-copy\Content hud_descriptor=E:\Engine\Engine\build\playtests\20261114-r7\curious-city\repro-copy\Content\ProjectHud.txt hud_ui=E:\Engine\Engine\build\playtests\20261114-r7\curious-city\repro-copy\Content\UI/CityHud.ui hud_ui_exists=1 city_config=E:\Engine\Engine\build\playtests\20261114-r7\curious-city\repro-copy\Content\Config\city-settings.txt city_config_exists=1
+vfs_read path=/Game/Config/city-settings.txt value=district=harbor
+skeletal_material_api slots=2 source_id=0 original=/Game/Materials/Hologram.mat set_slot=1 invalid_slot=0 set_override=1 override=/Game/Materials/Hologram.mat clear_override=1 restored=/Game/Materials/Hologram.mat meshes=2 vertices=2154 bounds_min=-1.32593,-0.970486,-0.82232 bounds_max=1.32593,0.939236,0.778266
+event=scene_ready balance=500 houses=0
+event=hud_reference_rebound balance=500 houses=0
+event=build_ui_click
+event=house_add_deferred_accepted_and_charged balance=400 houses=1
+event=save_ui_click
+event=load_ui_click
+event=savegame_loaded_references_cleared balance=400 houses=1
+savegame_skeletal_slots name=SaveGameSlotProbe count=2 slot_0=/Game/Materials/Hologram.mat slot_1=/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat23662event=hud_reference_rebound balance=400 houses=1
+trace_filter_debug all=Hit default=Miss channel2=Hit ignoreGround=Miss debugLines=5 clearedLines=0
+world_transform child=Cube local=0,0,0 world=3,2,2
+vfs_mount_game=E:\Engine\Engine\build\playtests\20261114-r7\curious-city\repro-copy\Content hud_descriptor=E:\Engine\Engine\build\playtests\20261114-r7\curious-city\repro-copy\Content\ProjectHud.txt hud_ui=E:\Engine\Engine\build\playtests\20261114-r7\curious-city\repro-copy\Content\UI/CityHud.ui hud_ui_exists=1 city_config=E:\Engine\Engine\build\playtests\20261114-r7\curious-city\repro-copy\Content\Config\city-settings.txt city_config_exists=1
+vfs_read path=/Game/Config/city-settings.txt value=district=harbor
+skeletal_material_api slots=2 source_id=0 original=/Game/Materials/Hologram.mat set_slot=1 invalid_slot=0 set_override=1 override=/Game/Materials/Hologram.mat clear_override=1 restored=/Game/Materials/Hologram.mat meshes=2 vertices=2154 bounds_min=-1.32593,-0.970486,-0.82232 bounds_max=1.32593,0.939236,0.778266
+event=scene_ready balance=500 houses=0
+event=hud_reference_rebound balance=500 houses=0
+event=build_ui_click
+event=house_add_deferred_accepted_and_charged balance=400 houses=1
+event=save_ui_click
+event=load_ui_click
+event=savegame_loaded_references_cleared balance=400 houses=1
+savegame_skeletal_slots name=SaveGameSlotProbe count=2 slot_0=/Game/Materials/Hologram.mat slot_1=/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat23662event=hud_reference_rebound balance=400 houses=1

@@ -1,0 +1,45 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[VfsRead] Dynamic mount '/_ext_17740976270254610017' -> 'E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/gpu/transparency' (path 'E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/gpu/transparency/Layer.hlsl' outside registered mounts)
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 420x300
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 420x300
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\transparency-second-0-a.bmp written=1 size=420x300
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\tired-bomber\continuation\transparency-second-0-b.bmp written=1 size=540x320
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "drawCalls": 133,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\transparency-second-0-a.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        2,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        },
+        {
+            "drawCalls": 133,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\tired-bomber\\continuation\\transparency-second-0-b.bmp",
+            "lod": [
+                {
+                    "impostor": -1,
+                    "levels": [
+                        2,
+                        0,
+                        0
+                    ]
+                }
+            ]
+        }
+    ],
+    "ok": true
+}

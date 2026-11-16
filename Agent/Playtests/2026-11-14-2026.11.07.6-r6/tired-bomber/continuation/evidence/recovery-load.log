@@ -1,0 +1,62 @@
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "ok": true,
+    "recoveryCandidates": [
+    ],
+    "recoveryRecords": [
+        {
+            "engineVersion": "2026.11.07.6",
+            "format": 1,
+            "module": "Binaries/Release/17aa7ba454a34d00bbb0ad4a6ce442a0/Game.dll",
+            "moduleSha256": "5d0ecb43e524e6ddecfc4360f6140ee9cb906ff355390f299910e32c1ff09cbf",
+            "project": "E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/continuation/BomberContinue/Project.json",
+            "recordPath": "E:/Engine/Engine/build/playtests/20261114-r6/tired-bomber/continuation/BomberContinue/.painengine/Recovery/c875fb9b-acb0-489b-9ad0-78f03eef6041.json",
+            "savedUtc": "2026-11-14T01:32:02.742Z",
+            "snapshot": "c875fb9b-acb0-489b-9ad0-78f03eef6041-59b45ad4-d373-4088-af9a-2d0b52eb4896.scene.json",
+            "sourceScene": ""
+        }
+    ],
+    "steps": [
+        {
+            "action": "recover",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "UnsavedDamageMarker",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        }
+    ]
+}

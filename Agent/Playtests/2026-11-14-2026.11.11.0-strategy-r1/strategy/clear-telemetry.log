@@ -1,0 +1,11 @@
+selected=1 unit=-1.5,0.65,-6 crate=-0.018911,0.700378,2 guard=0.7424,0.65,6 state=Patrol won=0 lost=0 paused=false
+selected=1 unit=-1.5,0.65,-5.856 crate=-0.0209861,0.70042,2 guard=1.5104,0.65,6 state=Patrol won=0 lost=0 paused=false
+selected=1 unit=-1.5,0.65,-4.416 crate=-0.0209861,0.70042,2 guard=1.86416,0.65,5.70695 state=Chase won=0 lost=0 paused=false
+selected=1 unit=-1.5,0.65,-2.976 crate=-0.0209861,0.70042,2 guard=1.6184,0.65,4.97941 state=Chase won=0 lost=0 paused=false
+selected=1 unit=-1.5,0.65,-1.536 crate=-0.0209861,0.70042,2 guard=1.32708,0.65,4.26904 state=Chase won=0 lost=0 paused=false
+selected=1 unit=-1.5,0.65,-0.0960023 crate=-0.0209861,0.70042,2 guard=0.979561,0.65,3.58473 state=Chase won=0 lost=0 paused=false
+selected=1 unit=-1.5,0.65,1.104 crate=-0.0209861,0.70042,2 guard=0.521786,0.65,2.97208 state=Chase won=0 lost=0 paused=false
+selected=1 unit=-1.5,0.65,1.104 crate=-0.0209861,0.70042,2 guard=-0.0356473,0.65,2.4438 state=Chase won=0 lost=0 paused=false
+selected=1 unit=-1.5,0.65,1.104 crate=-0.0209861,0.70042,2 guard=-0.565582,0.65,1.89006 state=Chase won=0 lost=0 paused=false
+selected=1 unit=-1.5,0.65,1.104 crate=-0.0209861,0.70042,2 guard=-0.741425,0.65,1.76955 state=Patrol won=0 lost=1 paused=false
+selected=1 unit=-1.5,0.65,1.104 crate=-0.0209861,0.70042,2 guard=-0.813082,0.65,1.86282 state=Patrol won=0 lost=1 paused=false

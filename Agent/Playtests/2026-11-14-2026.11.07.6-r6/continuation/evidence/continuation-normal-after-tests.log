@@ -1,0 +1,326 @@
+[VfsRead] using local VFS (no host service)
+[Scenario A] Global VFS initial mount check:
+  File: /Engine/Shaders/RotatedFigure.hlsl
+  Bytes read: 6120
+PASS: vfs lifecycle A (read before engine)
+PASS: trace math
+PASS: ready primitives and hidden geometry setup
+PASS: owned GameSettings and rendering dispatch
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[VfsRead] Dynamic mount '/_ext_2602683094591862733' -> 'C:/Users/serge/AppData/Local/Temp/EngineTestsShaders' (path 'C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Assigned.hlsl' outside registered mounts)
+PASS: assigned primitives: GPU, materials and instances
+PASS: trace scene geometry and filters
+PASS: trace screen coordinates and projection
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 320x200
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 320x200
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+PASS: trace Game, cursor and editor integration
+PASS: scene ownership and IDs (no GPU)
+SetParent rejected: the hierarchy would contain a cycle.
+PASS: scene hierarchy and snapshots (no GPU)
+PASS: scene deferred mutations (no GPU)
+PASS: atomic group transforms, references and deletion (no GPU)
+PASS: wav decoder: RIFF parsing, read, seek
+PASS: typed properties and transactional asset updates
+RegisterComponent('B') failed: AlreadyOwned
+RegisterComponent('B') failed: AlreadyOwned
+PASS: registry ownership
+RegisterComponent('null') failed: NullComponent
+RegisterComponent('') failed: EmptyName
+RegisterComponent('A') failed: DeviceNotReady
+RegisterComponent('A') failed: DuplicateName
+PASS: registration failure ownership
+SetParent rejected: the hierarchy would contain a cycle.
+SetParent rejected: the hierarchy would contain a cycle.
+PASS: transform hierarchy and cache
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+PASS: unregister hierarchy and instances
+PASS: frame light snapshot
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/ReflectiveSphere.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/ReflectiveSphere.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/ReflectiveSphere.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/ReflectiveSphere.hlsl [VARIANT_DEFERRED_GBUFFER]
+[VfsRead] Failed to read bytes for path '/_ext_2602683094591862733/Missing.hlsl' (virtual: '/_ext_2602683094591862733/Missing.hlsl'): Failed to open virtual file: /_ext_2602683094591862733/Missing.hlsl -> C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Missing.hlsl
+[VfsRead] Failed to read bytes for path 'C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Absent.hlsl' (virtual: '/_ext_2602683094591862733/Absent.hlsl'): Failed to open virtual file: /_ext_2602683094591862733/Absent.hlsl -> C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Absent.hlsl
+PASS: forward/deferred shader variants
+[ShaderCompiler] Include file not found in VFS: '/_ext_2602683094591862733/Missing.hlsl'
+PASS: shader includes, overrides and dependencies
+Successfully registered shader: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Hot.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Hot.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Invalidated 2 shader(s) depending on C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Hot.hlsl
+Shader compilation failed: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Hot.hlsl
+C:\Users\serge\AppData\Local\Temp\EngineTestsShaders\Hot.hlsl(1,38-51): error X3004: undeclared identifier 'undefinedValue'
+C:\Users\serge\AppData\Local\Temp\EngineTestsShaders\Hot.hlsl(1,31-52): error X3080: 'PSMain': function must return a value
+
+Warning: Failed to get vertex shader: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Hot.hlsl, using base shader
+Shader compilation failed: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Hot.hlsl
+C:\Users\serge\AppData\Local\Temp\EngineTestsShaders\Hot.hlsl(1,38-51): error X3004: undeclared identifier 'undefinedValue'
+C:\Users\serge\AppData\Local\Temp\EngineTestsShaders\Hot.hlsl(1,31-52): error X3080: 'PSMain': function must return a value
+
+Warning: Failed to get pixel shader: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Hot.hlsl, using base shader
+Invalidated 2 shader(s) depending on C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Hot.hlsl
+Successfully registered shader: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Hot.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Hot.hlsl [VARIANT_DEFAULT]
+Invalidated 2 shader(s) depending on C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Inc/Shared.hlsli
+Successfully registered shader: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Hot.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Hot.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Invalidated all 4 cached shader(s)
+Shader compilation failed: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Hot.hlsl
+C:\Users\serge\AppData\Local\Temp\EngineTestsShaders\Hot.hlsl(1,38-55): error X3004: undeclared identifier 'missingAfterReload'
+C:\Users\serge\AppData\Local\Temp\EngineTestsShaders\Hot.hlsl(1,31-56): error X3080: 'PSMain': function must return a value
+
+Warning: Failed to get vertex shader: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Hot.hlsl, using base shader
+Shader compilation failed: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Hot.hlsl
+C:\Users\serge\AppData\Local\Temp\EngineTestsShaders\Hot.hlsl(1,38-55): error X3004: undeclared identifier 'missingAfterReload'
+C:\Users\serge\AppData\Local\Temp\EngineTestsShaders\Hot.hlsl(1,31-56): error X3080: 'PSMain': function must return a value
+
+Warning: Failed to get pixel shader: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Hot.hlsl, using base shader
+PASS: shader invalidation and errors
+PASS: material template variants and reflection
+PASS: mesh primitives: normals, uvs, winding
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/BaseFBX.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/BaseFBX.hlsl [VARIANT_DEFAULT]
+PASS: mesh component offscreen rendering
+Material 'C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Params.hlsl' failed to compile:
+C:\Users\serge\AppData\Local\Temp\EngineTestsShaders\Params.hlsl(3,16-18): error X3004: undeclared identifier 'Tnt'
+
+Material 'C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/WrongSlot.hlsl' failed to compile:
+MaterialParams must be declared as: cbuffer MaterialParams : register(b1)
+PASS: material compilation, parameters, errors
+Texture loaded: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Blue.tga (1x1)
+Failed to load texture (VFS read failed): C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Missing.tga
+[VfsRead] Failed to read bytes for path 'C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Missing.tga' (virtual: '/_ext_2602683094591862733/Missing.tga'): Failed to open virtual file: /_ext_2602683094591862733/Missing.tga -> C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Missing.tga
+Material: cannot load texture 'C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Missing.tga' for BaseMap
+Material 'C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Broken.hlsl' failed to compile:
+C:\Users\serge\AppData\Local\Temp\EngineTestsShaders\Broken.hlsl(1,68-70): error X3004: undeclared identifier 'Tnt'
+
+PASS: material offscreen rendering
+PASS: .mat format: load, validate, save
+Texture loaded: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Textures/Blue.tga (1x1)
+Material C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Green.mat: params.Stale is not declared by the shader
+Texture loaded: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Textures/Blue.tga (1x1)
+Material C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Green.mat: params.Stale is not declared by the shader
+Recompiled 1 material(s) depending on C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Green.mat
+Material 'C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Params.hlsl' failed to compile:
+C:\Users\serge\AppData\Local\Temp\EngineTestsShaders\Params.hlsl(1,68-70): error X3004: undeclared identifier 'Tnt'
+
+Recompiled 1 material(s) depending on C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Params.hlsl
+Recompiled 1 material(s) depending on C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Params.hlsl
+ReloadMaterial failed: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Green.mat: render.blend must be one of: opaque, masked, translucent, additive
+LoadMaterial failed: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Other.mat: "shader" (path of the surface .hlsl file) is required
+PASS: game material cache and reload
+PASS: material JSON numeric overflow is an error
+PASS: material parameters must fit a finite float
+PASS: material version cannot wrap around an integer
+PASS: materials on components and passes
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/ShadowDepth.hlsl [VARIANT_DEFAULT]
+PASS: masked material shadows
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/ShadowDepth.hlsl [VARIANT_DEFAULT]
+PASS: instanced materials: copies, custom data, shadows
+Texture loaded: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/white.tga (1x1)
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+PASS: material parameters and textures multiplied by instance data
+Texture loaded: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/blue.tga (1x1)
+Material 'C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Variant.hlsl' failed to compile:
+C:\Users\serge\AppData\Local\Temp\EngineTestsShaders\Variant.hlsl(2,2-6): error: Deliberately broken instanced variant
+
+PASS: failed material variant keeps parameters and textures
+Texture loaded: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/blue.tga (1x1)
+Texture loaded: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/blue.tga (1x1)
+Texture loaded: C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/blue.tga (1x1)
+Material 'C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Slots.hlsl' failed to compile:
+Material textures cannot use register(t32): it is reserved for point shadows
+Material 'C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Slots.hlsl' failed to compile:
+C:\Users\serge\AppData\Local\Temp\EngineTestsShaders\Slots.hlsl(1,11-16): error X4500: overlapping register semantics not yet implemented 't32'
+
+PASS: material texture slots respect point shadow resources
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/ImpostorBake.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/ImpostorBake.hlsl [VARIANT_DEFAULT]
+ImpostorAtlas: baked 4x1 views at 32 px, 2 mips.
+ImpostorAtlas: baked 4x1 views at 32 px, 2 mips.
+ImpostorAtlas: baked 4x1 views at 32 px, 2 mips.
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/Impostor.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/Impostor.hlsl [VARIANT_DEFAULT]
+ImpostorAtlas: baked 4x1 views at 32 px, 2 mips.
+Material 'C:/Users/serge/AppData/Local/Temp/EngineTestsShaders/Broken.hlsl' failed to compile:
+C:\Users\serge\AppData\Local\Temp\EngineTestsShaders\Broken.hlsl(1,68-70): error X3004: undeclared identifier 'Tnt'
+
+ImpostorAtlas: baked 4x1 views at 32 px, 2 mips.
+PASS: impostor atlas baked through a material
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/x64/Release/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+PASS: skinned materials: bone palette and crowd
+PASS: particle GPU indexing
+PASS: particle component sorting modes
+PASS: WM_QUIT exit code
+PASS: virtual file system (VFS)
+[Scenario B] Running BaseEngine::Run with module: E:\Engine\Engine\build\x64\Release\RuntimeFixtures\RequestExit.dll, frames=1, mode=Game...
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/_ext_2602683094591862733' -> 'C:/Users/serge/AppData/Local/Temp/EngineTestsShaders'
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/build/x64/Release/EngineContent'
+ModuleLoaded
+FixtureCreate
+FixtureStart
+FixtureUpdate
+FixtureStop
+FixtureDestroy
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped
+[Scenario B] BaseEngine::Run finished with exitCode=0.
+[Scenario B] VfsRead::GetVFS().GetMounts() after Stop(): count=2
+    mount: '/_ext_2602683094591862733' -> 'C:\Users\serge\AppData\Local\Temp\EngineTestsShaders'
+    mount: '/Engine' -> 'E:\Engine\Engine\build\x64\Release\EngineContent'
+[Scenario B] VfsRead::ReadBytes("/Engine/Shaders/RotatedFigure.hlsl") after Stop(): 6120 bytes.
+PASS: vfs lifecycle B (read after stop)
+[Scenario C] TextureLoader::LoadTexture2D: не проверено (требует активный ID3D11Device* и ID3D11DeviceContext*, без D3D возвращает false до обращения к VFS).
+[Scenario C] ShaderCompiler::CompileFromFile("/Engine/Shaders/RotatedFigure.hlsl"):
+  HRESULT: 0x0
+  Error: (none)
+PASS: vfs lifecycle C (compiler after stop)
+[Scenario D] Второй Play после Stop (новый экземпляр BaseEngine)...
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/_ext_2602683094591862733' -> 'C:/Users/serge/AppData/Local/Temp/EngineTestsShaders'
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/build/x64/Release/EngineContent'
+ModuleLoaded
+FixtureCreate
+FixtureStart
+FixtureUpdate
+FixtureStop
+FixtureDestroy
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped
+[Scenario D] BaseEngine::Run (второй экземпляр) вернул exitCode=0.
+[Scenario D] После завершения второго Run() (Stop() снова вызван):
+  Mounts count: 2
+  Bytes read: 6120
+PASS: second run exits cleanly
+[Scenario E] не проверено: Play() приватный, Run() атомарно вызывает Stop() перед возвратом.
+  Необходимый публичный хук: onPlayStarted или onFrame callback в RuntimeLaunchOptions / BaseEngine.
+[Scenario E] Проверено на уровне VFS: Mount("/Game") обновляет путь без дубликатов (count=1).
+PASS: VirtualFileSystem::Mount replaces same root
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/_ext_2602683094591862733' -> 'C:/Users/serge/AppData/Local/Temp/EngineTestsShaders'
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/build/x64/Release/EngineContent'
+ModuleLoaded
+FixtureCreate
+FixtureStart
+FixtureUpdate
+FixtureStop
+FixtureDestroy
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped
+[VFS Mount Set] Все 2 маунтов сохранены без изменений после Stop().
+PASS: vfs mounts preserved after stop
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/_ext_2602683094591862733' -> 'C:/Users/serge/AppData/Local/Temp/EngineTestsShaders'
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/build/x64/Release/EngineContent'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/x64/Release/TestProjectContent'
+ModuleLoaded
+FixtureCreate
+FixtureStart
+FixtureUpdate
+FixtureStop
+FixtureDestroy
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped
+[VFS ContentRoot Reverted] Проектный contentRoot не остался в /Game после Stop().
+PASS: vfs project content unmounted after stop
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VfsRead] Bind rejected: null api pointer
+[VfsRead] Bind rejected: incompatible version 0 (expected >= 1)
+[VfsRead] Bind rejected: invalid size 8 (expected >= 136)
+[VfsRead] host service failed: 1 for /ProxyParity/missing.bin
+[VfsRead] host service failed: 3 for /ProxyParity/text.txt
+[VFS] Mounted '/_ext_2602683094591862733' -> 'C:/Users/serge/AppData/Local/Temp/EngineTestsShaders'
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/build/x64/Release/EngineContent'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/x64/Release/TestProjectContent'
+ModuleLoaded
+FixtureCreate
+FixtureStart
+FixtureUpdate
+FixtureStop
+FixtureDestroy
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped
+[VFS PreMounted Game Reverted] Предварительно смонтированный /Game восстановлен после Stop().
+PASS: vfs premounted game restored after stop
+PASS: mesh simplification
+PASS: mesh validation rules
+PASS: mesh tangent basis and mirrored uv
+PASS: tangents through primitives and simplifier
+PASS: shadow cascade range and splits
+PASS: shadow cascade projection stable under yaw
+PASS: shadow cascade radius hysteresis and coverage
+PASS: shadow cascade off-axis selection on GPU
+PASS: point shadow faces match cube sampling
+PASS: VAT bounds contain quantized poses and interpolation
+PASS: normal map survives mirrored world scale
+PASS: two-sided normal map preserves UV directions under reflection
+PASS: vfs service: resolve and toVirtual
+PASS: vfs service: exists and stat
+[VfsService] first read via module: /Test/hello.txt
+PASS: vfs service: readFile and allocator
+PASS: vfs service: enumerate and find
+PASS: vfs service: callback reentrancy without deadlock
+PASS: vfs service: mounts and unsupported stubs
+[VfsRead] Unbind
+[VfsRead] Bind host VFS service v1
+[VfsRead] Unbind
+[VfsRead] Bind host VFS service v1
+[VfsRead] Unbind
+[VfsRead] Bind host VFS service v1
+[VfsRead] Unbind
+PASS: vfs proxy lifecycle: sessions and rejection
+[VfsRead] Unbind
+[VfsRead] Bind host VFS service v1
+[VfsRead] Unbind
+PASS: vfs proxy lifecycle: read parity and allocator
+71/71 tests passed; 0 skipped; 0 failed

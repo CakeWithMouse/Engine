@@ -1,0 +1,21 @@
+[Test] Running HostTests (EditorHistory)...
+Host regression checks: 59
+[Info] Viewport overlay service: FOUND (version 1)
+[Info] Camera: ok
+[Info] Camera: zero
+[Info] Camera: ok
+[Info] Viewport overlay service: FOUND (version 1)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Camera: zero
+[Info] Viewport overlay service: FOUND (version 1)
+[Info] Camera: ok
+Overlay host checks: 18
+HostTests: 83 checks passed.
+
+Command 17 status 8: Остановите Play перед редактированием.
+Command 48 status 8: Остановите Play перед редактированием.
+Command 48 status 1: 
+Command 17 status 6: 
+Command 48 status 8: 
+Command 17 status 6: 
+Command 27 status 10: 

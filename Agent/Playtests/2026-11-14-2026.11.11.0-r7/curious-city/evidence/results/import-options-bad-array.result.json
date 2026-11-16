@@ -1,0 +1,166 @@
+{
+    "accepted": false,
+    "after": [
+        {
+            "id": 1,
+            "material": "",
+            "name": "CityGuard",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+                "camera": 0,
+                "cameraDistance": 5,
+                "cameraHeight": 2,
+                "farClip": 10000,
+                "fieldOfView": 120,
+                "fov": 60,
+                "hearingRadius": 0,
+                "lookSensitivity": 0.004999999888241291,
+                "machineMemory": "",
+                "moveSpeed": 5,
+                "nearClip": 0.10000000149011612,
+                "orthoHeight": 10,
+                "orthographic": false,
+                "playerControlled": false,
+                "sightRadius": 0,
+                "standardControl": true,
+                "stateMachine": "/Game/AI/CityGate2.fsm",
+                "team": 0,
+                "version": 1,
+                "viewPlane": 0
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Gameplay.AiCharacter"
+        },
+        {
+            "id": 2,
+            "material": "",
+            "name": "CityGuard 2",
+            "parent": 0,
+            "position": [
+                1,
+                0,
+                0
+            ],
+            "projectData": {
+                "camera": 0,
+                "cameraDistance": 5,
+                "cameraHeight": 2,
+                "farClip": 10000,
+                "fieldOfView": 120,
+                "fov": 60,
+                "hearingRadius": 0,
+                "lookSensitivity": 0.004999999888241291,
+                "machineMemory": "{\"Speed\":5.5}",
+                "moveSpeed": 5,
+                "nearClip": 0.10000000149011612,
+                "orthoHeight": 10,
+                "orthographic": false,
+                "playerControlled": false,
+                "sightRadius": 0,
+                "standardControl": true,
+                "stateMachine": "/Game/AI/CityGate2.fsm",
+                "team": 0,
+                "version": 1,
+                "viewPlane": 0
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Gameplay.AiCharacter"
+        }
+    ],
+    "before": [
+        {
+            "id": 1,
+            "material": "",
+            "name": "CityGuard",
+            "parent": 0,
+            "position": [
+                0,
+                0,
+                0
+            ],
+            "projectData": {
+                "camera": 0,
+                "cameraDistance": 5,
+                "cameraHeight": 2,
+                "farClip": 10000,
+                "fieldOfView": 120,
+                "fov": 60,
+                "hearingRadius": 0,
+                "lookSensitivity": 0.004999999888241291,
+                "machineMemory": "",
+                "moveSpeed": 5,
+                "nearClip": 0.10000000149011612,
+                "orthoHeight": 10,
+                "orthographic": false,
+                "playerControlled": false,
+                "sightRadius": 0,
+                "standardControl": true,
+                "stateMachine": "/Game/AI/CityGate2.fsm",
+                "team": 0,
+                "version": 1,
+                "viewPlane": 0
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Gameplay.AiCharacter"
+        },
+        {
+            "id": 2,
+            "material": "",
+            "name": "CityGuard 2",
+            "parent": 0,
+            "position": [
+                1,
+                0,
+                0
+            ],
+            "projectData": {
+                "camera": 0,
+                "cameraDistance": 5,
+                "cameraHeight": 2,
+                "farClip": 10000,
+                "fieldOfView": 120,
+                "fov": 60,
+                "hearingRadius": 0,
+                "lookSensitivity": 0.004999999888241291,
+                "machineMemory": "{\"Speed\":5.5}",
+                "moveSpeed": 5,
+                "nearClip": 0.10000000149011612,
+                "orthoHeight": 10,
+                "orthographic": false,
+                "playerControlled": false,
+                "sightRadius": 0,
+                "standardControl": true,
+                "stateMachine": "/Game/AI/CityGate2.fsm",
+                "team": 0,
+                "version": 1,
+                "viewPlane": 0
+            },
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "type": "Gameplay.AiCharacter"
+        }
+    ],
+    "dialogs": [
+    ],
+    "ok": true
+}

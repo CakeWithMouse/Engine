@@ -48,12 +48,21 @@ void HeadOnTests();
 void CrowdToOnePointTests();
 void StandingUnitIsNotPushedTests();
 void SquadThroughGapTests();
+void GroupMovingTargetTests();
+void GroupCharacterTargetTests();
+void GroupUnreachableGoalTests();
+void SmallGroupDetourTests();
+void SmallGroupFormationChangeTests();
+void SmallGroupSharedGoalTests();
 void SharedFieldAndOpenFieldTests();
 void SquadMachineAndTeamsTests();
 void WindowedFieldTests();
 void StaggeredReplanTests();
 void MachineRegistryTests();
 void SmartObjectTests();
+void MachineFileTests();
+void TutorialSceneTests();
+void ScriptLinkTests();
 int RunBench(int soldiers, float seconds, bool profile);
 
 int main(int argc, char** argv)
@@ -108,12 +117,21 @@ int main(int argc, char** argv)
         {"stage8 crowd to one point: no overlap, no jitter", CrowdToOnePointTests},
         {"stage8 a standing unit is walked around", StandingUnitIsNotPushedTests},
         {"stage9 squad of 100 through a gap on one field", SquadThroughGapTests},
+        {"stage9 group follows moving and removed targets", GroupMovingTargetTests},
+        {"stage9 character target does not avoid itself", GroupCharacterTargetTests},
+        {"stage9 unreachable group goal and reopened passage", GroupUnreachableGoalTests},
+        {"stage9 small group completes barrier detour", SmallGroupDetourTests},
+        {"stage9 small group changes formation near barrier", SmallGroupFormationChangeTests},
+        {"stage9 small group changes shared goal", SmallGroupSharedGoalTests},
         {"stage9 shared field and open ground", SharedFieldAndOpenFieldTests},
         {"stage9 squad machine, teams, losses", SquadMachineAndTeamsTests},
         {"stage9 flow field window and widening", WindowedFieldTests},
         {"stage10 squad at 60 FPS: re-planning in turns", StaggeredReplanTests},
         {"stage11 machines by name, AiCharacter property", MachineRegistryTests},
         {"stage12 smart objects: claim, use, release", SmartObjectTests},
+        {"stage13 machines from .fsm files and blocks", MachineFileTests},
+        {"stage14 AI tutorial scene: guard and visitor", TutorialSceneTests},
+        {"stage15 visual scripts and machines talk", ScriptLinkTests},
         {"stage3 turret focus and the player", TurretAndPlayerTests},
     };
     const char* filter = argc > 1 ? argv[1] : "";

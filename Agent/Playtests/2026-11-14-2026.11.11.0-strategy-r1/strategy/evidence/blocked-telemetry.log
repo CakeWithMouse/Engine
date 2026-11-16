@@ -1,0 +1,7 @@
+selected=1 unit=-1.5,0.65,-4.608 crate=0,0.7,2 guard=0.2392,0.65,5.57014 state=Chase won=0 lost=0 paused=false
+selected=1 unit=-1.5,0.65,-3.168 crate=0,0.7,2 guard=0.106331,0.65,4.81377 state=Chase won=0 lost=0 paused=false
+selected=1 unit=-1.5,0.65,-1.728 crate=0,0.7,2 guard=-0.0506453,0.65,4.06205 state=Chase won=0 lost=0 paused=false
+selected=1 unit=-1.5,0.65,-0.288002 crate=0,0.7,2 guard=-0.245031,0.65,3.31931 state=Chase won=0 lost=0 paused=false
+selected=1 unit=-1.5,0.65,1.104 crate=0,0.7,2 guard=-0.525403,0.65,2.60594 state=Chase won=0 lost=0 paused=false
+selected=1 unit=-1.5,0.65,1.104 crate=0,0.7,2 guard=-0.800977,0.65,1.89134 state=Chase won=0 lost=0 paused=false
+selected=1 unit=-1.5,0.65,1.104 crate=0,0.7,2 guard=-0.87408,0.65,1.8835 state=Chase won=0 lost=1 paused=false

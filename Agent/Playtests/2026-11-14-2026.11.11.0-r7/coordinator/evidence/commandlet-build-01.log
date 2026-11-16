@@ -1,0 +1,25 @@
+Using v143 / MSVC 14.44.35207 / Windows SDK 10.0.26100.0
+Assimp enabled: true
+
+  MOC FileService.h
+  MOC MainWindow.h
+  MOC ObjectInspectorPanel.h
+  MOC ViewportWidget.h
+  pch.cpp
+  EngineCommandlets.cpp
+  moc_Logger.cpp
+  moc_CommandRegistry.cpp
+  moc_FileService.cpp
+  UIElement.cpp
+  UIMarkup.cpp
+  FontAtlas.cpp
+  moc_MainWindow.cpp
+  moc_ViewportWidget.cpp
+  moc_ObjectInspectorPanel.cpp
+  moc_SceneObjectsPanel.cpp
+  moc_MaterialEditorWindow.cpp
+  moc_MainToolBar.cpp
+E:\Engine\Engine\Include\Engine\AI\SmartObject.h(20,15): error C2059: синтаксическая ошибка: = (компилируется исходный файл Tools/EngineCommandlets.cpp) [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Engine\Include\Engine\AI\SmartObject.h(20,18): error C2238: непредвиденные лексемы перед ";" (компилируется исходный файл Tools/EngineCommandlets.cpp) [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Engine\Include\Engine\AI\SmartObject.h(22,5): error C2059: синтаксическая ошибка: , (компилируется исходный файл Tools/EngineCommandlets.cpp) [E:\Engine\Editor\EditorModule.vcxproj]
+

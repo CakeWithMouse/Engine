@@ -1,0 +1,188 @@
+{
+  "orthographic": true,
+  "height": 288,
+  "width": 384,
+  "rendering": 1,
+  "orthoHeight": 6,
+  "groups": [
+    {
+      "kind": "skeletal",
+      "geometry": "cross",
+      "height": 2,
+      "material": "E:/Engine/Game/BasicExamples/Content/Materials/Glass.mat",
+      "width": 1.5,
+      "fade": 0.2,
+      "lodDistances": [
+        2,
+        4
+      ],
+      "lods": 2,
+      "layers": [
+        {
+          "position": [
+            -0.75,
+            0,
+            -0.25
+          ],
+          "color": [
+            1,
+            0.25,
+            0.15
+          ],
+          "alpha": 0.4,
+          "rotation": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "color": [
+            0.1,
+            0.75,
+            1
+          ],
+          "alpha": 0.55,
+          "rotation": [
+            0,
+            35,
+            0
+          ]
+        },
+        {
+          "position": [
+            0.75,
+            0,
+            0.25
+          ],
+          "color": [
+            0.45,
+            1,
+            0.25
+          ],
+          "alpha": 0.7,
+          "rotation": [
+            0,
+            -25,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "layers": [
+        {
+          "position": [
+            -0.4,
+            0,
+            -0.1
+          ],
+          "color": [
+            1,
+            0.7,
+            0.1
+          ],
+          "alpha": 0.35,
+          "rotation": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "position": [
+            0.4,
+            0,
+            0.15
+          ],
+          "color": [
+            0.6,
+            0.2,
+            1
+          ],
+          "alpha": 0.65,
+          "rotation": [
+            0,
+            70,
+            0
+          ]
+        }
+      ],
+      "height": 1.8,
+      "lods": 2,
+      "kind": "crowd",
+      "fade": 0.2,
+      "width": 1.35,
+      "lodDistances": [
+        2,
+        4
+      ],
+      "material": "E:/Engine/Game/BasicExamples/Content/Materials/Hologram.mat"
+    }
+  ],
+  "frames": [
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\frames\\transparency-city-forward.bmp",
+      "time": 0,
+      "camera": [
+        0,
+        3.5,
+        8
+      ],
+      "target": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\frames\\transparency-city-orbit.bmp",
+      "time": 0.5,
+      "camera": [
+        6,
+        3,
+        5
+      ],
+      "target": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\frames\\transparency-city-return-orbit.bmp",
+      "time": 1,
+      "camera": [
+        -6,
+        3,
+        5
+      ],
+      "target": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "time": 0,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "height": 300,
+      "camera": [
+        0,
+        3.5,
+        8
+      ],
+      "width": 480,
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\frames\\transparency-city-resize.bmp"
+    }
+  ]
+}

@@ -2,6 +2,7 @@
 
 #include "../../Core/AssetOps.h"
 #include "../../Core/FileService.h"
+#include "../../Core/FolderPaths.h"
 #include "../../Core/Logger.h"
 
 #include <QTemporaryDir>
@@ -18,6 +19,166 @@ void CheckAsset(bool cond, const char* msg)
         std::fprintf(stderr, "FAIL (AssetOps): %s\n", msg);
         std::exit(1);
     }
+}
+
+inline void RunFolderPathValidationTests()
+{
+    using namespace EditorCore;
+    QTemporaryDir tempDir;
+    CheckAsset(tempDir.isValid(), "Temporary directory created for folder validation");
+    FileService fs;
+    fs.SetProjectRoot(tempDir.path());
+    AssetOps ops(&fs);
+    QString error;
+
+    const QStringList invalidPaths = {
+        QString(), QStringLiteral("../Rejected"), QStringLiteral("Inside/../Rejected"),
+        QStringLiteral("Inside/.."), QStringLiteral("Inside\\..\\Rejected"),
+        QStringLiteral("..\\Rejected"), QStringLiteral("/Rejected"),
+        tempDir.path() + QStringLiteral("/Rejected"), QStringLiteral("C:/Rejected"),
+        QStringLiteral("C:Rejected"), QStringLiteral("Inside/name:stream"),
+        QStringLiteral("//server/share/Rejected"), QStringLiteral("\\\\server\\share\\Rejected"),
+        QStringLiteral("\\Rejected")
+    };
+    for (const QString& path : invalidPaths)
+    {
+        error.clear();
+        CheckAsset(!ValidateFolderRelativePath(path, &error), "Invalid relative folder path rejected");
+        CheckAsset(!error.isEmpty(), "Relative folder validation reports an error");
+        error.clear();
+        CheckAsset(!ops.CreateFolder(path, &error), "CreateFolder rejects invalid path");
+        CheckAsset(!error.isEmpty(), "Rejected CreateFolder reports an error");
+    }
+    CheckAsset(!ops.Exists(QStringLiteral("Rejected")), "Rejected paths do not create a folder");
+    CheckAsset(ValidateFolderRelativePath(QStringLiteral(".")), "Project root is a valid relative parent");
+    CheckAsset(ValidateFolderRelativePath(QStringLiteral("Inside\\Child")), "Backslash relative path is valid");
+    CheckAsset(ops.CreateFolder(QStringLiteral("Inside\\Child")), "Valid backslash path creates nested folder");
+    CheckAsset(ops.IsFolder(QStringLiteral("Inside/Child")), "Backslash path is normalized before creation");
+
+    const auto entries = Logger::Instance().GetRecentEntries(100);
+    bool logged = false;
+    for (const LogEntry& entry : entries)
+        logged = logged || (entry.level == LogLevel::Error && entry.message.startsWith(QStringLiteral("FolderPaths:")));
+    CheckAsset(logged, "Rejected folder paths are logged");
+}
+
+inline void RunFolderNameValidationTests()
+{
+    using namespace EditorCore;
+    const QStringList validNames = {
+        QStringLiteral("New Folder"), QStringLiteral("Folder_2"), QStringLiteral("Folder.v2"),
+        QStringLiteral(".assets"), QStringLiteral("COM10"), QStringLiteral("LPT10"), QStringLiteral("Console")
+    };
+    for (const QString& name : validNames)
+    {
+        QString error;
+        CheckAsset(ValidateFolderName(name, &error), "Safe folder leaf name accepted");
+        CheckAsset(error.isEmpty(), "Safe leaf name has no error");
+    }
+    const QStringList invalidNames = {
+        QString(), QStringLiteral("."), QStringLiteral(".."), QStringLiteral("a/b"),
+        QStringLiteral("a\\b"), QStringLiteral("a:b"), QStringLiteral("<name"),
+        QStringLiteral("name>"), QStringLiteral("\"name"), QStringLiteral("name|"),
+        QStringLiteral("name?"), QStringLiteral("name*"), QStringLiteral("name."),
+        QStringLiteral("name "), QStringLiteral("CON"), QStringLiteral("con.txt"),
+        QStringLiteral("PRN"), QStringLiteral("AUX"), QStringLiteral("NUL.bin"),
+        QStringLiteral("COM1"), QStringLiteral("com9.more"), QStringLiteral("lpt1"),
+        QStringLiteral("LPT9.ext"), QStringLiteral("COM\u00b9"), QStringLiteral("LPT\u00b2"),
+        QStringLiteral("CONIN$"), QStringLiteral("CONOUT$"), QStringLiteral("bad\nname"),
+        QString(QChar(0))
+    };
+    for (const QString& name : invalidNames)
+    {
+        QString error;
+        CheckAsset(!ValidateFolderName(name, &error), "Unsafe folder leaf name rejected");
+        CheckAsset(!error.isEmpty(), "Unsafe leaf name has an error");
+    }
+}
+
+inline void RunExclusiveFolderTests()
+{
+    using namespace EditorCore;
+    QTemporaryDir tempDir;
+    CheckAsset(tempDir.isValid(), "Temporary directory created for exclusive folders");
+    Logger logger;
+    FileService fs(&logger);
+    fs.SetProjectRoot(tempDir.path());
+    AssetOps ops(&fs);
+    QString error;
+
+    CheckAsset(!ops.CreateFolder(QStringLiteral("Folders/Owned"), &error, true), "Exclusive creation requires existing parent");
+    CheckAsset(!error.isEmpty(), "Missing exclusive parent reports error");
+    CheckAsset(!ops.Exists(QStringLiteral("Folders")), "Exclusive creation does not make missing parent");
+    CheckAsset(ops.CreateFolder(QStringLiteral("Folders")), "Create exclusive fixture parent");
+    error.clear();
+    CheckAsset(ops.CreateFolder(QStringLiteral("Folders/Owned"), &error, true), "First exclusive folder creation succeeds");
+    CheckAsset(error.isEmpty(), "First exclusive folder creation has no error");
+    CheckAsset(ops.IsFolder(QStringLiteral("Folders/Owned")), "Exclusively created folder exists");
+    CheckAsset(ops.CreateFile(QStringLiteral("Folders/Owned/keep.txt"), "KEEP"), "Create owned folder sentinel");
+    CheckAsset(!ops.CreateFolder(QStringLiteral("Folders/Owned"), &error, true), "Second exclusive folder creation fails");
+    CheckAsset(!error.isEmpty(), "Exclusive folder collision reports error");
+    CheckAsset(ops.Exists(QStringLiteral("Folders/Owned/keep.txt")), "Folder collision preserves existing contents");
+
+    CheckAsset(ops.CreateFile(QStringLiteral("Folders/File"), "FILE"), "Create file collision fixture");
+    error.clear();
+    CheckAsset(!ops.CreateFolder(QStringLiteral("Folders/File"), &error, true), "Exclusive creation rejects existing file");
+    CheckAsset(!error.isEmpty(), "Exclusive file collision reports error");
+    QByteArray content;
+    CheckAsset(fs.ReadFile(QStringLiteral("Folders/File"), content), "Collision file still readable");
+    CheckAsset(content == QByteArray("FILE"), "Exclusive collision does not alter file");
+    CheckAsset(!ops.CreateFolder(QStringLiteral("."), &error, true), "Exclusive project-root collision rejected");
+
+    error.clear();
+    CheckAsset(fs.CreateDirectoryPath(QStringLiteral("Direct/Nested"), &error), "Default FileService creation remains nested");
+    CheckAsset(fs.CreateDirectoryPath(QStringLiteral("Direct/Nested"), &error), "Default FileService creation remains idempotent");
+    const QString direct = QDir(tempDir.path()).filePath(QStringLiteral("Direct/Owned"));
+    CheckAsset(fs.CreateDirectoryPath(direct, &error, true), "FileService exclusive absolute creation succeeds");
+    CheckAsset(!fs.CreateDirectoryPath(direct, &error, true), "FileService exclusive collision fails");
+    CheckAsset(!error.isEmpty(), "FileService exclusive collision reports error");
+    const auto entries = logger.GetRecentEntries(100);
+    bool logged = false;
+    for (const LogEntry& entry : entries)
+        logged = logged || (entry.level == LogLevel::Error && entry.message.contains(QStringLiteral("already exists")));
+    CheckAsset(logged, "Exclusive collisions are logged through FileService logger");
+}
+
+inline void RunFolderResolutionTests()
+{
+    using namespace EditorCore;
+    QTemporaryDir tempDir;
+    CheckAsset(tempDir.isValid(), "Temporary directory created for canonical folder resolution");
+    FileService fs;
+    fs.SetProjectRoot(tempDir.path());
+    AssetOps ops(&fs);
+    QString error;
+
+    CheckAsset(ops.CreateFolder(QStringLiteral("Inside")), "Create canonical resolution fixture");
+    const QString inside = ResolveFolderPath(fs, QStringLiteral("Inside"), &error);
+    CheckAsset(inside == fs.ResolveSandboxPath(QStringLiteral("Inside")), "Existing inside folder resolves to sandbox absolute path");
+    CheckAsset(!QFileInfo(inside).canonicalFilePath().isEmpty(), "Existing inside folder has canonical path");
+    CheckAsset(error.isEmpty(), "Valid canonical resolution has no error");
+    CheckAsset(ResolveFolderPath(fs, QStringLiteral(".")) == fs.GetProjectRoot(), "Dot resolves to project root");
+    const QString missing = QStringLiteral("Inside/Missing/Child");
+    CheckAsset(ResolveFolderPath(fs, missing, &error) == fs.ResolveSandboxPath(missing), "Nonexistent child resolves through existing ancestor");
+    CheckAsset(ResolveFolderPath(fs, QStringLiteral("Inside\\Missing\\Child")) == fs.ResolveSandboxPath(missing), "Canonical resolution normalizes backslashes");
+    CheckAsset(!ops.Exists(missing), "Resolving nonexistent child does not create directories");
+    CheckAsset(ops.CreateFolder(missing, &error), "Resolved nonexistent nested child can be created by default");
+    CheckAsset(ops.IsFolder(missing), "Resolved nested child really exists");
+
+    CheckAsset(ops.CreateFile(QStringLiteral("ParentFile"), "FILE"), "Create nondirectory ancestor fixture");
+    error.clear();
+    CheckAsset(ResolveFolderPath(fs, QStringLiteral("ParentFile/Child"), &error).isEmpty(), "File ancestor cannot resolve as folder parent");
+    CheckAsset(!error.isEmpty(), "Nondirectory ancestor reports error");
+    CheckAsset(!ops.CreateFolder(QStringLiteral("ParentFile/Child")), "CreateFolder rejects file ancestor");
+
+    FileService missingRoot;
+    missingRoot.SetProjectRoot(QDir(tempDir.path()).filePath(QStringLiteral("UnresolvedRoot")));
+    error.clear();
+    CheckAsset(ResolveFolderPath(missingRoot, QStringLiteral("Child"), &error).isEmpty(), "Nonexistent project root is rejected");
+    CheckAsset(!error.isEmpty(), "Unresolved project root reports error");
+    AssetOps missingOps(&missingRoot);
+    CheckAsset(!missingOps.CreateFolder(QStringLiteral("Child")), "CreateFolder rejects unresolved root");
+    CheckAsset(!ops.Exists(QStringLiteral("UnresolvedRoot")), "Rejected unresolved root is not created");
 }
 
 inline void RunAssetOpsTests()
@@ -65,6 +226,13 @@ inline void RunAssetOpsTests()
         CheckAsset(error.isEmpty(), "No error on valid CreateFolder");
         CheckAsset(ops.Exists(QStringLiteral("Textures/Albedo")), "Created folder exists");
         CheckAsset(ops.IsFolder(QStringLiteral("Textures/Albedo")), "Created folder is folder");
+        CheckAsset(ops.CreateFile(QStringLiteral("Textures/Albedo/keep.txt"), "KEEP"), "Create nested folder sentinel");
+        CheckAsset(ops.CreateFolder(QStringLiteral("Textures/Albedo"), &error), "Default folder creation is idempotent");
+        CheckAsset(error.isEmpty(), "Repeated default folder creation has no error");
+        CheckAsset(ops.Exists(QStringLiteral("Textures/Albedo/keep.txt")), "Default folder creation preserves contents");
+        QByteArray preserved;
+        CheckAsset(fs.ReadFile(QStringLiteral("Textures/Albedo/keep.txt"), preserved), "Preserved nested sentinel is readable");
+        CheckAsset(preserved == QByteArray("KEEP"), "Default folder creation preserves file data");
 
         // Sandbox escape rejected
         CheckAsset(!ops.CreateFolder(QStringLiteral("../evil_dir"), &error), "CreateFolder outside sandbox rejected");
@@ -187,6 +355,11 @@ inline void RunAssetOpsTests()
         CheckAsset(ops.Exists(modelPath), "Original model still exists");
         CheckAsset(ops.Exists(modelPath + QStringLiteral(".importsettings.json")), "Original companion still exists");
     }
+
+    RunFolderPathValidationTests();
+    RunFolderNameValidationTests();
+    RunExclusiveFolderTests();
+    RunFolderResolutionTests();
 }
 
 } // namespace

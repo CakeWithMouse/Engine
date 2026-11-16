@@ -1,0 +1,27 @@
+{
+  "steps": [
+    {
+      "action": "load",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Content\\Scenes\\CityWorkshop.scene.json"
+    },
+    {
+      "value": [
+        99,
+        99,
+        99
+      ],
+      "target": "Market",
+      "action": "property",
+      "path": "/transform/position"
+    },
+    {
+      "action": "save",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Content\\Scenes\\InvalidShouldNotChange.scene.json"
+    },
+    {
+      "action": "startup"
+    }
+  ],
+  "editorWindow": true,
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\curious-city\\continuation\\city-copy\\Project.json"
+}

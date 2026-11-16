@@ -40,6 +40,8 @@ public:
     /** Removes a soldier, for example when it dies. The instance is hidden. */
     void RemoveMember(size_t member);
     size_t Size() const;
+    /** Borrowed read-only field; inspect on the world thread, never retain across ticks or reload. */
+    const Detail::FlowField* DiagnosticField() const { return field_.get(); }
     const std::vector<Member>& Members() const { return members_; }
     void SetFacing(float yaw) { facing_ = yaw; }
     float Facing() const { return facing_; }
@@ -51,6 +53,7 @@ public:
 
     using Controller::MoveTo;
     void MoveTo(glm::vec3 point, float acceptanceRadius = 0.5f) override;
+    /** Tracks the object while the order is active; a removed target finishes as Unreachable. */
     void MoveTo(ObjectRef target, float acceptanceRadius = 1.5f) override;
     void StopMovement() override;
     void SerializeSaveGame(SaveArchive& archive) override;

@@ -1,0 +1,77 @@
+{
+  "bucket": "codex",
+  "windowDurationMins": 10080,
+  "resetsAt": 1794928911,
+  "overallBaselineUsedPercent": 7,
+  "phaseStartUsedPercent": 20,
+  "checkpoints": [
+    {
+      "usedPercent": 22,
+      "phase": "SDK integration and AI smoke"
+    },
+    {
+      "usedPercent": 23,
+      "phase": "AI UI, import and reload regressions"
+    },
+    {
+      "usedPercent": 25,
+      "phase": "Full rebuild, paired AI and real audio measurements"
+    },
+    {
+      "usedPercent": 27,
+      "phase": "Audio initial-spatial fix and native scene UI helper"
+    },
+    {
+      "usedPercent": 28,
+      "phase": "Independent audio confirmations and native scene checks"
+    },
+    {
+      "usedPercent": 29,
+      "phase": "All six AI features independently passed twice; legacy work ongoing"
+    },
+    {
+      "usedPercent": 31,
+      "phase": "Legacy render, runtime state, material and cleanup checks; user budget override active"
+    },
+    {
+      "usedPercent": 32,
+      "phase": "Native diagnostic v9 and relocated source archive checks; continuing under explicit user override"
+    },
+    {
+      "usedPercent": 34,
+      "phase": "TimeScale defect fixed, full rebuild and independent repeats; user override active"
+    },
+    {
+      "usedPercent": 35,
+      "phase": "Native material preview and right-drag verified; completing remaining paired criteria"
+    },
+    {
+      "usedPercent": 36,
+      "phase": "40 of 54 target rows paired; native material preview confirmed; archive rebuild audits"
+    },
+    {
+      "usedPercent": 37,
+      "phase": "42 of 54 paired; UI/HUD native helper verified; fourth persona and final graphics in progress under user override"
+    },
+    {
+      "usedPercent": 38,
+      "phase": "44 of 54 paired; real Play resize and HUD pixel route verified; final persona archives in progress"
+    },
+    {
+      "usedPercent": 40,
+      "phase": "50 of 54 paired; five fixes independently reviewed; four final graphics criteria and playable-project cleanup"
+    },
+    {
+      "usedPercent": 41,
+      "phase": "Final: 54 of 54 targets passed by two independent agents; all four source archives rebuilt and run; local project cleanup verified"
+    }
+  ],
+  "observedOverallDelta": 34,
+  "phaseDelta": 21,
+  "note": "Shared rounded account counter; not exact thread usage. Previous r6 baseline retained.",
+  "budgetExtensionRequested": true,
+  "budgetExtensionApproved": true,
+  "userOverride": "2026-11-14: Continue until full coverage (explicit user reply). Prior skill soft stop32/max37 no longer applies; preserve usage accounting.",
+  "priorStopNewAt": 32,
+  "priorMaximumAt": 37
+}

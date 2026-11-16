@@ -1,0 +1,11 @@
+{
+  "path": "strategy/RepairCorridor-r4-source.zip",
+  "sha256": "d8cad02b7d333d9149c804372a5dede765b1b561a73c0e3a20dffe2862bcad48",
+  "bytes": 17293,
+  "entries": 18,
+  "crc": "passed",
+  "forbidden": [],
+  "sourceMismatch": [],
+  "freshGameplaySourcesMatch": true,
+  "finalCleanBuildSourcesMatch": true
+}

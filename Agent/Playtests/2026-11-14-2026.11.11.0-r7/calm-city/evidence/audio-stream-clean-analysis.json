@@ -1,0 +1,476 @@
+{
+  "source": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\CalmCityUpgraded\\Content\\Audio\\Signal.wav",
+  "capture": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\calm-city\\audio-stream-clean.wav",
+  "sampleRate": 48000,
+  "frequencyHz": 733.0,
+  "chipSeconds": 0.125,
+  "captureDurationSeconds": 12.0,
+  "bestMatch": {
+    "startSeconds": 2.025,
+    "correlation": 0.7952087991231247,
+    "linearGain": 0.09576474993002845,
+    "referenceChipAmplitudes": [
+      0.6910713540235688,
+      0.6910487648486393,
+      0.17276173939382894,
+      0.6910692064578222,
+      0.1727678228155874,
+      0.17276228817812517,
+      0.6910465959947156,
+      0.17276725002907237,
+      0.6910713540235688,
+      0.6910487648486393,
+      0.6910465959947156,
+      0.17276725002907237,
+      0.1727678228155874,
+      0.17276228817812517,
+      0.6910465959947156,
+      0.17276725002907237,
+      0.6910713540235688,
+      0.6910487648486393,
+      0.17276173939382894,
+      0.6910692064578222,
+      0.1727678228155874,
+      0.17276228817812517,
+      0.6910465959947156,
+      0.6910692064578222,
+      0.1727678228155874,
+      0.17276228817812517,
+      0.17276173939382894,
+      0.6910692064578222,
+      0.1727678228155874,
+      0.6910487648486393,
+      0.6910465959947156,
+      0.17276725002907237
+    ],
+    "observedChipAmplitudes": [
+      0.04386547114279871,
+      0.04530534767757298,
+      0.03363446895084747,
+      0.04459719564682985,
+      0.031157307823546684,
+      0.04076693368703573,
+      0.045289533394751544,
+      0.034434497093680516,
+      0.04443510669456074,
+      0.04314342672169689,
+      0.04550729787977578,
+      0.03498259251385754,
+      0.04163534171550935,
+      0.04544513999649859,
+      0.044619663112080585,
+      0.0330110730265327,
+      0.04493142200539504,
+      0.046430868707343316,
+      0.0363509331291492,
+      0.0467769713829353,
+      0.036020599770324076,
+      0.03843381889623209,
+      0.047677056404641975,
+      0.04531652534417394,
+      0.03469802570576474,
+      0.0428932131290559,
+      0.043736887508569765,
+      0.047585821400629724,
+      0.03517640131641575,
+      0.045866900676073914,
+      0.044168200375184756,
+      0.035686023567590604
+    ]
+  },
+  "repeatMatches": [
+    {
+      "cycle": 1,
+      "startSeconds": 6.025,
+      "correlation": 0.10754817368622392,
+      "linearGain": 0.08357953162542256
+    }
+  ],
+  "searchStepSeconds": 0.025,
+  "fixedWindows": [
+    {
+      "startSeconds": 0.0,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 0.125,
+      "toneAmplitude": 0.00011913792176640013
+    },
+    {
+      "startSeconds": 0.25,
+      "toneAmplitude": 0.0012911733507367292
+    },
+    {
+      "startSeconds": 0.375,
+      "toneAmplitude": 0.0011910516099126244
+    },
+    {
+      "startSeconds": 0.5,
+      "toneAmplitude": 0.00021908046935406136
+    },
+    {
+      "startSeconds": 0.625,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 0.75,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 0.875,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 1.0,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 1.125,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 1.25,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 1.375,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 1.5,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 1.625,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 1.75,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 1.875,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 2.0,
+      "toneAmplitude": 0.03514684762017663
+    },
+    {
+      "startSeconds": 2.125,
+      "toneAmplitude": 0.04480006469979077
+    },
+    {
+      "startSeconds": 2.25,
+      "toneAmplitude": 0.034382972741471264
+    },
+    {
+      "startSeconds": 2.375,
+      "toneAmplitude": 0.04374302346260163
+    },
+    {
+      "startSeconds": 2.5,
+      "toneAmplitude": 0.032976873850814596
+    },
+    {
+      "startSeconds": 2.625,
+      "toneAmplitude": 0.04014394846410525
+    },
+    {
+      "startSeconds": 2.75,
+      "toneAmplitude": 0.04572616421425098
+    },
+    {
+      "startSeconds": 2.875,
+      "toneAmplitude": 0.03512471499058728
+    },
+    {
+      "startSeconds": 3.0,
+      "toneAmplitude": 0.04551545534107184
+    },
+    {
+      "startSeconds": 3.125,
+      "toneAmplitude": 0.041711247614267845
+    },
+    {
+      "startSeconds": 3.25,
+      "toneAmplitude": 0.04532390235163576
+    },
+    {
+      "startSeconds": 3.375,
+      "toneAmplitude": 0.035177724875373184
+    },
+    {
+      "startSeconds": 3.5,
+      "toneAmplitude": 0.042261299139897186
+    },
+    {
+      "startSeconds": 3.625,
+      "toneAmplitude": 0.04384273635221803
+    },
+    {
+      "startSeconds": 3.75,
+      "toneAmplitude": 0.04641720092794493
+    },
+    {
+      "startSeconds": 3.875,
+      "toneAmplitude": 0.033771742044560474
+    },
+    {
+      "startSeconds": 4.0,
+      "toneAmplitude": 0.043772144082869384
+    },
+    {
+      "startSeconds": 4.125,
+      "toneAmplitude": 0.043878923411408866
+    },
+    {
+      "startSeconds": 4.25,
+      "toneAmplitude": 0.037223397765609824
+    },
+    {
+      "startSeconds": 4.375,
+      "toneAmplitude": 0.04582609742878026
+    },
+    {
+      "startSeconds": 4.5,
+      "toneAmplitude": 0.03710506846105115
+    },
+    {
+      "startSeconds": 4.625,
+      "toneAmplitude": 0.037479861604697996
+    },
+    {
+      "startSeconds": 4.75,
+      "toneAmplitude": 0.04877084751267198
+    },
+    {
+      "startSeconds": 4.875,
+      "toneAmplitude": 0.04248874410504239
+    },
+    {
+      "startSeconds": 5.0,
+      "toneAmplitude": 0.03649038956318302
+    },
+    {
+      "startSeconds": 5.125,
+      "toneAmplitude": 0.041305100090686005
+    },
+    {
+      "startSeconds": 5.25,
+      "toneAmplitude": 0.04456036530109488
+    },
+    {
+      "startSeconds": 5.375,
+      "toneAmplitude": 0.046606661680989994
+    },
+    {
+      "startSeconds": 5.5,
+      "toneAmplitude": 0.036815099316258884
+    },
+    {
+      "startSeconds": 5.625,
+      "toneAmplitude": 0.04407338909971269
+    },
+    {
+      "startSeconds": 5.75,
+      "toneAmplitude": 0.04483799844700745
+    },
+    {
+      "startSeconds": 5.875,
+      "toneAmplitude": 0.03579662141492895
+    },
+    {
+      "startSeconds": 6.0,
+      "toneAmplitude": 0.0453659545572412
+    },
+    {
+      "startSeconds": 6.125,
+      "toneAmplitude": 0.04437523960563092
+    },
+    {
+      "startSeconds": 6.25,
+      "toneAmplitude": 0.03558245504910111
+    },
+    {
+      "startSeconds": 6.375,
+      "toneAmplitude": 0.044285352635442726
+    },
+    {
+      "startSeconds": 6.5,
+      "toneAmplitude": 0.03561730918447489
+    },
+    {
+      "startSeconds": 6.625,
+      "toneAmplitude": 0.04263666478415589
+    },
+    {
+      "startSeconds": 6.75,
+      "toneAmplitude": 0.047399085240041064
+    },
+    {
+      "startSeconds": 6.875,
+      "toneAmplitude": 0.03669686066749428
+    },
+    {
+      "startSeconds": 7.0,
+      "toneAmplitude": 0.046314123232221324
+    },
+    {
+      "startSeconds": 7.125,
+      "toneAmplitude": 0.04548110778477742
+    },
+    {
+      "startSeconds": 7.25,
+      "toneAmplitude": 0.04571400327991474
+    },
+    {
+      "startSeconds": 7.375,
+      "toneAmplitude": 0.03644237463373654
+    },
+    {
+      "startSeconds": 7.5,
+      "toneAmplitude": 0.04496219293931198
+    },
+    {
+      "startSeconds": 7.625,
+      "toneAmplitude": 0.0450263653175207
+    },
+    {
+      "startSeconds": 7.75,
+      "toneAmplitude": 0.04950873454982514
+    },
+    {
+      "startSeconds": 7.875,
+      "toneAmplitude": 0.03681585657459452
+    },
+    {
+      "startSeconds": 8.0,
+      "toneAmplitude": 0.04744917557856141
+    },
+    {
+      "startSeconds": 8.125,
+      "toneAmplitude": 0.04552711904908787
+    },
+    {
+      "startSeconds": 8.25,
+      "toneAmplitude": 0.035927562572816346
+    },
+    {
+      "startSeconds": 8.375,
+      "toneAmplitude": 0.044413027269754754
+    },
+    {
+      "startSeconds": 8.5,
+      "toneAmplitude": 0.036587134388331694
+    },
+    {
+      "startSeconds": 8.625,
+      "toneAmplitude": 0.04438842348360874
+    },
+    {
+      "startSeconds": 8.75,
+      "toneAmplitude": 0.04747685269745669
+    },
+    {
+      "startSeconds": 8.875,
+      "toneAmplitude": 0.04644932772504994
+    },
+    {
+      "startSeconds": 9.0,
+      "toneAmplitude": 0.03659704447267577
+    },
+    {
+      "startSeconds": 9.125,
+      "toneAmplitude": 0.03976231080708473
+    },
+    {
+      "startSeconds": 9.25,
+      "toneAmplitude": 0.04602718769821341
+    },
+    {
+      "startSeconds": 9.375,
+      "toneAmplitude": 0.009525945140813126
+    },
+    {
+      "startSeconds": 9.5,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 9.625,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 9.75,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 9.875,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 10.0,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 10.125,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 10.25,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 10.375,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 10.5,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 10.625,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 10.75,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 10.875,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 11.0,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 11.125,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 11.25,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 11.375,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 11.5,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 11.625,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 11.75,
+      "toneAmplitude": 0.0
+    },
+    {
+      "startSeconds": 11.875,
+      "toneAmplitude": 0.0
+    }
+  ]
+}

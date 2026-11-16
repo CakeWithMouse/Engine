@@ -1,0 +1,34 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  MOC Logger.h
+  MOC CommandRegistry.h
+  MOC FileService.h
+  MOC MainToolBar.h
+  MOC SceneObjectsPanel.h
+  MOC ObjectInspectorPanel.h
+  UiTestRunner.cpp
+  DockLayoutManager.cpp
+  Logger.cpp
+  CommandRegistry.cpp
+  FileService.cpp
+  EditorLocale.cpp
+  EditorSettings.cpp
+  SettingsService.cpp
+  EditorTheme.cpp
+  IconProvider.cpp
+  EditorStyles.cpp
+  MainToolBar.cpp
+  SceneObjectsPanel.cpp
+  ObjectInspectorPanel.cpp
+  ProjectProperties.cpp
+  ImportSettings.cpp
+  ImportSettingsDialog.cpp
+  moc_Logger.cpp
+  moc_CommandRegistry.cpp
+  moc_FileService.cpp
+  moc_MainToolBar.cpp
+  moc_SceneObjectsPanel.cpp
+  moc_ObjectInspectorPanel.cpp
+  UiTests.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\UiTests.exe
+

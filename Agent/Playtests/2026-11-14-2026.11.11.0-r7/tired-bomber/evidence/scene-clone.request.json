@@ -1,0 +1,55 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\BomberUpgradedR7\\Project.json",
+  "steps": [
+    {
+      "action": "new"
+    },
+    {
+      "name": "CloneParent",
+      "action": "create",
+      "type": "Primitive.Cube"
+    },
+    {
+      "name": "CloneChild",
+      "action": "create",
+      "type": "Primitive.Sphere"
+    },
+    {
+      "target": "CloneParent",
+      "action": "property",
+      "value": [
+        5,
+        2,
+        -3
+      ],
+      "path": "/position"
+    },
+    {
+      "target": "CloneChild",
+      "action": "parent",
+      "parent": "CloneParent"
+    },
+    {
+      "target": "CloneChild",
+      "action": "property",
+      "value": [
+        1,
+        3,
+        2
+      ],
+      "path": "/position"
+    },
+    {
+      "action": "duplicate",
+      "target": "CloneParent"
+    },
+    {
+      "action": "save",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\BomberUpgradedR7\\Content\\Scenes\\role-clone.scene.json"
+    },
+    {
+      "action": "load",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber\\BomberUpgradedR7\\Content\\Scenes\\role-clone.scene.json"
+    }
+  ]
+}

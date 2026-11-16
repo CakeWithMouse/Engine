@@ -1,0 +1,331 @@
+{
+  "rendering": 1,
+  "caster": "crowd",
+  "frames": [
+    {
+      "probes": [
+        [
+          -3,
+          1,
+          -2
+        ],
+        [
+          3,
+          1,
+          2
+        ],
+        [
+          0,
+          1,
+          4
+        ]
+      ],
+      "lights": [
+        {
+          "enabled": true,
+          "radius": 24,
+          "color": [
+            1,
+            0.45,
+            0.2
+          ],
+          "shadows": true,
+          "position": [
+            -3,
+            4,
+            -2
+          ],
+          "intensity": 0.7
+        },
+        {
+          "enabled": true,
+          "radius": 24,
+          "color": [
+            0.25,
+            0.5,
+            1
+          ],
+          "shadows": true,
+          "position": [
+            3,
+            4,
+            2
+          ],
+          "intensity": 0.7
+        },
+        {
+          "enabled": true,
+          "radius": 24,
+          "color": [
+            0.3,
+            1,
+            0.35
+          ],
+          "shadows": true,
+          "position": [
+            0,
+            5,
+            4
+          ],
+          "intensity": 0.7
+        }
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\GpuChecks\\point-shadow-0.bmp",
+      "position": [
+        0,
+        1,
+        0
+      ],
+      "camera": [
+        0,
+        5.8,
+        -6.4
+      ],
+      "target": [
+        0,
+        1,
+        0
+      ],
+      "time": 0.25
+    },
+    {
+      "probes": [
+        [
+          -3,
+          1,
+          -2
+        ],
+        [
+          3,
+          1,
+          2
+        ],
+        [
+          0,
+          1,
+          4
+        ]
+      ],
+      "lights": [
+        {
+          "enabled": true,
+          "radius": 24,
+          "color": [
+            1,
+            0.45,
+            0.2
+          ],
+          "shadows": true,
+          "position": [
+            -3,
+            4,
+            -2
+          ],
+          "intensity": 0
+        },
+        {
+          "enabled": true,
+          "radius": 24,
+          "color": [
+            0.25,
+            0.5,
+            1
+          ],
+          "shadows": true,
+          "position": [
+            3,
+            4,
+            2
+          ],
+          "intensity": 0.7
+        },
+        {
+          "enabled": true,
+          "radius": 24,
+          "color": [
+            0.3,
+            1,
+            0.35
+          ],
+          "shadows": true,
+          "position": [
+            0,
+            5,
+            4
+          ],
+          "intensity": 0.7
+        }
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\GpuChecks\\point-shadow-1.bmp",
+      "position": [
+        0,
+        1,
+        0
+      ],
+      "camera": [
+        0,
+        9.4,
+        -11.200000000000001
+      ],
+      "target": [
+        0,
+        1,
+        0
+      ],
+      "time": 0.25
+    },
+    {
+      "probes": [
+        [
+          -3,
+          1,
+          -2
+        ],
+        [
+          3,
+          1,
+          2
+        ],
+        [
+          0,
+          1,
+          4
+        ]
+      ],
+      "lights": [
+        {
+          "enabled": true,
+          "radius": 24,
+          "color": [
+            1,
+            0.45,
+            0.2
+          ],
+          "shadows": true,
+          "position": [
+            -3,
+            4,
+            -2
+          ],
+          "intensity": 0.7
+        },
+        {
+          "enabled": true,
+          "radius": 24,
+          "color": [
+            0.25,
+            0.5,
+            1
+          ],
+          "shadows": true,
+          "position": [
+            3,
+            4,
+            2
+          ],
+          "intensity": 0.7
+        },
+        {
+          "enabled": true,
+          "radius": 24,
+          "color": [
+            0.3,
+            1,
+            0.35
+          ],
+          "shadows": true,
+          "position": [
+            0,
+            5,
+            4
+          ],
+          "intensity": 0.7
+        }
+      ],
+      "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\calm-city\\GpuChecks\\point-shadow-2.bmp",
+      "position": [
+        0,
+        1,
+        0
+      ],
+      "camera": [
+        0,
+        15.399999999999999,
+        -19.200000000000003
+      ],
+      "target": [
+        0,
+        1,
+        0
+      ],
+      "time": 0.25
+    }
+  ],
+  "lodFade": 0.2,
+  "lodScales": [
+    1,
+    0.6,
+    0.3
+  ],
+  "travel": 2,
+  "sceneLighting": true,
+  "lodScreenHeights": [
+    40,
+    20
+  ],
+  "lights": [
+    {
+      "enabled": true,
+      "radius": 24,
+      "color": [
+        1,
+        0.45,
+        0.2
+      ],
+      "shadows": true,
+      "position": [
+        -3,
+        4,
+        -2
+      ],
+      "intensity": 0.7
+    },
+    {
+      "enabled": true,
+      "radius": 24,
+      "color": [
+        0.25,
+        0.5,
+        1
+      ],
+      "shadows": true,
+      "position": [
+        3,
+        4,
+        2
+      ],
+      "intensity": 0.7
+    },
+    {
+      "enabled": true,
+      "radius": 24,
+      "color": [
+        0.3,
+        1,
+        0.35
+      ],
+      "shadows": true,
+      "position": [
+        0,
+        5,
+        4
+      ],
+      "intensity": 0.7
+    }
+  ],
+  "lodDistances": [
+    10,
+    20
+  ],
+  "globalShadows": true
+}

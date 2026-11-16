@@ -1,0 +1,116 @@
+{
+  "scenario": "moving transparent crowd with three pixel-height LOD thresholds and live resize",
+  "expectedLodCounts": [
+    [
+      4,
+      2,
+      0
+    ],
+    [
+      0,
+      4,
+      0
+    ],
+    [
+      0,
+      0,
+      4
+    ]
+  ],
+  "results": [
+    {
+      "rendering": 0,
+      "frames": [
+        {
+          "index": 0,
+          "lodCounts": [
+            4,
+            2,
+            0
+          ],
+          "dimensions": [
+            320,
+            240
+          ],
+          "image": "transparency-crowd-lod-m0-0.bmp",
+          "bytes": 230454
+        },
+        {
+          "index": 1,
+          "lodCounts": [
+            0,
+            4,
+            0
+          ],
+          "dimensions": [
+            480,
+            320
+          ],
+          "image": "transparency-crowd-lod-m0-1.bmp",
+          "bytes": 460854
+        },
+        {
+          "index": 2,
+          "lodCounts": [
+            0,
+            0,
+            4
+          ],
+          "dimensions": [
+            400,
+            240
+          ],
+          "image": "transparency-crowd-lod-m0-2.bmp",
+          "bytes": 288054
+        }
+      ]
+    },
+    {
+      "rendering": 1,
+      "frames": [
+        {
+          "index": 0,
+          "lodCounts": [
+            4,
+            2,
+            0
+          ],
+          "dimensions": [
+            320,
+            240
+          ],
+          "image": "transparency-crowd-lod-m1-0.bmp",
+          "bytes": 230454
+        },
+        {
+          "index": 1,
+          "lodCounts": [
+            0,
+            4,
+            0
+          ],
+          "dimensions": [
+            480,
+            320
+          ],
+          "image": "transparency-crowd-lod-m1-1.bmp",
+          "bytes": 460854
+        },
+        {
+          "index": 2,
+          "lodCounts": [
+            0,
+            0,
+            4
+          ],
+          "dimensions": [
+            400,
+            240
+          ],
+          "image": "transparency-crowd-lod-m1-2.bmp",
+          "bytes": 288054
+        }
+      ]
+    }
+  ]
+}

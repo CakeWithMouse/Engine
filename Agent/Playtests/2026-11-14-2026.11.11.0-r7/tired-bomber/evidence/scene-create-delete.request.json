@@ -1,0 +1,28 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber/BomberUpgradedR7/Project.json",
+  "steps": [
+    {
+      "action": "new"
+    },
+    {
+      "name": "RoleDeleteProbe",
+      "type": "Primitive.Cube",
+      "action": "create"
+    },
+    {
+      "target": "RoleDeleteProbe",
+      "action": "delete"
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "action": "save",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber/BomberUpgradedR7/Content/Scenes/role-scene-delete.scene.json"
+    },
+    {
+      "action": "load",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber/BomberUpgradedR7/Content/Scenes/role-scene-delete.scene.json"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+[
+  {
+    "label": "fresh-create",
+    "args": [],
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "label": "fresh-enable",
+    "args": [],
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

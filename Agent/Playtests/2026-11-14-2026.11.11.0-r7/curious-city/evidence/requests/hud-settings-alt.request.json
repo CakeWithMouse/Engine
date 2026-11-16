@@ -1,0 +1,16 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Project.json",
+  "steps": [
+    {
+      "choice": "UI/CityHudAlt.ui",
+      "action": "hud-settings",
+      "dialogImage": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\frames\\hud-settings-alt-dialog.png"
+    },
+    {
+      "choice": "UI/CityHud.ui",
+      "action": "hud-settings",
+      "dialogImage": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\frames\\hud-settings-cancel.png",
+      "cancel": true
+    }
+  ]
+}

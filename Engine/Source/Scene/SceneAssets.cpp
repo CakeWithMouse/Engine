@@ -149,6 +149,16 @@ void ValidateMaterialPath(std::string_view path)
     if (!ValidPath(path) || (!path.empty() && Extension(fs::u8path(std::string(path))) != ".mat"))
         throw std::runtime_error("Expected a .mat path inside /Game");
 }
+void ValidateScript(std::string_view path)
+{
+    if (!ValidPath(path) || (!path.empty() && Extension(fs::u8path(std::string(path))) != ".vscript"))
+        throw std::runtime_error("Expected a .vscript path inside /Game");
+    if (path.empty()) return;
+    const auto physical = VfsRead::Active().Resolve(path);
+    std::error_code error;
+    if (physical.empty() || !fs::is_regular_file(fs::u8path(physical), error))
+        throw std::runtime_error("Missing script: " + std::string(path));
+}
 void ValidateMaterial(std::string_view path)
 {
     ValidateMaterialPath(path);

@@ -1,0 +1,1 @@
+ProjectTools.ps1 -Action Build -Rebuild завершился без исключения PowerShell. Лог содержит «Build validated and activated». DLL: Binaries/Release/6fb08b1ef5874e18a778b86d0f30f168/Game.dll. Отдельный числовой exit code wrapper не записывался.

@@ -1,0 +1,37 @@
+{
+  "machine": "/Game/AI/Guard.fsm",
+  "steps": [
+    {
+      "action": "play"
+    },
+    {
+      "action": "frames",
+      "dt": 0.025,
+      "count": 20
+    },
+    {
+      "action": "key",
+      "down": true,
+      "key": 69
+    },
+    {
+      "action": "frames",
+      "dt": 0.025,
+      "count": 2
+    },
+    {
+      "action": "key",
+      "down": false,
+      "key": 69
+    },
+    {
+      "action": "frames",
+      "dt": 0.025,
+      "count": 100
+    },
+    {
+      "action": "stop"
+    }
+  ],
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\tired-bomber/AiTutorialScriptProject/Project.json"
+}

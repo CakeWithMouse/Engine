@@ -1,0 +1,19 @@
+{
+  "orthoSize": 10,
+  "y": 90,
+  "fov": 60,
+  "height": 180,
+  "width": 320,
+  "x": 160,
+  "direction": [
+    0,
+    0,
+    -1
+  ],
+  "origin": [
+    0,
+    0,
+    0
+  ],
+  "orthographic": false
+}

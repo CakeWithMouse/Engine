@@ -1,0 +1,48 @@
+Using v143 / MSVC 14.44.35207 / Windows SDK 10.0.26100.0
+Assimp enabled: true
+
+  AssetCommandHandler.cpp
+  EditorHistory.cpp
+  SceneCommandHandler.cpp
+  ViewportCommandHandler.cpp
+  AiMachineEditorWindow.cpp
+  AssetDeleteCommand.cpp
+  AssetTools.cpp
+  CodeTools.cpp
+  FileBrowser.cpp
+  HudTools.cpp
+  ImportCommands.cpp
+  MainWindow.cpp
+  MaterialEditorWindow.cpp
+  Module.cpp
+  ObjectInspectorLight.cpp
+  ObjectInspectorPanel.cpp
+  PhysicsTools.cpp
+  ProjectProperties.cpp
+  QtHost.cpp
+  SceneObjectsPanel.cpp
+  ScriptEditorWindow.cpp
+  ViewportWidget.cpp
+  ViewportWidget_Input.cpp
+  EditorApp.cpp
+  ExternalGameRunner.cpp
+  IconProvider.cpp
+  ViewportOverlayHelper.cpp
+E:\Engine\Editor\Source\MainWindow.cpp(350,32): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(358,33): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(362,31): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(366,35): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(374,37): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(396,30): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(397,30): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(398,35): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+  moc_MainWindow.cpp
+  moc_MaterialEditorWindow.cpp
+  moc_ObjectInspectorPanel.cpp
+  moc_SceneObjectsPanel.cpp
+  moc_ViewportWidget.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Editor.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Editor.exp
+  Создание кода
+  Создание кода завершено
+  EditorModule.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Editor.dll
+

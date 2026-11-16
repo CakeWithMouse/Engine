@@ -1,0 +1,18 @@
+{
+  "origin": [
+    4,
+    3,
+    8
+  ],
+  "orthoSize": 24,
+  "x": 100.5,
+  "width": 640,
+  "height": 360,
+  "direction": [
+    -0.3,
+    -0.2,
+    -1
+  ],
+  "y": 77.25,
+  "orthographic": true
+}

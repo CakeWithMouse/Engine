@@ -1,0 +1,21 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Project.json",
+  "steps": [
+    {
+      "kind": "control",
+      "action": "play"
+    },
+    {
+      "enabled": true,
+      "kind": "focus"
+    },
+    {
+      "kind": "frames",
+      "count": 45
+    },
+    {
+      "kind": "control",
+      "action": "stop"
+    }
+  ]
+}

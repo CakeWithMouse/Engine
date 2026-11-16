@@ -1,0 +1,50 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Project.json",
+  "steps": [
+    {
+      "name": "CloneParentProbe",
+      "action": "create",
+      "type": "Primitive.Cube"
+    },
+    {
+      "name": "CloneChildProbe",
+      "action": "create",
+      "type": "Primitive.Cube"
+    },
+    {
+      "parent": "CloneParentProbe",
+      "action": "parent",
+      "target": "CloneChildProbe"
+    },
+    {
+      "targets": [
+        "CloneParentProbe",
+        "CloneChildProbe"
+      ],
+      "action": "select"
+    },
+    {
+      "action": "duplicate"
+    },
+    {
+      "name": "SingleCloneProbe",
+      "action": "create",
+      "type": "Primitive.Cube"
+    },
+    {
+      "target": "SingleCloneProbe",
+      "action": "duplicate"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Content\\Scenes\\CuriousCloneReferenceFinal.scene.json",
+      "action": "save"
+    },
+    {
+      "action": "new"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261114-r7\\curious-city\\upgraded-city\\Content\\Scenes\\CuriousCloneReferenceFinal.scene.json",
+      "action": "load"
+    }
+  ]
+}

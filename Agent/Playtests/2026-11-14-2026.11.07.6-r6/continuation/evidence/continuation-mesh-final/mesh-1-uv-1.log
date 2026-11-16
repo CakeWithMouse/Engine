@@ -1,0 +1,215 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 320x240
+[Info] Overlay: early return (empty lines and billboards)
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\continuation-mesh-final\mesh-1-uv-1-0.bmp written=1 size=320x240
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 320x240
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\continuation-mesh-final\mesh-1-uv-1-1.bmp written=1 size=320x240
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\continuation-mesh-final\mesh-1-uv-1-2.bmp written=1 size=320x240
+frame-dump E:\Engine\Engine\build\playtests\20261114-r6\continuation-mesh-final\mesh-1-uv-1-3.bmp written=1 size=320x240
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "frames": [
+        {
+            "basis": [
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ]
+            ],
+            "center": [
+                127,
+                127,
+                0
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\continuation-mesh-final\\mesh-1-uv-1-0.bmp",
+            "restored": false,
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "sha256": "ec659ee1b3265730cf62bf28317337ebaaa75a0fda247f0efb29eb71fd465886",
+            "transientMaterialRebound": false
+        },
+        {
+            "basis": [
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ]
+            ],
+            "center": [
+                127,
+                127,
+                0
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\continuation-mesh-final\\mesh-1-uv-1-1.bmp",
+            "restored": false,
+            "scale": [
+                -2,
+                1,
+                0.5
+            ],
+            "sha256": "ba4598746d829a8129bf1afc66128fb53d1572319fb7f75b062e7b0c80fe2b3a",
+            "transientMaterialRebound": false
+        },
+        {
+            "basis": [
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ]
+            ],
+            "center": [
+                127,
+                127,
+                255
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\continuation-mesh-final\\mesh-1-uv-1-2.bmp",
+            "restored": false,
+            "scale": [
+                1,
+                1,
+                -1
+            ],
+            "sha256": "c37acf484f3bbd038d20be56222b1c401404baea70d9526f5f7752dd0e6a4214",
+            "transientMaterialRebound": false
+        },
+        {
+            "basis": [
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    0,
+                    -1
+                ]
+            ],
+            "center": [
+                127,
+                127,
+                0
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261114-r6\\continuation-mesh-final\\mesh-1-uv-1-3.bmp",
+            "restored": true,
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "sha256": "ec659ee1b3265730cf62bf28317337ebaaa75a0fda247f0efb29eb71fd465886",
+            "transientMaterialRebound": true
+        }
+    ],
+    "ok": true,
+    "originalBasis": [
+        [
+            -1,
+            0,
+            0,
+            -1
+        ],
+        [
+            -1,
+            0,
+            0,
+            -1
+        ],
+        [
+            -1,
+            0,
+            0,
+            -1
+        ],
+        [
+            -1,
+            0,
+            0,
+            -1
+        ]
+    ]
+}
+[VfsRead] Dynamic mount '/_ext_4018761718933420421' -> 'E:/Engine/Engine/build/playtests/20261114-r6/continuation-mesh-final' (path 'E:/Engine/Engine/build/playtests/20261114-r6/continuation-mesh-final/Basis.hlsl' outside registered mounts)

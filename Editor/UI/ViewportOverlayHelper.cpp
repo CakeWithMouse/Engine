@@ -2,9 +2,12 @@
 #include "GizmoTriangles.h"
 #include "IconProvider.h"
 #include "EditorIconData.h"
+#include "EditorTheme.h"
 #include "ViewportOverlay.h"
+#include "BillboardMetrics.h"
 #include "IEditorHost.h"
 #include "SettingsService.h"
+#include "CameraGuide.h"
 
 #include <algorithm>
 #include <cmath>
@@ -13,44 +16,50 @@
 
 namespace
 {
-    inline uint32_t GetBillboardIcon(const IEditorHost::SceneObject& obj, uint32_t& outColor)
+    inline uint32_t TintFromColor(const QColor& c)
+    {
+        return ViewportOverlay::MakeRgba(
+            static_cast<uint8_t>(c.red()),
+            static_cast<uint8_t>(c.green()),
+            static_cast<uint8_t>(c.blue()),
+            255);
+    }
+
+    inline uint32_t GetBillboardIcon(const IEditorHost::SceneObject& obj, const ThemePalette& pal, uint32_t& outColor)
     {
         if (obj.hasPointLight || obj.type == "Light.Point" || obj.name.find("Light") != std::string::npos)
         {
-            uint8_t r = static_cast<uint8_t>(std::clamp(obj.pointLight.color[0] * 255.0f, 0.0f, 255.0f));
-            uint8_t g = static_cast<uint8_t>(std::clamp(obj.pointLight.color[1] * 255.0f, 0.0f, 255.0f));
-            uint8_t b = static_cast<uint8_t>(std::clamp(obj.pointLight.color[2] * 255.0f, 0.0f, 255.0f));
-            outColor = ViewportOverlay::MakeRgba(r, g, b, 255);
+            outColor = TintFromColor(pal.iconPointLight);
             return static_cast<uint32_t>(EditorIcons::IconId::PointLight);
         }
 
         if (obj.type == "Light.Directional" || obj.type == "Environment.Sky" || obj.name.find("Sky") != std::string::npos || obj.name.find("Sun") != std::string::npos)
         {
-            outColor = 0xFF30D0FF;
+            outColor = TintFromColor(pal.iconSunSky);
             return static_cast<uint32_t>(EditorIcons::IconId::SunSky);
         }
 
-        if (obj.gameplayKind != 2 && (obj.type == "Camera" || obj.name.find("Camera") != std::string::npos))
+        if (CameraGuide::IsCamera(obj) && obj.gameplayKind != 2)
         {
-            outColor = 0xFFE0E0E0;
+            outColor = TintFromColor(pal.iconCamera);
             return static_cast<uint32_t>(EditorIcons::IconId::Camera);
         }
 
         if (obj.gameplayKind == 2 || obj.type == "Gameplay.Camera" || obj.type == "GameCamera")
         {
-            outColor = 0xFF80E080;
+            outColor = TintFromColor(pal.iconGameCamera);
             return static_cast<uint32_t>(EditorIcons::IconId::GameCamera);
         }
 
         if (obj.type.rfind("Particle.", 0) == 0 || obj.type == "Particles" || obj.name.find("Particle") != std::string::npos)
         {
-            outColor = 0xFFE080FF;
+            outColor = TintFromColor(pal.iconParticles);
             return static_cast<uint32_t>(EditorIcons::IconId::Particles);
         }
 
         if (obj.gameplayKind == 1 || obj.type == "Character" || obj.type == "Player" || obj.name.find("Player") != std::string::npos)
         {
-            outColor = 0xFF50E050;
+            outColor = TintFromColor(pal.iconCharacter);
             return static_cast<uint32_t>(EditorIcons::IconId::Character);
         }
 
@@ -75,6 +84,10 @@ void ViewportOverlayHelper::UpdateOverlays(
     const bool gridEnabled = SettingsService::Instance().GetValue(QStringLiteral("view/grid"), true).toBool();
     const bool gizmoEnabled = SettingsService::Instance().GetValue(QStringLiteral("view/gizmo"), true).toBool();
     const bool iconsEnabled = SettingsService::Instance().GetValue(QStringLiteral("view/icons"), true).toBool();
+    const bool camerasEnabled = SettingsService::Instance().GetValue("view/cameras", true).toBool();
+    const bool cameraFull = SettingsService::Instance().GetValue("view/cameraFull", false).toBool();
+    const bool cameraXray = SettingsService::Instance().GetValue("view/cameraXray", false).toBool();
+    const float cameraDepth = SettingsService::Instance().GetValue("view/cameraDepth", 10.).toFloat();
     const bool overlaysEnabled = gizmoEnabled || iconsEnabled;
 
     const auto snapshot = host->ReadSnapshot();
@@ -94,8 +107,19 @@ void ViewportOverlayHelper::UpdateOverlays(
     float lightRad = (selectedObj && selectedObj->hasPointLight) ? selectedObj->pointLight.radius : 0.0f;
 
     uint64_t objectsHash = 14695981039346656037ull;
+    auto hashBytes = [&](const void* data, size_t size) {
+        auto* bytes = static_cast<const unsigned char*>(data);
+        for (size_t i=0;i<size;++i) { objectsHash ^= bytes[i]; objectsHash *= 1099511628211ull; }
+    };
+    hashBytes(&camerasEnabled,sizeof(camerasEnabled));hashBytes(&cameraFull,sizeof(cameraFull));
+    hashBytes(&cameraXray,sizeof(cameraXray));hashBytes(&cameraDepth,sizeof(cameraDepth));
+    hashBytes(&cam.width,sizeof(cam.width));
     for (const auto& obj : snapshot.objects)
     {
+        // Parent transforms and camera optics also invalidate the guide cache.
+        hashBytes(&obj.transform,sizeof(obj.transform));hashBytes(&obj.parent,sizeof(obj.parent));
+        hashBytes(&obj.inheritScale,sizeof(obj.inheritScale));
+        if(CameraGuide::IsCamera(obj))hashBytes(obj.projectData.data(),obj.projectData.size());
         objectsHash ^= obj.id;
         objectsHash *= 1099511628211ull;
         objectsHash ^= static_cast<uint64_t>(obj.hasPointLight ? 1 : 0);
@@ -114,7 +138,9 @@ void ViewportOverlayHelper::UpdateOverlays(
         objRot,
         static_cast<int>(hoveredHandle),
         static_cast<int>(activeHandle),
-        lightRad
+        lightRad,
+        hasCamera ? cam.height : 0u,
+        static_cast<uint32_t>(EditorTheme::Instance().Mode())
     );
 
     if (hash == inOutHash)
@@ -140,18 +166,23 @@ void ViewportOverlayHelper::UpdateOverlays(
 
     if (iconsEnabled)
     {
+        const ThemePalette iconPalette = EditorTheme::Instance().Palette();
         for (const auto& obj : snapshot.objects)
         {
             uint32_t iconColor = 0xFFFFFFFF;
-            uint32_t iconId = GetBillboardIcon(obj, iconColor);
+            uint32_t iconId = GetBillboardIcon(obj, iconPalette, iconColor);
             if (iconId != 0)
             {
                 EngineOverlayBillboard bb{};
                 bb.iconId = iconId;
                 bb.x = obj.transform.position[0];
-                bb.y = obj.transform.position[1] + (obj.hasPointLight ? 0.3f : 0.0f);
+                bb.y = obj.transform.position[1];
                 bb.z = obj.transform.position[2];
-                bb.sizePixels = 32.0f;
+                if (CameraGuide::IsCamera(obj)) {
+                    const auto world = CameraGuide::World(obj, snapshot);
+                    bb.x=world[3].x;bb.y=world[3].y;bb.z=world[3].z;
+                }
+                bb.sizePixels = BillboardMetrics::SizePixels(static_cast<float>(cam.height));
                 bb.rgbaTint = iconColor;
                 bb.objectId = obj.id;
                 billboards.push_back(bb);
@@ -185,6 +216,13 @@ void ViewportOverlayHelper::UpdateOverlays(
         lines.push_back(sunLine);
         dirLineCount = 1;
     }
+
+    if (camerasEnabled && hasCamera)
+        for (const auto& object : snapshot.objects) if (CameraGuide::IsCamera(object)) {
+            const auto camera=CameraGuide::Read(object,snapshot,cam.height?float(cam.width)/cam.height:16.f/9.f);
+            auto guide=CameraGuide::Lines(camera,object.id==snapshot.selected,cameraDepth,cameraFull,cameraXray);
+            lines.insert(lines.end(),guide.begin(),guide.end());
+        }
 
     if (gizmoEnabled && selectedObj && hasCamera)
     {
@@ -262,26 +300,31 @@ uint64_t ViewportOverlayHelper::HitTestBillboard(
 {
     if (!host || cam.width <= 0 || cam.height <= 0) return 0;
 
-    const bool overlaysEnabled = SettingsService::Instance().GetValue(QStringLiteral("view/overlays"), true).toBool();
+    const bool overlaysEnabled = SettingsService::Instance().GetValue(QStringLiteral("view/icons"), true).toBool();
     if (!overlaysEnabled) return 0;
 
     const auto snapshot = host->ReadSnapshot();
     float bestDist = tolerancePixels;
     uint64_t bestId = 0;
 
+    const ThemePalette iconPalette = EditorTheme::Instance().Palette();
     for (const auto& obj : snapshot.objects)
     {
         uint32_t col = 0;
-        if (GetBillboardIcon(obj, col) == 0)
+        if (GetBillboardIcon(obj, iconPalette, col) == 0)
             continue;
 
         float pos[3] = {
             obj.transform.position[0],
-            obj.transform.position[1] + (obj.hasPointLight ? 0.3f : 0.0f),
+            obj.transform.position[1],
             obj.transform.position[2]
         };
 
         float screen[2]{};
+        if(CameraGuide::IsCamera(obj)) {
+            const auto world=CameraGuide::World(obj,snapshot);
+            pos[0]=world[3].x;pos[1]=world[3].y;pos[2]=world[3].z;
+        }
         if (GizmoGeometry::ProjectPointToScreen(pos, cam.viewMatrix, cam.projMatrix, cam.width, cam.height, screen))
         {
             float dx = screen[0] - screenX;
