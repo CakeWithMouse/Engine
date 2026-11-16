@@ -91,6 +91,21 @@ QToolButton:pressed, QToolButton:checked {
     background-color: %11;
     border-color: %2;
 }
+QToolButton#InfoButton, QToolButton#CardInfoButton, QToolButton#AiLegendInfoButton, QToolButton#CameraGuideInfo {
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    padding: 0px;
+    margin: 0px;
+}
+QToolButton#InfoButton:hover, QToolButton#CardInfoButton:hover, QToolButton#AiLegendInfoButton:hover, QToolButton#CameraGuideInfo:hover {
+    background-color: %9;
+    border-color: %10;
+}
+QToolButton#InfoButton:pressed, QToolButton#CardInfoButton:pressed, QToolButton#AiLegendInfoButton:pressed, QToolButton#CameraGuideInfo:pressed {
+    background-color: %11;
+    border-color: %2;
+}
 QPushButton {
     background-color: %8;
     border: 1px solid %6;

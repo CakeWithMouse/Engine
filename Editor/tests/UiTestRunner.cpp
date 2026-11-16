@@ -17,6 +17,7 @@
 #include "WheelGuardTests.h"
 #include "AiDiagnosticsDockTests.h"
 #include "ObjectTypeInspectorTests.h"
+#include "InfoButtonTests.h"
 #include "EditorTheme.h"
 #include <QApplication>
 #include <iostream>
@@ -55,6 +56,7 @@ int main(int argc, char* argv[])
     runSuite(DockRedockTests::Run, "DockRedockTests");
     runSuite(AiDiagnosticsDockTests::Run, "AiDiagnosticsDockTests");
     runSuite(ObjectTypeInspectorTests::Run, "ObjectTypeInspectorTests");
+    runSuite(InfoButtonTests::Run, "InfoButtonTests");
     runSuite(GeometryTextureActionTests::Run, "GeometryTextureActionTests");
     runSuite(AssetPickerDialogTests::Run, "AssetPickerDialogTests");
     runSuite(ViewportBillboardTests::Run, "ViewportBillboardTests");

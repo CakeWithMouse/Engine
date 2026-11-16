@@ -28,6 +28,34 @@
 
 ---
 
+## Сессия fix/editor-ui-polish (Задачи Q, R, S, T)
+
+### Чек-лист задач
+- [x] **Задача Q (fix(ui)):** Кнопка «?» (`InfoButton`): векторная иконка Tabler `help-circle`, чистая функция расчёта геометрии попапа и текстовый fallback.
+  - Диагностика: `InfoButton` (18x18) в `EditorStyles.cpp` наследовал стили `QToolButton` с `padding: 4px 8px; border: 1px solid`, что съедало все 18px ширины и приводило к виду пустого квадратного чекбокса. Позиция попапа вычислялась жестко от `bottomLeft()` без проверки геометрии экрана.
+  - Иконка: в `EditorIconData.h` добавлен чистый SVG `help-circle` из Tabler 3.50 (`TABLER_HELP` / `TABLER_HELP_CIRCLE`) и `info-circle` (`TABLER_INFO_CIRCLE`). В `IconProvider.cpp` поддержаны ключи `help`, `help-circle`, `info`, `info-circle` с генерацией multi-DPR пиксмапов.
+  - Позиционирование: создана чистая функция `InfoButtonGeometry::CalculatePopupGeometry(btnRect, popupSize, screenAvailableGeom)`: по умолчанию под кнопкой с выравниванием правого края попапа по правому краю кнопки (раскрытие влево); если слева не влезает — раскрытие вправо; если снизу не влезает — раскрытие вверх; итоговый прямоугольник строго внутри `availableGeometry` (с поддержкой второго монитора со смещенными координатами).
+  - Окно подсказки: `InfoPopupWindow` (наследник `QFrame` с `Qt::Popup | Qt::FramelessWindowHint`), закрывается по клику вне и по клавише `Esc`, максимальная ширина `kMaxPopupWidth = 320`, перенос строк, поддержка опционального жирного заголовка `title_`.
+  - Внешний вид кнопки: прозрачный фон, курсор-рука (`PointingHandCursor`), hover/pressed подсветка, подсказка «Справка» / «Help» (вместо простыни текста), при отсутствии иконки рисуется текстовый символ `?` шрифтом редактора и пишется предупреждение в лог.
+  - Юнит-тесты: создан `InfoButtonTests.h` (10 checks PASS), подключен в `UiTestRunner.cpp`. Проверяет рендер иконки на 4 DPR (1.0, 1.25, 1.5, 2.0), чистую геометрию у правого края, у нижнего края, в углу и на втором мониторе, жизненный цикл попапа, шорткат Esc и тултипы.
+- [ ] **Задача R (feat(ui)):** Система «?» и вёрстка карточки «Обзор камеры» и панели диагностики.
+- [ ] **Задача S (diag/fix):** Диагностика AI и физики (почему не работают в редакторе).
+- [ ] **Задача T (test/audit):** Финальная сквозная сверка всех типов объектов и проверок протокола.
+
+---
+
+## Эталон тестов (Baseline ветки fix/editor-ui-polish на старте задач Q–T)
+
+| Тест / Скрипт | Результат (эталон) | Примечание |
+|---|---|---|
+| Сборка `EditorModule` (Debug) | **PASS** | 0 ошибок, 0 новых warnings |
+| `Editor/tests/CoreTests.exe` | **1105/1105 PASS** | 1105 checks passed |
+| `Editor/tests/HostTests.exe` | **165/165 PASS** | 165 checks passed |
+| `Editor/tests/UiTests.exe` | **916+ PASS, 1 FAIL (Красная база main)** | 916+ checks passed across 22 suites. Все наборы запускаются и доходят до конца. 1 сбой в `ViewportBillboardTests.h:216` (`game camera tint from dark palette`: базовый красный main, коммит `314b991`). |
+| `Editor/tools/check.ps1 -Quick` | **FAIL (Красная база main)** | Причина завершения кодом 1: `UiTests.exe` вернул exit code 1 из-за сбоя базового `ViewportBillboardTests.h:216`. Проверка локализации (кириллица вне Tr) успешно проходит. |
+
+---
+
 ## Сессия fix/editor-ui-polish (Задачи G–P)
 
 ### Чек-лист задач
@@ -55,6 +83,23 @@
 | `Editor/tools/check.ps1 -Quick` | **FAIL (Красная база main)** | Причина завершения кодом 1: `UiTests.exe` вернул exit code 1 из-за сбоя базового `ViewportBillboardTests.h:216`. Проверка локализации (кириллица вне Tr) успешно проходит. |
 
 ---
+
+---
+
+## Разведка и решения (Задачи Q, R, S, T)
+
+### Разведка Q (Кнопка «?» InfoButton: иконка и позиция попапа)
+- **Факты из кода:**
+  - В `EditorStyles.cpp:79-85` для `QToolButton` был задан стиль `padding: 4px 8px; border: 1px solid %6;`. `InfoButton` имеет фиксированный размер 18x18. Из-за горизонтального padding 8px + 8px + border 1px + 1px = 18px под контент иконки оставалось 0 пикселей, что приводило к схлопыванию иконки и виду пустого квадратного чекбокса.
+  - В `EditorIconData.h:176` исходный SVG `TABLER_HELP` содержал пути с нестандартным синтаксисом. В папке Tabler 3.50 (`tabler-icons-3.50.0\icons\outline\help-circle.svg`) взят официальный чистый векторный SVG `help-circle` (`M3 12a9 9 0 1 0 18 0... M12 16v.01... M12 13a2 2 0 0 0...`), четко читаемый на 16px.
+  - В `InfoButton.h:82-85` попап открывался строго по координатам `mapToGlobal(rect().bottomLeft())` со сдвигом вниз на 2px. При расположении кнопки у правого края окна (например в шапке инспектора или карточках) попап распахивался вправо за пределы видимой области экрана.
+- **Решение и реализация Q:**
+  - В `EditorStyles.cpp` добавлены специальные правила для `QToolButton#InfoButton, QToolButton#CardInfoButton, QToolButton#AiLegendInfoButton, QToolButton#CameraGuideInfo` с прозрачным фоном, отсутствием рамок по умолчанию, нулевым padding и margin, и hover/pressed подсветкой по палитре темы.
+  - В `EditorIconData.h` подключены `TABLER_HELP_CIRCLE` и `TABLER_INFO_CIRCLE`. В `IconProvider.cpp` поддержаны ключи `help`, `help-circle`, `info`, `info-circle` с поддержкой DPR 1.0, 1.25, 1.5, 2.0.
+  - В `InfoButton.h` создана чистая функция `InfoButtonGeometry::CalculatePopupGeometry`, вычисляющая прямоугольник попапа по координатам кнопки и `availableGeometry` целевого экрана (с определением экрана через `QWidget::screen()` / `QGuiApplication::screenAt`). По умолчанию попап открывается под кнопкой с выравниванием правого края попапа по правому краю кнопки (раскрытие влево). При нехватке места слева — раскрытие вправо; при нехватке места снизу — раскрытие вверх над кнопкой. Итоговый прямоугольник строго вписан в `availableGeometry`.
+  - Попап `InfoPopupWindow` наследует `QFrame` с флагами `Qt::Popup | Qt::FramelessWindowHint`, закрывается по клику вне и по клавише Escape.
+  - Кнопке назначен курсор `PointingHandCursor`, подсказка «Справка» / «Help», а при отсутствии иконки рисуется текстовый символ `?` шрифтом редактора и пишется предупреждение в лог.
+  - Создан юнит-тест `Editor/tests/InfoButtonTests.h` (10 checks PASS) с валидацией рендера иконки на 4 DPR, чистой геометрии попапа (правый край, нижний край, угол, второй монитор), Esc-закрытия и тултипов.
 
 ---
 

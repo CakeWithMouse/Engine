@@ -59,7 +59,8 @@ namespace
         if (name == QLatin1String("chevron-up") || name == QLatin1String("arrow-up")) return EditorIcons::TABLER_CHEVRON_UP;
         if (name == QLatin1String("chevron-down") || name == QLatin1String("arrow-down")) return EditorIcons::TABLER_CHEVRON_DOWN;
         if (name == QLatin1String("chevron-right") || name == QLatin1String("arrow-right")) return EditorIcons::TABLER_CHEVRON_RIGHT;
-        if (name == QLatin1String("help") || name == QLatin1String("info")) return EditorIcons::TABLER_HELP;
+        if (name == QLatin1String("help") || name == QLatin1String("help-circle")) return EditorIcons::TABLER_HELP;
+        if (name == QLatin1String("info") || name == QLatin1String("info-circle")) return EditorIcons::TABLER_INFO_CIRCLE;
         if (name == QLatin1String("camera")) return EditorIcons::SVG_CAMERA;
         if (name == QLatin1String("particles")) return EditorIcons::SVG_PARTICLES;
         return nullptr;
