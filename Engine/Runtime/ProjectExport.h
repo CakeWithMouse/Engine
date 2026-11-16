@@ -1,5 +1,6 @@
 #pragma once
 #include "Project.h"
+#include "ProjectUpgrade.h"
 #include <Engine/UI/ProjectHud.h>
 #include <Windows.h>
 #include <filesystem>
@@ -39,9 +40,34 @@ inline void CheckProcess(const fs::path& exe, const std::wstring& args, const fs
     DWORD code=1; GetExitCodeProcess(process.hProcess,&code); CloseHandle(process.hProcess);
     if (code || wait != WAIT_OBJECT_0) throw std::runtime_error("Export validation failed; see " + log.u8string());
 }
-inline void Export(const fs::path& file, const fs::path& destination, const fs::path& runtime) {
-    const auto project = ReadRuntimeProject(file); const auto release = ReadEngineRelease(runtime);
-    if (release.configuration != "Release") throw std::runtime_error("Export requires a Release runtime. Build or open the Release editor first.");
+inline fs::path FindRuntime(const EngineRelease& current, const std::string& version, const std::string& configuration) {
+    if (current.version == version && current.configuration == configuration) return current.runtime;
+    const auto besideLauncher = current.runtime.parent_path();
+    for (const auto& candidate : {
+        besideLauncher.parent_path() / configuration / "Runtime",
+        besideLauncher / "Engines" / version / configuration,
+        EngineStore() / version / configuration
+    }) {
+        if (!fs::is_regular_file(candidate / "EngineRuntime.exe")) continue;
+        const auto release = ReadEngineRelease(candidate);
+        if (release.version == version && release.configuration == configuration) return release.runtime;
+    }
+    return {};
+}
+inline void Export(const fs::path& file, const fs::path& destination, const fs::path& currentRuntime) {
+    const auto project = ReadRuntimeProject(file);
+    const auto current = ReadEngineRelease(currentRuntime);
+    const auto runtime = FindRuntime(current, current.version, "Release");
+    if (runtime.empty() || !fs::is_regular_file(runtime / "GameExecutable.exe"))
+        throw std::runtime_error("Build or install the matching Release runtime with game export support first.");
+    const auto release = ReadEngineRelease(runtime);
+    auto module = project.module;
+    if (project.engineConfiguration == "Debug") {
+        const auto debug = FindRuntime(current, project.engineVersion, "Debug");
+        if (debug.empty() || ProjectUpgrade::Hash(module) != ProjectUpgrade::Hash(debug / "Templates/SceneProject/Game.dll"))
+            throw std::runtime_error("This project uses a custom or unavailable Debug module. Build the project with the Release SDK before export.");
+        module = runtime / "Templates/SceneProject/Game.dll";
+    }
     for (const auto* dependency : {"msvcp140.dll", "vcruntime140.dll", "vcruntime140_1.dll"})
         if (!fs::is_regular_file(runtime/dependency)) throw std::runtime_error(std::string("Runtime redistributable is missing; rebuild the Release runtime: ")+dependency);
     const auto target = fs::absolute(destination).lexically_normal();
@@ -50,7 +76,8 @@ inline void Export(const fs::path& file, const fs::path& destination, const fs::
         return !rel.empty() && !rel.is_absolute() && *rel.begin() != "..";
     };
     if (fs::exists(target)) throw std::runtime_error("Choose a new export folder; existing folders are never overwritten");
-    if (inside(target,project.file.parent_path()) || inside(target,runtime)) throw std::runtime_error("Export folder must be outside project and runtime");
+    if (inside(target,project.file.parent_path()) || inside(target,runtime) || inside(target,current.runtime))
+        throw std::runtime_error("Export folder must be outside project and runtime");
     if (project.startupScene.empty() || !inside(project.startupScene,project.content)) throw std::runtime_error("Save the startup scene inside Content before export");
     const auto hud = ProjectHud::Read(project.content);
     if (!hud.empty() && !fs::is_regular_file(hud)) throw std::runtime_error("Selected HUD file is missing: " + hud.u8string());
@@ -81,6 +108,7 @@ inline void Export(const fs::path& file, const fs::path& destination, const fs::
     try {
         const auto bundled=staging/"Runtime", game=staging/"Game";
         fs::create_directories(bundled); fs::create_directories(game/"Binaries");
+        fs::copy_file(runtime / "GameExecutable.exe", staging / "Game.exe");
         for(const auto& entry:fs::directory_iterator(runtime)) {
             const auto name=entry.path().filename().u8string();
             if(entry.is_directory()) {
@@ -89,10 +117,10 @@ inline void Export(const fs::path& file, const fs::path& destination, const fs::
             } else if(entry.is_regular_file() && (entry.path().extension()==".dll" || name=="EngineRuntime.exe" || name=="EngineVersion.json" || name=="EngineConfiguration.txt")) fs::copy_file(entry.path(),bundled/entry.path().filename());
         }
         CopyTree(project.content,game/"Content");
-        for(const auto& entry:fs::directory_iterator(project.module.parent_path())) if(entry.is_regular_file() && entry.path().extension()==".dll") fs::copy_file(entry.path(),game/"Binaries"/entry.path().filename());
-        if(!fs::is_regular_file(game/"Binaries"/project.module.filename()))throw std::runtime_error("Game DLL is missing");
+        for(const auto& entry:fs::directory_iterator(module.parent_path())) if(entry.is_regular_file() && entry.path().extension()==".dll") fs::copy_file(entry.path(),game/"Binaries"/entry.path().filename());
+        if(!fs::is_regular_file(game/"Binaries"/module.filename()))throw std::runtime_error("Game DLL is missing");
         const auto scene=(fs::path("Content")/project.startupScene.lexically_relative(project.content)).generic_u8string();
-        Write(game/"Project.json",{{"name",project.name},{"module",(fs::path("Binaries")/project.module.filename()).generic_u8string()},{"content","Content"},{"startupScene",scene}});
+        Write(game/"Project.json",{{"name",project.name},{"module",(fs::path("Binaries")/module.filename()).generic_u8string()},{"content","Content"},{"startupScene",scene}});
         Write(game/"Engine.lock.json",{{"format",1},{"engineVersion",release.version},{"engineConfiguration",release.configuration}});
         const auto exe=bundled/"EngineRuntime.exe";
         CheckProcess(exe,L"--validate-project \""+(game/"Project.json").wstring()+L"\"",staging/"Validation.log");

@@ -16,7 +16,7 @@ if(Test-Path -LiteralPath "$project/Content/ProjectHud.txt"){throw 'New project 
 $package=Join-Path $root 'Готовая игра'
 & "$runtime/EngineRuntime.exe" --export-project "$project/Project.json" --destination $package *> "$root/export.log"
 if($LASTEXITCODE){throw "Export failed: $root/export.log"}
-foreach($file in @('Game/Content/ProjectHud.txt','Game/Content/UI/Hud.ui','Runtime/EngineContent/Shaders/UI.hlsl')){if(!(Test-Path -LiteralPath (Join-Path $package $file))){throw "Missing exported HUD resource: $file"}}
+foreach($file in @('Game.exe','Game/Content/ProjectHud.txt','Game/Content/UI/Hud.ui','Runtime/EngineContent/Shaders/UI.hlsl')){if(!(Test-Path -LiteralPath (Join-Path $package $file))){throw "Missing exported file: $file"}}
 $smoke=Get-Content "$package/GameSmoke.log" -Raw
 if(!$smoke.Contains('FontAtlas:') -or !$smoke.Contains('Shaders/UI.hlsl')){throw 'Export smoke did not draw selected HUD'}
 $hidden=Join-Path $root 'Source unavailable'
@@ -24,8 +24,9 @@ $prefix=[IO.Path]::GetFullPath($root)+[IO.Path]::DirectorySeparatorChar
 foreach($path in @($project,$hidden)){if(![IO.Path]::GetFullPath($path).StartsWith($prefix,[StringComparison]::OrdinalIgnoreCase)){throw 'Move outside test fixture'}}
 Move-Item -LiteralPath $project -Destination $hidden
 try {
-    & "$package/Runtime/EngineRuntime.exe" --project "$package/Game/Project.json" --mode game --frames 5 *> "$root/portable.log"
-    if($LASTEXITCODE){throw 'Export requires original project'}
+    $run = Start-Process -FilePath "$package/Game.exe" -ArgumentList @('--frames','5') -WorkingDirectory $root `
+        -RedirectStandardOutput "$root/portable.log" -RedirectStandardError "$root/portable-error.log" -PassThru -Wait
+    if($run.ExitCode){throw "Game.exe could not launch the portable game: $root/portable-error.log"}
     if(!(Get-Content "$root/portable.log" -Raw).Contains('FontAtlas:')){throw 'Portable game did not create HUD'}
 } finally { Move-Item -LiteralPath $hidden -Destination $project }
 [IO.File]::WriteAllText("$project/Content/ProjectHud.txt",'../outside.ui')

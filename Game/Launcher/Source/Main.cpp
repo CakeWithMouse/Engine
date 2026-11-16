@@ -20,6 +20,7 @@ namespace
 HWND list = nullptr;
 HWND status = nullptr;
 HWND editButton = nullptr;
+HWND exportButton = nullptr;
 constexpr INT_PTR ListId = 100;
 constexpr INT_PTR LaunchId = 101;
 constexpr INT_PTR EditId = 102;
@@ -321,6 +322,7 @@ const GameEntry& Selected()
 void UpdateStatus()
 {
     const auto projectFile = SelectedProject();
+    EnableWindow(exportButton, !projectFile.empty());
     if (!projectFile.empty())
     {
         try
@@ -387,11 +389,13 @@ LRESULT WindowProcImpl(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
             332, 280, 170, 35, window, reinterpret_cast<HMENU>(CreateId), nullptr, nullptr);
         CreateWindowW(L"BUTTON", L"Открыть проект…", WS_CHILD | WS_VISIBLE | WS_TABSTOP,
             514, 280, 174, 35, window, reinterpret_cast<HMENU>(OpenId), nullptr, nullptr);
+        exportButton = CreateWindowW(L"BUTTON", L"Собрать EXE…", WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+            18, 327, 170, 35, window, reinterpret_cast<HMENU>(ExportId), nullptr, nullptr);
         auto* bar = CreateMenu();
         auto* projectMenu = CreatePopupMenu();
         AppendMenuW(projectMenu,MF_STRING,CreateId,L"Создать проект…");
         AppendMenuW(projectMenu,MF_STRING,OpenId,L"Открыть проект…");
-        AppendMenuW(projectMenu,MF_STRING,ExportId,L"Экспорт игры на текущем движке…");
+        AppendMenuW(projectMenu,MF_STRING,ExportId,L"Собрать EXE…");
         auto* codeMenu = CreatePopupMenu();
         AppendMenuW(codeMenu,MF_STRING,EnableCodeId,L"Добавить C++…");
         AppendMenuW(codeMenu,MF_STRING,BuildCodeId,L"Собрать C++ проект");
@@ -404,7 +408,7 @@ LRESULT WindowProcImpl(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
         AppendMenuW(bar,MF_POPUP,reinterpret_cast<UINT_PTR>(versions),L"Версии движка");
         SetMenu(window,bar);
         status = CreateWindowW(L"STATIC", L"", WS_CHILD | WS_VISIBLE | SS_LEFT,
-            18, 335, 670, 70, window, nullptr, nullptr, nullptr);
+            18, 372, 670, 70, window, nullptr, nullptr, nullptr);
         UpdateStatus();
         return 0;
     }
@@ -414,14 +418,31 @@ LRESULT WindowProcImpl(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_COMMAND:
         if (LOWORD(wParam) == ExportId) {
             try {
-                const auto project=SelectedProject(); if(project.empty())throw std::runtime_error("Select your project first");
-                const auto parent=Pick(window,true); if(parent.empty())return 0;
-                const auto target=parent/(project.parent_path().filename().wstring()+L"-Export");
-                LaunchSplash splash(L"Проверка и экспорт игры…",true,window);
-                ProjectExport::CheckProcess(ExampleDeployment::ExecutableDirectory()/"Runtime/EngineRuntime.exe",
-                    L"--export-project \""+project.wstring()+L"\" --destination \""+target.wstring()+L"\"",project.parent_path()/"Export.log");
-                SetWindowTextW(status,(L"Готовая игра: "+target.wstring()+L". Запуск: Start.cmd").c_str());
-            } catch(const std::exception& e){MessageBoxW(window,ExampleDeployment::Wide(e.what()).c_str(),L"Экспорт",MB_OK|MB_ICONERROR);}
+                const auto project = SelectedProject();
+                if (project.empty()) throw std::runtime_error("Select your project first");
+                const auto parent = Pick(window, true);
+                if (parent.empty()) return 0;
+                const auto name = project.parent_path().filename().wstring() + L"-Export";
+                auto target = parent / name;
+                for (int copy = 2; std::filesystem::exists(target); ++copy)
+                    target = parent / (name + L"-" + std::to_wstring(copy));
+                {
+                    LaunchSplash splash(L"Сборка и проверка игры…", true, window);
+                    ProjectExport::CheckProcess(ExampleDeployment::ExecutableDirectory() / "Runtime/EngineRuntime.exe",
+                        L"--export-project \"" + project.wstring() + L"\" --destination \"" + target.wstring() + L"\"",
+                        project.parent_path() / "Export.log");
+                }
+                const auto exe = target / "Game.exe";
+                if (!std::filesystem::is_regular_file(exe))
+                    throw std::runtime_error("This runtime does not support Game.exe export. Rebuild EngineRuntime.");
+                SetWindowTextW(status, (L"Готовая игра: " + exe.wstring()).c_str());
+                if (MessageBoxW(window, (exe.wstring() + L"\n\nЗапустить игру?").c_str(), L"Сборка завершена",
+                        MB_YESNO | MB_ICONINFORMATION) == IDYES &&
+                    reinterpret_cast<INT_PTR>(ShellExecuteW(window, L"open", exe.c_str(), nullptr, target.c_str(), SW_SHOWNORMAL)) <= 32)
+                    throw std::runtime_error("Could not start Game.exe: " + exe.u8string());
+            } catch (const std::exception& error) {
+                MessageBoxW(window, ExampleDeployment::Wide(error.what()).c_str(), L"Сборка игры", MB_OK | MB_ICONERROR);
+            }
             return 0;
         }
         if (LOWORD(wParam) == EnableCodeId || LOWORD(wParam) == BuildCodeId)

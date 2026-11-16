@@ -316,8 +316,10 @@ void EditorMainWindow::BuildSceneMenu()
     sceneMenu_->setEnabled(host_->HasScene());
     sceneMenu_->addAction(Tr("Восстановить несохранённую сцену…", "Recover Unsaved Scene…"), this, &EditorMainWindow::OfferRecovery);
     sceneMenu_->addAction(Tr("Сделать стартовой сценой", "Set Startup Scene"), this, [this] { SaveScene(false, [this] { SetStartupScene(); }); });
-    sceneMenu_->addAction(Tr("Экспорт игры…", "Export Game…"), this, [this] {
-        if (host_->PlayState() != EditorQtHost::Edit || !CloseMaterialEditors()) return;
+    auto* exportAction = sceneMenu_->addAction(Tr("Собрать EXE…", "Build Game EXE…"));
+    connect(exportAction, &QAction::triggered, this, [this, exportAction] {
+        if (exportProcess_ || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+        if (!CloseMaterialEditors([exportAction] { exportAction->trigger(); })) return;
         MaybeSave([this] { ExportProject(); });
     });
 
@@ -1457,19 +1459,40 @@ void EditorMainWindow::ExportProject()
     if (name == "." || name == ".." || name.contains('/') || name.contains('\\') || name.contains(':')) {
         QMessageBox::warning(this, QStringLiteral("Экспорт"), QStringLiteral("Укажите имя папки без пути.")); return;
     }
-    exportProcess_ = new QProcess(this);
-    exportProcess_->setProcessChannelMode(QProcess::MergedChannels);
-    connect(exportProcess_, &QProcess::readyReadStandardOutput, this, [this] { AppendLine(QString::fromUtf8(exportProcess_->readAllStandardOutput())); });
-    connect(exportProcess_, &QProcess::finished, this, [this](int code, QProcess::ExitStatus state) {
-        AppendLine(QString::fromUtf8(exportProcess_->readAllStandardOutput()));
-        QMessageBox::information(this, QStringLiteral("Экспорт игры"), code == 0 && state == QProcess::NormalExit
-            ? QStringLiteral("Готово. Запускайте Start.cmd в папке экспорта.") : QStringLiteral("Экспорт не завершён. Подробности в журнале и Validation.log временной папки."));
-        exportProcess_->deleteLater(); exportProcess_ = nullptr;
+    const auto destination = QDir(parent).filePath(name);
+    auto* process = exportProcess_ = new QProcess(this);
+    process->setProcessChannelMode(QProcess::MergedChannels);
+    connect(process, &QProcess::readyReadStandardOutput, this, [this, process] {
+        AppendLine(QString::fromUtf8(process->readAllStandardOutput()));
     });
-    connect(exportProcess_, &QProcess::errorOccurred, this, [this](QProcess::ProcessError error) {
+    connect(process, &QProcess::finished, this, [this, process, destination](int code, QProcess::ExitStatus state) {
+        AppendLine(QString::fromUtf8(process->readAllStandardOutput()));
+        process->deleteLater();
+        exportProcess_ = nullptr;
+        statusBar()->clearMessage();
+        const auto exe = QDir(destination).filePath(QStringLiteral("Game.exe"));
+        if (code != 0 || state != QProcess::NormalExit || !QFileInfo(exe).isFile()) {
+            consoleDock_->show();
+            consoleDock_->raise();
+            QMessageBox::warning(this, Tr("Сборка игры", "Game Build"),
+                Tr("Не удалось собрать Game.exe. Подробности в консоли.", "Could not build Game.exe. See the console for details."));
+            return;
+        }
+        if (QMessageBox::question(this, Tr("Сборка завершена", "Build Complete"),
+                Tr("%1\n\nЗапустить игру?", "%1\n\nRun the game?").arg(QDir::toNativeSeparators(exe))) == QMessageBox::Yes &&
+            !QProcess::startDetached(exe, {}, destination))
+            QMessageBox::warning(this, Tr("Сборка игры", "Game Build"), Tr("Не удалось запустить Game.exe.", "Could not start Game.exe."));
+    });
+    connect(process, &QProcess::errorOccurred, this, [this, process](QProcess::ProcessError error) {
         if (error != QProcess::FailedToStart) return;
-        AppendLine(exportProcess_->errorString()); exportProcess_->deleteLater(); exportProcess_ = nullptr;
+        AppendLine(process->errorString());
+        process->deleteLater();
+        exportProcess_ = nullptr;
+        statusBar()->clearMessage();
+        QMessageBox::warning(this, Tr("Сборка игры", "Game Build"),
+            Tr("Не удалось запустить EngineRuntime.exe для сборки.", "Could not start EngineRuntime.exe for the build."));
     });
-    exportProcess_->start(QDir(QCoreApplication::applicationDirPath()).filePath("EngineRuntime.exe"),
-        {"--export-project", QString::fromUtf8(host_->host().projectFile), "--destination", QDir(parent).filePath(name)});
+    statusBar()->showMessage(Tr("Сборка и проверка игры…", "Building and checking the game…"));
+    process->start(QDir(QCoreApplication::applicationDirPath()).filePath("EngineRuntime.exe"),
+        {"--export-project", QString::fromUtf8(host_->host().projectFile), "--destination", destination});
 }

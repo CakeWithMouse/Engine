@@ -55,6 +55,9 @@
   <Error Condition="'@(ReleaseCrt)'==''" Text="Visual C++ x64 redistributable DLLs are missing; install the MSVC redistributable component before packaging." />
   <Copy SourceFiles="@(ReleaseCrt)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
 </Target>
+<Target Name="DeployGameExecutable" AfterTargets="Build" Condition="'$(Configuration)'=='Release'">
+  <MSBuild Projects="GameExecutable.vcxproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform);PlatformToolset=$(PlatformToolset);OutDir=$(OutDir)" />
+</Target>
 <Import Project="../BuildSupport/AssimpRuntime.targets" />
 
 </Project>
