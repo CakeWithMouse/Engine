@@ -302,6 +302,49 @@ inline void Run()
         }
     }
 
+    // 8. Virtual path normalization (Task L)
+    {
+        QTemporaryDir temp;
+        check(temp.isValid(), "Temporary directory for normalization tests created");
+        const QString root = temp.path();
+        QDir(root).mkpath(QStringLiteral("Scripts"));
+        QDir(root).mkpath(QStringLiteral("AI"));
+
+        // Empty path
+        check(EditorCore::NormalizeVirtualPath(QString()).isEmpty(), "Empty path normalizes to empty");
+
+        // Already virtual path with /Game/
+        check(EditorCore::NormalizeVirtualPath(QStringLiteral("/Game/Scripts/Hero.vscript")) == QStringLiteral("/Game/Scripts/Hero.vscript"),
+              "Virtual path starting with /Game/ preserved");
+        check(EditorCore::NormalizeVirtualPath(QStringLiteral("/Game/AI/Enemy.fsm")) == QStringLiteral("/Game/AI/Enemy.fsm"),
+              "Virtual path starting with /Game/ AI machine preserved");
+
+        // Virtual path without leading slash Game/
+        check(EditorCore::NormalizeVirtualPath(QStringLiteral("Game/Scripts/Hero.vscript")) == QStringLiteral("/Game/Scripts/Hero.vscript"),
+              "Virtual path Game/... gets leading slash");
+
+        // Backslashes
+        check(EditorCore::NormalizeVirtualPath(QStringLiteral("\\Game\\Scripts\\Hero.vscript")) == QStringLiteral("/Game/Scripts/Hero.vscript"),
+              "Backslashes in virtual path normalized");
+
+        // Relative path inside project
+        check(EditorCore::NormalizeVirtualPath(QStringLiteral("Scripts/Hero.vscript"), root) == QStringLiteral("/Game/Scripts/Hero.vscript"),
+              "Relative path inside project gets /Game/ prefix");
+
+        // Absolute disk path inside content root
+        const QString fullScriptDiskPath = QDir(root).filePath(QStringLiteral("Scripts/Hero.vscript"));
+        check(EditorCore::NormalizeVirtualPath(fullScriptDiskPath, root) == QStringLiteral("/Game/Scripts/Hero.vscript"),
+              "Absolute disk path inside content root maps to /Game/...");
+
+        const QString fullAiDiskPath = QDir(root).filePath(QStringLiteral("AI/Enemy.fsm"));
+        check(EditorCore::NormalizeVirtualPath(fullAiDiskPath, root) == QStringLiteral("/Game/AI/Enemy.fsm"),
+              "Absolute AI disk path inside content root maps to /Game/...");
+
+        // Whitespace trimming
+        check(EditorCore::NormalizeVirtualPath(QStringLiteral("  /Game/Scripts/Hero.vscript  ")) == QStringLiteral("/Game/Scripts/Hero.vscript"),
+              "Surrounding whitespace trimmed");
+    }
+
     std::printf("AssetPickerDialog tests: %d checks passed\n", checks);
 }
 

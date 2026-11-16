@@ -20,6 +20,8 @@
 #include <QDialogButtonBox>
 #include <QMessageBox>
 #include <QLabel>
+#include <QJsonArray>
+#include <QJsonDocument>
 
 void EditorMainWindow::OpenUIEditor(const QString& path) {
     const auto key=QFileInfo(path).absoluteFilePath();
@@ -101,6 +103,9 @@ void EditorMainWindow::BuildToolsMenu()
         [this](const CommandContext& ctx) {
             if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
                 return false;
+            const uint64_t targetId = ctx.parameters.value(QStringLiteral("objectId"), selectedId_).toULongLong();
+            if (targetId == 0)
+                return false;
             QString script = ctx.parameters.value(QStringLiteral("script")).toString();
             if (script.isEmpty()) {
                 AssetPickerDialog picker(EditorCore::AssetKind::Script, QString::fromUtf8(host_->host().contentRoot), QString(), this);
@@ -108,7 +113,12 @@ void EditorMainWindow::BuildToolsMenu()
                 script = picker.SelectedVirtualPath();
             }
             if (script.isEmpty()) return false;
-            UseAsset(script);
+            const QString normalized = EditorCore::NormalizeVirtualPath(script, QString::fromUtf8(host_->host().contentRoot));
+            EditorCommand c;
+            c.type = EditorCommand::SetScript;
+            c.objectId = targetId;
+            c.path = normalized;
+            host_->PostCommand(c);
             return true;
         },
         [this]() {
@@ -123,6 +133,9 @@ void EditorMainWindow::BuildToolsMenu()
         [this](const CommandContext& ctx) {
             if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
                 return false;
+            const uint64_t targetId = ctx.parameters.value(QStringLiteral("objectId"), selectedId_).toULongLong();
+            if (targetId == 0)
+                return false;
             QString machine = ctx.parameters.value(QStringLiteral("machine")).toString();
             if (machine.isEmpty()) {
                 AssetPickerDialog picker(EditorCore::AssetKind::AiMachine, QString::fromUtf8(host_->host().contentRoot), QString(), this);
@@ -130,7 +143,14 @@ void EditorMainWindow::BuildToolsMenu()
                 machine = picker.SelectedVirtualPath();
             }
             if (machine.isEmpty()) return false;
-            SetSelectedProperty(QStringLiteral("/stateMachine"), machine);
+            const QString normalized = EditorCore::NormalizeVirtualPath(machine, QString::fromUtf8(host_->host().contentRoot));
+            const QByteArray json = QJsonDocument(QJsonArray{normalized}).toJson(QJsonDocument::Compact);
+            EditorCommand c;
+            c.type = EditorCommand::SetProperty;
+            c.objectId = targetId;
+            c.path = QStringLiteral("/stateMachine");
+            c.name = QString::fromUtf8(json);
+            host_->PostCommand(c);
             return true;
         },
         [this]() {

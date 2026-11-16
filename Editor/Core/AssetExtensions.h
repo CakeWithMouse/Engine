@@ -129,6 +129,36 @@ inline bool ReimportSourceMatches(const QString& assetPath, const QString& sourc
     return kind != AssetKind::Unknown && KindForFile(sourcePath) == kind;
 }
 
+inline QString NormalizeVirtualPath(const QString& path, const QString& contentRoot = QString())
+{
+    if (path.isEmpty())
+        return QString();
+
+    const QString clean = QDir::fromNativeSeparators(path.trimmed());
+    if (clean.startsWith(QStringLiteral("/Game/"), Qt::CaseInsensitive))
+        return QStringLiteral("/Game/") + clean.mid(6);
+    if (clean.startsWith(QStringLiteral("Game/"), Qt::CaseInsensitive))
+        return QStringLiteral("/Game/") + clean.mid(5);
+
+    if (!contentRoot.isEmpty() && QDir(contentRoot).exists())
+    {
+        const QDir root(contentRoot);
+        const QString rel = root.relativeFilePath(QFileInfo(path).absoluteFilePath());
+        if (rel != QStringLiteral("..") &&
+            !rel.startsWith(QStringLiteral("../")) &&
+            !rel.startsWith(QStringLiteral("..\\")) &&
+            !QDir::isAbsolutePath(rel))
+        {
+            return QStringLiteral("/Game/") + QDir::fromNativeSeparators(rel);
+        }
+    }
+
+    if (!clean.startsWith(QLatin1Char('/')) && !clean.contains(QLatin1Char(':')))
+        return QStringLiteral("/Game/") + clean;
+
+    return clean;
+}
+
 struct ProjectAssetItem
 {
     QString virtualPath;  // "/Game/Models/Hero.glb"
