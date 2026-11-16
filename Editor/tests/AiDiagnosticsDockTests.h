@@ -4,6 +4,7 @@
 #include "DockLayoutManager.h"
 #include "CommandRegistry.h"
 #include "EditorTheme.h"
+#include "SettingsService.h"
 
 #include <QApplication>
 #include <QDockWidget>
@@ -61,6 +62,73 @@ inline void Run()
                   ("AiLayer" + std::to_string(i) + " found").c_str());
         }
         checks += 13;
+
+        // Task H: Structure, legend, details, and command synchronization
+        if (!CommandRegistry::Instance().HasCommand(QStringLiteral("View.ToggleAiDiagnostics")))
+        {
+            CommandDef def;
+            def.id = QStringLiteral("View.ToggleAiDiagnostics");
+            def.title = QStringLiteral("Toggle AI Diagnostics");
+            def.handler = [](const CommandContext& ctx) {
+                bool current = SettingsService::Instance().GetValue(QStringLiteral("ai/enabled"), false).toBool();
+                bool next = ctx.parameters.contains(QStringLiteral("enabled"))
+                    ? ctx.parameters.value(QStringLiteral("enabled")).toBool()
+                    : !current;
+                SettingsService::Instance().SetValue(QStringLiteral("ai/enabled"), next);
+                return true;
+            };
+            CommandRegistry::Instance().RegisterCommand(def);
+        }
+
+        auto* detailsCard = panel.findChild<QWidget*>(QStringLiteral("AiDetailsCard"));
+        Check(detailsCard != nullptr, "AiDetailsCard found");
+        auto* cardObj = dynamic_cast<CollapsibleCard*>(detailsCard);
+        Check(cardObj != nullptr && (cardObj->Title().contains(QStringLiteral("память")) || cardObj->Title().contains(QStringLiteral("Memory"))),
+              "AiDetailsCard has updated title");
+
+        auto* detailsEdit = panel.findChild<QPlainTextEdit*>(QStringLiteral("AiDetails"));
+        Check(detailsEdit != nullptr, "AiDetails found");
+        Check(detailsEdit->minimumHeight() >= 150, "AiDetails has minimumHeight >= 150");
+        Check(detailsEdit->sizePolicy().verticalPolicy() == QSizePolicy::MinimumExpanding, "AiDetails expands vertically");
+
+        auto* legend = panel.findChild<QLabel*>(QStringLiteral("AiLegend"));
+        Check(legend != nullptr, "AiLegend found");
+        Check(legend->text().contains(QStringLiteral("Проход")) || legend->text().contains(QStringLiteral("Walkable")),
+              "AiLegend has compact legend text");
+
+        auto* infoBtnWidget = panel.findChild<QToolButton*>(QStringLiteral("AiLegendInfoButton"));
+        Check(infoBtnWidget != nullptr, "AiLegendInfoButton found");
+        auto* infoBtn = dynamic_cast<InfoButton*>(infoBtnWidget);
+        Check(infoBtn != nullptr, "AiLegendInfoButton is InfoButton");
+        infoBtn->click();
+        QApplication::processEvents();
+        Check(infoBtn->Popup() != nullptr && infoBtn->Popup()->isVisible(), "AiLegendInfoButton popup opens on click");
+        auto* popupText = infoBtn->Popup()->findChild<QLabel*>(QStringLiteral("InfoPopupText"));
+        Check(popupText != nullptr && (popupText->text().contains(QStringLiteral("Зеленый")) || popupText->text().contains(QStringLiteral("Green"))),
+              "InfoPopupText contains layer legend text");
+        infoBtn->Popup()->hide();
+
+        auto* cellInfo = panel.findChild<QLabel*>(QStringLiteral("AiCellInfo"));
+        Check(cellInfo != nullptr, "AiCellInfo found");
+        Check(cellInfo->text().contains(QStringLiteral("Клетка")) || cellInfo->text().contains(QStringLiteral("Cell")),
+              "AiCellInfo shows initial compact hint");
+
+        auto* cellDetails = panel.findChild<QWidget*>(QStringLiteral("AiCellDetails"));
+        Check(cellDetails != nullptr, "AiCellDetails found");
+        Check(cellDetails->isHidden(), "AiCellDetails is initially hidden when no cell is hovered");
+
+        // Sync test: View.ToggleAiDiagnostics command <-> AiEnabled checkbox <-> SettingsService
+        auto* aiEnabled = panel.findChild<QCheckBox*>(QStringLiteral("AiEnabled"));
+        const bool prevEnabled = aiEnabled->isChecked();
+        CommandRegistry::Instance().Execute(QStringLiteral("View.ToggleAiDiagnostics"), {{QStringLiteral("enabled"), !prevEnabled}});
+        Check(aiEnabled->isChecked() == !prevEnabled, "AiEnabled checkbox synced from View.ToggleAiDiagnostics command");
+        Check(SettingsService::Instance().GetValue(QStringLiteral("ai/enabled")).toBool() == !prevEnabled,
+              "SettingsService ai/enabled synced from View.ToggleAiDiagnostics command");
+
+        // Restore
+        CommandRegistry::Instance().Execute(QStringLiteral("View.ToggleAiDiagnostics"), {{QStringLiteral("enabled"), prevEnabled}});
+        Check(aiEnabled->isChecked() == prevEnabled, "AiEnabled checkbox restored");
+        checks += 11;
     }
 
     // 2. Dock lifecycle: Open, Close, Reopen

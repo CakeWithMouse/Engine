@@ -124,6 +124,7 @@
         <ClInclude Include="DockRedockTests.h"/>
         <ClInclude Include="ViewportBillboardTests.h"/>
         <ClInclude Include="UiSmokeTests.h"/>
+        <ClInclude Include="..\UI\InfoButton.h"/>
     </ItemGroup>
 
     <ItemGroup>

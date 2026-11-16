@@ -63,6 +63,8 @@ public:
         UpdateHeaderText();
     }
 
+    const QString& Title() const { return titleText_; }
+
     void SetExpanded(bool exp)
     {
         if (expanded_ == exp)

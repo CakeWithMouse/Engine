@@ -232,6 +232,8 @@ void EditorMainWindow::BuildUi()
     actGrid_ = addToggle(Tr("Сетка", "Grid"), QStringLiteral("View.ToggleGrid"), QStringLiteral("view/grid"));
     actGizmo_ = addToggle(Tr("Гизмо", "Gizmo"), QStringLiteral("View.ToggleGizmo"), QStringLiteral("view/gizmo"));
     actIcons_ = addToggle(Tr("Иконки объектов", "Object Icons"), QStringLiteral("View.ToggleIcons"), QStringLiteral("view/icons"));
+    actAiDiag_ = addToggle(Tr("Показывать диагностику AI", "Show AI diagnostics"), QStringLiteral("View.ToggleAiDiagnostics"), QStringLiteral("ai/enabled"));
+    actAiDiag_->setObjectName(QStringLiteral("ViewAiDiagnostics"));
     auto* cameraGuides = viewMenu_->addAction(Tr("Камеры: направление и границы", "Cameras: direction and frustum"));
     cameraGuides->setObjectName("ViewCameraGuides");
     cameraGuides->setCheckable(true);
@@ -241,6 +243,7 @@ void EditorMainWindow::BuildUi()
         if (actGrid_) actGrid_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/grid"), true).toBool());
         if (actGizmo_) actGizmo_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/gizmo"), true).toBool());
         if (actIcons_) actIcons_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/icons"), true).toBool());
+        if (actAiDiag_) actAiDiag_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("ai/enabled"), false).toBool());
     });
 
     QMenu* aaMenu = viewMenu_->addMenu(Tr("Сглаживание", "Anti-aliasing"));
@@ -262,7 +265,7 @@ void EditorMainWindow::BuildUi()
 
     QMenu* viewMenu = viewMenu_;
 
-    for (QDockWidget* d : {static_cast<QDockWidget*>(viewportDock_), static_cast<QDockWidget*>(consoleDock_), static_cast<QDockWidget*>(fileDock_), static_cast<QDockWidget*>(sceneObjectsDock_), static_cast<QDockWidget*>(inspectorDock_), static_cast<QDockWidget*>(aiDiagnosticsDock_)})
+    for (QDockWidget* d : {static_cast<QDockWidget*>(viewportDock_), static_cast<QDockWidget*>(consoleDock_), static_cast<QDockWidget*>(fileDock_), static_cast<QDockWidget*>(sceneObjectsDock_), static_cast<QDockWidget*>(inspectorDock_)})
         if (d) viewMenu->addAction(d->toggleViewAction());
 
     statsLabel_ = new QLabel(this);

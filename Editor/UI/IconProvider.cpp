@@ -59,6 +59,7 @@ namespace
         if (name == QLatin1String("chevron-up") || name == QLatin1String("arrow-up")) return EditorIcons::TABLER_CHEVRON_UP;
         if (name == QLatin1String("chevron-down") || name == QLatin1String("arrow-down")) return EditorIcons::TABLER_CHEVRON_DOWN;
         if (name == QLatin1String("chevron-right") || name == QLatin1String("arrow-right")) return EditorIcons::TABLER_CHEVRON_RIGHT;
+        if (name == QLatin1String("help") || name == QLatin1String("info")) return EditorIcons::TABLER_HELP;
         if (name == QLatin1String("camera")) return EditorIcons::SVG_CAMERA;
         if (name == QLatin1String("particles")) return EditorIcons::SVG_PARTICLES;
         return nullptr;
@@ -213,6 +214,7 @@ QIcon IconProvider::AdjustmentsIcon(const QColor& color) { return GetIcon(QStrin
 QIcon IconProvider::ChevronUpIcon(const QColor& color) { return GetIcon(QStringLiteral("chevron-up"), color); }
 QIcon IconProvider::ChevronDownIcon(const QColor& color) { return GetIcon(QStringLiteral("chevron-down"), color); }
 QIcon IconProvider::ChevronRightIcon(const QColor& color) { return GetIcon(QStringLiteral("chevron-right"), color); }
+QIcon IconProvider::HelpIcon(const QColor& color) { return GetIcon(QStringLiteral("help"), color); }
 
 void IconProvider::UploadIcons(IEditorHost* host, bool force)
 {

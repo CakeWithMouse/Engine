@@ -44,4 +44,5 @@ public:
     static QIcon ChevronUpIcon(const QColor& color = QColor());
     static QIcon ChevronDownIcon(const QColor& color = QColor());
     static QIcon ChevronRightIcon(const QColor& color = QColor());
+    static QIcon HelpIcon(const QColor& color = QColor());
 };

@@ -229,6 +229,7 @@ private:
     QAction* actOverlays_ = nullptr;
     QAction* actGizmo_ = nullptr;
     QAction* actIcons_ = nullptr;
+    QAction* actAiDiag_ = nullptr;
     QAction* actThemeDark_ = nullptr;
     QAction* actThemeLight_ = nullptr;
     QAction* actLangRu_ = nullptr;

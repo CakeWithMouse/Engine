@@ -1,8 +1,10 @@
 #pragma once
 
 #include "CollapsibleCard.h"
+#include "CommandRegistry.h"
 #include "EditorLocale.h"
 #include "GizmoGeometry.h"
+#include "InfoButton.h"
 #include "InspectorCardStyle.h"
 #include "NoWheelDoubleSpinBox.h"
 #include "QtHost.h"
@@ -53,6 +55,7 @@ public:
         source_ = new QLabel(Tr("Слои выключены", "Layers off"), this);
         source_->setObjectName(QStringLiteral("AiSourceStatus"));
         source_->setWordWrap(true);
+        source_->setStyleSheet(QStringLiteral("font-size: 11px; padding: 3px 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.05);"));
         outer->addWidget(source_);
 
         auto* scroll = new QScrollArea(this);
@@ -86,18 +89,32 @@ public:
         {
             layers_[i]->setObjectName(QStringLiteral("AiLayer%1").arg(i));
             layerLayout->addWidget(layers_[i], i / 2, i % 2);
-            connect(layers_[i], &QCheckBox::toggled, this, [this] {
-                SaveSettings();
-                Poll();
-            });
+            connect(layers_[i], &QCheckBox::toggled, this, [this] { SaveSettings(); Poll(); });
         }
         cardLayers->ContentLayout()->addLayout(layerLayout);
 
-        legend_ = new QLabel(Tr("● Зелёный — проход   ● Красный — препятствие\n● Жёлтый — стоимость / тесно для агента\nA — старт, B — цель; голубой — направление",
-                                "Green: walkable · Red: blocked\nYellow: cost / insufficient clearance\nA: start · B: goal · Cyan: direction"), cardLayers->Content());
+        auto* legendRow = new QWidget(cardLayers->Content());
+        legendRow->setObjectName(QStringLiteral("AiLegendRow"));
+        auto* lRowLayout = new QHBoxLayout(legendRow);
+        lRowLayout->setContentsMargins(0, 2, 0, 2);
+        lRowLayout->setSpacing(6);
+
+        legend_ = new QLabel(legendRow);
         legend_->setObjectName(QStringLiteral("AiLegend"));
-        legend_->setWordWrap(true);
-        cardLayers->ContentLayout()->addWidget(legend_);
+        legend_->setText(Tr("● Проход  ● Препятствие  ● Стоимость  ● A/B  ● Направление",
+                            "● Walkable  ● Blocked  ● Cost  ● A/B  ● Direction"));
+        legend_->setStyleSheet(QStringLiteral("font-size: 11px;"));
+        lRowLayout->addWidget(legend_, 1);
+
+        auto* infoBtn = new InfoButton(
+            Tr("Легенда слоев:\n• Зеленый — проход\n• Красный — препятствие\n• Желтый — стоимость / тесно\n• A / B — старт и цель\n• Голубой — направление",
+               "Layer legend:\n• Green — walkable\n• Red — obstacle\n• Yellow — cost / clearance\n• A / B — start & goal\n• Cyan — direction"),
+            Tr("Layer legend:\n• Green — walkable\n• Red — obstacle\n• Yellow — cost / clearance\n• A / B — start & goal\n• Cyan — direction",
+               "Layer legend:\n• Green — walkable\n• Red — obstacle\n• Yellow — cost / clearance\n• A / B — start & goal\n• Cyan — direction"),
+            legendRow);
+        infoBtn->setObjectName(QStringLiteral("AiLegendInfoButton"));
+        lRowLayout->addWidget(infoBtn);
+        cardLayers->ContentLayout()->addWidget(legendRow);
         layout->addWidget(cardLayers);
 
         // Card 2: Subject
@@ -184,16 +201,33 @@ public:
         layout->addWidget(cardDisplay);
 
         // Card 5: Details
-        auto* cardDetails = new CollapsibleCard(Tr("Состояние и память", "State and Memory"), body, true);
-        cell_ = new QLabel(Tr("Наведите мышь на клетку во вьюпорте", "Hover a viewport cell"), cardDetails->Content());
+        auto* cardDetails = new CollapsibleCard(Tr("Состояние · задачи · память · история", "State · Tasks · Memory · History"), body, true);
+        cardDetails->setObjectName(QStringLiteral("AiDetailsCard"));
+
+        cell_ = new QLabel(Tr("Клетка: наведите курсор во вьюпорте", "Cell: hover viewport"), cardDetails->Content());
         cell_->setObjectName(QStringLiteral("AiCellInfo"));
         cell_->setWordWrap(true);
+        cell_->setStyleSheet(QStringLiteral("font-size: 11px;"));
         cardDetails->ContentLayout()->addWidget(cell_);
+
+        cellDetails_ = new QWidget(cardDetails->Content());
+        cellDetails_->setObjectName(QStringLiteral("AiCellDetails"));
+        auto* cdl = new QVBoxLayout(cellDetails_);
+        cdl->setContentsMargins(0, 0, 0, 0);
+        cellDetailsLabel_ = new QLabel(cellDetails_);
+        cellDetailsLabel_->setObjectName(QStringLiteral("AiCellDetailsLabel"));
+        cellDetailsLabel_->setWordWrap(true);
+        cellDetailsLabel_->setStyleSheet(QStringLiteral("font-size: 11px; font-weight: bold;"));
+        cdl->addWidget(cellDetailsLabel_);
+        cellDetails_->setVisible(false);
+        cardDetails->ContentLayout()->addWidget(cellDetails_);
 
         details_ = new QPlainTextEdit(cardDetails->Content());
         details_->setObjectName(QStringLiteral("AiDetails"));
         details_->setReadOnly(true);
-        details_->setMinimumHeight(120);
+        details_->setMinimumHeight(150);
+        details_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        details_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
         cardDetails->ContentLayout()->addWidget(details_);
         layout->addWidget(cardDetails);
 
@@ -201,7 +235,23 @@ public:
 
         LoadSettings();
 
-        connect(enabled_, &QCheckBox::toggled, this, [this] { SaveSettings(); Poll(); });
+        connect(enabled_, &QCheckBox::toggled, this, [this](bool checked) {
+            CommandRegistry::Instance().Execute(QStringLiteral("View.ToggleAiDiagnostics"), {{QStringLiteral("enabled"), checked}});
+            SaveSettings();
+            Poll();
+        });
+        connect(&CommandRegistry::Instance(), &CommandRegistry::CommandExecuted, this, [this](const QString& id, bool success) {
+            if (success && id == QStringLiteral("View.ToggleAiDiagnostics"))
+            {
+                const bool val = SettingsService::Instance().GetValue(QStringLiteral("ai/enabled"), false).toBool();
+                if (enabled_->isChecked() != val)
+                {
+                    QSignalBlocker block(enabled_);
+                    enabled_->setChecked(val);
+                    Poll();
+                }
+            }
+        });
         for (auto* cb : {selected_, agentRadius_, xray_})
             connect(cb, &QCheckBox::toggled, this, [this] { SaveSettings(); Poll(); });
         for (auto* sp : {radius_, height_, extent_})
@@ -394,10 +444,13 @@ private:
     {
         if (status != EngineSceneOk)
         {
-            source_->setText(Tr("Диагностика недоступна. Пересоберите игровой модуль с текущим SDK.",
-                                "Diagnostics unavailable. Rebuild the game module with the current SDK."));
+            source_->setText(Tr("Диагностика недоступна: модуль игры собран без поддержки AI. Соберите проект через run-editor.ps1 (без флага -Fast).",
+                                "Diagnostics unavailable: game module was built without AI support. Build project via run-editor.ps1 (without -Fast flag)."));
+            source_->setStyleSheet(QStringLiteral("font-size: 11px; padding: 6px 10px; border-radius: 4px; background: rgba(230, 160, 40, 0.15); border: 1px solid rgba(230, 160, 40, 0.35); color: #e6a028;"));
+            details_->clear();
             return;
         }
+        source_->setStyleSheet(QStringLiteral("font-size: 11px; padding: 3px 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.05);"));
         auto r = QJsonDocument::fromJson(data).object();
         const auto src = r["source"].toString();
         if (src == "off")
@@ -465,14 +518,21 @@ private:
         if (r.contains("cell"))
         {
             auto c = r["cell"].toObject();
-            cell_->setText(
-                Tr("Клетка [%1, %2] · стоимость %3\nЗазор %4 м · %5", "Cell [%1, %2] · cost %3\nClearance %4 m · %5")
-                    .arg(c["x"].toInt()).arg(c["z"].toInt()).arg(c["cost"].toInt())
-                    .arg(c["clearance"].toDouble(), 0, 'f', 2)
-                    .arg(c["walkable"].toBool() ? Tr("проходима", "walkable") : Tr("непроходима", "blocked")));
+            cell_->setText(Tr("Клетка [%1, %2] · стоимость %3", "Cell [%1, %2] · cost %3")
+                               .arg(c["x"].toInt()).arg(c["z"].toInt()).arg(c["cost"].toInt()));
+            QString details = Tr("Зазор: %1 м · Статус: %2", "Clearance: %1 m · Status: %2")
+                                  .arg(c["clearance"].toDouble(), 0, 'f', 2)
+                                  .arg(c["walkable"].toBool() ? Tr("проходима", "walkable") : Tr("непроходима", "blocked"));
+            if (c.contains("modifier"))
+                details += Tr("\nВлияние: %1", "\nModifier: %1").arg(c["modifier"].toString());
+            cellDetailsLabel_->setText(details);
+            cellDetails_->setVisible(true);
         }
         else
-            cell_->setText(Tr("Наведите мышь на клетку во вьюпорте", "Hover a viewport cell"));
+        {
+            cell_->setText(Tr("Клетка: наведите курсор во вьюпорте", "Cell: hover viewport"));
+            cellDetails_->setVisible(false);
+        }
 
         const QString details = r["details"].toString(
             Tr("Выберите AI-персонажа в сцене или отряд в списке. Состояния, задачи и память доступны в Play.",
@@ -489,7 +549,8 @@ private:
     QCheckBox *enabled_{nullptr}, *selected_{nullptr}, *agentRadius_{nullptr}, *xray_{nullptr};
     std::array<QCheckBox*, 8> layers_{};
     QComboBox* units_{nullptr};
-    QLabel *source_{nullptr}, *legend_{nullptr}, *cell_{nullptr}, *probeStatus_{nullptr};
+    QLabel *source_{nullptr}, *legend_{nullptr}, *cell_{nullptr}, *cellDetailsLabel_{nullptr}, *probeStatus_{nullptr};
+    QWidget* cellDetails_{nullptr};
     QPlainTextEdit* details_{nullptr};
     NoWheelDoubleSpinBox *radius_{nullptr}, *height_{nullptr}, *extent_{nullptr}, *fromX_{nullptr}, *fromZ_{nullptr}, *toX_{nullptr}, *toZ_{nullptr};
 };
