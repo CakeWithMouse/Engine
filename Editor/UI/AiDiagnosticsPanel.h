@@ -317,8 +317,8 @@ protected:
 
         float origin[3], dir[3], hit[3], point[3]{0, static_cast<float>(height_->value()), 0}, normal[3]{0, 1, 0};
         hover_ = GizmoGeometry::ScreenToWorldRay(
-                     static_cast<float>(mouse->position().x() * cam.width / std::max(1, viewport_->width())),
-                     static_cast<float>(mouse->position().y() * cam.height / std::max(1, viewport_->height())), cam, origin, dir) &&
+                     static_cast<float>(mouse->position().x() * cam.width / (std::max)(1, viewport_->width())),
+                     static_cast<float>(mouse->position().y() * cam.height / (std::max)(1, viewport_->height())), cam, origin, dir) &&
                  GizmoGeometry::RayPlaneIntersection(origin, dir, point, normal, hit);
         if (hover_)
         {
@@ -441,7 +441,7 @@ private:
                 auto u = v.toObject();
                 units_->addItem(u["name"].toString(), u["id"].toInt());
             }
-            units_->setCurrentIndex(std::max(0, units_->findData(chosen)));
+            units_->setCurrentIndex((std::max)(0, units_->findData(chosen)));
         }
 
         const auto path = r["path"].toString();

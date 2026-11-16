@@ -28,15 +28,54 @@
 
 ---
 
-## Эталон тестов (Baseline ветки fix/editor-ui-polish @ e7bcbcd)
+## Сессия fix/editor-ui-polish (Задачи G–P)
+
+### Чек-лист задач
+- [x] **Задача G (fix(ui)):** Колесо мыши не меняет значения нигде (независимо от фокуса). `WheelGuard` переработан: `FindGuardedControl` защищает `QAbstractSpinBox`, `QComboBox`, `QAbstractSlider` и их дочерние элементы (`QLineEdit` внутри спинбоксов/комбо) от любых мутаций значений колесом мыши как в сфокусированном, так и в несфокусированном состоянии. Колесо пересылается родительскому скроллу (`QScrollArea`); при отсутствии скролла игнорируется. Фокусная политика: колесо не забирает фокус (`Qt::WheelFocus` сбрасывается в `Qt::StrongFocus`). Клавиатура и drag работают в штатном режиме. Исключения сохранены строго по регламенту: зум камеры во вьюпорте (`ViewportWidget`), зум графов (`MaterialGraphWidget`, `GraphEditorWidget`), зум UI-канваса (`UIEditorCanvas`), списки/деревья/скроллбары (`QScrollBar`, `QAbstractItemView`) и выпадающий список комбобокса в открытом состоянии. Добавлены `setObjectName` элементам `PlaySettingsDialog` (`PlayDistance`, `PlayHeight`, `PlaySensitivity`). Написан расширенный юнит-тест в `WheelGuardTests.h` (113 checks PASS) с проверкой иммунитета к колесу по `objectName` на всех полях инспектора всех типов объектов, в редакторе материалов, редакторе UI, диалогах импорта/запуска и панели диагностики.
+- [ ] **Задача H (feat(ui)):** Панель «Навигация и диагностика»: меню и логика отображения.
+- [ ] **Задача I (fix(ui)):** Стрелка раскрытия папок в Content Browser с поддержкой High-DPI.
+- [ ] **Задача J (chore(build)):** Режимы `run-editor.ps1` (-Fast vs без -Fast) и сборка модулей физики/AI.
+- [ ] **Задача K (diag/test):** Проверка пути команды `Scene.ReplaceModel` и сохранности материала при замене модели.
+- [ ] **Задача L (fix(ui)):** Нормализация путей ресурсов из `AssetPickerDialog` для скриптов и AI-машин.
+- [ ] **Задача M (refactor(ui)):** Единый базовый класс карточки инспектора и стиль всех карточек без локального хардкода.
+- [ ] **Задача N (feat(ui)):** Замена длинных описаний в карточках камеры и инспектора на компактные подписи с `InfoButton`.
+- [ ] **Задача O (docs(backlog)):** Фиксация идеи кнопки «+» (добавление компонентов) в Backlog для архитектора.
+- [ ] **Задача P (audit/test):** Финальная сквозная сверка всех типов объектов и проверок протокола.
+
+---
+
+## Эталон тестов (Baseline ветки fix/editor-ui-polish на старте задач G–P)
 
 | Тест / Скрипт | Результат (эталон) | Примечание |
 |---|---|---|
-| Сборка `EditorModule` (Debug) | **PASS** | 0 ошибок, 8 warnings C4996 (`QMenu::addAction` legacy) |
+| Сборка `EditorModule` (Debug) | **PASS** | 0 ошибок, warnings C4996 (`QMenu::addAction` legacy) |
 | `Editor/tests/CoreTests.exe` | **1105/1105 PASS** | 1105 checks passed |
 | `Editor/tests/HostTests.exe` | **159/159 PASS** | 159 checks passed |
-| `Editor/tests/UiTests.exe` | **744 PASS, 1 FAIL (Красная база main)** | 744 checks passed (15 helper + 37 high-dpi + 38 import dialog + 18 edit import + 5 v2 + 15 delete + 8 refresh + 1 jitter + 4 model replace + 38 card style + 10 separator + 7 redock + 38 geom + 57 picker + 19 content icon + 77 content type + 419 smoke). 1 сбой в `ViewportBillboardTests.h:216` (`game camera tint from dark palette`: коммит `314b991` изменил предикат камеры на `CameraGuide::IsCamera(obj) && obj.gameplayKind != 2`, перехватив `Gameplay.Camera` с `gameplayKind == 0` до ветки `iconGameCamera`). |
-| `Editor/tools/check.ps1 -Quick` | **FAIL (Красная база main)** | FAIL: Hardcoded Cyrillic detected outside Tr() in `Editor/UI/AiDiagnosticsPanel.h:58-60` (126 characters, коммит `0947535`). |
+| `Editor/tests/UiTests.exe` | **896 PASS, 1 FAIL (Красная база main)** | 896 checks passed across 20 suites. Все наборы запускаются и доходят до конца. 1 сбой в `ViewportBillboardTests.h:216` (`game camera tint from dark palette`: базовый красный main, коммит `314b991`). |
+| `Editor/tools/check.ps1 -Quick` | **FAIL (Красная база main)** | Причина завершения кодом 1: `UiTests.exe` вернул exit code 1 из-за сбоя базового `ViewportBillboardTests.h:216`. Проверка локализации (кириллица вне Tr) успешно проходит. |
+
+---
+
+---
+
+## Разведка и решения (Задачи G–P)
+
+### Разведка G (Колесо мыши не меняет значения нигде)
+- **Факты из кода:**
+  - В предыдущей реализации `WheelGuard.h:123` стояло условие `if (!HasFocus(widget))`. Если виджет получал фокус кликом/табом, колесо мыши меняло значение поля (`QDoubleSpinBox`, `QSpinBox`, `QComboBox`, `QSlider`).
+  - В Qt `QAbstractSpinBox` содержит дочерний `QLineEdit`. Событие колеса над текстовым полем спинбокса сначала приходит в `QLineEdit`, который не распознавался как `IsGuarded`, после чего внутренний фильтр Qt `QAbstractSpinBox::eventFilter` перехватывал его и вызывал `wheelEvent` с мутацией значения.
+  - В `ViewportHeaderBar.h:101` комбобокс `comboGizmoSnapStep` находился внутри `ViewportContainer`, который был внесен в `IsExempt` целиком, из-за чего колесо над шагом снаппинга меняло значение.
+  - `NoWheelDoubleSpinBox.h` переопределял только `wheelEvent` через `ignore()`, не защищая от колеса при наличии фокуса в подклассах и на дочернем lineEdit.
+  - В ряде диалогов (`PlaySettingsDialog`) спинбоксы не имели `objectName`, что затрудняло таргетированное тестирование.
+- **Решение и реализация G:**
+  - В `WheelGuard.h` реализован метод `FindGuardedControl`: восходящий поиск целевого элемента (`QAbstractSpinBox`, `QComboBox`, `QAbstractSlider`) вверх по иерархии родителей. Защищены как сами элементы, так и их внутренние части (`QLineEdit`, стрелки, кнопки).
+  - Снято условие `!HasFocus(widget)`: значения защищенных элементов ввода НИКОГДА не меняются от колеса мыши, независимо от фокуса (и со сфокусированным, и с несфокусированным состоянием).
+  - Событие колеса всегда пересылается родителю защищенного элемента (`guarded->parentWidget()`), обеспечивая естественную прокрутку объемлющего `QScrollArea` (инспектор, окно настроек и т.д.). При отсутствии скролла событие безопасно игнорируется.
+  - Защита фокуса: если у элемента установлен `Qt::WheelFocus`, он сбрасывается в `Qt::StrongFocus` (`ClickFocus | TabFocus`), исключая захват фокуса от колеса.
+  - Исключения строго по ТЗ: зум камеры во вьюпорте (`ViewportWidget`), зум графов (`MaterialGraphWidget`, `GraphEditorWidget`), зум UI-канваса (`UIEditorCanvas`), скролл списков/деревьев/таблиц/скроллбаров (`QScrollBar`, `QAbstractItemView`) и выпадающий список комбобокса в открытом состоянии.
+  - `comboGizmoSnapStep` защищен: из списка исключений исключен контейнер `ViewportContainer`, исключение оставлено за самим `ViewportWidget`.
+  - В `PlaySettingsDialog.cpp` спинбоксам присвоены `objectName`: `PlayDistance`, `PlayHeight`, `PlaySensitivity`. Вёрстка окна вынесена в `BuildUi()`.
+  - В `WheelGuardTests.h` написан исчерпывающий тест (113 checks PASS) на проверку иммунитета к колесу в сфокусированном и несфокусированном состояниях по `objectName` на всех полях инспектора, редактора материалов, редактора UI, диалогов и шапки вьюпорта.
 
 ---
 

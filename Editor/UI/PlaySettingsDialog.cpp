@@ -15,6 +15,54 @@ PlaySettingsDialog::PlaySettingsDialog(const std::vector<PlaySettingsObjectView>
     : QDialog(parent), objects_(objects)
 {
     setWindowTitle(Tr("Персонаж и камера Play", "Play Character & Camera"));
+    BuildUi();
+}
+
+void PlaySettingsDialog::BuildUi()
+{
+    auto* form = new QFormLayout(this);
+    character_ = new QComboBox(this);
+    camera_ = new QComboBox(this);
+    character_->setObjectName(QStringLiteral("PlayCharacter"));
+    camera_->setObjectName(QStringLiteral("PlayCamera"));
+
+    character_->addItem(Tr("Без управления персонажем", "No Character Control"), QVariant::fromValue<qulonglong>(0));
+    camera_->addItem(Tr("Следовать за персонажем", "Follow Character"), QVariant::fromValue<qulonglong>(0));
+
+    for (const auto& o : objects_) {
+        auto* box = o.gameplayKind == 1 ? character_ : o.gameplayKind == 2 ? camera_ : nullptr;
+        if (box) box->addItem(QString::fromStdString(o.name), QVariant::fromValue<qulonglong>(o.id));
+    }
+
+    standard_ = new QCheckBox(Tr("WASD: движение, ПКМ + мышь: обзор", "WASD: movement, RMB + mouse: look"), this);
+
+    distance_ = new QDoubleSpinBox(this);
+    distance_->setObjectName(QStringLiteral("PlayDistance"));
+    distance_->setRange(0, 10000);
+
+    height_ = new QDoubleSpinBox(this);
+    height_->setObjectName(QStringLiteral("PlayHeight"));
+    height_->setRange(-10000, 10000);
+
+    sensitivity_ = new QDoubleSpinBox(this);
+    sensitivity_->setObjectName(QStringLiteral("PlaySensitivity"));
+    sensitivity_->setDecimals(4);
+    sensitivity_->setSingleStep(0.001);
+    sensitivity_->setRange(0, 1);
+
+    form->addRow(Tr("Персонаж", "Character"), character_);
+    form->addRow(Tr("Камера", "Camera"), camera_);
+    form->addRow(standard_);
+    form->addRow(Tr("Расстояние камеры", "Camera Distance"), distance_);
+    form->addRow(Tr("Высота камеры", "Camera Height"), height_);
+    form->addRow(Tr("Чувствительность обзора", "Look Sensitivity"), sensitivity_);
+    form->addRow(new QLabel(Tr("Добавьте персонажа в категории Персонажи.\nФиксированная камера использует трансформацию объекта.\nSpace: Stop, P: Pause. Для управления щёлкните viewport.",
+                               "Add a character in the Characters category.\nFixed camera uses object transform.\nSpace: Stop, P: Pause. Click viewport for controls."), this));
+
+    auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+    form->addRow(buttons);
+    connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
 }
 
 bool PlaySettingsDialog::Execute(uint64_t& outSettingsId, QString& outConfigJson)
@@ -34,62 +82,21 @@ bool PlaySettingsDialog::Execute(uint64_t& outSettingsId, QString& outConfigJson
         }
     }
 
-    auto* form = new QFormLayout(this);
-    auto* character = new QComboBox(this);
-    auto* camera = new QComboBox(this);
-    character->setObjectName(QStringLiteral("PlayCharacter"));
-    camera->setObjectName(QStringLiteral("PlayCamera"));
-
-    character->addItem(Tr("Без управления персонажем", "No Character Control"), QVariant::fromValue<qulonglong>(0));
-    camera->addItem(Tr("Следовать за персонажем", "Follow Character"), QVariant::fromValue<qulonglong>(0));
-
-    for (const auto& o : objects_) {
-        auto* box = o.gameplayKind == 1 ? character : o.gameplayKind == 2 ? camera : nullptr;
-        if (box) box->addItem(QString::fromStdString(o.name), QVariant::fromValue<qulonglong>(o.id));
-    }
-
-    character->setCurrentIndex((std::max)(0, character->findData(QVariant::fromValue<qulonglong>(data["character"].toInteger()))));
-    camera->setCurrentIndex((std::max)(0, camera->findData(QVariant::fromValue<qulonglong>(data["camera"].toInteger()))));
-
-    auto* standard = new QCheckBox(Tr("WASD: движение, ПКМ + мышь: обзор", "WASD: movement, RMB + mouse: look"), this);
-    standard->setChecked(data["standardControl"].toBool());
-
-    auto* distance = new QDoubleSpinBox(this);
-    distance->setRange(0, 10000);
-    distance->setValue(data["cameraDistance"].toDouble());
-
-    auto* height = new QDoubleSpinBox(this);
-    height->setRange(-10000, 10000);
-    height->setValue(data["cameraHeight"].toDouble());
-
-    auto* sensitivity = new QDoubleSpinBox(this);
-    sensitivity->setDecimals(4);
-    sensitivity->setSingleStep(0.001);
-    sensitivity->setRange(0, 1);
-    sensitivity->setValue(data["lookSensitivity"].toDouble());
-
-    form->addRow(Tr("Персонаж", "Character"), character);
-    form->addRow(Tr("Камера", "Camera"), camera);
-    form->addRow(standard);
-    form->addRow(Tr("Расстояние камеры", "Camera Distance"), distance);
-    form->addRow(Tr("Высота камеры", "Camera Height"), height);
-    form->addRow(Tr("Чувствительность обзора", "Look Sensitivity"), sensitivity);
-    form->addRow(new QLabel(Tr("Добавьте персонажа в категории Персонажи.\nФиксированная камера использует трансформацию объекта.\nSpace: Stop, P: Pause. Для управления щёлкните viewport.",
-                               "Add a character in the Characters category.\nFixed camera uses object transform.\nSpace: Stop, P: Pause. Click viewport for controls."), this));
-
-    auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
-    form->addRow(buttons);
-    connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
-    connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
+    character_->setCurrentIndex((std::max)(0, character_->findData(QVariant::fromValue<qulonglong>(data["character"].toInteger()))));
+    camera_->setCurrentIndex((std::max)(0, camera_->findData(QVariant::fromValue<qulonglong>(data["camera"].toInteger()))));
+    standard_->setChecked(data["standardControl"].toBool());
+    distance_->setValue(data["cameraDistance"].toDouble());
+    height_->setValue(data["cameraHeight"].toDouble());
+    sensitivity_->setValue(data["lookSensitivity"].toDouble());
 
     if (exec() != QDialog::Accepted) return false;
 
-    data["character"] = static_cast<qint64>(character->currentData().toULongLong());
-    data["camera"] = static_cast<qint64>(camera->currentData().toULongLong());
-    data["standardControl"] = standard->isChecked();
-    data["cameraDistance"] = distance->value();
-    data["cameraHeight"] = height->value();
-    data["lookSensitivity"] = sensitivity->value();
+    data["character"] = static_cast<qint64>(character_->currentData().toULongLong());
+    data["camera"] = static_cast<qint64>(camera_->currentData().toULongLong());
+    data["standardControl"] = standard_->isChecked();
+    data["cameraDistance"] = distance_->value();
+    data["cameraHeight"] = height_->value();
+    data["lookSensitivity"] = sensitivity_->value();
 
     outSettingsId = settingsId;
     outConfigJson = QString::fromUtf8(QJsonDocument(data).toJson(QJsonDocument::Compact));

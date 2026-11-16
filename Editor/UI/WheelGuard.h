@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QAbstractItemView>
 #include <QAbstractSlider>
 #include <QAbstractSpinBox>
 #include <QApplication>
@@ -9,6 +10,7 @@
 #include <QScrollBar>
 #include <QWheelEvent>
 #include <QWidget>
+#include <cstring>
 
 class WheelGuard : public QObject
 {
@@ -46,16 +48,39 @@ public:
         }
     }
 
+    static QWidget* FindGuardedControl(QWidget* widget)
+    {
+        if (!widget) return nullptr;
+        // Scrollbars are never guarded (they must scroll views)
+        if (qobject_cast<QScrollBar*>(widget)) return nullptr;
+
+        for (QWidget* w = widget; w; w = w->parentWidget())
+        {
+            if (qobject_cast<QScrollBar*>(w)) return nullptr;
+
+            // Direct check for spin/combo/slider
+            if (qobject_cast<QAbstractSpinBox*>(w) ||
+                qobject_cast<QComboBox*>(w) ||
+                qobject_cast<QAbstractSlider*>(w))
+            {
+                if (w->property("wheelGuardExempt").toBool())
+                    return nullptr;
+                return w;
+            }
+
+            // Exception: popup list view of an open QComboBox must be able to scroll its items
+            if (qobject_cast<QAbstractItemView*>(w)) return nullptr;
+
+            if (w->property("wheelGuardExempt").toBool())
+                return nullptr;
+        }
+        return nullptr;
+    }
+
     static bool IsGuarded(const QWidget* widget)
     {
         if (!widget) return false;
-        // Explicitly exclude scrollbars: scrollbars must handle wheel events to scroll views
-        if (qobject_cast<const QScrollBar*>(widget)) return false;
-
-        if (qobject_cast<const QAbstractSpinBox*>(widget)) return true;
-        if (qobject_cast<const QComboBox*>(widget)) return true;
-        if (qobject_cast<const QAbstractSlider*>(widget)) return true;
-        return false;
+        return FindGuardedControl(const_cast<QWidget*>(widget)) != nullptr;
     }
 
     static bool IsExempt(const QWidget* widget)
@@ -69,12 +94,10 @@ public:
             const QString name = w->objectName();
             if (name == QStringLiteral("Viewport") ||
                 name == QStringLiteral("ViewportWidget") ||
-                name == QStringLiteral("ViewportContainer") ||
                 name == QStringLiteral("MaterialGraphWidget") ||
                 name == QStringLiteral("GraphCanvas") ||
                 name == QStringLiteral("GraphEditorWidget") ||
-                name == QStringLiteral("UIEditorCanvas") ||
-                name == QStringLiteral("UIEditorWindow"))
+                name == QStringLiteral("UIEditorCanvas"))
             {
                 return true;
             }
@@ -115,24 +138,29 @@ protected:
         if (!widget)
             return QObject::eventFilter(watched, event);
 
-        if (guarding_ && watched == guardedTarget_)
+        // Avoid recursion during event forwarding
+        if (guarding_)
             return false;
 
-        if (IsGuarded(widget) && !IsExempt(widget))
+        QWidget* guarded = FindGuardedControl(widget);
+        if (guarded && !IsExempt(guarded))
         {
-            if (!HasFocus(widget))
+            // Focus policy: wheel should never grant focus (ClickFocus / TabFocus only)
+            if (guarded->focusPolicy() == Qt::WheelFocus)
             {
-                event->ignore();
-                if (QWidget* parent = widget->parentWidget())
-                {
-                    guarding_ = true;
-                    guardedTarget_ = parent;
-                    QApplication::sendEvent(parent, event);
-                    guarding_ = false;
-                    guardedTarget_ = nullptr;
-                }
-                return true; // Suppress value change on unfocused control
+                guarded->setFocusPolicy(Qt::StrongFocus);
             }
+
+            event->ignore();
+
+            // Forward event to parent of guarded control (e.g. scroll area)
+            if (QWidget* parent = guarded->parentWidget())
+            {
+                guarding_ = true;
+                QApplication::sendEvent(parent, event);
+                guarding_ = false;
+            }
+            return true; // Suppress value mutation on guarded control
         }
 
         return QObject::eventFilter(watched, event);
@@ -143,5 +171,4 @@ private:
     ~WheelGuard() override = default;
 
     bool guarding_{false};
-    QWidget* guardedTarget_{nullptr};
 };

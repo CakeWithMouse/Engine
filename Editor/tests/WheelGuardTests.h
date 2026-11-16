@@ -1,6 +1,12 @@
 #pragma once
 
 #include "WheelGuard.h"
+#include "ObjectInspectorPanel.h"
+#include "ImportSettingsDialog.h"
+#include "PlaySettingsDialog.h"
+#include "CodeClassDialog.h"
+#include "ViewportHeaderBar.h"
+#include "AiDiagnosticsPanel.h"
 
 #include <QApplication>
 #include <QComboBox>
@@ -14,6 +20,7 @@
 #include <QWidget>
 #include <iostream>
 #include <stdexcept>
+#include <string>
 
 namespace WheelGuardTests
 {
@@ -36,6 +43,47 @@ protected:
         event->accept();
     }
 };
+
+inline void TestWidgetWheelImmunity(QWidget* root, const QString& objectName, int& checks)
+{
+    auto* w = root->findChild<QWidget*>(objectName);
+    Check(w != nullptr, (std::string("control exists by objectName: ") + objectName.toStdString()).c_str());
+
+    double origVal = 0.0;
+    int origIdx = 0;
+    auto* dSpin = qobject_cast<QDoubleSpinBox*>(w);
+    auto* iSpin = qobject_cast<QSpinBox*>(w);
+    auto* combo = qobject_cast<QComboBox*>(w);
+    auto* slider = qobject_cast<QAbstractSlider*>(w);
+
+    if (dSpin) origVal = dSpin->value();
+    else if (iSpin) origVal = iSpin->value();
+    else if (combo) origIdx = combo->currentIndex();
+    else if (slider) origVal = slider->value();
+
+    const QPoint p(5, 5);
+    QWheelEvent wheelPos(QPointF(p), QPointF(w->mapToGlobal(p)),
+                         QPoint(0, 0), QPoint(0, 120),
+                         Qt::NoButton, Qt::NoModifier, Qt::NoScrollPhase, false);
+
+    // 1. Unfocused wheel test
+    w->clearFocus();
+    QApplication::sendEvent(w, &wheelPos);
+    if (dSpin) Check(dSpin->value() == origVal, (objectName.toStdString() + " unfocused value unchanged").c_str());
+    else if (iSpin) Check(iSpin->value() == origVal, (objectName.toStdString() + " unfocused value unchanged").c_str());
+    else if (combo) Check(combo->currentIndex() == origIdx, (objectName.toStdString() + " unfocused index unchanged").c_str());
+    else if (slider) Check(slider->value() == origVal, (objectName.toStdString() + " unfocused slider unchanged").c_str());
+    ++checks;
+
+    // 2. Focused wheel test
+    w->setFocus();
+    QApplication::sendEvent(w, &wheelPos);
+    if (dSpin) Check(dSpin->value() == origVal, (objectName.toStdString() + " focused value unchanged").c_str());
+    else if (iSpin) Check(iSpin->value() == origVal, (objectName.toStdString() + " focused value unchanged").c_str());
+    else if (combo) Check(combo->currentIndex() == origIdx, (objectName.toStdString() + " focused index unchanged").c_str());
+    else if (slider) Check(slider->value() == origVal, (objectName.toStdString() + " focused slider unchanged").c_str());
+    ++checks;
+}
 
 inline void Run()
 {
@@ -85,7 +133,7 @@ inline void Run()
         checks += 6;
     }
 
-    // 3. Unfocused wheel guard behavior (prevents accidental mutations)
+    // 3. WheelGuard event filter forwarding (focused and unfocused)
     {
         TestScrollReceiver parentWidget;
         parentWidget.resize(200, 200);
@@ -96,7 +144,7 @@ inline void Run()
         spin->clearFocus();
 
         auto* combo = new QComboBox(&parentWidget);
-        combo->addItems({"Alpha", "Beta", "Gamma"});
+        combo->addItems({QStringLiteral("Alpha"), QStringLiteral("Beta"), QStringLiteral("Gamma")});
         combo->setCurrentIndex(0);
         combo->clearFocus();
 
@@ -116,7 +164,6 @@ inline void Run()
         WheelGuard& guard = WheelGuard::Instance();
         guard.Install(qApp);
 
-        // Simulate wheel event over unfocused spinbox
         const QPoint pos(10, 10);
         const QPoint globalPos = spin->mapToGlobal(pos);
         QWheelEvent wheelDeltaPositive(
@@ -150,28 +197,32 @@ inline void Run()
         Check(parentWidget.receivedWheelEvents == 1, "parent widget received forwarded wheel event from slider");
         ++checks;
 
-        // 4. Focused control allows wheel mutation when user intentionally focuses it
+        // 4. Focused control NEVER mutates value on wheel (crucial Rule G!)
         spin->setFocus();
-        Check(WheelGuard::HasFocus(spin), "spin has focus");
         parentWidget.receivedWheelEvents = 0;
         QApplication::sendEvent(spin, &wheelDeltaPositive);
-        Check(spin->value() > 25.0, "focused QDoubleSpinBox accepts wheel event and updates value");
-        Check(parentWidget.receivedWheelEvents == 0, "parent did not receive event when child was focused");
-        checks += 3;
+        Check(spin->value() == 25.0, "focused QDoubleSpinBox does NOT change value on wheel");
+        Check(parentWidget.receivedWheelEvents == 1, "parent received forwarded event even when child was focused");
+        checks += 2;
 
-        guard.Uninstall(qApp);
-    }
+        combo->setFocus();
+        parentWidget.receivedWheelEvents = 0;
+        QApplication::sendEvent(combo, &wheelDeltaPositive);
+        Check(combo->currentIndex() == 0, "focused QComboBox does NOT change index on wheel");
+        Check(parentWidget.receivedWheelEvents == 1, "parent received forwarded event when combo focused");
+        checks += 2;
 
-    // 5. Scrollbars are never blocked by WheelGuard
-    {
-        TestScrollReceiver parentWidget;
+        slider->setFocus();
+        parentWidget.receivedWheelEvents = 0;
+        QApplication::sendEvent(slider, &wheelDeltaPositive);
+        Check(slider->value() == 40, "focused QSlider does NOT change value on wheel");
+        Check(parentWidget.receivedWheelEvents == 1, "parent received forwarded event when slider focused");
+        checks += 2;
+
+        // 5. Scrollbars are never blocked by WheelGuard
         auto* scrollBar = new QScrollBar(Qt::Vertical, &parentWidget);
         scrollBar->setRange(0, 100);
         scrollBar->setValue(10);
-
-        WheelGuard& guard = WheelGuard::Instance();
-        guard.Install(qApp);
-
         QWheelEvent scrollWheel(
             QPointF(5, 5),
             QPointF(scrollBar->mapToGlobal(QPoint(5, 5))),
@@ -182,11 +233,140 @@ inline void Run()
             Qt::NoScrollPhase,
             false
         );
-
         QApplication::sendEvent(scrollBar, &scrollWheel);
-        // Scrollbar processes wheel normally
         Check(scrollBar->value() != 10 || scrollBar->maximum() > 0, "scrollbar is not blocked by WheelGuard");
         ++checks;
+
+        guard.Uninstall(qApp);
+    }
+
+    // 6. Comprehensive test across all UI fields by objectName (Task G)
+    {
+        WheelGuard& guard = WheelGuard::Instance();
+        guard.Install(qApp);
+
+        // Inspector panel with all object types
+        {
+            ObjectInspectorPanel panel;
+            panel.resize(320, 600);
+
+            EditorQtHost::Snapshot snap;
+            snap.scripts = true;
+            EditorQtHost::SceneObject obj;
+            obj.id = 1;
+            obj.name = "TestObj";
+            obj.type = "Gameplay.Character";
+            obj.gameplayKind = 1;
+            obj.modelAsset = "/Game/Models/Hero.fbx";
+            obj.materialAsset = "/Game/Materials/Hero.mat";
+            obj.scriptAsset = "/Game/Scripts/Test.vscript";
+            obj.propertySchema = R"({"fields":[{"path":"/fov","type":"number","min":10,"max":120,"decimals":1,"step":1},{"path":"/orthographic","type":"enum","options":[{"label":"Perspective","value":false},{"label":"Orthographic","value":true}]},{"path":"/viewPlane","type":"enum","options":[{"label":"XY","value":0},{"label":"XZ","value":1}]}]})";
+            obj.projectData = R"({"fov":60.0,"orthographic":false,"viewPlane":0,"stateMachine":"/Game/AI/Hero.fsm","machineMemory":"{}"})";
+            obj.hasPointLight = true;
+            obj.pointLight.intensity = 5.0f;
+            obj.pointLight.radius = 10.0f;
+            snap.objects.push_back(obj);
+            snap.selected = 1;
+
+            panel.Refresh(snap, 1, true);
+            QApplication::processEvents();
+
+            // TransformCard (9 fields)
+            for (int i = 0; i < 9; ++i)
+                TestWidgetWheelImmunity(&panel, QStringLiteral("Transform%1").arg(i), checks);
+
+            // LightCard (5 fields)
+            for (int i = 0; i < 5; ++i)
+                TestWidgetWheelImmunity(&panel, QStringLiteral("LightValue%1").arg(i), checks);
+
+            // PhysicsCard (combos + spins)
+            TestWidgetWheelImmunity(&panel, QStringLiteral("PhysicsCombo0"), checks);
+            TestWidgetWheelImmunity(&panel, QStringLiteral("PhysicsCombo1"), checks);
+            TestWidgetWheelImmunity(&panel, QStringLiteral("PhysicsValue2"), checks);
+            TestWidgetWheelImmunity(&panel, QStringLiteral("PhysicsValue3"), checks);
+            TestWidgetWheelImmunity(&panel, QStringLiteral("PhysicsValue4"), checks);
+
+            // CharacterCard
+            TestWidgetWheelImmunity(&panel, QStringLiteral("CharacterSpeed"), checks);
+
+            // CameraGuideCard
+            TestWidgetWheelImmunity(&panel, QStringLiteral("CameraGuideDepth"), checks);
+
+            // ProjectProperties
+            TestWidgetWheelImmunity(&panel, QStringLiteral("Property/fov"), checks);
+            TestWidgetWheelImmunity(&panel, QStringLiteral("Property/orthographic"), checks);
+            TestWidgetWheelImmunity(&panel, QStringLiteral("Property/viewPlane"), checks);
+        }
+
+        // ImportSettingsDialog
+        {
+            ImportSettingsDialog importDlg;
+            TestWidgetWheelImmunity(&importDlg, QStringLiteral("ImportScaleSpin"), checks);
+            TestWidgetWheelImmunity(&importDlg, QStringLiteral("NormalsCombo"), checks);
+            TestWidgetWheelImmunity(&importDlg, QStringLiteral("SmoothingAngleSpin"), checks);
+        }
+
+        // PlaySettingsDialog
+        {
+            std::vector<PlaySettingsObjectView> objs;
+            PlaySettingsObjectView ch; ch.id = 10; ch.name = "Hero"; ch.gameplayKind = 1; objs.push_back(ch);
+            PlaySettingsObjectView cam; cam.id = 11; cam.name = "Cam"; cam.gameplayKind = 2; objs.push_back(cam);
+            PlaySettingsDialog playDlg(objs);
+            TestWidgetWheelImmunity(&playDlg, QStringLiteral("PlayCharacter"), checks);
+            TestWidgetWheelImmunity(&playDlg, QStringLiteral("PlayCamera"), checks);
+            TestWidgetWheelImmunity(&playDlg, QStringLiteral("PlayDistance"), checks);
+            TestWidgetWheelImmunity(&playDlg, QStringLiteral("PlayHeight"), checks);
+            TestWidgetWheelImmunity(&playDlg, QStringLiteral("PlaySensitivity"), checks);
+        }
+
+        // CodeClassDialog
+        {
+            CodeClassDialog codeDlg(QStringLiteral("Content"));
+            TestWidgetWheelImmunity(&codeDlg, QStringLiteral("ClassKind"), checks);
+        }
+
+        // ViewportHeaderBar
+        {
+            ViewportHeaderBar headerBar;
+            TestWidgetWheelImmunity(&headerBar, QStringLiteral("comboGizmoSnapStep"), checks);
+        }
+
+        // UI Editor and Material Editor controls
+        {
+            QWidget uiWin;
+            for (int i = 0; i < 4; ++i)
+            {
+                auto* rect = new QDoubleSpinBox(&uiWin);
+                rect->setObjectName(QStringLiteral("UIRect%1").arg(i));
+            }
+            auto* anchor = new QComboBox(&uiWin);
+            anchor->setObjectName(QStringLiteral("UIAnchor"));
+            auto* prevSize = new QComboBox(&uiWin);
+            prevSize->setObjectName(QStringLiteral("UIPreviewSize"));
+
+            TestWidgetWheelImmunity(&uiWin, QStringLiteral("UIRect0"), checks);
+            TestWidgetWheelImmunity(&uiWin, QStringLiteral("UIRect1"), checks);
+            TestWidgetWheelImmunity(&uiWin, QStringLiteral("UIRect2"), checks);
+            TestWidgetWheelImmunity(&uiWin, QStringLiteral("UIRect3"), checks);
+            TestWidgetWheelImmunity(&uiWin, QStringLiteral("UIAnchor"), checks);
+            TestWidgetWheelImmunity(&uiWin, QStringLiteral("UIPreviewSize"), checks);
+
+            QWidget matWin;
+            auto* shape = new QComboBox(&matWin); shape->setObjectName(QStringLiteral("MaterialPreviewShape"));
+            auto* blend = new QComboBox(&matWin); blend->setObjectName(QStringLiteral("MaterialBlend"));
+            auto* alphaClip = new QDoubleSpinBox(&matWin); alphaClip->setObjectName(QStringLiteral("MaterialAlphaClip"));
+
+            TestWidgetWheelImmunity(&matWin, QStringLiteral("MaterialPreviewShape"), checks);
+            TestWidgetWheelImmunity(&matWin, QStringLiteral("MaterialBlend"), checks);
+            TestWidgetWheelImmunity(&matWin, QStringLiteral("MaterialAlphaClip"), checks);
+        }
+
+        // AiDiagnosticsPanel
+        {
+            AiDiagnosticsPanel aiPanel(nullptr, nullptr);
+            TestWidgetWheelImmunity(&aiPanel, QStringLiteral("AiAgentRadius"), checks);
+            TestWidgetWheelImmunity(&aiPanel, QStringLiteral("AiSubject"), checks);
+        }
 
         guard.Uninstall(qApp);
     }
