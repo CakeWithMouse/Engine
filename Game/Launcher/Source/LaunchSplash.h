@@ -180,12 +180,16 @@ public:
                 wchar_t cls[128]{};GetClassNameW(w,cls,128);
                 RECT rect{};GetClientRect(w,&rect);
                 if(id==s.pid) {
-                    if(wcscmp(cls,L"ConsoleWindowClass")==0) {
-                        HICON hIcon = LoadIconW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(IDI_ICON));
-                        HICON hIconSm = static_cast<HICON>(LoadImageW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(IDI_ICON), IMAGE_ICON,
-                            GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR));
-                        if(hIcon) SendMessageW(w, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(hIcon));
-                        if(hIconSm) SendMessageW(w, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(hIconSm));
+                    HICON hIcon = LoadIconW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(IDI_ICON));
+                    HICON hIconSm = static_cast<HICON>(LoadImageW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(IDI_ICON), IMAGE_ICON,
+                        GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR));
+                    if(hIcon) {
+                        SendMessageW(w, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(hIcon));
+                        SetClassLongPtrW(w, GCLP_HICON, reinterpret_cast<LONG_PTR>(hIcon));
+                    }
+                    if(hIconSm) {
+                        SendMessageW(w, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(hIconSm));
+                        SetClassLongPtrW(w, GCLP_HICONSM, reinterpret_cast<LONG_PTR>(hIconSm));
                     }
                     if(IsWindowVisible(w) && wcscmp(cls,L"ConsoleWindowClass") && rect.right>200 && rect.bottom>150) s.found=true;
                 }
