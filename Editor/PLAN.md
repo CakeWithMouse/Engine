@@ -37,7 +37,7 @@
 - [x] **Задача J (chore(build)):** Режимы `run-editor.ps1` (-Fast vs без -Fast) и сборка модулей физики/AI. Устранено инвертирование логики флага `-Fast`: ранее при запуске без флагов принудительно включался `$Fast = $true`, блокируя сборку полного решения. Теперь вызов без флага `-Fast` (или с `-All`) выполняет полноценную сборку всего решения (`Engine.sln`), включая игровой модуль `SceneProject` (`Game.dll`), `Battle` (с `BattleAi.cpp` и AI-отрядами), `BasicExamples`, `Pong`, `SunGame`, `Katamari`. Добавлено автоматическое распознавание Jolt Physics SDK (`Engine/vcpkg_installed/.../Jolt/Jolt.h`) с пробросом `/p:EngineEnableJolt=true` и AI/Navigation SDK (`Engine/Include/Engine/AI/Navigation.h`). Добавлен подробный финальный отчет сборки (`Build Summary`) в консоль с указанием режима, конфигурации, статуса физики, импорта моделей и игровых модулей. Зоны `Engine/`, `Game/`, `build.ps1` не затронуты.
 - [x] **Задача K (diag/test):** Проверка пути команды `Scene.ReplaceModel` и сохранности материала при замене модели. Выполнена трассировка цепочки `Scene.ReplaceModel`: UI (`ObjectInspectorPanel.cpp`) -> команда `Scene.ReplaceModel` (`ImportCommands.cpp`) -> хост `SceneCommandHandler.cpp` (`EditorCommand::SetModel`) -> движок `SceneDocument.cpp` (`ctx.scene.loadScene`). Установлено: и в хосте (`assets["model"] = cmd.path`), и в движке (`SceneDocument.cpp:241` / `426` `SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset)`) поле `materialAsset` гарантированно сохраняется и не сбрасывается. В `ModelReplaceHostTests.h` расширена mock-сцена и написан юнит-тест проверки сохранения материала при замене модели (исходный `Content/Materials/Test.mat` проверяется до замены, после `SetModel`, при `Undo` и при `Redo` — во всех фазах `materialAsset` объекта и снапшота строго идентичен). `HostTests` выросли со 159 до 165 checks (все PASS). Багов на стороне Editor/Engine не обнаружено.
 - [x] **Задача L (fix(ui)):** Нормализация путей ресурсов из `AssetPickerDialog` для скриптов и AI-машин. Устранена ложная ошибка «Ресурс вне проекта»: ранее в `AssetTools.cpp:101` метод `UseAsset` вычислял относительный путь через `content.relativeFilePath(QFileInfo(path).absoluteFilePath())`. Для виртуальных путей формата `/Game/...` возвращался путь с префиксом `../`, вызывая модальное окно ошибки и блокируя назначение скрипта. В `AssetExtensions.h` создана чистая функция нормализации `EditorCore::NormalizeVirtualPath(path, contentRoot)` (поддержка `/Game/...`, `Game/...`, обратных слэшей, относительных и абсолютных дисковых путей в песочнице проекта). В `AssetTools.cpp` метод `UseAsset` переведен на распознавание виртуальных путей `/Game/...` без ложных проверок выхода за проект. В `HudTools.cpp` команды `Scene.AssignScript` и `Scene.AssignAiMachine` переведены на прямое создание и отправку команд `EditorCommand::SetScript` и `EditorCommand::SetProperty` (`/stateMachine`) с параметром `objectId` (с фолбэком на `selectedId_`), нормализацией путей и без небезопасного обхода через `UseAsset`. Добавлены 10 юнит-тестов нормализации в `AssetPickerDialogTests.h` (всего 67 checks PASS).
-- [ ] **Задача M (refactor(ui)):** Единый базовый класс карточки инспектора и стиль всех карточек без локального хардкода.
+- [x] **Задача M (refactor(ui)):** Единый базовый класс карточки инспектора и стиль всех карточек без локального хардкода. Проведен сквозной аудит всех 10 карточек инспектора (`GeneralCard`, `TransformCard`, `GeometryCard`, `MaterialCard`, `LightCard`, `CharacterCard`, `PhysicsCard`, `ScriptCard`, `AiMachineCard`, `CameraGuideCard`). Подтверждено: все 10 карточек используют базовый класс `CollapsibleCard` и единые константы `InspectorCardStyle` (`kLabelWidth = 80`, `kFieldHeight = 22`, `kButtonHeight = 24`, `kHeaderHeight = 22`, `CardMargins = (6, 4, 6, 4)`, `kCardSpacing = 4`, `kRowSpacing = 4`). В `ObjectInspectorLight.cpp` добавлена установка `setObjectName("LightCard")` непосредственно в конструкторе `BuildPointLightCard`. В `InspectorCardStyleTests.h` написан исчерпывающий тест валидации всех 10 карточек (проверка полиморфного приведения `dynamic_cast<CollapsibleCard*>`, свойства `collapsibleCard`, геометрии шапки 22px, `contentsMargins` контента `(6, 4, 6, 4)`, `spacing == 4`, ширины `CardFieldLabel` 80px, высоты полей 22-26px, кнопок 24-32px и смены цвета подложки с темой). Число проверок в `InspectorCardStyleTests` выросло с 58 до 148 checks (все PASS).
 - [ ] **Задача N (feat(ui)):** Замена длинных описаний в карточках камеры и инспектора на компактные подписи с `InfoButton`.
 - [ ] **Задача O (docs(backlog)):** Фиксация идеи кнопки «+» (добавление компонентов) в Backlog для архитектора.
 - [ ] **Задача P (audit/test):** Финальная сквозная сверка всех типов объектов и проверок протокола.
@@ -148,6 +148,36 @@
     - Команда `Scene.AssignAiMachine` принимает параметр `objectId`, нормализует путь машины и напрямую отправляет `EditorCommand::SetProperty` с путем `/stateMachine` и сериализованным в JSON массивом.
   - В `Editor/tests/AssetPickerDialogTests.h` добавлены 10 новых проверок (всего 67 checks PASS) на различные варианты нормализации путей (виртуальные пути с ведущим слэшем и без него, обратные слэши, относительные пути, абсолютные дисковые пути в `Content/`, пробелы, пустые пути).
   - Проверена сборка Debug и Release, все тесты `CoreTests` (1105/1105) и `HostTests` (165/165) пройдены.
+
+### Разведка M (Единый базовый класс карточки инспектора и стиль всех карточек без локального хардкода)
+- **Факты из кода:**
+  - Полный список карточек инспектора (10 штук):
+    1. `GeneralCard` (`cardGeneral_` в `ObjectInspectorPanel.cpp`)
+    2. `TransformCard` (`Editor/UI/TransformCard.h`)
+    3. `GeometryCard` (`Editor/UI/GeometryCard.h`)
+    4. `MaterialCard` (`Editor/UI/MaterialCard.h`)
+    5. `LightCard` (`cardLight_` в `ObjectInspectorLight.cpp`)
+    6. `CharacterCard` (`cardCharacter_` в `ObjectInspectorPanel.cpp`)
+    7. `PhysicsCard` (`cardPhysics_` в `ObjectInspectorPanel.cpp`)
+    8. `ScriptCard` (`Editor/UI/ScriptCard.h`)
+    9. `AiMachineCard` (`Editor/UI/AiMachineCard.h`)
+    10. `CameraGuideCard` (`Editor/UI/CameraGuideCard.h`)
+  - Все 10 карточек либо напрямую наследуют `CollapsibleCard`, либо инстанциируют `CollapsibleCard`.
+  - Все карточки устанавливают свойство `collapsibleCard = true` через базовый конструктор `CollapsibleCard`.
+  - Единые константы оформления определены в `Editor/UI/InspectorCardStyle.h`: `kLabelWidth = 80`, `kFieldHeight = 22`, `kButtonHeight = 24`, `kHeaderHeight = 22`, `CardMargins = QMargins(6, 4, 6, 4)`, `kCardSpacing = 4`, `kRowSpacing = 4`.
+  - В `ObjectInspectorLight.cpp` имя объекта `cardLight_->setObjectName(QStringLiteral("LightCard"))` задавалось снаружи метода `BuildPointLightCard`; добавлена установка непосредственно внутри функции.
+- **Решение и реализация M:**
+  - В `ObjectInspectorLight.cpp` добавлено явное присвоение `cardLight_->setObjectName(QStringLiteral("LightCard"))` внутри `BuildPointLightCard`.
+  - В `Editor/tests/InspectorCardStyleTests.h` написан исчерпывающий тест, выполняющий валидацию всех 10 карточек по их именам `cardNames`:
+    - Проверка полиморфного приведения `dynamic_cast<CollapsibleCard*>(card) != nullptr`.
+    - Проверка динамического свойства `collapsibleCard == true`.
+    - Проверка наличия кнопки сворачивания `CardHeaderBtn` с фиксированной высотой 22px (`kHeaderHeight`).
+    - Проверка контейнера контента `CardContent` с отступами `(6, 4, 6, 4)` и расстоянием между строками `4` (`kCardSpacing`).
+    - Проверка рендера подложки в темной и светлой темах.
+    - Проверка всех подписей `CardFieldLabel` (фиксированная ширина ровно 80px).
+    - Проверка высот всех полей ввода (22-26px) и кнопок (24-32px).
+  - Результаты: число проверок в `InspectorCardStyleTests` выросло с 58 до 148 checks (все PASS).
+
 
 
 ---

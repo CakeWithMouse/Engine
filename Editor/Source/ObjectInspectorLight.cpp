@@ -39,6 +39,7 @@ static QWidget* CreateAxisCell(NoWheelDoubleSpinBox* spin, const QString& axisLe
 void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
 {
     cardLight_ = new CollapsibleCard(Tr("Свет", "Light"), this, true);
+    cardLight_->setObjectName(QStringLiteral("LightCard"));
     lightInspector_ = cardLight_;
     auto* cl = cardLight_->ContentLayout();
     auto emitChanged = [this] {

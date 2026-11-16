@@ -52,16 +52,45 @@ inline void Run()
     QApplication::processEvents();
 
     // 1. Verify all CollapsibleCards have identical content margins, spacing, and background styling
-    QList<QWidget*> cards;
-    for (auto* w : panel.findChildren<QWidget*>())
+    const QStringList cardNames = {
+        QStringLiteral("GeneralCard"),
+        QStringLiteral("TransformCard"),
+        QStringLiteral("GeometryCard"),
+        QStringLiteral("MaterialCard"),
+        QStringLiteral("LightCard"),
+        QStringLiteral("CharacterCard"),
+        QStringLiteral("PhysicsCard"),
+        QStringLiteral("ScriptCard"),
+        QStringLiteral("AiMachineCard"),
+        QStringLiteral("CameraGuideCard")
+    };
+
+    for (const auto& name : cardNames)
     {
-        if (w->property("collapsibleCard").toBool())
-        {
-            cards.append(w);
-        }
+        auto* card = panel.findChild<QWidget*>(name);
+        Check(card != nullptr, (name + " found in inspector panel").toLatin1().constData());
+        auto* coll = dynamic_cast<CollapsibleCard*>(card);
+        Check(coll != nullptr, (name + " is a CollapsibleCard").toLatin1().constData());
+        Check(card->property("collapsibleCard").toBool() == true, (name + " has collapsibleCard property").toLatin1().constData());
+        auto* header = card->findChild<QPushButton*>(QStringLiteral("CardHeaderBtn"));
+        Check(header != nullptr, (name + " has CardHeaderBtn").toLatin1().constData());
+        Check(header->maximumHeight() == InspectorCardStyle::kHeaderHeight, (name + " CardHeaderBtn height == 22").toLatin1().constData());
+        auto* content = card->findChild<QWidget*>(QStringLiteral("CardContent"));
+        Check(content != nullptr, (name + " has CardContent").toLatin1().constData());
+        auto* layout = content->layout();
+        Check(layout != nullptr, (name + " ContentLayout exists").toLatin1().constData());
+        Check(layout->contentsMargins() == InspectorCardStyle::CardMargins(), (name + " content margins == (6, 4, 6, 4)").toLatin1().constData());
+        Check(layout->spacing() == InspectorCardStyle::kCardSpacing, (name + " content spacing == 4").toLatin1().constData());
+        checks += 9;
     }
-    Check(!cards.isEmpty(), "CollapsibleCards found in inspector panel");
-    Check(cards.size() >= 8, "All inspector CollapsibleCards found (>= 8)");
+
+    QList<QWidget*> cards;
+    for (const auto& name : cardNames)
+    {
+        if (auto* w = panel.findChild<QWidget*>(name))
+            cards.append(w);
+    }
+    Check(cards.size() == 10, "All 10 inspector CollapsibleCards found");
     ++checks;
 
     const QColor darkBg = EditorTheme::Instance().Palette().bgPanel;
