@@ -312,11 +312,13 @@ void MaterialEditorWindow::BuildUi()
 {
     auto* tools = addToolBar(QStringLiteral("Материал"));
     tools->setMovable(false);
-    auto* save = tools->addAction(QStringLiteral("Сохранить"), this, [this] { Save(); });
+    auto* save = tools->addAction(IconProvider::SaveIcon(), QString(), this, [this] { Save(); });
+    save->setObjectName(QStringLiteral("MaterialSave"));
     save->setShortcut(QKeySequence::Save);
-    save->setToolTip(QStringLiteral("Записать HLSL и .mat, перекомпилировать (Ctrl+S)"));
-    tools->addAction(QStringLiteral("Откатить"), this, [this] { Revert(); })
-         ->setToolTip(QStringLiteral("Вернуть материал и HLSL к сохранённым файлам"));
+    save->setToolTip(Tr("Сохранить (Ctrl+S)", "Save (Ctrl+S)"));
+    auto* revert = tools->addAction(IconProvider::RevertIcon(), QString(), this, [this] { Revert(); });
+    revert->setObjectName(QStringLiteral("MaterialRevert"));
+    revert->setToolTip(Tr("Откатить к сохранённым файлам", "Revert to saved files"));
     tools->addSeparator();
     tools->addWidget(new QLabel(QStringLiteral(" Форма: "), tools));
     shape_ = new QComboBox(tools);
@@ -324,7 +326,7 @@ void MaterialEditorWindow::BuildUi()
     shape_->addItems({QStringLiteral("Сфера"), QStringLiteral("Куб"), QStringLiteral("Плоскость")});
     tools->addWidget(shape_);
     tools->addSeparator();
-    graphAction_ = tools->addAction(QStringLiteral("Нодовый граф"), this, [this] {
+    graphAction_ = tools->addAction(IconProvider::SchemaIcon(), QString(), this, [this] {
         const bool toCode = graphMode_;
         const QString question = toCode
             ? QStringLiteral("Удалить граф? HLSL останется как есть и будет правиться руками.")
@@ -336,6 +338,7 @@ void MaterialEditorWindow::BuildUi()
         else EnableGraph();
     });
     graphAction_->setObjectName(QStringLiteral("MaterialGraphToggle"));
+    graphAction_->setToolTip(Tr("Нодовый граф / Перейти на код", "Node graph / Switch to code"));
     graphAction_->setEnabled(false); // до загрузки HLSL
     BuildGraphTools(tools);
 
@@ -384,6 +387,8 @@ void MaterialEditorWindow::BuildUi()
     errors_->setObjectName(QStringLiteral("MaterialErrors"));
 
     auto* left = new QSplitter(Qt::Vertical, this);
+    left->setHandleWidth(6);
+    left->setChildrenCollapsible(false);
     left->addWidget(preview_);
     left->addWidget(scroll);
     left->setStretchFactor(0, 1);
@@ -417,11 +422,15 @@ void MaterialEditorWindow::BuildUi()
     graph_->textureRestored = [this](const QString& name, const QString& gamePath) { AssignTexture(name, gamePath); };
 
     auto* right = new QSplitter(Qt::Vertical, this);
+    right->setHandleWidth(6);
+    right->setChildrenCollapsible(false);
     right->addWidget(sourceTabs_);
     right->addWidget(errors_);
     right->setStretchFactor(0, 4);
     right->setStretchFactor(1, 1);
     auto* main = new QSplitter(Qt::Horizontal, this);
+    main->setHandleWidth(6);
+    main->setChildrenCollapsible(false);
     main->addWidget(left);
     main->addWidget(right);
     main->setStretchFactor(0, 2);
@@ -620,7 +629,9 @@ void MaterialEditorWindow::SetGraphMode(bool on)
     if (on) sourceTabs_->setCurrentWidget(graphPage_);
     sourceTabs_->setTabText(sourceTabs_->indexOf(source_), on ? QStringLiteral("HLSL (из графа)") : QStringLiteral("HLSL"));
     source_->setReadOnly(on || !sourceLoaded_);
-    graphAction_->setText(on ? QStringLiteral("Перейти на код") : QStringLiteral("Нодовый граф"));
+    graphAction_->setIcon(on ? IconProvider::CodeIcon() : IconProvider::SchemaIcon());
+    graphAction_->setText(QString());
+    graphAction_->setToolTip(on ? Tr("Перейти на код HLSL", "Switch to HLSL code") : Tr("Нодовый граф", "Node graph"));
     if (loaded_) RebuildSettings();
 }
 

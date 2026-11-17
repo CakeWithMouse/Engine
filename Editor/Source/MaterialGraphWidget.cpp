@@ -156,85 +156,18 @@ QStringList MaterialGraphWidget::PresetNames()
 
 void MaterialGraphWidget::BuildMaterialToolbar()
 {
-    auto* presets = new QToolButton(this);
-    presets->setObjectName(QStringLiteral("MaterialGraphPresets"));
-    presets->setText(Tr("Готовые графы", "Presets"));
-    presets->setPopupMode(QToolButton::InstantPopup);
-    auto* presetMenu = new QMenu(presets);
-    presetMenu->setObjectName(QStringLiteral("MaterialGraphPresetMenu"));
-    // Список собирается при каждом открытии: свои графы могли добавить другие окна или git.
-    connect(presetMenu, &QMenu::aboutToShow, this, [this, presetMenu] {
-        presetMenu->clear();
-        auto confirm = [this] {
-            return QMessageBox::question(this, Tr("Готовый граф", "Preset"),
-                Tr("Заменить текущий граф готовым?", "Replace the current graph with the preset?")) == QMessageBox::Yes;
-        };
-        presetMenu->addSection(Tr("Встроенные", "Built-in"));
-        for (int i = 0; i < PresetNames().size(); ++i)
-            presetMenu->addAction(PresetNames()[i], this, [this, i, confirm] { if (confirm()) LoadPreset(i); });
-
-        const QStringList own = UserPresets();
-        presetMenu->addSection(Tr("Проекта", "Project"));
-        if (own.isEmpty())
-            presetMenu->addAction(Tr("пока нет: сохраните текущий граф", "none yet: save the current graph"))->setEnabled(false);
-        for (const QString& name : own)
-            presetMenu->addAction(name, this, [this, name, confirm] {
-                QString error;
-                if (confirm() && !LoadUserPreset(name, error))
-                    QMessageBox::warning(this, Tr("Готовый граф", "Preset"), error);
-            });
-        presetMenu->addSeparator();
-        presetMenu->addAction(Tr("Сохранить текущий как готовый…", "Save current as preset…"), this, [this] {
-            // Диалог после закрытия меню, а не из его цикла событий.
-            QTimer::singleShot(0, this, [this] { RequestSaveUserPreset(); });
-        })->setEnabled(!presetFolder_.isEmpty());
-        if (!own.isEmpty())
-        {
-            auto* remove = presetMenu->addMenu(Tr("Удалить", "Delete"));
-            for (const QString& name : own)
-                remove->addAction(name, this, [this, name] {
-                    if (QMessageBox::question(this, Tr("Удалить готовый граф", "Delete preset"),
-                            Tr("Удалить «%1» из проекта?", "Delete \"%1\" from the project?").arg(name)) == QMessageBox::Yes)
-                        RemoveUserPreset(name);
-                });
-        }
-    });
-    presets->setMenu(presetMenu);
-    AddToolbarWidget(presets);
-
-    auto* copy = new QToolButton(this);
-    copy->setText(Tr("Копировать для ИИ", "Copy for AI"));
-    copy->setToolTip(Tr("Описание нод и JSON графа в буфер обмена: вставьте в чат с нейросетью",
-                        "Node reference and graph JSON to the clipboard, for a chat with an AI"));
-    connect(copy, &QToolButton::clicked, this, [this] {
-        QGuiApplication::clipboard()->setText(AiPrompt());
-        QMessageBox::information(this, Tr("Граф скопирован", "Graph copied"),
-            Tr("Вставьте текст в чат с нейросетью, опишите нужный эффект, скопируйте ответ и нажмите «Вставить из ИИ».",
-               "Paste it into an AI chat, describe the effect, copy the answer and press \"Paste from AI\"."));
-    });
-    AddToolbarWidget(copy);
-
-    auto* paste = new QToolButton(this);
-    paste->setText(Tr("Вставить из ИИ", "Paste from AI"));
-    connect(paste, &QToolButton::clicked, this, [this] {
-        QString error;
-        if (!PasteFromAi(QGuiApplication::clipboard()->text(), &error))
-            QMessageBox::warning(this, Tr("Граф не вставлен", "Graph not pasted"),
-                error);
-    });
-    AddToolbarWidget(paste);
 }
 
 qreal MaterialGraphWidget::NodeWidth(const GraphNodeData& node) const
 {
-    return node.type == MaterialGraphSchema::MasterType() ? 170 : IsTextureType(node.type) ? 180 : 150;
+    return node.type == MaterialGraphSchema::MasterType() ? 180 : IsTextureType(node.type) ? 190 : 160;
 }
 
 qreal MaterialGraphWidget::NodeContentHeight(const GraphNodeData& node) const
 {
     if (IsTextureType(node.type)) return Thumbnail + 6;
     return IsParameterType(node.type) || node.type == QStringLiteral("Constant") || node.type == QStringLiteral("UVCoord") ||
-                   node.type == QStringLiteral("Panner") ? 22 : 0;
+                   node.type == QStringLiteral("Panner") ? 24 : 0;
 }
 
 QVariant MaterialGraphWidget::NodeDecoration(const GraphNodeData& node) const
@@ -250,14 +183,34 @@ void MaterialGraphWidget::PaintNodeContent(QPainter* painter, const GraphNodeDat
 {
     if (node.type == QStringLiteral("ColorParam"))
     {
-        painter->setBrush(node.properties.value(QStringLiteral("color"), QColor(Qt::white)).value<QColor>());
-        painter->setPen(QPen(QColor(0x64, 0x74, 0x8B), 1.0));
-        painter->drawRoundedRect(QRectF(content.center().x() - 24, content.top() + 2, 48, 14), 3, 3);
+        const QColor c = node.properties.value(QStringLiteral("color"), QColor(Qt::white)).value<QColor>();
+        const QRectF swatchRect(content.left() + 2, content.top() + 2, content.width() - 4, 18);
+        painter->setBrush(c);
+        painter->setPen(QPen(QColor(0x3B, 0x42, 0x52), 1.0));
+        painter->drawRoundedRect(swatchRect, 3, 3);
+        painter->setBrush(Qt::NoBrush);
+        painter->setPen(QPen(QColor(255, 255, 255, 40), 1.0));
+        painter->drawRoundedRect(swatchRect.adjusted(1, 1, -1, -1), 2, 2);
     }
     else if (node.type == QStringLiteral("ScalarParam") || node.type == QStringLiteral("Constant"))
-        painter->drawText(content, Qt::AlignCenter, QString::number(node.properties.value(QStringLiteral("value"), 0.5).toDouble(), 'f', 3));
+    {
+        const QRectF fieldRect(content.left() + 2, content.top() + 2, content.width() - 4, 18);
+        painter->setBrush(QColor(0x13, 0x16, 0x1C));
+        painter->setPen(QPen(QColor(0x3B, 0x42, 0x52), 1.0));
+        painter->drawRoundedRect(fieldRect, 3, 3);
+        painter->setPen(QColor(0xCB, 0xD5, 0xE1));
+        const QString valStr = QString::number(node.properties.value(QStringLiteral("value"), 0.5).toDouble(), 'f', 3);
+        painter->drawText(fieldRect, Qt::AlignCenter, valStr);
+    }
     else if (VectorSize(node.type))
-        painter->drawText(content, Qt::AlignCenter, VectorText(node.properties.value(QStringLiteral("value")), VectorSize(node.type)));
+    {
+        const QRectF fieldRect(content.left() + 2, content.top() + 2, content.width() - 4, 18);
+        painter->setBrush(QColor(0x13, 0x16, 0x1C));
+        painter->setPen(QPen(QColor(0x3B, 0x42, 0x52), 1.0));
+        painter->drawRoundedRect(fieldRect, 3, 3);
+        painter->setPen(QColor(0xCB, 0xD5, 0xE1));
+        painter->drawText(fieldRect, Qt::AlignCenter, VectorText(node.properties.value(QStringLiteral("value")), VectorSize(node.type)));
+    }
     else if (node.type == QStringLiteral("UVCoord"))
         painter->drawText(content, Qt::AlignCenter, Tr("Тайлинг %1 × %2", "Tiling %1 x %2")
             .arg(node.properties.value(QStringLiteral("tilingX"), 1.0).toDouble())
@@ -521,141 +474,4 @@ void MaterialGraphWidget::LoadPreset(int index)
     Checkpoint(); // готовый граф и ответ ИИ отменяются, как любая правка
     ReplaceDocument(model);
     NotifyStructure();
-}
-
-QString MaterialGraphWidget::UserPresetFile(const QString& name) const
-{
-    return presetFolder_.isEmpty() ? QString() : QDir(presetFolder_).filePath(name + QStringLiteral(".graph.json"));
-}
-
-QStringList MaterialGraphWidget::UserPresets() const
-{
-    QStringList names;
-    if (presetFolder_.isEmpty()) return names;
-    for (const QFileInfo& file : QDir(presetFolder_).entryInfoList({QStringLiteral("*.graph.json")}, QDir::Files, QDir::Name | QDir::IgnoreCase))
-        names << file.fileName().chopped(static_cast<int>(QStringLiteral(".graph.json").size()));
-    return names;
-}
-
-bool MaterialGraphWidget::SaveUserPreset(const QString& name, QString& error)
-{
-    // Имя становится именем файла: буквы любого алфавита, цифры, пробел, «_», «-», «.».
-    static const QRegularExpression valid(QStringLiteral(R"(^[\w][\w .\-]*$)"), QRegularExpression::UseUnicodePropertiesOption);
-    if (presetFolder_.isEmpty())
-        error = Tr("Папка готовых графов проекта не задана.", "The project preset folder is not set.");
-    else if (!valid.match(name).hasMatch() || name.endsWith(QLatin1Char('.')) || name.size() > 64)
-        error = Tr("Имя: буквы, цифры, пробел, «_», «-» и «.», до 64 символов.", "Name: letters, digits, space, _, - and ., up to 64 characters.");
-    else if (!QDir().mkpath(presetFolder_))
-        error = Tr("Не удалось создать папку %1.", "Cannot create the folder %1.").arg(presetFolder_);
-    else
-    {
-        QSaveFile file(UserPresetFile(name));
-        if (file.open(QIODevice::WriteOnly) && file.write(Document().ExportToJson().toUtf8()) >= 0 && file.commit()) return true;
-        error = Tr("Не удалось записать %1: %2", "Cannot write %1: %2").arg(file.fileName(), file.errorString());
-    }
-    return false;
-}
-
-bool MaterialGraphWidget::LoadUserPreset(const QString& name, QString& error)
-{
-    QFile file(UserPresetFile(name));
-    EditorCore::MaterialGraphModel model;
-    if (!file.open(QIODevice::ReadOnly) || !model.ImportFromJson(QString::fromUtf8(file.readAll())))
-    {
-        error = Tr("Готовый граф «%1» не читается.", "Cannot read the preset \"%1\".").arg(name);
-        return false;
-    }
-    Checkpoint(); // готовый граф и ответ ИИ отменяются, как любая правка
-    ReplaceDocument(model);
-    NotifyStructure();
-    return true;
-}
-
-bool MaterialGraphWidget::RemoveUserPreset(const QString& name)
-{
-    return QFile::remove(UserPresetFile(name));
-}
-
-void MaterialGraphWidget::RequestSaveUserPreset()
-{
-    bool accepted = false;
-    const QString name = QInputDialog::getText(this, Tr("Сохранить готовый граф", "Save preset"),
-        Tr("Имя (файл в Content/MaterialGraphs, виден всем через git):", "Name (a file in Content/MaterialGraphs, shared through git):"),
-        QLineEdit::Normal, {}, &accepted).trimmed();
-    if (!accepted || name.isEmpty()) return;
-    if (QFile::exists(UserPresetFile(name)) &&
-        QMessageBox::question(this, Tr("Сохранить готовый граф", "Save preset"),
-            Tr("«%1» уже есть. Заменить?", "\"%1\" exists. Replace it?").arg(name)) != QMessageBox::Yes)
-        return;
-    QString error;
-    if (!SaveUserPreset(name, error)) QMessageBox::warning(this, Tr("Готовый граф не сохранён", "Preset not saved"), error);
-}
-
-QString MaterialGraphWidget::AiPrompt() const
-{
-    QString prompt;
-    prompt += QStringLiteral("You edit a material node graph of a DirectX 11 engine. The graph compiles to an HLSL surface function.\n");
-    prompt += QStringLiteral("Current graph JSON:\n\n```json\n%1```\n\n").arg(Document().ExportToJson());
-    prompt += QStringLiteral(
-        "Format: nodes have id, type, title, x, y and properties; connections link fromNode/fromPin (an output) to toNode/toPin (an input).\n"
-        "An input takes one connection. Node types and pins:\n"
-        "  * MaterialOutput, exactly one. Inputs are the surface of a Blinn-Phong lighting model, there is no PBR:\n"
-        "    Albedo (float3 colour), Alpha (masked/translucent materials), Specular (0 matte .. 1 strong highlight),\n"
-        "    AmbientModel (0 flat .. 1 hemispherical ambient), Emissive (float3, added after lighting), Normal (world normal).\n"
-        "    An unconnected input keeps the default: the object's colour times its texture, no emission.\n"
-        "Pin types are float, float2, float3, float4 or any (math nodes take the size of their largest input).\n"
-        "Any output may feed any input: a scalar is broadcast, extra components are dropped, missing ones become 0 (alpha 1).\n");
-    // Ноды и пины — из того же описания, что у компилятора: подсказка не расходится с графом.
-    static const QHash<QString, QString> props{
-        {QStringLiteral("ColorParam"), QStringLiteral("name, color [r,g,b,a] 0..1")},
-        {QStringLiteral("ScalarParam"), QStringLiteral("name, value")},
-        {QStringLiteral("Vector2Param"), QStringLiteral("name, value [x,y]")},
-        {QStringLiteral("Vector3Param"), QStringLiteral("name, value [x,y,z]")},
-        {QStringLiteral("Constant"), QStringLiteral("value")},
-        {QStringLiteral("Texture2D"), QStringLiteral("textureName")},
-        {QStringLiteral("NormalMap"), QStringLiteral("textureName")},
-        {QStringLiteral("UVCoord"), QStringLiteral("tilingX, tilingY")},
-        {QStringLiteral("Panner"), QStringLiteral("speedX, speedY")}};
-    for (const auto& group : MaterialSchema().Groups())
-        for (const QString& type : group.types)
-        {
-            QStringList inputs, outputs;
-            for (const auto& pin : EditorCore::HlslGraphCompiler::NodePins(type)) (pin.isInput ? inputs : outputs) << pin.name + QLatin1Char(':') + pin.type;
-            prompt += QStringLiteral("  * %1 (%2inputs: %3; outputs: %4)\n").arg(type,
-                props.contains(type) ? QStringLiteral("props: %1; ").arg(props.value(type)) : QString(),
-                inputs.isEmpty() ? QStringLiteral("none") : inputs.join(QStringLiteral(", ")), outputs.join(QStringLiteral(", ")));
-        }
-    prompt += QStringLiteral(
-        "ObjectColor is the colour of the object; SurfaceDefaults gives the default surface (object colour times its texture).\n"
-        "InstanceData is per-copy data of instanced meshes. NormalMap gives a world normal for MaterialOutput.Normal.\n"
-        "Names of parameters and textures are HLSL identifiers and must be unique.\n"
-        "Change the graph as the user asks and reply ONLY with the whole updated JSON in a ```json block.\n");
-    return prompt;
-}
-
-bool MaterialGraphWidget::PasteFromAi(const QString& text, QString* error)
-{
-    if (error) *error = Tr("В буфере обмена нет корректного JSON графа с выходом материала.",
-                           "The clipboard has no valid graph JSON with a material output.");
-    QString json = text.trimmed();
-    static const QRegularExpression block(QStringLiteral(R"(```(?:json)?\s*([\s\S]*?)\s*```)"));
-    if (const auto match = block.match(json); match.hasMatch()) json = match.captured(1);
-    EditorCore::MaterialGraphModel model;
-    if (!model.ImportFromJson(json)) return false;
-    const auto& nodes = model.Nodes();
-    if (std::count_if(nodes.begin(), nodes.end(), [](const GraphNodeData& n) { return n.type == MaterialGraphSchema::MasterType(); }) != 1) return false;
-    // Выдуманная нейросетью нода молча дала бы 0 в HLSL: такой ответ не принимается.
-    if (std::any_of(nodes.begin(), nodes.end(), [](const GraphNodeData& n) { return !EditorCore::HlslGraphCompiler::IsKnownNode(n.type); }))
-        return false;
-    const auto compiled = EditorCore::HlslGraphCompiler::Compile(model);
-    if (!compiled.problems.isEmpty())
-    {
-        if (error) *error = compiled.problems.constBegin().value();
-        return false;
-    }
-    if (error) error->clear();
-    Checkpoint(); // готовый граф и ответ ИИ отменяются, как любая правка
-    ReplaceDocument(model);
-    NotifyStructure();
-    return true;
 }

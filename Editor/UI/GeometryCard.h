@@ -120,8 +120,8 @@ public:
     {
         SetTitle(Tr("Геометрия", "Geometry"));
         SetInfo(Tr("Геометрия", "Geometry"),
-                Tr("Поддерживаемые форматы моделей: .obj, .fbx, .glb.\nДля процедурных примитивов замена геометрии заблокирована.",
-                   "Supported model formats: .obj, .fbx, .glb.\nGeometry replacement is blocked for procedural primitives."));
+                Tr("3D-модель объекта:\n• Форматы: .obj, .fbx, .glb\n• Перетаскивание ассета из браузера\n\nДля примитивов замена заблокирована.",
+                   "3D object model:\n• Formats: .obj, .fbx, .glb\n• Drag-and-drop asset from browser\n\nReplacement is locked for primitives."));
         if (labelModelTitle_) labelModelTitle_->setText(Tr("Модель [.obj / .fbx / .glb]", "Model [.obj / .fbx / .glb]"));
         if (modelAsset_)
         {
@@ -139,8 +139,8 @@ private:
     void BuildCard()
     {
         SetInfo(Tr("Геометрия", "Geometry"),
-                Tr("Поддерживаемые форматы моделей: .obj, .fbx, .glb.\nДля процедурных примитивов замена геометрии заблокирована.",
-                   "Supported model formats: .obj, .fbx, .glb.\nGeometry replacement is blocked for procedural primitives."));
+                Tr("3D-модель объекта:\n• Форматы: .obj, .fbx, .glb\n• Перетаскивание ассета из браузера\n\nДля примитивов замена заблокирована.",
+                   "3D object model:\n• Formats: .obj, .fbx, .glb\n• Drag-and-drop asset from browser\n\nReplacement is locked for primitives."));
 
         auto* cl = ContentLayout();
 

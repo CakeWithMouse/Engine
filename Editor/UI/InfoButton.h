@@ -20,7 +20,7 @@
 
 namespace InfoButtonGeometry
 {
-    constexpr int kMaxPopupWidth = 320;
+    constexpr int kMaxPopupWidth = 360;
 
     inline QRect CalculatePopupGeometry(const QRect& buttonGlobalRect, const QSize& popupSize, const QRect& screenAvailableGeom)
     {
@@ -91,6 +91,7 @@ public:
         : QToolButton(parent)
     {
         setObjectName(QStringLiteral("InfoButton"));
+        setProperty("isInfoButton", true);
         setFixedSize(18, 18);
         setIconSize(QSize(14, 14));
         setAutoRaise(true);
@@ -122,6 +123,12 @@ public:
         SetInfoText(title, ruText, enText);
     }
 
+    explicit InfoButton(const QString& ruTitle, const QString& ruText, const QString& enTitle, const QString& enText, QWidget* parent = nullptr)
+        : InfoButton(parent)
+    {
+        SetInfoText(ruTitle, ruText, enTitle, enText);
+    }
+
     ~InfoButton() override
     {
         if (langSubId_) EditorLocale::Instance().UnsubscribeLanguageChanged(langSubId_);
@@ -131,7 +138,8 @@ public:
 
     void SetInfoText(const QString& ruText, const QString& enText = QString())
     {
-        title_.clear();
+        ruTitle_.clear();
+        enTitle_.clear();
         ruText_ = ruText;
         enText_ = enText.isEmpty() ? ruText : enText;
         RetranslateUi();
@@ -139,7 +147,17 @@ public:
 
     void SetInfoText(const QString& title, const QString& ruText, const QString& enText)
     {
-        title_ = title;
+        ruTitle_ = title;
+        enTitle_ = title;
+        ruText_ = ruText;
+        enText_ = enText.isEmpty() ? ruText : enText;
+        RetranslateUi();
+    }
+
+    void SetInfoText(const QString& ruTitle, const QString& ruText, const QString& enTitle, const QString& enText)
+    {
+        ruTitle_ = ruTitle;
+        enTitle_ = enTitle.isEmpty() ? ruTitle : enTitle;
         ruText_ = ruText;
         enText_ = enText.isEmpty() ? ruText : enText;
         RetranslateUi();
@@ -150,8 +168,24 @@ public:
         return EditorLocale::Instance().Language() == EditorLanguage::Ru ? ruText_ : enText_;
     }
 
-    const QString& Title() const { return title_; }
-    const QString& CurrentTitle() const { return title_; }
+    const QString& Title() const { return ruTitle_; }
+    QString CurrentTitle() const { return EditorLocale::Instance().Language() == EditorLanguage::Ru ? ruTitle_ : enTitle_; }
+
+    void SetToolbarStyle(bool toolbar = true)
+    {
+        isToolbar_ = toolbar;
+        if (isToolbar_)
+        {
+            setFixedSize(26, 26);
+            setIconSize(QSize(16, 16));
+        }
+        else
+        {
+            setFixedSize(18, 18);
+            setIconSize(QSize(14, 14));
+        }
+        UpdateIcon();
+    }
 
     void ShowPopup()
     {
@@ -159,7 +193,7 @@ public:
         {
             popup_ = new InfoPopupWindow(nullptr);
             popup_->setObjectName(QStringLiteral("InfoPopupWindow"));
-            popup_->setMaximumWidth(InfoButtonGeometry::kMaxPopupWidth);
+            popup_->setFixedWidth(InfoButtonGeometry::kMaxPopupWidth);
             auto* layout = new QVBoxLayout(popup_);
             layout->setContentsMargins(10, 8, 10, 8);
             layout->setSpacing(4);
@@ -176,9 +210,9 @@ public:
             layout->addWidget(popupLabel_);
         }
         UpdatePopupStyle();
-        if (!title_.isEmpty())
+        if (!CurrentTitle().isEmpty())
         {
-            titleLabel_->setText(title_);
+            titleLabel_->setText(CurrentTitle());
             titleLabel_->show();
         }
         else
@@ -209,7 +243,7 @@ public:
     {
         setToolTip(Tr("Справка", "Help"));
         if (popupLabel_) popupLabel_->setText(CurrentText());
-        if (titleLabel_ && !title_.isEmpty()) titleLabel_->setText(title_);
+        if (titleLabel_ && !CurrentTitle().isEmpty()) titleLabel_->setText(CurrentTitle());
     }
 
     QFrame* Popup() const { return popup_; }
@@ -241,10 +275,11 @@ public:
 private:
     void UpdateIcon()
     {
-        QIcon ic = IconProvider::HelpIcon(EditorTheme::Instance().Palette().textSecondary);
+        const int sz = isToolbar_ ? 16 : 14;
+        QIcon ic = IconProvider::GetIcon(QStringLiteral("help-circle"), EditorTheme::Instance().Palette().textSecondary, sz);
         if (ic.isNull())
         {
-            qWarning("[Warning] InfoButton: help icon not found, using '?' text fallback");
+            ic = IconProvider::HelpIcon(EditorTheme::Instance().Palette().textSecondary);
         }
         setIcon(ic);
     }
@@ -275,7 +310,8 @@ private:
         ).arg(pal.bgPanel.name(), pal.textPrimary.name(), pal.borderMid.name()));
     }
 
-    QString title_;
+    QString ruTitle_;
+    QString enTitle_;
     QString ruText_;
     QString enText_;
     QFrame* popup_{nullptr};
@@ -283,4 +319,5 @@ private:
     QLabel* popupLabel_{nullptr};
     int langSubId_{0};
     uint32_t themeSubId_{0};
+    bool isToolbar_{false};
 };

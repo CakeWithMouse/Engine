@@ -10,14 +10,24 @@
 #include <QtGlobal>
 #include <algorithm>
 #include <cmath>
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#endif
 
 PreviewWidget::PreviewWidget(QWidget* parent) : QWidget(parent)
 {
     setAttribute(Qt::WA_NativeWindow, true);
     setAttribute(Qt::WA_PaintOnScreen, true); // the engine Presents here
-    setAttribute(Qt::WA_NoSystemBackground, true);
+    setAttribute(Qt::WA_OpaquePaintEvent, true);
+    setAutoFillBackground(true);
     setMinimumSize(240, 240);
     setFocusPolicy(Qt::ClickFocus);
+    QPalette pal = palette();
+    pal.setColor(QPalette::Window, QColor(0x18, 0x1B, 0x22));
+    setPalette(pal);
 
     orbitTimer_ = new QTimer(this);
     orbitTimer_->setSingleShot(true);
@@ -49,7 +59,17 @@ void PreviewWidget::Attach()
     if (attached_ || !attach)
         return;
     attached_ = true;
-    attach(reinterpret_cast<void*>(winId()), PhysW(), PhysH()); // winId creates the native window
+    void* nativeHandle = reinterpret_cast<void*>(winId());
+#ifdef _WIN32
+    HWND hwnd = reinterpret_cast<HWND>(nativeHandle);
+    if (hwnd)
+    {
+        LONG_PTR style = GetWindowLongPtrW(hwnd, GWL_STYLE);
+        SetWindowLongPtrW(hwnd, GWL_STYLE, style | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
+        SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+    }
+#endif
+    attach(nativeHandle, PhysW(), PhysH()); // winId creates the native window
 }
 
 void PreviewWidget::Detach()

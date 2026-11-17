@@ -198,6 +198,7 @@
         <ClCompile Include="Source/MaterialEditorWindow_Graph.cpp"/>
         <ClCompile Include="Source/MaterialTextureTools.cpp"/>
         <ClCompile Include="Source/MaterialGraphWidget.cpp"/>
+        <ClCompile Include="Source/MaterialGraphWidget_Presets.cpp"/>
         <ClCompile Include="Source/GraphEditorWidget.cpp"/>
         <ClCompile Include="Source/ScriptGraphWidget.cpp"/>
         <ClCompile Include="Source/ScriptGraphWidget_DragDrop.cpp"/>

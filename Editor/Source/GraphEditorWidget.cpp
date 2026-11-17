@@ -372,8 +372,7 @@ public:
         painter->fillPath(body, QColor(0x18, 0x1B, 0x22));
         const QColor problemColor = problem_.isEmpty() && !warning_.isEmpty() ? QColor(0xEA, 0xB3, 0x08) : QColor(0xEF, 0x44, 0x44);
         const bool marked = !problem_.isEmpty() || !warning_.isEmpty();
-        painter->setPen(isSelected() ? QPen(QColor(0x38, 0xBD, 0xF8), 2.0)
-                        : marked ? QPen(problemColor, 2.0) : QPen(QColor(0x2D, 0x33, 0x42), 1.0));
+        painter->setPen(isSelected() ? QPen(QColor(0x38, 0xBD, 0xF8), 2.5) : marked ? QPen(problemColor, 2.0) : QPen(QColor(0x2D, 0x33, 0x42), 1.0));
         painter->drawPath(body);
 
         QPainterPath header;
@@ -415,9 +414,11 @@ public:
             painter->setPen(QPen(color.darker(150), 1.0));
             painter->drawEllipse(pin.localPos, 4.5, 4.5);
             painter->setPen(QColor(0xCB, 0xD5, 0xE1));
-            const QRectF label = pin.isInput ? QRectF(pin.localPos.x() + 8, pin.localPos.y() - 8, width_ / 2 + 10, 16)
-                                             : QRectF(width_ / 2 - 20, pin.localPos.y() - 8, width_ / 2 + 8, 16);
-            painter->drawText(label, (pin.isInput ? Qt::AlignLeft : Qt::AlignRight) | Qt::AlignVCenter, pin.name);
+            const qreal maxLabelW = (width_ - 24) / 2.0;
+            const QRectF label = pin.isInput ? QRectF(pin.localPos.x() + 8, pin.localPos.y() - 8, maxLabelW, 16)
+                                             : QRectF(width_ - 8 - maxLabelW, pin.localPos.y() - 8, maxLabelW, 16);
+            painter->drawText(label, (pin.isInput ? Qt::AlignLeft : Qt::AlignRight) | Qt::AlignVCenter,
+                              painter->fontMetrics().elidedText(pin.name, Qt::ElideRight, static_cast<int>(maxLabelW)));
         }
 
         // Содержимое ноды под пинами рисует наследник виджета.
@@ -690,20 +691,18 @@ bool SameLink(const GraphConnectionData& a, const GraphConnectionData& b)
 
 InfoButton* MakeGraphHelpButton(QWidget* parent)
 {
-    return new InfoButton(
-        QStringLiteral("Пин → пин: связь; потянуть подключённый вход — снять связь\n"
-                       "ПКМ по холсту или Tab — добавить ноду, по ноде — её меню\n"
-                       "Колесо — масштаб, ПКМ/СКМ с движением — сдвиг, F — показать всё\n"
-                       "Ctrl+Z / Ctrl+Y — отменить / повторить\n"
-                       "Ctrl+C / Ctrl+X / Ctrl+V / Ctrl+D — копировать / вырезать / вставить / дублировать\n"
-                       "Ctrl+A — выделить всё, Del — удалить"),
-        QStringLiteral("Pin to pin: link; drag a connected input to detach it\n"
-                       "RMB on the canvas or Tab: add a node; on a node: its menu\n"
-                       "Wheel: zoom, RMB/MMB drag: pan, F: frame all\n"
-                       "Ctrl+Z / Ctrl+Y: undo / redo\n"
-                       "Ctrl+C / Ctrl+X / Ctrl+V / Ctrl+D: copy / cut / paste / duplicate\n"
-                       "Ctrl+A: select all, Del: delete"),
+    auto* btn = new InfoButton(
+        QStringLiteral("Навигация и редактирование графа"),
+        QStringLiteral("Связи между нодами:\n• Перетащите пин на другой пин для создания связи\n• Потяните за подключённый входной пин, чтобы отсоединить связь\n\n"
+                       "Добавление нод и навигация:\n• ПКМ по холсту или Tab — поиск и добавление нод\n• ПКМ по ноде — контекстные действия и свойства\n• Колёсико мыши — масштаб (0.2x..10x), ПКМ/СКМ — сдвиг холста\n\n"
+                       "Горячие клавиши:\n• F — показать всё (или выделенные ноды)\n• Ctrl+Z / Ctrl+Y — отменить / повторить\n• Ctrl+C / Ctrl+X / Ctrl+V — копировать / вырезать / вставить\n• Ctrl+D — дублировать выделенные ноды\n• Ctrl+A — выделить всё, Del — удалить"),
+        QStringLiteral("Graph Navigation and Editing"),
+        QStringLiteral("Node connections:\n• Drag a pin to another pin to create a link\n• Drag a connected input pin to disconnect it\n\n"
+                       "Adding nodes and navigation:\n• RMB on canvas or Tab — search and add nodes\n• RMB on a node — context actions and properties\n• Mouse wheel — zoom (0.2x..10x), RMB/MMB drag — pan\n\n"
+                       "Keyboard shortcuts:\n• F — frame all (or selected nodes)\n• Ctrl+Z / Ctrl+Y — undo / redo\n• Ctrl+C / Ctrl+X / Ctrl+V — copy / cut / paste\n• Ctrl+D — duplicate selected nodes\n• Ctrl+A — select all, Del — delete"),
         parent);
+    btn->SetToolbarStyle(true);
+    return btn;
 }
 } // namespace
 
@@ -742,9 +741,10 @@ void GraphEditorWidget::BuildToolbar()
     toolbar_->setContentsMargins(4, 3, 4, 3);
     auto* add = new QToolButton(this);
     add->setObjectName(prefix + QStringLiteral("AddNode"));
-    add->setText(Tr("+ Нода", "+ Node"));
-    add->setToolTip(Tr("Добавить ноду: список с поиском (также ПКМ по холсту или Tab)",
-                       "Add a node: a searchable list (also RMB on the canvas or Tab)"));
+    add->setIcon(IconProvider::PlusIcon());
+    add->setIconSize(QSize(16, 16));
+    add->setToolTip(Tr("Добавить ноду (ПКМ по холсту или Tab)",
+                       "Add node (RMB on the canvas or Tab)"));
     connect(add, &QToolButton::clicked, this, [this, add] {
         ShowNodeSearch(add->mapToGlobal(QPoint(0, add->height())), view_->mapToScene(view_->viewport()->rect().center()));
     });
@@ -805,16 +805,9 @@ void GraphEditorWidget::BuildToolbar()
     auto* overflow = new GraphToolbarOverflow(toolbar_, this);
 
     toolbar_->addStretch(1);
-    auto* hint = new QLabel(Tr("ПКМ/Tab — ноды · ЛКМ по пину — связь · Ctrl+C/V/D/Z · Del",
-                               "RMB/Tab: nodes · LMB on a pin: link · Ctrl+C/V/D/Z · Del"), this);
-    QPalette hintPalette = hint->palette(); // серый, но не выключенный: у выключенной надписи нет подсказки
-    hintPalette.setColor(QPalette::WindowText, hintPalette.color(QPalette::PlaceholderText));
-    hint->setPalette(hintPalette);
-    toolbar_->addWidget(hint);
     auto* help = MakeGraphHelpButton(this);
     help->setObjectName(prefix + QStringLiteral("Help"));
     toolbar_->addWidget(help);
-    overflow->AddWidget(hint);
     overflow->AddButton(comment, Tr("Комментарий", "Comment"));
     overflow->AddButton(arrange, Tr("Упорядочить", "Arrange"));
     overflow->AddButton(frame, Tr("Показать всё", "Frame all"));
@@ -854,6 +847,7 @@ void GraphEditorWidget::RefreshToolbarIcons()
         if (auto* button = findChild<QToolButton*>(prefix + QString::fromLatin1(suffix)))
             button->setIcon(icon);
     };
+    apply("AddNode", IconProvider::PlusIcon(color));
     apply("Undo", IconProvider::UndoIcon(color));
     apply("Redo", IconProvider::RedoIcon(color));
     apply("Frame", IconProvider::FrameIcon(color));
@@ -1293,7 +1287,7 @@ bool GraphEditorWidget::eventFilter(QObject* watched, QEvent* event)
     {
         const double factor = static_cast<QWheelEvent*>(event)->angleDelta().y() > 0 ? 1.15 : 1.0 / 1.15;
         const double scale = view_->transform().m11() * factor;
-        if (scale > 0.2 && scale < 3.0) view_->scale(factor, factor);
+        if (scale >= 0.2 && scale <= 10.0) view_->scale(factor, factor);
         return true;
     }
     return QWidget::eventFilter(watched, event);

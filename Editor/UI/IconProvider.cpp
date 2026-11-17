@@ -70,6 +70,21 @@ namespace
         if (name == QLatin1String("layout-grid") || name == QLatin1String("arrange")) return EditorIcons::TABLER_LAYOUT_GRID;
         if (name == QLatin1String("message-circle") || name == QLatin1String("comment")) return EditorIcons::TABLER_MESSAGE_CIRCLE;
         if (name == QLatin1String("focus-2") || name == QLatin1String("frame")) return EditorIcons::TABLER_FOCUS_2;
+        if (name == QLatin1String("device-floppy") || name == QLatin1String("save")) return EditorIcons::TABLER_DEVICE_FLOPPY;
+        if (name == QLatin1String("rotate-2") || name == QLatin1String("revert")) return EditorIcons::TABLER_ROTATE_2;
+        if (name == QLatin1String("code")) return EditorIcons::TABLER_CODE;
+        if (name == QLatin1String("schema")) return EditorIcons::TABLER_SCHEMA;
+        if (name == QLatin1String("template")) return EditorIcons::TABLER_TEMPLATE;
+        if (name == QLatin1String("variable")) return EditorIcons::TABLER_VARIABLE;
+        if (name == QLatin1String("typography")) return EditorIcons::TABLER_TYPOGRAPHY;
+        if (name == QLatin1String("hand-click")) return EditorIcons::TABLER_HAND_CLICK;
+        if (name == QLatin1String("progress")) return EditorIcons::TABLER_PROGRESS;
+        if (name == QLatin1String("components")) return EditorIcons::TABLER_COMPONENTS;
+        if (name == QLatin1String("circle-dotted")) return EditorIcons::TABLER_CIRCLE_DOTTED;
+        if (name == QLatin1String("file-code")) return EditorIcons::TABLER_FILE_CODE;
+        if (name == QLatin1String("volume")) return EditorIcons::TABLER_VOLUME;
+        if (name == QLatin1String("robot")) return EditorIcons::TABLER_ROBOT;
+        if (name == QLatin1String("box")) return EditorIcons::TABLER_BOX;
         return nullptr;
     }
 
@@ -230,6 +245,21 @@ QIcon IconProvider::PasteIcon(const QColor& color) { return GetIcon(QStringLiter
 QIcon IconProvider::ArrangeIcon(const QColor& color) { return GetIcon(QStringLiteral("arrange"), color); }
 QIcon IconProvider::CommentIcon(const QColor& color) { return GetIcon(QStringLiteral("comment"), color); }
 QIcon IconProvider::FrameIcon(const QColor& color) { return GetIcon(QStringLiteral("frame"), color); }
+QIcon IconProvider::SaveIcon(const QColor& color) { return GetIcon(QStringLiteral("save"), color); }
+QIcon IconProvider::RevertIcon(const QColor& color) { return GetIcon(QStringLiteral("revert"), color); }
+QIcon IconProvider::CodeIcon(const QColor& color) { return GetIcon(QStringLiteral("code"), color); }
+QIcon IconProvider::SchemaIcon(const QColor& color) { return GetIcon(QStringLiteral("schema"), color); }
+QIcon IconProvider::TemplateIcon(const QColor& color) { return GetIcon(QStringLiteral("template"), color); }
+QIcon IconProvider::VariableIcon(const QColor& color) { return GetIcon(QStringLiteral("variable"), color); }
+QIcon IconProvider::TypographyIcon(const QColor& color) { return GetIcon(QStringLiteral("typography"), color); }
+QIcon IconProvider::HandClickIcon(const QColor& color) { return GetIcon(QStringLiteral("hand-click"), color); }
+QIcon IconProvider::ProgressIcon(const QColor& color) { return GetIcon(QStringLiteral("progress"), color); }
+QIcon IconProvider::ComponentsIcon(const QColor& color) { return GetIcon(QStringLiteral("components"), color); }
+QIcon IconProvider::CircleDottedIcon(const QColor& color) { return GetIcon(QStringLiteral("circle-dotted"), color); }
+QIcon IconProvider::FileCodeIcon(const QColor& color) { return GetIcon(QStringLiteral("file-code"), color); }
+QIcon IconProvider::VolumeIcon(const QColor& color) { return GetIcon(QStringLiteral("volume"), color); }
+QIcon IconProvider::RobotIcon(const QColor& color) { return GetIcon(QStringLiteral("robot"), color); }
+QIcon IconProvider::BoxIcon(const QColor& color) { return GetIcon(QStringLiteral("box"), color); }
 
 void IconProvider::UploadIcons(IEditorHost* host, bool force)
 {

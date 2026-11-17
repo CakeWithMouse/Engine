@@ -131,8 +131,8 @@ public:
     {
         SetTitle(Tr("Автомат ИИ", "AI State Machine"));
         SetInfo(Tr("Автомат ИИ", "AI State Machine"),
-                Tr("Конечный автомат поведения персонажа: файл .fsm или имя C++ автомата.\nПоддерживает локальные переопределения переменных памяти.",
-                   "Finite state machine for character behavior: a .fsm file or C++ machine name.\nSupports local overrides of machine memory variables."));
+                Tr("Конечный автомат ИИ [.fsm]:\n• Иерархический граф состояний\n• Локальные переменные памяти ниже\n• Перетаскивание автомата из браузера",
+                   "AI state machine [.fsm]:\n• Hierarchical state machine graph\n• Local memory variables below\n• Drag-and-drop machine from browser"));
         label_->setText(Tr("Файл .fsm или имя автомата из C++", "A .fsm file or the name of a C++ machine"));
         machine_->setPlaceholderText(Tr("нет", "none"));
         choose_->setText(Tr("Выбрать…", "Browse…"));

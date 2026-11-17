@@ -41,8 +41,8 @@ void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
     cardLight_ = new CollapsibleCard(Tr("Свет", "Light"), this, true);
     cardLight_->setObjectName(QStringLiteral("LightCard"));
     cardLight_->SetInfo(Tr("Свет", "Light"),
-                        Tr("Параметры источника света: цвет, яркость, радиус затухания, тени.",
-                           "Light source parameters: color, intensity, attenuation radius, shadows."));
+                        Tr("Параметры источника света:\n• Цвет и яркость излучения\n• Радиус затухания света\n• Отбрасывание динамических теней",
+                           "Light source parameters:\n• Emission color and intensity\n• Light attenuation radius\n• Dynamic shadow casting"));
     lightInspector_ = cardLight_;
     auto* cl = cardLight_->ContentLayout();
     auto emitChanged = [this] {

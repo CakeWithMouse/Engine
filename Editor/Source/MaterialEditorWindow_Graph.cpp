@@ -19,9 +19,10 @@ void MaterialEditorWindow::BuildGraphTools(QToolBar* tools)
 {
     templates_ = new QToolButton(this);
     templates_->setObjectName(QStringLiteral("MaterialTemplates"));
-    templates_->setText(Tr("Шаблоны", "Templates"));
-    templates_->setToolTip(Tr("Создать материал из готового графа: Simple — плоский цвет, ORM — упакованная текстура",
-                              "Create a material from a preset graph: Simple — flat colour, ORM — packed texture"));
+    templates_->setIcon(IconProvider::TemplateIcon());
+    templates_->setIconSize(QSize(16, 16));
+    templates_->setToolTip(Tr("Шаблоны материала: Simple, ORM, базовые эффекты",
+                              "Material templates: Simple, ORM, base effects"));
     templates_->setPopupMode(QToolButton::InstantPopup);
     templates_->setEnabled(false); // до загрузки HLSL
 
@@ -33,13 +34,18 @@ void MaterialEditorWindow::BuildGraphTools(QToolBar* tools)
                    "Replace the current material with the template graph? Revert undoes this before saving.")) == QMessageBox::Yes)
             ApplyTemplate(kind);
     };
-    menu->addAction(Tr("Simple — плоский цвет", "Simple — flat colour"), this, [this, apply] { apply(0); });
+    menu->addAction(Tr("Simple — слоты текстур", "Simple — texture slots"), this, [this, apply] { apply(0); });
     menu->addAction(Tr("ORM — упакованная текстура AO/Roughness/Metallic", "ORM — packed texture AO/Roughness/Metallic"),
                     this, [this, apply] { apply(1); });
+    menu->addSeparator();
+    menu->addAction(Tr("Textured Color — базовая текстура", "Textured Color — base texture"), this, [this, apply] { apply(2); });
+    menu->addAction(Tr("Animated Neon — неоновая пульсация", "Animated Neon — pulsing neon"), this, [this, apply] { apply(3); });
+    menu->addAction(Tr("Gold — золотой металл с бликом", "Gold — golden metal with rim"), this, [this, apply] { apply(4); });
+    menu->addAction(Tr("Scrolling Energy — бегущая текстура", "Scrolling Energy — scrolling energy"), this, [this, apply] { apply(5); });
     templates_->setMenu(menu);
     tools->addWidget(templates_);
 
-    exposeAction_ = tools->addAction(Tr("Выставить параметром", "Expose as parameter"), this,
+    exposeAction_ = tools->addAction(IconProvider::VariableIcon(), QString(), this,
                                      [this] { ExposeSelectedAsParameter(); });
     exposeAction_->setObjectName(QStringLiteral("MaterialExposeParam"));
     exposeAction_->setToolTip(Tr("Превратить выбранную ноду Constant в параметр материала без перекомпиляции",
@@ -51,8 +57,12 @@ void MaterialEditorWindow::ApplyTemplate(int kind)
 {
     if (!loaded_ || !sourceLoaded_ || saving_) return;
     BackupGraphFiles();
-    graph_->SetModel(kind == 0 ? EditorCore::MaterialGraphPresets::BuildSimple()
-                               : EditorCore::MaterialGraphPresets::BuildOrm());
+    if (kind == 0)
+        graph_->SetModel(EditorCore::MaterialGraphPresets::BuildSimple());
+    else if (kind == 1)
+        graph_->SetModel(EditorCore::MaterialGraphPresets::BuildOrm());
+    else
+        graph_->LoadPreset(kind - 2);
     if (!graphMode_) SetGraphMode(true);
     ApplyGraph();
 }

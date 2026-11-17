@@ -85,8 +85,8 @@ public:
     {
         SetTitle(Tr("Скрипт", "Script"));
         SetInfo(Tr("Скрипт", "Script"),
-                Tr("Визуальный скрипт логики объекта [.vscript].\nПозволяет настраивать поведение и переопределять переменные объекта.",
-                   "Visual script for object logic [.vscript].\nAllows customizing behavior and overriding per-object variables."));
+                Tr("Визуальный скрипт [.vscript]:\n• Граф логики и событий объекта\n• Публичные переменные настраиваются ниже\n• Перетаскивание скрипта из браузера",
+                   "Visual logic script [.vscript]:\n• Object logic and event graph\n• Public variables configured below\n• Drag-and-drop script from browser"));
         label_->setText(Tr("Визуальный скрипт [.vscript]", "Visual script [.vscript]"));
         asset_->setPlaceholderText(Tr("нет", "none"));
         choose_->setText(Tr("Выбрать…", "Browse…"));

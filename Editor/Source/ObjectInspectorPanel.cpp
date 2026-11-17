@@ -210,7 +210,7 @@ void ObjectInspectorPanel::BuildCharacterCard(QVBoxLayout* layout)
 {
     cardCharacter_ = new CollapsibleCard(Tr("Персонаж", "Character"), this, true);
     cardCharacter_->setObjectName(QStringLiteral("CharacterCard"));
-    cardCharacter_->SetInfo(Tr("Персонаж", "Character"), Tr("Параметры контроллера персонажа: скорость перемещения.", "Character controller parameters: movement speed."));
+    cardCharacter_->SetInfo(Tr("Персонаж", "Character"), Tr("Контроллер персонажа:\n• Скорость перемещения\n• Реакция на коллизии и физику", "Character controller:\n• Movement speed\n• Collision and physics reaction"));
     characterInspector_ = cardCharacter_;
     auto* cl = cardCharacter_->ContentLayout();
 
@@ -238,7 +238,7 @@ void ObjectInspectorPanel::BuildPhysicsCard(QVBoxLayout* layout)
 {
     cardPhysics_ = new CollapsibleCard(Tr("Физика", "Physics"), this, true);
     cardPhysics_->setObjectName(QStringLiteral("PhysicsCard"));
-    cardPhysics_->SetInfo(Tr("Физика", "Physics"), Tr("Физические свойства твердого тела — симуляция Jolt Physics в режиме Play.\nФорма коллизии, масса, трение и упругость.", "Rigid body physics properties: Jolt Physics simulation in Play mode.\nCollision shape, mass, friction, and restitution."));
+    cardPhysics_->SetInfo(Tr("Физика", "Physics"), Tr("Физика Jolt Physics (режим Play):\n• Форма коллизии (куб, сфера, меш)\n• Масса, статичность и упругость", "Jolt Physics (Play mode):\n• Collision shape (box, sphere, mesh)\n• Mass, static flag, and restitution"));
     physicsInspector_ = cardPhysics_;
     auto* cl = cardPhysics_->ContentLayout();
     auto emitChanged = [this] {

@@ -91,18 +91,18 @@ QToolButton:pressed, QToolButton:checked {
     background-color: %11;
     border-color: %2;
 }
-QToolButton#InfoButton, QToolButton#CardInfoButton, QToolButton#AiLegendInfoButton, QToolButton#CameraGuideInfo {
+QToolButton#InfoButton, QToolButton#CardInfoButton, QToolButton#AiLegendInfoButton, QToolButton#CameraGuideInfo, QToolButton[isInfoButton="true"] {
     background-color: transparent;
     border: 1px solid transparent;
     border-radius: 3px;
     padding: 0px;
     margin: 0px;
 }
-QToolButton#InfoButton:hover, QToolButton#CardInfoButton:hover, QToolButton#AiLegendInfoButton:hover, QToolButton#CameraGuideInfo:hover {
+QToolButton#InfoButton:hover, QToolButton#CardInfoButton:hover, QToolButton#AiLegendInfoButton:hover, QToolButton#CameraGuideInfo:hover, QToolButton[isInfoButton="true"]:hover {
     background-color: %9;
     border-color: %10;
 }
-QToolButton#InfoButton:pressed, QToolButton#CardInfoButton:pressed, QToolButton#AiLegendInfoButton:pressed, QToolButton#CameraGuideInfo:pressed {
+QToolButton#InfoButton:pressed, QToolButton#CardInfoButton:pressed, QToolButton#AiLegendInfoButton:pressed, QToolButton#CameraGuideInfo:pressed, QToolButton[isInfoButton="true"]:pressed {
     background-color: %11;
     border-color: %2;
 }
@@ -225,28 +225,28 @@ QMainWindow::separator, QSplitter::handle {
     background: transparent;
 }
 QMainWindow::separator:horizontal, QSplitter::handle:horizontal {
-    height: 4px;
-    border-top: 1px solid transparent;
+    height: 6px;
+    border-top: 2px solid transparent;
     border-bottom: 2px solid transparent;
     background-color: %14;
     background-clip: content;
 }
 QMainWindow::separator:vertical, QSplitter::handle:vertical {
-    width: 4px;
-    border-left: 1px solid transparent;
+    width: 6px;
+    border-left: 2px solid transparent;
     border-right: 2px solid transparent;
     background-color: %14;
     background-clip: content;
 }
 QMainWindow::separator:horizontal:hover, QSplitter::handle:horizontal:hover {
-    height: 4px;
+    height: 6px;
     border-top: 1px solid transparent;
     border-bottom: 1px solid transparent;
     background-color: %15;
     background-clip: content;
 }
 QMainWindow::separator:vertical:hover, QSplitter::handle:vertical:hover {
-    width: 4px;
+    width: 6px;
     border-left: 1px solid transparent;
     border-right: 1px solid transparent;
     background-color: %15;
