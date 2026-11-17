@@ -62,6 +62,7 @@ PhysicsShapeType ShapeType(const Json& value)
     if (text == "box") return PhysicsShapeType::Box;
     if (text == "sphere") return PhysicsShapeType::Sphere;
     if (text == "capsule") return PhysicsShapeType::Capsule;
+    if (text == "mesh") return PhysicsShapeType::Mesh;
     Invalid("Unknown physics shape type");
 }
 const char* BodyTypeName(PhysicsBodyType type)
@@ -79,6 +80,7 @@ const char* ShapeTypeName(PhysicsShapeType type)
     {
     case PhysicsShapeType::Sphere: return "sphere";
     case PhysicsShapeType::Capsule: return "capsule";
+    case PhysicsShapeType::Mesh: return "mesh";
     default: return "box";
     }
 }

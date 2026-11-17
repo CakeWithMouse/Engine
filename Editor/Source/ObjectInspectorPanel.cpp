@@ -342,7 +342,8 @@ void ObjectInspectorPanel::RetranslateUi()
         QSignalBlocker blocker(physicsShape_);
         const int current = physicsShape_->currentIndex();
         physicsShape_->clear();
-        physicsShape_->addItems({Tr("Куб", "Box"), Tr("Сфера", "Sphere"), Tr("Капсула", "Capsule")});
+        physicsShape_->addItems({Tr("Куб", "Box"), Tr("Сфера", "Sphere"), Tr("Капсула", "Capsule"),
+                                    Tr("Меш (сложная)", "Mesh (complex)")});
         physicsShape_->setCurrentIndex(current < 0 ? 0 : current);
     }
 
@@ -489,7 +490,7 @@ void ObjectInspectorPanel::Refresh(
                 : EnginePhysicsObjectState{0u, 1u, 0u, 0.5f, 0.0f, 1000.0f};
             if (canReplaceField(physicsEnabled_)) physicsEnabled_->setChecked(state.enabled != 0);
             if (canReplaceField(physicsBodyType_)) physicsBodyType_->setCurrentIndex(std::min(std::max(static_cast<int>(state.bodyType), 0), 2));
-            if (canReplaceField(physicsShape_)) physicsShape_->setCurrentIndex(std::min(std::max(static_cast<int>(state.shapeType), 0), 2));
+            if (canReplaceField(physicsShape_)) physicsShape_->setCurrentIndex(std::min(std::max(static_cast<int>(state.shapeType), 0), 3));
             if (canReplaceField(physicsFriction_)) physicsFriction_->setValue(state.friction);
             if (canReplaceField(physicsRestitution_)) physicsRestitution_->setValue(state.restitution);
             if (canReplaceField(physicsDensity_)) physicsDensity_->setValue(state.density);

@@ -14,10 +14,13 @@ constexpr const char* EnginePhysicsObjectExtension = "Engine.Scene.PhysicsObject
 constexpr uint32_t EnginePhysicsBodyStatic = 0;
 constexpr uint32_t EnginePhysicsBodyDynamic = 1;
 constexpr uint32_t EnginePhysicsBodyKinematic = 2;
-// Collision shape: 0 = box, 1 = sphere, 2 = capsule.
+// Collision shape: 0 = box, 1 = sphere, 2 = capsule, 3 = mesh (complex collision
+// from the render geometry: exact concave shape for static bodies, convex hull
+// for moving ones — Jolt restricts concave shapes to static bodies).
 constexpr uint32_t EnginePhysicsShapeBox = 0;
 constexpr uint32_t EnginePhysicsShapeSphere = 1;
 constexpr uint32_t EnginePhysicsShapeCapsule = 2;
+constexpr uint32_t EnginePhysicsShapeMesh = 3;
 
 struct EnginePhysicsObjectState
 {

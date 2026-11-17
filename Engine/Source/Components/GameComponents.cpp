@@ -404,6 +404,34 @@ void GameComponent::CreatePhysicsBody()
     desc.halfExtents = 0.5f * scale;
     desc.radius = 0.5f * std::max({scale.x, scale.y, scale.z});
     desc.halfHeight = 0.5f * scale.y;
+    // Complex collision follows the render mesh: vertices in the body's local
+    // space with the world scale baked in, so the body pose matches the visual.
+    // The vectors only need to outlive the CreateBody call.
+    std::vector<glm::vec3> meshVertices;
+    std::vector<uint32_t> meshIndices;
+    if (physicsShape_ == PhysicsShapeType::Mesh)
+    {
+        GameComponent* source = GetRenderComponent();
+        if (source && !source->points.empty() && !source->indices.empty())
+        {
+            const glm::mat4 worldMatrix = source->GetWorldMatrixGLM();
+            const glm::vec3 worldScale(glm::length(glm::vec3(worldMatrix[0])),
+                                       glm::length(glm::vec3(worldMatrix[1])),
+                                       glm::length(glm::vec3(worldMatrix[2])));
+            // The CPU vertex stream stores (position, colour) pairs.
+            meshVertices.reserve(source->points.size() / 2);
+            for (size_t i = 0; i < source->points.size(); i += 2)
+            {
+                const DirectX::XMFLOAT4& p = source->points[i];
+                meshVertices.emplace_back(p.x * worldScale.x, p.y * worldScale.y, p.z * worldScale.z);
+            }
+            meshIndices.reserve(source->indices.size());
+            for (const int index : source->indices)
+                if (index >= 0) meshIndices.push_back(static_cast<uint32_t>(index));
+            desc.meshVertices = &meshVertices;
+            desc.meshIndices = &meshIndices;
+        }
+    }
     desc.density = physicsDensity_;
     desc.friction = physicsFriction_;
     desc.restitution = physicsRestitution_;

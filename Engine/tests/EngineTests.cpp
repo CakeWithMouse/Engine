@@ -2209,6 +2209,7 @@ void SoundDecoderTests();
 void PrimitiveApiTests();
 void GameSettingsTests();
 void PhysicsWorldTests();
+void PhysicsMeshShapeTests();
 
 void ScriptTests();
 void AiMachineExtensionTests();
@@ -2222,6 +2223,7 @@ int main()
         {"ready primitives and hidden geometry setup", PrimitiveApiTests},
         {"owned GameSettings and rendering dispatch", GameSettingsTests},
         {"physics world: gravity, stepping, impulses, raycasts", PhysicsWorldTests},
+        {"physics world: complex mesh collision shapes", PhysicsMeshShapeTests},
         {"assigned primitives: GPU, materials and instances", AssignedPrimitiveRendering},
         {"trace scene geometry and filters", TraceSceneTests},
         {"trace screen coordinates and projection", TraceScreenTests},
