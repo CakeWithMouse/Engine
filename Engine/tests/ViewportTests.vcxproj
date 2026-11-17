@@ -4,11 +4,29 @@
     <ProjectConfiguration Include="Debug|x64"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>
   </ItemGroup>
-  <PropertyGroup Label="Globals"><ProjectGuid>{03CB2B77-F1D2-4C56-9E11-9B41E475350A}</ProjectGuid><WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion></PropertyGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{03CB2B77-F1D2-4C56-9E11-9B41E475350A}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <EngineEnableJolt Condition="'$(EngineEnableJolt)'=='' and Exists('$(MSBuildThisFileDirectory)..\vcpkg_installed\x64-windows\include\Jolt\Jolt.h')">true</EngineEnableJolt>
+    <EngineEnableJolt Condition="'$(EngineEnableJolt)'==''">false</EngineEnableJolt>
+    <EngineEnableVcpkg Condition="'$(EngineEnableVcpkg)'==''">false</EngineEnableVcpkg>
+    <EngineEnableVcpkg Condition="'$(EngineEnableJolt)'=='true'">true</EngineEnableVcpkg>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)/Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration"><ConfigurationType>Application</ConfigurationType><PlatformToolset>v145</PlatformToolset><CharacterSet>Unicode</CharacterSet></PropertyGroup>
+  <PropertyGroup>
+    <VcpkgEnableManifest>$(EngineEnableVcpkg)</VcpkgEnableManifest>
+    <VcpkgEnabled>$(EngineEnableVcpkg)</VcpkgEnabled>
+    <VcpkgManifestRoot>$(MSBuildThisFileDirectory)..\</VcpkgManifestRoot>
+    <VcpkgInstalledDir>$(MSBuildThisFileDirectory)..\vcpkg_installed\</VcpkgInstalledDir>
+  </PropertyGroup>
+  <Import Project="..\BuildSupport\VcpkgRoot.props" />
+  <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props" Condition="'$(EngineEnableVcpkg)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" />
   <Import Project="$(VCTargetsPath)/Microsoft.Cpp.props" />
   <Import Project="../BuildSupport/Cpp.props" />
+  <ItemDefinitionGroup Condition="'$(EngineEnableJolt)'=='true'"><ClCompile><PreprocessorDefinitions>ENGINE_ENABLE_JOLT;%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile></ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(EngineEnableJolt)'=='true' and '$(Configuration)'=='Debug'"><Link><AdditionalDependencies>$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/debug/lib/Jolt.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(EngineEnableJolt)'=='true' and '$(Configuration)'=='Release'"><Link><AdditionalDependencies>$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/lib/Jolt.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(EngineEnableAssimp)'=='true'"><Link><AdditionalDependencies>$(EngineAssimpLib);%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
   <ItemDefinitionGroup><ClCompile><AdditionalIncludeDirectories>$(RepositoryRoot)Game/Common;$(RepositoryRoot)Game/BasicExamples/Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories></ClCompile></ItemDefinitionGroup>
   <ItemGroup>
@@ -17,6 +35,10 @@
   <Import Project="../../Game/Common/PreviewScenes.props" />
   <ItemGroup><ProjectReference Include="../Engine.vcxproj"><Project>{90A42B03-FDD9-4E98-834D-49B44E58C029}</Project></ProjectReference></ItemGroup>
   <Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets" />
+  <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets" Condition="'$(EngineEnableVcpkg)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets')" />
+  <Target Name="RequireVcpkgDependencies" BeforeTargets="PrepareForBuild" Condition="'$(EngineEnableVcpkg)'=='true'">
+    <Error Condition="!Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" Text="vcpkg-dependent features (Jolt physics) require vcpkg. Set VCPKG_ROOT or /p:VcpkgRoot to the installed vcpkg directory." />
+  </Target>
   <Import Project="../BuildSupport/Content.targets" />
   <!-- The Battle preview loads its material assets from the content root (the executable directory here). -->
   <ItemGroup>
@@ -25,11 +47,10 @@
   <Target Name="DeployBattleMaterials" AfterTargets="Build">
     <Copy SourceFiles="@(BattleMaterials)" DestinationFolder="$(OutDir)Materials" SkipUnchangedFiles="true" />
   </Target>
-
-  <PropertyGroup>
-    <EngineEnableJolt Condition="'$(EngineEnableJolt)'=='' and Exists('..\..\vcpkg_installed\x64-windows\include\Jolt\Jolt.h')">true</EngineEnableJolt>
-    <EngineEnableJolt Condition="'$(EngineEnableJolt)'==''">false</EngineEnableJolt>
-  </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(EngineEnableJolt)'=='true' and '$(Configuration)'=='Debug'"><Link><AdditionalDependencies>$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/debug/lib/Jolt.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(EngineEnableJolt)'=='true' and '$(Configuration)'=='Release'"><Link><AdditionalDependencies>$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/lib/Jolt.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
+  <!-- vcpkg app-local deployment can leave a stale release Jolt.dll in the Debug output;
+       the Debug exe imports the debug DLL's assert symbol, so force the config-correct DLL. -->
+  <Target Name="DeployJoltDll" AfterTargets="Build" Condition="'$(EngineEnableJolt)'=='true'">
+    <Copy Condition="'$(Configuration)'=='Debug'" SourceFiles="$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/debug/bin/Jolt.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="false" />
+    <Copy Condition="'$(Configuration)'!='Debug'" SourceFiles="$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/bin/Jolt.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="false" />
+  </Target>
 </Project>

@@ -15,8 +15,8 @@
 > полный GUI-прогон один раз на завершённую область.
 
 ### Чек-лист session-задач
-- [ ] ШАГ 0.5: эталон тестов (редакторская часть готова, движковая — в прогоне)
-- [ ] ФАЗА 0: аудит А–Е (А готов, Б/В/Г/Д/Е в работе)
+- [x] ШАГ 0.5: эталон тестов (редактор + движок готовы; 3 красных движковых скрипта починены минимально, п. 51 «Решения»)
+- [x] ФАЗА 0: аудит А–Е (выполнен, коммит fe6a588; выводы ниже)
 - [ ] 1. Баги сцены: иконки world-transform, гизмо Play/Stop
 - [ ] 2. Общая база графов (по аудиту А: база уже есть — убрать дубли, интегрировать FileService)
 - [ ] 3. DnD-инфраструктура + сценарии
@@ -37,7 +37,7 @@
 | `HostTests.exe` | **165/165 PASS** | |
 | `UiTests.exe` | **~1335 checks PASS, 1 FAIL (красная база main)** | Сбой: `ViewportBillboardTests` «game camera tint from dark palette» — та же красная база, что зафиксирована в эталонах fix/editor-ui-polish. exit code 1. |
 | `check.ps1 -Full` | **FAIL на UiTests (красная база)** | Прервался до движковых скриптов; они запущены отдельным прогоном (лог: %TEMP%\pain-baseline-engine.log) |
-| Движковые скрипты (run.ps1, component-generation, edit-session, scene-module, run-viewport, skeletal, run-games, run-runtime, compatibility, project-workflow) | **в прогоне** | результаты будут дописаны |
+| Движковые скрипты (отдельный прогон, лог %TEMP%\pain-baseline-engine.log) | **8 PASS / 3 FAIL (красная база main)** | engine-tests=0, component-generation=0, edit-session=0, scene-module=0, skeletal=0, run-games=0, compatibility=0 (Release); **viewport=1, run-runtime=1, project-workflow=1** — причины и минимальные engine-фиксы ниже («Решения», п. 39) |
 
 ### Фаза 0 — аудит А (общая база графов): ВЫПОЛНЕН
 - Общее ядро УЖЕ есть: `Editor/Core/Graph/GraphDocument.h:16-119` (GraphPin/GraphNodeData/GraphConnectionData/GraphCommentData, ExportToJson/ImportFromJson, форматы Legacy `{"version":1}` и V1 `{"format":"ITMOEngine.Graph","version":1}`, IsNewerFormat), `GraphSchema.h:41-106`, `GraphHistory.h:11-38` (снимки JSON, Limit 200, mergeKey), `GraphClipboard.h:18-21`, `GraphSchemaRegistry.cpp:19-29` (material/code/fsm).
@@ -1199,6 +1199,12 @@
     - Безопасность при закрытии: отмена доставки превью гарантируется использованием `QPointer<QObject>`, проверяемого перед отправкой в UI.
     - Мгновенное открытие диалога (<30 мс на 500 файлов) обеспечено оптимизацией `QListWidget` (`setUniformItemSizes(true)`, пакетное отключение `setUpdatesEnabled(false)` на время наполнения) и однократным сканированием mtime в `QDirIterator` без повторных дисковых `stat`.
     - Прямые вызовы `QFileDialog` в `MainWindow.cpp` для выбора материалов устранены в пользу зарегистрированной команды `Scene.AssignMaterial`.
+51. **Минимальные engine-фиксы красной базы main (ШАГ 0.5, 17.11.2026) — отдельный `engine:`-коммит:**
+    Эталон движка дал 3 красных скрипта на чистом main (editor-правки не влияют на движок). Все три — устаревшая инфраструктура/тесты, чиню минимально, т.к. блокируют эталонный пайплайн (разрешено TZ «Не работает старая фича, мешающая задаче: чинить минимально»). Правки только в Engine/, отдельным коммитом ДО editor-коммитов.
+    - **viewport=1 — `Engine/tests/ViewportTests.vcxproj`:** Jolt-детект стоял ВНИЗУ после импорта targets с неверным путём `'..\..\vcpkg_installed\...'` (резолвится в несуществующий корень репо) → Jolt=false → Jolt.lib не линкуется → 139 unresolved JPH-символов из Engine.lib(PhysicsWorld.obj). Fix: зеркалю рабочую схему `EngineTests.vcxproj` — детект в Globals через `$(MSBuildThisFileDirectory)..\vcpkg_installed`, `EngineEnableVcpkg`, Vcpkg-свойства, импорт `VcpkgRoot.props`/`vcpkg.props` до Cpp.props, define `ENGINE_ENABLE_JOLT`, `vcpkg.targets` после Cpp.props (include + app-local деплой Jolt.dll), Error-target `RequireVcpkgDependencies`. НЮАНС: vcpkg-автолинк в Debug выбирал release `lib/Jolt.lib`, в котором НЕТ `__imp_?AssertFailed@JPH` (релизная Jolt.dll не экспортирует assert-символ; он есть только в `debug/lib/Jolt.lib`, т.к. Debug-движок собирает PhysicsWorld.obj с JPH_ENABLE_ASSERTS → dllimport-ссылка). Поэтому СОХРАНЕНЫ явные link-группы Debug→`debug/lib/Jolt.lib`, Release→`lib/Jolt.lib` (как в исходнике) — они гарантируют правильный debug-импорт-либ; автолинк остаётся только ради деплоя Jolt.dll. ВТОРОЙ НЮАНС: vcpkg app-local деплой оставлял в Debug-выходе устаревший RELEASE `Jolt.dll` (инкрементальный tlog не перезаписывал) → Debug-exe падал 0xC0000139 (entrypoint not found: release-DLL не экспортирует debug assert-символ). Fix: детерминированный post-build target `DeployJoltDll` (AfterTargets=Build, SkipUnchangedFiles=false) копирует config-правильный `debug/bin/Jolt.dll` (Debug) / `bin/Jolt.dll` (Release) поверх app-local. Проверено: с правильным debug-DLL ViewportTests.exe exit 0 (все PASS).
+    - **run-runtime=1 — `Engine/BuildSupport/New-ProjectSdk.ps1`:** SDK-сборка Engine.vcxproj авто-включает Jolt (Engine/vcpkg_installed есть), но скрипт добавлял vcpkg IncludePath и копировал vcpkg-либы ТОЛЬКО `if ($useAssimp)`. При assimp=false (run-runtime без -EnableAssimp) Jolt.h не находится → C1083. Fix: `$useJolt`-детект по Jolt.h, явная передача `EngineEnableJolt`, условия IncludePath и копирования `*.lib` в SDK/Lib расширены до `($useAssimp -or $useJolt)`, в манифест добавлено поле `jolt`. Публичные заголовки Jolt не экспонируют (grep Engine/Include пуст) → потребителям SDK нужен только Jolt.lib, который `ProjectSdk.props` линкует wildcard'ом `Lib\*.lib`. BuildSupport правка обоснована: без неё SDK-сборка заблокирована. **ВЕРИФИЦИРОВАНО: run-runtime exit 0, 18 runtime checks passed.**
+    - **project-workflow=1 — `Engine/tests/project-workflow/ProjectWorkflowTests.cpp:255`:** устаревший жёсткий счётчик `types.size() == 15`; коммит e5a53c3 «Add AI system and sample» добавил типы (Gameplay.PlaySettings/AiCharacter/NavVolume/SmartObject) → `StandardTypes.h:113-130` регистрирует 18. Fix: 15→18 (проверка остаётся точным счётчиком, не ослабление). **ВЕРИФИЦИРОВАНО: project-workflow exit 0 (включая --check-project/--smoke-project/--smoke-project-editor).**
+    - Верификация (повторный прогон, лог %TEMP%\pain-engine-fixverify.log + %TEMP%\pain-viewport-retry2.log): **viewport=0** («Rendered frame», все PASS; deploy-target перезаписал устаревший release-DLL на debug), **project-workflow=0**, **run-runtime=0** (18 checks). Эталон движка теперь полностью зелёный.
 
 ---
 

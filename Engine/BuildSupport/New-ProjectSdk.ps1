@@ -11,15 +11,17 @@ $baselineDir = Join-Path $engineRoot "build/sdk/x64/$Configuration/$($sdkToolcha
 [IO.Directory]::CreateDirectory($baselineDir) | Out-Null
 $baselineLog = Join-Path $baselineDir 'build.log'
 $useAssimp = if ($Assimp -eq 'auto') { Test-Path -LiteralPath "$engineRoot/vcpkg_installed/x64-windows/include/assimp/scene.h" } else { $Assimp -eq 'true' }
+$useJolt = Test-Path -LiteralPath "$engineRoot/vcpkg_installed/x64-windows/include/Jolt/Jolt.h"
 $buildArgs = @((Join-Path $engineRoot 'Engine.vcxproj'), '/nologo', '/m:1', '/nr:false', '/noconsolelogger',
     "/flp:LogFile=$baselineLog;Encoding=UTF-8;Verbosity=minimal",
     (ConvertTo-MSBuildProperty 'Configuration' $Configuration),
     (ConvertTo-MSBuildProperty 'OutDir' ($baselineDir+'/')),
     (ConvertTo-MSBuildProperty 'IntDir' ($baselineDir+'/obj/')),
     (ConvertTo-MSBuildProperty 'EngineEnableAssimp' $useAssimp.ToString().ToLowerInvariant()),
+    (ConvertTo-MSBuildProperty 'EngineEnableJolt' $useJolt.ToString().ToLowerInvariant()),
     '/p:VcpkgEnableManifest=false', '/p:WholeProgramOptimization=false')
 $buildArgs += @(Get-EngineToolchainArguments $sdkToolchain)
-if ($useAssimp) { $buildArgs += ConvertTo-MSBuildProperty 'IncludePath' ((Get-EngineToolchainProperties $sdkToolchain).IncludePath + ";$engineRoot/vcpkg_installed/x64-windows/include") }
+if ($useAssimp -or $useJolt) { $buildArgs += ConvertTo-MSBuildProperty 'IncludePath' ((Get-EngineToolchainProperties $sdkToolchain).IncludePath + ";$engineRoot/vcpkg_installed/x64-windows/include") }
 Write-Output "Building $Configuration SDK with $($sdkToolchain.toolset) / MSVC $($sdkToolchain.version)."
 $baselineBuild = Invoke-ToolchainProcess $sdkToolchain.msbuild $buildArgs -Timeout 1800000
 if ($baselineBuild.exitCode) {
@@ -57,7 +59,7 @@ Copy-Item -LiteralPath "$PSScriptRoot/ProjectBootstrap.props" -Destination "$sdk
 Copy-Item -LiteralPath "$PSScriptRoot/ProjectBootstrap.targets" -Destination "$sdk/Build/ProjectBootstrap.targets" -Force
 Copy-Item -LiteralPath "$PSScriptRoot/ProjectSdk.targets" -Destination "$sdk/Build/ProjectSdk.targets" -Force
 $importDir = if ($Configuration -eq 'Debug') { "$engineRoot/vcpkg_installed/x64-windows/debug/lib" } else { "$engineRoot/vcpkg_installed/x64-windows/lib" }
-if ($useAssimp -and (Test-Path -LiteralPath $importDir)) { Copy-Item -Path "$importDir/*.lib" -Destination "$sdk/Lib" -Force }
+if (($useAssimp -or $useJolt) -and (Test-Path -LiteralPath $importDir)) { Copy-Item -Path "$importDir/*.lib" -Destination "$sdk/Lib" -Force }
 New-Item -ItemType Directory -Force (Join-Path $sdk 'Examples'),(Join-Path $sdk 'Docs') | Out-Null
 Copy-Item -LiteralPath "$engineRoot/../Game/BasicExamples/Source/SessionCounterSubsystem.h" -Destination "$sdk/Examples/SessionCounterSubsystem.h" -Force
 Copy-Item -LiteralPath "$engineRoot/docs/GAME-SUBSYSTEMS.md" -Destination "$sdk/Docs/GAME-SUBSYSTEMS.md" -Force
@@ -85,7 +87,7 @@ Copy-Item -Path "$engineRoot/docs/api-reference/examples/*" -Destination "$sdk/E
 $manifest = @{format=2;version=$release.version;configuration=$Configuration;platform='x64';toolset=$sdkToolchain.toolset;crt= $(if($Configuration -eq 'Debug'){'MDd'}else{'MD'});
     localOnly=[bool]$UseBuildToolset;
     buildTools=@{version=$sdkToolchain.version;minimumVersion=$sdkToolchain.version;compilerVersion=$sdkToolchain.compilerVersion;wholeProgramOptimization=$false;windowsSdk=$sdkToolchain.windowsSdk.version};
-    assimp=$useAssimp;engineLibrarySha256=(Get-FileHash -LiteralPath "$sdk/Lib/Engine.lib").Hash}
+    assimp=$useAssimp;jolt=$useJolt;engineLibrarySha256=(Get-FileHash -LiteralPath "$sdk/Lib/Engine.lib").Hash}
 [IO.File]::WriteAllText("$sdk/Sdk.json", ($manifest | ConvertTo-Json), [Text.UTF8Encoding]::new($false))
 # Reject too-new dependencies or incompatible public headers before publication.
 $validationArgs = @{ Sdk = $sdk; OutputDirectory = "$baselineDir/validation" }
