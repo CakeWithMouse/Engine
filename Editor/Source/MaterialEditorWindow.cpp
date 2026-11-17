@@ -40,6 +40,7 @@
 #include <QTextBlock>
 #include <QTimer>
 #include <QToolBar>
+#include <QToolButton>
 #include <QVBoxLayout>
 #include <QWheelEvent>
 #include <algorithm>
@@ -335,6 +336,7 @@ void MaterialEditorWindow::BuildUi()
     });
     graphAction_->setObjectName(QStringLiteral("MaterialGraphToggle"));
     graphAction_->setEnabled(false); // до загрузки HLSL
+    BuildGraphTools(tools);
 
     preview_ = new PreviewWidget(this);
     preview_->setObjectName(QStringLiteral("MaterialPreview"));
@@ -565,6 +567,7 @@ void MaterialEditorWindow::LoadShaderText()
     QByteArray data;
     sourceLoaded_ = !shaderFile_.isEmpty() && EditorCore::GraphFileIo::Read(ProjectRoot(), ContentRoot(), shaderFile_, data);
     graphAction_->setEnabled(sourceLoaded_);
+    if (templates_) templates_->setEnabled(sourceLoaded_);
     if (!sourceLoaded_)
     {
         source_->setPlainText({});

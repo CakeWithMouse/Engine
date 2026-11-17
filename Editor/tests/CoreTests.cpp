@@ -18,6 +18,7 @@
 #include "core/GraphFileIoTests.h"
 #include "core/DragDropTests.h"
 #include "core/PreviewTests.h"
+#include "core/MaterialPresetsTests.h"
 #include "../Core/SceneFile.h"
 #include "core/SceneFileTests.h"
 #include "../Core/Terminal.h"
@@ -476,6 +477,10 @@ int main(int argc, char* argv[])
     std::printf("[Test] TestPreview...\n");
     std::fflush(stdout);
     gChecks += RunPreviewTests();
+
+    std::printf("[Test] TestMaterialPresets...\n");
+    std::fflush(stdout);
+    gChecks += RunMaterialPresetsTests();
 
     RunCameraGuideTests(gChecks);
     std::printf("CoreTests: %d checks passed.\n", gChecks);
