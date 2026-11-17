@@ -98,6 +98,7 @@ private:
     // Шаблоны и команды графа на тулбаре окна (реализация в MaterialEditorWindow_Graph.cpp).
     void BuildGraphTools(QToolBar* tools);
     void ApplyTemplate(int kind); // 0 — Simple, 1 — ORM
+    void ExposeSelectedAsParameter(); // выбранные Constant -> ScalarParam без перекомпиляции
     void Engine(std::function<void(const EngineEditSessionApi&)> task);
     // Читает материал после task и показывает результат; rebuild пересоздаёт список параметров.
     void EngineThenRead(std::function<QString(const EngineEditSessionApi&)> task, bool rebuild,
@@ -148,6 +149,7 @@ private:
     QTabWidget* sourceTabs_ = nullptr;
     QAction* graphAction_ = nullptr;
     QToolButton* templates_ = nullptr;
+    QAction* exposeAction_ = nullptr;
     QTimer* graphApply_ = nullptr;
 
     EditorQtHost* host_ = nullptr;

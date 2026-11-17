@@ -93,6 +93,7 @@
         <ClCompile Include="../Core/Graph/GraphFileIo.cpp"/>
         <ClCompile Include="../Core/MaterialGraphSchema.cpp"/>
         <ClCompile Include="../Core/MaterialGraphPresets.cpp"/>
+        <ClCompile Include="../Core/MaterialGraphTransform.cpp"/>
         <ClCompile Include="../Core/CodeGraphSchema.cpp"/>
         <ClCompile Include="../Core/FsmGraphSchema.cpp"/>
         <ClCompile Include="../Core/ScriptMessages.cpp"/>
@@ -161,6 +162,7 @@
         <ClInclude Include="../Core/Graph/GraphFileIo.h"/>
         <ClInclude Include="../Core/MaterialGraphSchema.h"/>
         <ClInclude Include="../Core/MaterialGraphPresets.h"/>
+        <ClInclude Include="../Core/MaterialGraphTransform.h"/>
         <ClInclude Include="../Core/CodeGraphSchema.h"/>
         <ClInclude Include="../Core/FsmGraphSchema.h"/>
         <ClInclude Include="../Core/ScriptMessages.h"/>

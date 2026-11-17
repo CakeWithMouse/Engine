@@ -19,6 +19,7 @@
 #include "core/DragDropTests.h"
 #include "core/PreviewTests.h"
 #include "core/MaterialPresetsTests.h"
+#include "core/MaterialTransformTests.h"
 #include "../Core/SceneFile.h"
 #include "core/SceneFileTests.h"
 #include "../Core/Terminal.h"
@@ -481,6 +482,10 @@ int main(int argc, char* argv[])
     std::printf("[Test] TestMaterialPresets...\n");
     std::fflush(stdout);
     gChecks += RunMaterialPresetsTests();
+
+    std::printf("[Test] TestMaterialTransform...\n");
+    std::fflush(stdout);
+    gChecks += RunMaterialTransformTests();
 
     RunCameraGuideTests(gChecks);
     std::printf("CoreTests: %d checks passed.\n", gChecks);

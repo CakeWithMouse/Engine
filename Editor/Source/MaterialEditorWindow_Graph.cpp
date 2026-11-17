@@ -1,6 +1,7 @@
 #include "MaterialEditorWindow.h"
 
 #include "MaterialGraphPresets.h"
+#include "MaterialGraphTransform.h"
 #include "MaterialGraphWidget.h"
 #include "EditorLocale.h"
 
@@ -8,6 +9,8 @@
 #include <QMessageBox>
 #include <QToolBar>
 #include <QToolButton>
+#include <QAction>
+#include <QStatusBar>
 
 // Шаблоны материала (Simple/ORM) и команды графа, вынесенные из MaterialEditorWindow.cpp:
 // работают с graph_ через публичный API, не меняя размер самого окна.
@@ -35,6 +38,13 @@ void MaterialEditorWindow::BuildGraphTools(QToolBar* tools)
                     this, [this, apply] { apply(1); });
     templates_->setMenu(menu);
     tools->addWidget(templates_);
+
+    exposeAction_ = tools->addAction(Tr("Выставить параметром", "Expose as parameter"), this,
+                                     [this] { ExposeSelectedAsParameter(); });
+    exposeAction_->setObjectName(QStringLiteral("MaterialExposeParam"));
+    exposeAction_->setToolTip(Tr("Превратить выбранную ноду Constant в параметр материала без перекомпиляции",
+                                 "Turn the selected Constant node into a material parameter without recompiling"));
+    exposeAction_->setEnabled(false); // до загрузки HLSL
 }
 
 void MaterialEditorWindow::ApplyTemplate(int kind)
@@ -45,4 +55,26 @@ void MaterialEditorWindow::ApplyTemplate(int kind)
                                : EditorCore::MaterialGraphPresets::BuildOrm());
     if (!graphMode_) SetGraphMode(true);
     ApplyGraph();
+}
+
+void MaterialEditorWindow::ExposeSelectedAsParameter()
+{
+    if (!loaded_ || !sourceLoaded_ || saving_) return;
+    if (!graphMode_)
+    {
+        statusBar()->showMessage(Tr("Сначала перейдите в нодовый граф", "Switch to the node graph first"));
+        return;
+    }
+    const QList<int> ids = graph_->SelectedNodes();
+    if (!EditorCore::MaterialGraphTransform::CanExpose(graph_->Model(), ids))
+    {
+        statusBar()->showMessage(Tr("Выделите ноду Constant, чтобы выставить её параметром",
+                                    "Select a Constant node to expose it as a parameter"));
+        return;
+    }
+    BackupGraphFiles();
+    graph_->SetModel(EditorCore::MaterialGraphTransform::ExposeConstants(graph_->Model(), ids));
+    ApplyGraph();
+    statusBar()->showMessage(Tr("Константа стала параметром: правится без перекомпиляции",
+                                "Constant exposed as a parameter: editable without recompile"));
 }

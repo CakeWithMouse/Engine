@@ -568,6 +568,7 @@ void MaterialEditorWindow::LoadShaderText()
     sourceLoaded_ = !shaderFile_.isEmpty() && EditorCore::GraphFileIo::Read(ProjectRoot(), ContentRoot(), shaderFile_, data);
     graphAction_->setEnabled(sourceLoaded_);
     if (templates_) templates_->setEnabled(sourceLoaded_);
+    if (exposeAction_) exposeAction_->setEnabled(sourceLoaded_);
     if (!sourceLoaded_)
     {
         source_->setPlainText({});
