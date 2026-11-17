@@ -2,6 +2,7 @@
 #include "MaterialTextureTools.h"
 #include "MaterialGraphWidget.h"
 #include "HlslGraphCompiler.h"
+#include "HlslToGraph.h"
 #include "Graph/GraphFileIo.h"
 #include "EditorTheme.h"
 #include "EditorWindowSetup.h"
@@ -680,9 +681,23 @@ void MaterialEditorWindow::EnableGraph()
 {
     if (!loaded_ || graphMode_ || !sourceLoaded_ || saving_) return;
     BackupGraphFiles();
-    EditorCore::MaterialGraphModel model;
-    model.SetupDefaultMasterNode();
-    graph_->SetModel(model);
+    const QString hlsl = source_->toPlainText();
+    const auto parsed = EditorCore::HlslToGraph::Parse(hlsl);
+    if (parsed.ok)
+    {
+        graph_->SetModel(parsed.model);
+    }
+    else
+    {
+        EditorCore::MaterialGraphModel model;
+        model.SetupDefaultMasterNode();
+        graph_->SetModel(model);
+        statusBar()->showMessage(EditorCore::HlslToGraph::IsGenerated(hlsl)
+            ? Tr("Граф разобран не полностью, создан пустой граф: %1", "Graph parsed partially, empty graph created: %1")
+                  .arg(parsed.problems.join(QStringLiteral("; ")))
+            : Tr("Шейдер не является нодовым графом: создан пустой граф, «Откатить» вернёт код",
+                 "Shader is not a node graph: empty graph created, Revert restores the code"));
+    }
     SetGraphMode(true);
     ApplyGraph();
 }

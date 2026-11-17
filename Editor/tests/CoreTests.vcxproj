@@ -83,6 +83,7 @@
         <ClCompile Include="../Core/Preview/PreviewImage.cpp"/>
         <ClCompile Include="../Core/Preview/TexturePreviewSource.cpp"/>
         <ClCompile Include="../Core/HlslGraphCompiler.cpp"/>
+        <ClCompile Include="../Core/HlslToGraph.cpp"/>
         <ClCompile Include="../Core/MaterialGraphModel.cpp"/>
         <ClCompile Include="../Core/Graph/GraphDocument.cpp"/>
         <ClCompile Include="../Core/Graph/GraphSchema.cpp"/>
@@ -152,6 +153,7 @@
         <ClInclude Include="../Core/Preview/PreviewImage.h"/>
         <ClInclude Include="../Core/Preview/TexturePreviewSource.h"/>
         <ClInclude Include="../Core/HlslGraphCompiler.h"/>
+        <ClInclude Include="../Core/HlslToGraph.h"/>
         <ClInclude Include="../Core/MaterialGraphModel.h"/>
         <ClInclude Include="../Core/Graph/GraphDocument.h"/>
         <ClInclude Include="../Core/Graph/GraphSchema.h"/>
