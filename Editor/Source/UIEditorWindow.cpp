@@ -4,6 +4,7 @@
 #include "EditorWindowSetup.h"
 #include <Engine/UI/UIMarkup.h>
 #include <QTreeWidget>
+#include <QAbstractItemView>
 #include <QSplitter>
 #include <QScrollArea>
 #include <QFormLayout>
@@ -140,7 +141,8 @@ UIEditorWindow::UIEditorWindow(const QString& file,QWidget* parent) : QMainWindo
     deleteAction_=tools->addAction(Tr("Удалить", "Delete"),this,[this]{DeleteSelected();});deleteAction_->setObjectName("UIDelete");
     auto* size=new QComboBox(this);size->setObjectName("UIPreviewSize");size->addItems({"1280 × 720","1920 × 1080","800 × 600","720 × 1280"});tools->addWidget(size);
     auto* split=new QSplitter(this);setCentralWidget(split);
-    tree_=new QTreeWidget(split);tree_->setHeaderLabel(Tr("Иерархия", "Hierarchy"));tree_->setObjectName("UIHierarchy");
+    auto* hierarchy=new UIHierarchyTree(split);hierarchy->editor=this;tree_=hierarchy;tree_->setHeaderLabel(Tr("Иерархия", "Hierarchy"));tree_->setObjectName("UIHierarchy");
+    tree_->setDragEnabled(true);tree_->setAcceptDrops(true);tree_->setDropIndicatorShown(true);tree_->setDragDropMode(QAbstractItemView::InternalMove);tree_->setSelectionMode(QAbstractItemView::SingleSelection);
     canvas_=new UICanvas(this);split->addWidget(canvas_);
     auto* scroll=new QScrollArea(split);scroll->setWidgetResizable(true);auto* props=new QWidget(scroll);scroll->setWidget(props);auto* form=new QFormLayout(props);
     name_=new QLineEdit(props);name_->setObjectName("UIName");

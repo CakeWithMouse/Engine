@@ -257,6 +257,7 @@
         <ClCompile Include="Source/UIEditorWindow.cpp"/>
         <ClCompile Include="Source/UIEditorWindow_Inspector.cpp"/>
         <ClCompile Include="Source/UIEditorWindow_History.cpp"/>
+        <ClCompile Include="Source/UIEditorWindow_Hierarchy.cpp"/>
         <ClCompile Include="Source/HudTools.cpp"/>
         <ClCompile Include="Source/PhysicsTools.cpp"/>
         <ClCompile Include="../Engine/Source/UI/UIElement.cpp">

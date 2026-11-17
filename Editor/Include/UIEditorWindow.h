@@ -1,9 +1,9 @@
 #pragma once
 #include <QMainWindow>
 #include <QImage>
+#include <QTreeWidget>
 #include <Engine/UI/UIElement.h>
 #include <memory>
-class QTreeWidget;
 class QTreeWidgetItem;
 class QLineEdit;
 class QDoubleSpinBox;
@@ -13,6 +13,7 @@ class QLabel;
 class QPushButton;
 class QAction;
 class QFormLayout;
+class QDropEvent;
 class UICanvas;
 
 class UIEditorWindow : public QMainWindow {
@@ -34,6 +35,7 @@ public:
     void Checkpoint();
     void Undo();
     void Redo();
+    void MoveElement(UIElement* element, UIElement* newParent, size_t index);
 protected:
     void closeEvent(QCloseEvent* event) override;
 private:
@@ -82,4 +84,14 @@ private:
     QLabel* labelAlignRight_ = nullptr;
     QLabel* labelFill_ = nullptr;
     int langSubId_ = 0;
+};
+
+// Hierarchy tree with internal drag: dropping on a container reparents, dropping above or below
+// a sibling reorders. The drop mutates the engine tree through MoveElement, then rebuilds.
+class UIHierarchyTree : public QTreeWidget {
+public:
+    using QTreeWidget::QTreeWidget;
+    UIEditorWindow* editor = nullptr;
+protected:
+    void dropEvent(QDropEvent* event) override;
 };
