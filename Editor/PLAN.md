@@ -26,7 +26,41 @@
 - [x] 7. Редактор материалов (a–g) (п. 63 «Решения»: 7f шаблоны Simple/ORM + ORM-unpack автотест 23; 7d Constant→ScalarParam без перекомпиляции + автотест 17; 7c обратный парсер HLSL→граф + round-trip автотест 20, EnableGraph восстанавливает граф; 7g группы панели Рендер/Текстуры/Параметры; 7a/7b выполнены задачами 2/5, инлайн-виджеты/collapse/докуемая палитра — Backlog (line-ratchet); 7e MaterialInstance — формата в движке нет, «Нужно в ABI»+Backlog+вопрос; Debug+Release build OK, CoreTests 1266 = не хуже базы; GUI-сценарий области «материалы» написан)
 - [x] 8. Visual Script (п. 64 «Решения»: панель переменных / readValues-оверлей выполнения / иконки+«?» / компактный список предупреждений клик→нода уже присутствовали — проверено чтением; НОВОЕ DnD Graph.CreateVariableNode: Core MIME ScriptVariableDrag + автотест 24, drag-source ScriptVariableTable, drop-target ScriptGraphWidget::eventFilter → Variable.Get/Set один Undo; ScriptEditorWindow.cpp net-zero на ratchet 523; Debug+Release build OK, CoreTests 1290 = не хуже базы; GUI-сценарий области «скрипт» написан, живые шаги — «Не проверено в рантайме»)
 - [x] 9. Редактор UI (Hud.ui) (п. 65 «Решения»: 9a скрытые движковые свойства Padding/Interactive/Border/Align/Fill + Group; 9b snapshot Undo/Redo один-на-жест; 9c reparent/reorder дерева + engine TakeChild/InsertChild (аддитивно, ABI цел); 9d Save/Reload через FileService + Tabler-иконки; 9e зум/сетка холста; 9f секции инспектора Макет/Вид/Поведение; 9g DnD UI.AddWidget Core UiWidgetDrag + автотест 19 + палитра→холст; Debug+Release build OK, CoreTests 1309 = не хуже базы, commandlet ui.edit-text кириллица через FileService; GUI-сценарий области «UI-редактор» написан, живые шаги — «Не проверено в рантайме»; multi-select/Image/шрифт — Backlog/Нужно в ABI)
-- [ ] ФИНАЛ: отчёт
+- [x] ФИНАЛ: отчёт (см. «Итог сессии» ниже)
+
+### Итог сессии (ФИНАЛ, feature/editor-graphs-ux-overhaul)
+
+> Ветка от локальной main `6b9b053`; **main не изменена** (`git log main -1` = 6b9b053).
+> 29 коммитов `main..HEAD`. Запреты соблюдены: без pull/fetch/merge/rebase/push, без правок main,
+> без удаления/создания других веток; старая ветка не тронута.
+
+**Сделано (задачи 1–9):**
+1. Баги сцены — иконки world-transform, оверлеи скрываются в Play/Pause (п. 52).
+2. Общая база графов — FileService-IO графов (Script/AiMachine/Material), дубли убраны (пп. 53, 9984504/fb59786).
+3. DnD-инфраструктура — Core MIME (AssetDrag) + матрица DropRules + автотест; CB источник/move/copy/import, viewport spawn/assign, hierarchy reparent world-transform один Undo (пп. 54–58).
+4. Content Browser — контекстное меню по типам, подменю «Создать» по категориям через CommandRegistry (п. 59).
+5. Общий UI графов — Tabler outline иконки, перекраска по теме, «?» InfoButton, copy/paste граф JSON, адаптивный тулбар «…» (пп. 60–61).
+6. Превью-модуль — Core IPreviewSource/TexturePreviewSource/PreviewImage + UI PreviewWidget (realtime HWND, detach-on-hide, FPS-лимит), AssetThumbnailCache делегирует; PreviewTests 35 (п. 62).
+7. Редактор материалов a–g — шаблоны Simple/ORM (+23), Constant→ScalarParam (+17), обратный парсер HLSL→граф (+20), секции панели; 7a/7b наследованы задачами 2/5; 7e MaterialInstance — формата нет (п. 63).
+8. Visual Script — DnD Graph.CreateVariableNode (Core ScriptVariableDrag +24, drag-source панель, drop→Variable.Get/Set один Undo); остальное уже присутствовало (п. 64).
+9. Редактор UI — 9a скрытые свойства+Group, 9b Undo/Redo, 9c reparent/reorder (+engine TakeChild/InsertChild), 9d FileService Save/Reload+иконки, 9e зум/сетка, 9f секции инспектора, 9g DnD UI.AddWidget (+19) (п. 65).
+
+**Пропущено/отложено (Backlog, не мокается):** multi-select UI; Image/текстуры и per-widget шрифт (нет в движке); инлайновые виджеты/collapse/докуемая палитра графов (line-ratchet заблокированных виджетов); MaterialInstance/per-object overrides; статические 3D-миниатюры; гизмо child в world-позиции. См. «Backlog».
+
+**Engine/Game-правки (отдельные engine:-коммиты, C-ABI обратно совместим):**
+- `5ebe68d` engine: минимальная починка красной базы (Jolt wiring, SDK New-ProjectSdk.ps1, ViewportTests.vcxproj, ProjectWorkflowTests.cpp type count) — BuildSupport тронут только т.к. сборка/тесты базы были невозможны иначе (п. 51/39).
+- `2467833` engine: `UIElement::TakeChild`/`InsertChild` — header-only inline, аддитивно, без слома ABI/виртуалов/layout; whole Engine.sln Debug+Release собран (все проекты incl Game, SDK compat v142/v143/v145 passed).
+- Game/ source и build.ps1 **не менялись**.
+
+**Нужно в ABI:** формат MaterialInstance + per-object overrides; UI Image/текстуры и per-widget шрифт; экспорт констант цветов навигационного оверлея; статические 3D-миниатюры. См. «Нужно в ABI».
+
+**Вопросы к Юрию:** CoreTests.cpp достиг лимита 500 (следующие Core-сьюты упрутся; нужен ratchet тест-агрегатора); MaterialInstance формат (default отложено); line-ratchet для GraphEditorWidget/MaterialGraphWidget (инлайновые виджеты). См. «Вопросы к Юрию».
+
+**Не проверено в рантайме:** все живые GUI-жесты областей (сцена/графы/превью/материалы/скрипт/UI/DnD/CB) — тяжёлый EditorUiTests стабильно блокируется на step 15 (`Viewport overlay service: NOT FOUND`, environmental, ДО сценариев; доказано на main контролем worktree-vs-worktree). GUI-сценарии написаны заранее для полного прогона. См. «Не проверено в рантайме» и per-area сценарии.
+
+**Тесты (не хуже эталона):** CoreTests 1105→**1309** PASS; HostTests **165** PASS; UiTests — единственный красный pre-existing environmental `CrossTypeInfoButtonTests` («GeometryCard InfoPopupWindow strictly within screen bounds», доказан на main). Debug+Release EditorModule build OK (0 ошибок; известные C4996 warnings базы). Release commandlet `ui.edit-text` exit 0, кириллица через FileService сохранена.
+
+**Реальные риски:** (1) живые UI-жесты не верифицированы в рантайме из-за environmental block тяжёлого прогона — логика покрыта Core-автотестами и сборкой, но фактический drag/drop/зум в GUI требует ручного прогона по сценариям; (2) `EngineCommandlets.cpp` зарегистрирован в line-ratchet (1699) — legacy-файл, рост запрещён; (3) CoreTests.cpp на лимите 500 — следующие Core-сьюты требуют ratchet-решения Юрия; (4) zoom холста меняет `scale_`, drag-математика согласована (дефолт 1.0), но живое перетаскивание при зуме ≠1 не проверено в рантайме.
 
 ### Эталон тестов (feature/editor-graphs-ux-overhaul @ 6b9b053, до правок)
 
