@@ -1,4 +1,5 @@
 #include "MaterialGraphWidget.h"
+#include "MaterialGraphSchema.h"
 #include "HlslGraphCompiler.h"
 #include "EditorLocale.h"
 
@@ -9,6 +10,10 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <algorithm>
+
+using EditorCore::GraphDocument;
+using EditorCore::GraphNodeData;
+using EditorCore::MaterialGraphSchema;
 
 namespace
 {

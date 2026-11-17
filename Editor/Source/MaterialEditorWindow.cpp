@@ -7,6 +7,7 @@
 #include "EditorTheme.h"
 #include "EditorWindowSetup.h"
 #include "PreviewWidget.h"
+#include "IconProvider.h"
 
 #include <QAction>
 #include <QCheckBox>

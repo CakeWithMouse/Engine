@@ -4,6 +4,7 @@
 #include "MaterialGraphTransform.h"
 #include "MaterialGraphWidget.h"
 #include "EditorLocale.h"
+#include "IconProvider.h"
 
 #include <QMenu>
 #include <QMessageBox>
