@@ -106,6 +106,11 @@ class Pyramid final : public Mesh
 public:
     Pyramid() : Mesh(MeshPrimitives::Pyramid(), {0.75f, 0.55f, 0.85f, 1}) {}
 };
+class EmptyComponent final : public GameComponent
+{
+public:
+    EmptyComponent() : GameComponent() {}
+};
 
 inline ComponentTypeCatalog GetComponentTypes()
 {
@@ -116,6 +121,8 @@ inline ComponentTypeCatalog GetComponentTypes()
         {"Primitive.Cylinder", "Цилиндр", EngineComponentDetail::Create<Cylinder>},
         {"Primitive.Cone", "Конус", EngineComponentDetail::Create<Cone>},
         {"Primitive.Pyramid", "Пирамида", EngineComponentDetail::Create<Pyramid>},
+        {"Scene.Empty", "Пустой объект", EngineComponentDetail::Create<EmptyComponent>},
+        {"Scene.Folder", "Папка", EngineComponentDetail::Create<EmptyComponent>},
         {"Light.Point", "Точечный свет", EngineComponentDetail::Create<PointLight>},
         {"Light.Directional", "Направленный свет", EngineComponentDetail::Create<DirectionalLightComponent>},
         {"Particle.Sparks", "Искры", EngineComponentDetail::Create<Sparks>},
