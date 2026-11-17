@@ -359,6 +359,9 @@ void MaterialEditorWindow::BuildUi()
     twoSided_->setObjectName(QStringLiteral("MaterialTwoSided"));
     castShadows_ = new QCheckBox(QStringLiteral("Отбрасывает тени"), settings);
     castShadows_->setObjectName(QStringLiteral("MaterialCastShadows"));
+    auto* renderTitle = new QLabel(Tr("Рендер", "Rendering"), settings);
+    renderTitle->setStyleSheet(QStringLiteral("font-weight: bold;"));
+    settingsForm->addRow(renderTitle);
     settingsForm->addRow(QStringLiteral("Смешивание"), blend_);
     settingsForm->addRow(QStringLiteral("Порог альфы"), alphaClip_);
     settingsForm->addRow(unlit_);
@@ -368,8 +371,6 @@ void MaterialEditorWindow::BuildUi()
     parameters_ = new QWidget(settings);
     parameterForm_ = new QFormLayout(parameters_);
     parameterForm_->setContentsMargins(0, 0, 0, 0);
-    auto* parametersTitle = new QLabel(QStringLiteral("<b>Текстуры и параметры</b>"), settings);
-    settingsForm->addRow(parametersTitle);
     settingsForm->addRow(parameters_);
 
     auto* scroll = new QScrollArea(this);
@@ -769,6 +770,13 @@ void MaterialEditorWindow::RebuildSettings()
 
     while (parameterForm_->rowCount()) parameterForm_->removeRow(0);
 
+    auto addGroup = [this](const QString& title) {
+        auto* label = new QLabel(title, parameters_);
+        label->setStyleSheet(QStringLiteral("font-weight: bold; padding-top: 4px;"));
+        parameterForm_->addRow(label);
+    };
+    if (!state_.textures.isEmpty()) addGroup(Tr("Текстуры", "Textures"));
+
     for (const auto& texture : state_.textures)
     {
         const QString name = texture.name;
@@ -792,6 +800,8 @@ void MaterialEditorWindow::RebuildSettings()
         connect(add, &QPushButton::clicked, this, [this] { QTimer::singleShot(0, this, [this] { RequestAddTexture(); }); });
         parameterForm_->addRow(add);
     }
+
+    if (!state_.parameters.isEmpty()) addGroup(Tr("Параметры", "Parameters"));
 
     for (int index = 0; index < state_.parameters.size(); ++index)
     {
