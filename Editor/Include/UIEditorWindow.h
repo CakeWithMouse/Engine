@@ -12,6 +12,7 @@ class QCheckBox;
 class QLabel;
 class QPushButton;
 class QAction;
+class QFormLayout;
 class UICanvas;
 
 class UIEditorWindow : public QMainWindow {
@@ -35,6 +36,7 @@ protected:
 private:
     void RefreshInspector();
     bool ApplyInspector();
+    void BuildPropertyEditors(QFormLayout* form, QWidget* props);
     QString file_;
     std::unique_ptr<UIElement> root_;
     UIElement* selected_ = nullptr;
@@ -60,5 +62,15 @@ private:
     QLabel* labelColorProperty_ = nullptr;
     QPushButton* colorBtn_ = nullptr;
     QLabel* hintLabel_ = nullptr;
+    QDoubleSpinBox* padding_[4]{};
+    QCheckBox* interactive_ = nullptr;
+    QDoubleSpinBox* borderWidth_ = nullptr;
+    QCheckBox* alignRight_ = nullptr;
+    QDoubleSpinBox* fill_ = nullptr;
+    QLabel* labelPadding_ = nullptr;
+    QLabel* labelInteractive_ = nullptr;
+    QLabel* labelBorderWidth_ = nullptr;
+    QLabel* labelAlignRight_ = nullptr;
+    QLabel* labelFill_ = nullptr;
     int langSubId_ = 0;
 };

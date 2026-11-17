@@ -131,7 +131,7 @@ UIEditorWindow::UIEditorWindow(const QString& file,QWidget* parent) : QMainWindo
     auto* tools=addToolBar(QStringLiteral("UI"));
     saveAction_=tools->addAction(Tr("Сохранить", "Save"),this,[this]{Save();});saveAction_->setShortcut(QKeySequence::Save);saveAction_->setObjectName("UISave");
     reloadAction_=tools->addAction(Tr("Перечитать", "Reload"),this,[this]{if(ConfirmClose())Reload();});tools->addSeparator();
-    for(const auto& type:{"Panel","Label","Button","Bar"}) {
+    for(const auto& type:{"Panel","Label","Button","Bar","Group"}) {
         auto* action=tools->addAction(QString::fromLatin1(type),this,[this,type]{AddElement(QString::fromLatin1(type));});action->setObjectName("UIAdd"+QString::fromLatin1(type));
     }
     deleteAction_=tools->addAction(Tr("Удалить", "Delete"),this,[this]{DeleteSelected();});deleteAction_->setObjectName("UIDelete");
@@ -157,6 +157,7 @@ UIEditorWindow::UIEditorWindow(const QString& file,QWidget* parent) : QMainWindo
     colorProperty_=new QComboBox(props);
     labelColorProperty_=new QLabel(Tr("Свойство цвета", "Color Property"),props);form->addRow(labelColorProperty_,colorProperty_);
     colorBtn_=new QPushButton(Tr("Цвет и прозрачность…", "Color & Opacity…"),props);colorBtn_->setObjectName("UIColor");form->addRow(colorBtn_);
+    BuildPropertyEditors(form,props);
     hintLabel_=new QLabel(Tr("Размер 0 растягивается до края.\nДобавление — внутрь выбранной панели\nили группы. Кнопки получают логику в C++.", "Size 0 stretches to the edge.\nAdding creates elements inside selected panel\nor group. Buttons receive logic in C++."),props);hintLabel_->setWordWrap(true);form->addRow(hintLabel_);
     split->setSizes({220,700,280});split->setStretchFactor(1,1);
     status_=new QLabel(this);status_->setWordWrap(true);statusBar()->addWidget(status_,1);
@@ -208,6 +209,13 @@ void UIEditorWindow::RetranslateUi() {
     if (labelVisible_) labelVisible_->setText(Tr("Видимость", "Visible"));
     if (labelColorProperty_) labelColorProperty_->setText(Tr("Свойство цвета", "Color Property"));
     if (colorBtn_) colorBtn_->setText(Tr("Цвет и прозрачность…", "Color & Opacity…"));
+    if (labelPadding_) labelPadding_->setText(Tr("Отступы", "Padding"));
+    if (labelInteractive_) labelInteractive_->setText(Tr("Интерактивность", "Interactive"));
+    if (labelBorderWidth_) labelBorderWidth_->setText(Tr("Толщина рамки", "Border Width"));
+    if (labelAlignRight_) labelAlignRight_->setText(Tr("Выравнивание вправо", "Align Right"));
+    if (labelFill_) labelFill_->setText(Tr("Заполнение", "Fill"));
+    const QString padNames[] = {Tr("Слева", "Left"), Tr("Сверху", "Top"), Tr("Справа", "Right"), Tr("Снизу", "Bottom")};
+    for (int i = 0; i < 4; ++i) if (padding_[i]) padding_[i]->setToolTip(padNames[i]);
     if (hintLabel_) hintLabel_->setText(Tr("Размер 0 растягивается до края.\nДобавление — внутрь выбранной панели\nили группы. Кнопки получают логику в C++.", "Size 0 stretches to the edge.\nAdding creates elements inside selected panel\nor group. Buttons receive logic in C++."));
     RefreshInspector();
 }
@@ -237,30 +245,10 @@ void UIEditorWindow::RebuildTree(){
     if(root_)add(root_.get(),nullptr);tree_->expandAll();refreshing_=false;
 }
 void UIEditorWindow::Select(UIElement* element){selected_=element;RefreshInspector();refreshing_=true;QTreeWidgetItemIterator it(tree_);while(*it){if((*it)->data(0,Qt::UserRole).value<quintptr>()==reinterpret_cast<quintptr>(element)){tree_->setCurrentItem(*it);break;}++it;}refreshing_=false;canvas_->update();}
-void UIEditorWindow::RefreshInspector(){
-    refreshing_=true;const bool valid=selected_!=nullptr;
-    for(auto* field:rect_)field->setEnabled(valid);name_->setEnabled(valid);anchor_->setEnabled(valid);visible_->setEnabled(valid);text_->setEnabled(false);colorProperty_->clear();
-    if(valid){name_->setText(QString::fromStdString(selected_->Name));const auto& r=selected_->Rect;const float values[]={r.X,r.Y,r.Width,r.Height};for(int i=0;i<4;++i)rect_[i]->setValue(values[i]);anchor_->setCurrentIndex(int(r.Anchor));visible_->setChecked(selected_->bVisible);text_->clear();
-        if(auto* p=dynamic_cast<UILabel*>(selected_)){text_->setEnabled(true);text_->setText(QString::fromStdString(p->GetText()));colorProperty_->addItems({Tr("Текст", "Text")});}
-        if(auto* p=dynamic_cast<UIButton*>(selected_)){text_->setEnabled(true);text_->setText(QString::fromStdString(p->GetText()));colorProperty_->addItems({Tr("Фон", "Background"),Tr("Текст", "Text"),Tr("Наведение", "Hover"),Tr("Нажатие", "Pressed"),Tr("Рамка", "Border")});}
-        if(dynamic_cast<UIPanel*>(selected_))colorProperty_->addItems({Tr("Фон", "Background"),Tr("Рамка", "Border")});
-        if(dynamic_cast<UIBar*>(selected_))colorProperty_->addItems({Tr("Заполнение", "Fill"),Tr("Фон", "Background")});
-    }refreshing_=false;
-}
-bool UIEditorWindow::ApplyInspector(){
-    if(refreshing_||!selected_)return true;
-    const auto name=name_->text().toUtf8().toStdString();auto* existing=root_->Find(name);
-    if(!name.empty()&&existing&&existing!=selected_){status_->setText(Tr("Имя уже используется: ", "Name already in use: ")+name_->text());return false;}
-    const auto before=UIMarkup::Serialize(*selected_);
-    selected_->Name=name;selected_->Rect={UIAnchor(anchor_->currentIndex()),float(rect_[0]->value()),float(rect_[1]->value()),float(rect_[2]->value()),float(rect_[3]->value())};selected_->bVisible=visible_->isChecked();
-    if(auto* p=dynamic_cast<UILabel*>(selected_))p->SetText(text_->text().toUtf8().toStdString());if(auto* p=dynamic_cast<UIButton*>(selected_))p->SetText(text_->text().toUtf8().toStdString());
-    if(before!=UIMarkup::Serialize(*selected_)){Changed();RebuildTree();}
-    return true;
-}
 void UIEditorWindow::AddElement(const QString& type){
     if(!root_)return;std::unique_ptr<UIElement> next;
-    if(type=="Panel")next=std::make_unique<UIPanel>();else if(type=="Label"){auto p=std::make_unique<UILabel>();p->SetText(Tr("Текст", "Text").toUtf8().toStdString());next=std::move(p);}else if(type=="Button"){auto p=std::make_unique<UIButton>();p->SetText(Tr("Кнопка", "Button").toUtf8().toStdString());next=std::move(p);}else if(type=="Bar"){auto p=std::make_unique<UIBar>();p->Fill=0.5f;next=std::move(p);}else return;
-    int number=1;do{next->Name=type.toLower().toStdString()+std::to_string(number++);}while(root_->Find(next->Name));next->Rect={UIAnchor::TopLeft,16,16,type=="Panel"?320.0f:200.0f,type=="Panel"?180.0f:36.0f};
+    if(type=="Panel")next=std::make_unique<UIPanel>();else if(type=="Label"){auto p=std::make_unique<UILabel>();p->SetText(Tr("Текст", "Text").toUtf8().toStdString());next=std::move(p);}else if(type=="Button"){auto p=std::make_unique<UIButton>();p->SetText(Tr("Кнопка", "Button").toUtf8().toStdString());next=std::move(p);}else if(type=="Bar"){auto p=std::make_unique<UIBar>();p->Fill=0.5f;next=std::move(p);}else if(type=="Group")next=std::make_unique<UIElement>();else return;
+    int number=1;do{next->Name=type.toLower().toStdString()+std::to_string(number++);}while(root_->Find(next->Name));const bool box=type=="Panel"||type=="Group";next->Rect={UIAnchor::TopLeft,16,16,box?320.0f:200.0f,box?180.0f:36.0f};
     auto* parent=selected_?selected_:root_.get();while(parent!=root_.get()&&Type(parent)!="Panel"&&Type(parent)!="Group")parent=parent->GetParent();selected_=parent->Add(std::move(next));Changed();RebuildTree();RefreshInspector();
 }
 void UIEditorWindow::DeleteSelected(){if(!selected_||selected_==root_.get())return;auto* parent=selected_->GetParent();parent->RemoveChild(selected_);selected_=parent;Changed();RebuildTree();RefreshInspector();}
