@@ -127,7 +127,7 @@ void ScriptEditorWindow::BuildUi()
     dock->setFeatures(QDockWidget::NoDockWidgetFeatures);
     auto* panel = new QWidget(dock);
     auto* panelLayout = new QVBoxLayout(panel);
-    variables_ = new QTableWidget(0, 3, panel);
+    variables_ = new ScriptVariableTable(0, 3, panel);
     variables_->setObjectName(QStringLiteral("ScriptVariables"));
     variables_->setHorizontalHeaderLabels({Tr("Имя", "Name"), Tr("Тип", "Type"), Tr("Значение", "Value")});
     variables_->horizontalHeader()->setStretchLastSection(true);

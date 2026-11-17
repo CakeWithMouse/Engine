@@ -7,6 +7,7 @@
 #include <QDialogButtonBox>
 #include <QDoubleSpinBox>
 #include <QFormLayout>
+#include <QGraphicsView>
 #include <QHBoxLayout>
 #include <QJsonObject>
 #include <QLabel>
@@ -110,6 +111,12 @@ ScriptGraphWidget::ScriptGraphWidget(CodeGraphSchema& schema, QWidget* parent)
     : GraphEditorWidget(schema, parent), schema_(schema)
 {
     setObjectName(QStringLiteral("ScriptGraph"));
+    // Drop переменной ловится на viewport внутреннего холста (см. ScriptGraphWidget_DragDrop.cpp).
+    if (auto* view = findChild<QGraphicsView*>())
+    {
+        canvasViewport_ = view->viewport();
+        canvasViewport_->setAcceptDrops(true);
+    }
 }
 
 void ScriptGraphWidget::LoadDocument(const GraphDocument& document)

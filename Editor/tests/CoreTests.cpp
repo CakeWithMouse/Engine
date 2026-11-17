@@ -21,6 +21,7 @@
 #include "core/MaterialPresetsTests.h"
 #include "core/MaterialTransformTests.h"
 #include "core/HlslToGraphTests.h"
+#include "core/ScriptVariableDragTests.h"
 #include "../Core/SceneFile.h"
 #include "core/SceneFileTests.h"
 #include "../Core/Terminal.h"
@@ -491,7 +492,7 @@ int main(int argc, char* argv[])
     std::printf("[Test] TestHlslToGraph...\n");
     std::fflush(stdout);
     gChecks += RunHlslToGraphTests();
-
+    gChecks += RunScriptVariableDragTests();
     RunCameraGuideTests(gChecks);
     std::printf("CoreTests: %d checks passed.\n", gChecks);
     std::fflush(stdout);

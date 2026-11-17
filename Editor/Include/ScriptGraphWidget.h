@@ -5,7 +5,30 @@
 
 #include <QHash>
 #include <QJsonArray>
+#include <QPoint>
+#include <QTableWidget>
 #include <functional>
+
+class QDragEnterEvent;
+class QDragMoveEvent;
+class QDropEvent;
+class QMouseEvent;
+
+// Таблица переменных скрипта: перетаскивание строки на холст графа создаёт ноду Variable.Get/Set
+// (MIME ScriptVariableDrag, правило DropRules GraphVariable -> GraphCanvas). Имя и тип берутся из
+// редакторов строки; без имени перетаскивание не начинается.
+class ScriptVariableTable : public QTableWidget
+{
+public:
+    using QTableWidget::QTableWidget;
+
+protected:
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+
+private:
+    QPoint dragStart_;
+};
 
 // Холст визуального скрипта на общем GraphEditorWidget. В ноде видны её свойства (клавиша, переменная,
 // значение) и значения неподключённых входов; двойной щелчок открывает их диалог. Переменные графа
@@ -38,7 +61,12 @@ protected:
     void EditNode(int nodeId) override;
     QString EditActionText(const EditorCore::GraphNodeData& node) const override;
     void OnRestored(const EditorCore::GraphDocument& before) override;
+    // Drop переменной на холст: события приходят на viewport внутреннего QGraphicsView.
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
+    void AcceptVariableDrag(QDragMoveEvent* event);
+    void DropVariable(QDropEvent* event);
     EditorCore::CodeGraphSchema& schema_;
+    QWidget* canvasViewport_ = nullptr;
 };

@@ -200,6 +200,7 @@
         <ClCompile Include="Source/MaterialGraphWidget.cpp"/>
         <ClCompile Include="Source/GraphEditorWidget.cpp"/>
         <ClCompile Include="Source/ScriptGraphWidget.cpp"/>
+        <ClCompile Include="Source/ScriptGraphWidget_DragDrop.cpp"/>
         <ClCompile Include="Source/ScriptEditorWindow.cpp"/>
         <ClCompile Include="Source/FsmBlockListEditor.cpp"/>
         <ClCompile Include="Source/FsmGraphWidget.cpp"/>
@@ -233,6 +234,7 @@
         <ClCompile Include="Core/MaterialGraphPresets.cpp"/>
         <ClCompile Include="Core/MaterialGraphTransform.cpp"/>
         <ClCompile Include="Core/CodeGraphSchema.cpp"/>
+        <ClCompile Include="Core/ScriptVariableDrag.cpp"/>
         <ClCompile Include="Core/FsmGraphSchema.cpp"/>
         <ClCompile Include="Core/ScriptMessages.cpp"/>
         <ClCompile Include="Core/SceneFile.cpp"/>
@@ -325,6 +327,7 @@
         <ClInclude Include="Core/MaterialGraphPresets.h"/>
         <ClInclude Include="Core/MaterialGraphTransform.h"/>
         <ClInclude Include="Core/CodeGraphSchema.h"/>
+        <ClInclude Include="Core/ScriptVariableDrag.h"/>
         <ClInclude Include="Core/FsmGraphSchema.h"/>
         <ClInclude Include="Core/ScriptMessages.h"/>
         <ClInclude Include="Core/SceneFile.h"/>
