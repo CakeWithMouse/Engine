@@ -10,6 +10,7 @@
 #include <cstdint>
 
 #include "QtHost.h"
+#include "MaterialSlotList.h"
 
 class QLabel;
 class QLineEdit;
@@ -126,6 +127,9 @@ private:
     void BuildUi();
     void RefreshProjectProperties(const EditorQtHost::Snapshot&, const EditorQtHost::SceneObject&);
     void SubmitProperty(const QString& path, const QJsonValue& value);
+    void BindMaterialSlots();
+    static QVector<MaterialSlotInfo> ModelMaterialSlots(const EditorQtHost::SceneObject& object);
+    QVector<MaterialSlotInfo> lastSlots_;
     QWidget* properties_ = nullptr;
     QVBoxLayout* propertiesLayout_ = nullptr;
     QString propertiesKey_;

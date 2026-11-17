@@ -113,6 +113,7 @@ void ObjectInspectorPanel::BuildUi()
         CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignMaterial"));
     };
     cardMaterial_->onClearMaterial = [this] { emit ClearMaterialRequested(); };
+    BindMaterialSlots();
 
     cardScript_ = new ScriptCard(this);
     cardScript_->setObjectName(QStringLiteral("ScriptCard"));
@@ -523,7 +524,9 @@ void ObjectInspectorPanel::Refresh(
 
         const bool showGeometry = isModel || isPrimitive;
         const bool showMaterial = isModel || isPrimitive;
-        const bool showProperties = (!isModel && !isPrimitive && !isPointLight && !isDirLight && !isParticles);
+        // Models expose per-part material slots through the property schema.
+        const bool modelHasProperties = isModel && propertiesLayout_->count() > 0;
+        const bool showProperties = modelHasProperties || (!isModel && !isPrimitive && !isPointLight && !isDirLight && !isParticles);
 
         const QString cr = property("contentRoot").toString();
         const QString modelPath = QString::fromStdString(object.modelAsset);
@@ -559,6 +562,11 @@ void ObjectInspectorPanel::Refresh(
             lastCardsRoot_ = cr;
             lastCardsValid_ = true;
         }
+        // Слоты частей модели правит карточка «Материал», а не общий список свойств.
+        QVector<MaterialSlotInfo> slotInfos;
+        if (isModel) slotInfos = ModelMaterialSlots(object);
+        cardMaterial_->SetSlots(slotInfos, selectionChanged);
+        lastSlots_ = slotInfos;
         if (properties_->isHidden() == showProperties)
             properties_->setVisible(showProperties);
         // Скрипт — у любого объекта сцены, если игровой модуль их поддерживает.

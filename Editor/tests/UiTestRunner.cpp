@@ -4,6 +4,7 @@
 #include "ImportSettingsV2EditTests.h"
 #include "AssetDeleteTests.h"
 #include "InspectorRefreshTests.h"
+#include "MaterialSlotListTests.h"
 #include "DockRedockTests.h"
 #include "ViewportBillboardTests.h"
 #include "UiSmokeTests.h"
@@ -31,6 +32,7 @@ int main(int argc, char* argv[])
         InspectorRefreshTests::Run();
         InspectorRefreshTests::RunMouseRefreshJitter();
         InspectorRefreshTests::RunModelReplaceButtonRegression();
+        MaterialSlotListTests::Run();
         DockRedockTests::Run();
         ViewportBillboardTests::Run();
         ContentBrowserTests::Run();
