@@ -3,6 +3,7 @@
 #include "ObjectInspectorPanel.h"
 
 #include <QApplication>
+#include <QCheckBox>
 #include <QDoubleSpinBox>
 #include <QDir>
 #include <QEvent>
@@ -70,6 +71,59 @@ inline void WriteFile(const QString& path)
         throw std::runtime_error("InspectorRefresh: cannot create fixture file");
     f.write("x");
     f.close();
+}
+
+inline void RunPointLightShadows()
+{
+    ObjectInspectorPanel panel;
+    EditorQtHost::Snapshot snap;
+    EditorQtHost::SceneObject lamp;
+    lamp.id = 1;
+    lamp.type = "Light.Point";
+    lamp.hasPointLight = true;
+    lamp.lightCastShadows = true;
+    lamp.pointLight = {{1, 1, 1}, 2, 10, 1};
+    snap.objects = {lamp};
+    panel.Refresh(snap, lamp.id, true);
+
+    auto* shadows = panel.findChild<QCheckBox*>(QStringLiteral("LightShadows"));
+    auto* intensity = panel.findChild<QDoubleSpinBox*>(QStringLiteral("LightValue3"));
+    Check(shadows && intensity, "point light controls exist");
+    int edits = 0;
+    InspectorPointLightValue submitted;
+    QObject::connect(&panel, &ObjectInspectorPanel::PointLightEditingFinished, &panel,
+        [&](quint64 id, const InspectorPointLightValue& value) {
+            Check(id == lamp.id, "light edit targets selected lamp");
+            submitted = value;
+            ++edits;
+        });
+    intensity->setValue(3);
+    QMetaObject::invokeMethod(intensity, "editingFinished", Qt::DirectConnection);
+    Check(edits == 1 && submitted.intensity == 3 && submitted.castShadows,
+          "changing intensity preserves enabled point shadows");
+    Check(!shadows->isHidden() && shadows->isChecked(), "point shadow toggle reflects scene");
+
+    shadows->click();
+    Check(edits == 2 && !submitted.castShadows, "point shadows can be disabled explicitly");
+    shadows->click();
+    Check(edits == 3 && submitted.castShadows, "point shadows can be enabled explicitly");
+
+    // The same checkbox is also used by the sun. Its state must not leak to a lamp.
+    snap.objects[0].type = "Light.Directional";
+    snap.objects[0].hasPointLight = false;
+    snap.objects[0].projectData = R"({"shadows":true})";
+    panel.Refresh(snap, lamp.id, true);
+    Check(shadows->isChecked(), "sun has shadows enabled");
+    snap.objects[0] = lamp;
+    snap.objects[0].lightCastShadows = false;
+    panel.Refresh(snap, lamp.id, true);
+    QMetaObject::invokeMethod(intensity, "editingFinished", Qt::DirectConnection);
+    Check(edits == 4 && !submitted.castShadows, "sun shadow flag does not leak to an unshadowed lamp");
+
+    snap.objects[0].lightCastShadows = true;
+    panel.Refresh(snap, lamp.id, false);
+    Check(shadows->isChecked() && edits == 4, "scene refresh updates shadows without sending an edit");
+    std::cout << "Point light shadow inspector regression passed." << std::endl;
 }
 
 inline void Run()

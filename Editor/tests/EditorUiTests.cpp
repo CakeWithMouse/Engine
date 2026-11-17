@@ -2256,6 +2256,7 @@ int wmain(int argc, wchar_t** argv)
             return EditorQtHost::SceneObject{};
         };
         Check(selectedLight().hasPointLight, "new light selected");
+        Check(selectedLight().lightCastShadows, "new point light casts shadows");
         Ui([](auto* w) {
             auto* button = w->findChild<QPushButton*>(QStringLiteral("LightColor"));
             Check(button && button->isVisible(), "light color button visible"); button->click();
@@ -2263,6 +2264,7 @@ int wmain(int argc, wchar_t** argv)
             dialog->setCurrentColor(QColor::fromRgbF(0.2f,0.8f,0.4f)); dialog->accept();
         });
         until([&] { return std::abs(selectedLight().pointLight.color[1] - 0.8f) < 0.001f; });
+        Check(selectedLight().lightCastShadows, "color picker preserves point light shadows");
         Ui([](auto* w) { Action(w, QStringLiteral("Отменить"))->trigger(); });
         until([&] { return !host.ReadSnapshot().selected; });
         bool whiteRestored = false;
@@ -2283,6 +2285,7 @@ int wmain(int argc, wchar_t** argv)
             intensity->setValue(4); QMetaObject::invokeMethod(intensity, "editingFinished", Qt::DirectConnection);
         });
         until([&] { return selectedLight().pointLight.intensity == 4; });
+        Check(selectedLight().lightCastShadows, "intensity edit preserves point light shadows");
         Ui([](auto* w) { w->findChild<QCheckBox*>(QStringLiteral("LightEnabled"))->click(); });
         until([&] { return !selectedLight().pointLight.enabled; });
         Ui([](auto* w) { w->findChild<QCheckBox*>(QStringLiteral("LightEnabled"))->click(); });

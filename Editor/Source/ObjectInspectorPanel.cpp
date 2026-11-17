@@ -519,7 +519,8 @@ void ObjectInspectorPanel::Refresh(
                 else lightValues_[i]->setValue(object.pointLight.radius);
             }
             lightEnabled_->setChecked(object.pointLight.enabled != 0);
-            lightShadows_->hide();
+            lightShadows_->setChecked(object.lightCastShadows);
+            lightShadows_->show();
             lightRowLabels_[4]->setText(Tr("Радиус", "Radius"));
             lightValues_[4]->setRange(0.01, 10000.0); lightValues_[4]->setSingleStep(0.5);
             UpdateLightColorButton(object.pointLight.color); cardLight_->show();

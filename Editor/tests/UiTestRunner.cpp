@@ -30,6 +30,12 @@ int main(int argc, char* argv[])
     QApplication app(appArgc, argv);
     EditorTheme::Apply(app);
 
+    if (argc == 2 && std::string(argv[1]) == "--point-light-shadows")
+    {
+        try { InspectorRefreshTests::RunPointLightShadows(); return 0; }
+        catch (const std::exception& ex) { std::cerr << ex.what() << std::endl; return 1; }
+    }
+
     int failures = 0;
     auto runSuite = [&](auto func, const char* name) {
         try
@@ -50,6 +56,7 @@ int main(int argc, char* argv[])
     runSuite(ImportSettingsV2EditTests::Run, "ImportSettingsV2EditTests");
     runSuite(AssetDeleteTests::Run, "AssetDeleteTests");
     runSuite(InspectorRefreshTests::Run, "InspectorRefreshTests");
+    runSuite(InspectorRefreshTests::RunPointLightShadows, "InspectorRefreshTests::RunPointLightShadows");
     runSuite(InspectorRefreshTests::RunMouseRefreshJitter, "InspectorRefreshTests::RunMouseRefreshJitter");
     runSuite(InspectorRefreshTests::RunModelReplaceButtonRegression, "InspectorRefreshTests::RunModelReplaceButtonRegression");
     runSuite(MaterialSlotListTests::Run, "MaterialSlotListTests");
