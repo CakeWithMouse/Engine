@@ -692,14 +692,13 @@ bool SameLink(const GraphConnectionData& a, const GraphConnectionData& b)
 InfoButton* MakeGraphHelpButton(QWidget* parent)
 {
     auto* btn = new InfoButton(
-        QStringLiteral("Навигация и редактирование графа"),
-        QStringLiteral("Связи между нодами:\n• Перетащите пин на другой пин для создания связи\n• Потяните за подключённый входной пин, чтобы отсоединить связь\n\n"
-                       "Добавление нод и навигация:\n• ПКМ по холсту или Tab — поиск и добавление нод\n• ПКМ по ноде — контекстные действия и свойства\n• Колёсико мыши — масштаб (0.2x..10x), ПКМ/СКМ — сдвиг холста\n\n"
-                       "Горячие клавиши:\n• F — показать всё (или выделенные ноды)\n• Ctrl+Z / Ctrl+Y — отменить / повторить\n• Ctrl+C / Ctrl+X / Ctrl+V — копировать / вырезать / вставить\n• Ctrl+D — дублировать выделенные ноды\n• Ctrl+A — выделить всё, Del — удалить"),
-        QStringLiteral("Graph Navigation and Editing"),
-        QStringLiteral("Node connections:\n• Drag a pin to another pin to create a link\n• Drag a connected input pin to disconnect it\n\n"
-                       "Adding nodes and navigation:\n• RMB on canvas or Tab — search and add nodes\n• RMB on a node — context actions and properties\n• Mouse wheel — zoom (0.2x..10x), RMB/MMB drag — pan\n\n"
-                       "Keyboard shortcuts:\n• F — frame all (or selected nodes)\n• Ctrl+Z / Ctrl+Y — undo / redo\n• Ctrl+C / Ctrl+X / Ctrl+V — copy / cut / paste\n• Ctrl+D — duplicate selected nodes\n• Ctrl+A — select all, Del — delete"),
+        Tr("Навигация и редактирование графа", "Graph Navigation and Editing"),
+        Tr("Связи между нодами:\n• Перетащите пин на другой пин для создания связи\n• Потяните за подключённый входной пин, чтобы отсоединить связь\n\n"
+           "Добавление нод и навигация:\n• ПКМ по холсту или Tab — поиск и добавление нод\n• ПКМ по ноде — контекстные действия и свойства\n• Колёсико мыши — масштаб (0.2x..10x), ПКМ/СКМ — сдвиг холста\n\n"
+           "Горячие клавиши:\n• F — показать всё (или выделенные ноды)\n• Ctrl+Z / Ctrl+Y — отменить / повторить\n• Ctrl+C / Ctrl+X / Ctrl+V — копировать / вырезать / вставить\n• Ctrl+D — дублировать выделенные ноды\n• Ctrl+A — выделить всё, Del — удалить",
+           "Node connections:\n• Drag a pin to another pin to create a link\n• Drag a connected input pin to disconnect it\n\n"
+           "Adding nodes and navigation:\n• RMB on canvas or Tab — search and add nodes\n• RMB on a node — context actions and properties\n• Mouse wheel — zoom (0.2x..10x), RMB/MMB drag — pan\n\n"
+           "Keyboard shortcuts:\n• F — frame all (or selected nodes)\n• Ctrl+Z / Ctrl+Y — undo / redo\n• Ctrl+C / Ctrl+X / Ctrl+V — copy / cut / paste\n• Ctrl+D — duplicate selected nodes\n• Ctrl+A — select all, Del — delete"),
         parent);
     btn->SetToolbarStyle(true);
     return btn;
