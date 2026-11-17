@@ -250,10 +250,12 @@ void EditorMainWindow::RegisterAssetCommands()
     });
 
     RegisterDragDropCommands();
+    RegisterAssetCreateCommands();
 }
 
 void EditorMainWindow::UnregisterAssetCommands()
 {
+    UnregisterAssetCreateCommands();
     UnregisterDragDropCommands();
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.Import"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.EditImportSettings"));

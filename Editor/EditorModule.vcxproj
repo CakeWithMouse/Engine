@@ -181,6 +181,8 @@
         <ClCompile Include="Source/ImportCommands.cpp"/>
         <ClCompile Include="Source/AssetDeleteCommand.cpp"/>
         <ClCompile Include="Source/FileBrowser.cpp"/>
+        <ClCompile Include="Source/FileBrowserContextMenu.cpp"/>
+        <ClCompile Include="Source/AssetCreateCommands.cpp"/>
         <ClCompile Include="Source/AssetTreeView.cpp"/>
         <ClCompile Include="Source/DragDropCommands.cpp"/>
         <ClCompile Include="Source/ViewportWidget.cpp"/>

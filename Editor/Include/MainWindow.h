@@ -138,6 +138,8 @@ private:
     void UnregisterAssetCommands();
     void RegisterDragDropCommands();
     void UnregisterDragDropCommands();
+    void RegisterAssetCreateCommands();
+    void UnregisterAssetCreateCommands();
     void HandleModelImported(const EditorCommand& command);
     float GetModelSpawnScale(const QString& path);
     void ConnectPanels();

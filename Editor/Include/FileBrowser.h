@@ -10,12 +10,14 @@
 #include "IconProvider.h"
 #include "EditorTheme.h"
 #include "ProjectFileTypeStrings.h"
+#include "AssetExtensions.h"
 
 class QComboBox;
 class QLineEdit;
 class QTreeView;
 class QToolButton;
 class QAction;
+class QMenu;
 class EditorQtHost;
 
 class ProjectFilesFilter final : public QSortFilterProxyModel
@@ -141,6 +143,10 @@ private:
     void BuildUi();
     void OnDoubleClicked(const QModelIndex& index);
     void OnContextMenu(const QPoint& pos);
+    void AddCreateSubmenu(QMenu& menu, const QString& folderParent, const QString& directory);
+    void AddAssetActions(QMenu& menu, const QString& path, EditorCore::AssetKind kind);
+    void AddFileOperations(QMenu& menu, const QString& path);
+    void AddFolderActions(QMenu& menu, const QString& path);
     void ApplyFilter(const QString& text);
     void DeleteCurrentAsset();
     bool IsProtectedPath(const QString& path) const;

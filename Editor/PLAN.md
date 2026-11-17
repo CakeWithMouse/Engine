@@ -20,7 +20,7 @@
 - [x] 1. Баги сцены: иконки world-transform, гизмо Play/Stop (п. 52 «Решения»; billboard-тесты зелёные, CrossType red — pre-existing по контролю)
 - [x] 2. Общая база графов (по аудиту А: база уже есть — убрать дубли, интегрировать FileService)
 - [x] 3. DnD-инфраструктура + сценарии (пп. 54–58 «Решения»: Core MIME+матрица, CB источник/move/copy/import, viewport spawn/assign, hierarchy reparent world-transform один Undo; per-editor drop-таргеты скоуплены в задачи 4/7/8/9; живые жесты — «Не проверено в рантайме»)
-- [ ] 4. Content Browser: контекстное меню по типам
+- [x] 4. Content Browser: контекстное меню по типам (п. 59 «Решения»: подменю «Создать» по категориям, без «Открыть в приложении» для папок, дубликат, скрытие неприменимого; material-instance → задача 7)
 - [ ] 5. Общий UI графовых редакторов (иконки Tabler, «?», тулбар)
 - [ ] 6. Превью-модуль
 - [ ] 7. Редактор материалов (a–g)
@@ -1262,6 +1262,16 @@
     - Матрица `DropRules` готова полностью (все ячейки → command id). Wiring таргетов, которых ещё нет в редакторе, ложится в соответствующие задачи (без mock-таргетов сейчас): `Material.AssignTexture` (CB→слот текстуры материала) и `Graph.CreateTextureNode` (CB→холст) → задача 7; `Graph.CreateVariableNode` (переменная→Get/Set) → задача 8; `UI.AddWidget` (палитра→холст) → задача 9; CB→Hierarchy/InspectorSlot assign/replace → задача 4/инспектор. Команды `Scene.AssignMaterial/AssignScript/AssignAiMachine/ReplaceModel` уже существуют (ImportCommands/AssetTools) и используются viewport-drop.
     - Звук→viewport = `None` (нет ABI спавна звука) → «Нужно в ABI». Prefab — в движке нет → не реализуется (TZ).
     - GUI-прогон области DnD (задача 3) покрывает: Explorer→CB import, CB move/copy/multi-select, CB→viewport spawn/assign, Hierarchy reparent (циклы, world-transform). Остальные сценарии проверяются в GUI-прогонах задач 7/8/9.
+
+59. **Задача 4 — Content Browser: контекстное меню по типам через CommandRegistry (17.11.2026):**
+    - **Извлечение:** `OnContextMenu` вынесен из `FileBrowser.cpp` (506→379) в новый `Editor/Source/FileBrowserContextMenu.cpp` (245, ≤500) с helpers `AddCreateSubmenu`/`AddAssetActions`/`AddFileOperations`/`AddFolderActions` (объявлены в `FileBrowser.h`). Диспетчеризация через `triggered`-лямбды (без длинной if/else цепи `menu.exec`).
+    - **Папка/пустая область → подменю «Создать» по категориям:** Основное (Новая папка `Assets.CreateFolder` [objectName `AssetsCreateFolder` сохранён — локатор FolderCreationTests], Новый материал `Assets.CreateMaterial`, Импорт модели/текстуры `Assets.Import`), Логика (Новый скрипт `Assets.CreateScript` [скрыт без scripts], Новый автомат ИИ `Assets.CreateAiMachine`), Звук (Импорт аудио), UI (Новый UI `UI.Create`). **«Открыть в приложении» для папок УБРАНО** (было `hasFile` включая каталоги).
+    - **Новые команды создания (`Editor/Source/AssetCreateCommands.cpp`, 52):** `Assets.CreateMaterial/CreateScript/CreateAiMachine` (параметр `directory` → существующие editor-методы `CreateMaterial/CreateScript/CreateAiMachine`); canExecute по `HasMaterials`/`scripts`. Register/Unregister объявлены в MainWindow.h, вызываются из Register/UnregisterAssetCommands. Внутренности создания (QSaveFile/mkpath мимо FileService) НЕ тронуты — pre-existing, вне скоупа задачи 4 (Backlog).
+    - **Файл по типу (`KindForFile`):** «Назначить/Добавить» только для Model/Texture/Material/Script (скрыт для Audio/UI/AiMachine/Unknown — `UseAsset` их не поддерживает); Редактировать материал/скрипт/автомат; Прослушать/Остановить звук; Настройки импорта/Переимпорт (Model/Texture, authoring); Переместить/переименовать (Model/Texture/Material/Script, authoring); **Дублировать** (`Assets.Copy` → `_1` суффикс, новый); Открыть в приложении/Показать в проводнике/Копировать путь/Удалить. Неприменимое СКРЫТО (nullptr/условие), не серое.
+    - **Ratchet:** `ImportCommands.cpp` 505→507 (+2 вызова Register/UnregisterAssetCreateCommands). `FileBrowser.cpp` 379 < 506 (запись не меняется). Новые файлы ≤500.
+    - **Верификация (check.ps1 -AllowEngine Quick ×2, финальный лог %TEMP%\pain-task4-menuD2.log):** forbidden/layers/localization/line-counts OK; build OK; CoreTests **1171**, HostTests **165**, UiSmoke **467**, ContentBrowser icon/type **46/77** (FolderCreationTests зелёный — локатор подменю работает через рекурсивный findChild); единственный красный — pre-existing `CrossTypeInfoButtonTests`. Не хуже базы.
+    - **Материал-instance:** создание instance отложено в задачу 7 (зависит от material-instance ABI движка) — «Нужно в ABI» п. 7. Дубликат материала реализован (`Assets.Copy`).
+    - **Не проверено в рантайме:** живые клики по подменю «Создать»/тип-специфичным действиям (GUI-прогон области CB).
 
 ---
 
