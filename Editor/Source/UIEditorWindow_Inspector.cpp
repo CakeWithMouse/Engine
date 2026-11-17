@@ -67,6 +67,7 @@ bool UIEditorWindow::ApplyInspector() {
     if (refreshing_ || !selected_) return true;
     const auto name = name_->text().toUtf8().toStdString(); auto* existing = root_->Find(name);
     if (!name.empty() && existing && existing != selected_) { status_->setText(Tr("Имя уже используется: ", "Name already in use: ") + name_->text()); return false; }
+    const auto rootBefore = UIMarkup::Serialize(*root_);
     const auto before = UIMarkup::Serialize(*selected_);
     selected_->Name = name; selected_->Rect = {UIAnchor(anchor_->currentIndex()), float(rect_[0]->value()), float(rect_[1]->value()), float(rect_[2]->value()), float(rect_[3]->value())}; selected_->bVisible = visible_->isChecked();
     selected_->Padding = {float(padding_[0]->value()), float(padding_[1]->value()), float(padding_[2]->value()), float(padding_[3]->value())}; selected_->bInteractive = interactive_->isChecked();
@@ -74,6 +75,6 @@ bool UIEditorWindow::ApplyInspector() {
     if (auto* p = dynamic_cast<UIButton*>(selected_)) { p->SetText(text_->text().toUtf8().toStdString()); p->BorderWidth = float(borderWidth_->value()); }
     if (auto* p = dynamic_cast<UIPanel*>(selected_)) p->BorderWidth = float(borderWidth_->value());
     if (auto* p = dynamic_cast<UIBar*>(selected_)) p->Fill = float(fill_->value());
-    if (before != UIMarkup::Serialize(*selected_)) { Changed(); RebuildTree(); }
+    if (before != UIMarkup::Serialize(*selected_)) { PushUndo(rootBefore); Changed(); RebuildTree(); }
     return true;
 }

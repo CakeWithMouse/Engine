@@ -104,7 +104,7 @@ protected:
         if(event->button()!=Qt::LeftButton)return;
         Layout();start_=event->position()/scale_;editor_->Select(Hit(editor_->Root(),start_));
         if(auto* e=editor_->Selected()){
-            original_=e->Rect;drag_=e!=editor_->Root();
+            original_=e->Rect;drag_=e!=editor_->Root();checkpointed_=false;
             if(original_.Width==0)original_.Width=e->GetBox().Width;
             if(original_.Height==0)original_.Height=e->GetBox().Height;
         }
@@ -112,6 +112,7 @@ protected:
     void mouseMoveEvent(QMouseEvent* event) override {
         if(!drag_||!(event->buttons()&Qt::LeftButton))return;
         auto* e=editor_->Selected();if(!e)return;
+        if(!checkpointed_){editor_->Checkpoint();checkpointed_=true;}
         const auto delta=event->position()/scale_-start_;
         const int a=static_cast<int>(original_.Anchor);
         e->Rect.Width=original_.Width;e->Rect.Height=original_.Height;
@@ -122,7 +123,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent*) override { drag_=false; }
 private:
     UIEditorWindow* editor_;FontAtlas font_;QImage atlas_;QHash<QRgb,QImage> tinted_;
-    double scale_=1;bool drag_=false;QPointF start_;UIRect original_;
+    double scale_=1;bool drag_=false;bool checkpointed_=false;QPointF start_;UIRect original_;
 };
 
 UIEditorWindow::UIEditorWindow(const QString& file,QWidget* parent) : QMainWindow(nullptr, Qt::Window),file_(file) {
@@ -131,6 +132,8 @@ UIEditorWindow::UIEditorWindow(const QString& file,QWidget* parent) : QMainWindo
     auto* tools=addToolBar(QStringLiteral("UI"));
     saveAction_=tools->addAction(Tr("Сохранить", "Save"),this,[this]{Save();});saveAction_->setShortcut(QKeySequence::Save);saveAction_->setObjectName("UISave");
     reloadAction_=tools->addAction(Tr("Перечитать", "Reload"),this,[this]{if(ConfirmClose())Reload();});tools->addSeparator();
+    undoAction_=tools->addAction(Tr("Отменить", "Undo"),this,[this]{Undo();});undoAction_->setShortcut(QKeySequence::Undo);undoAction_->setObjectName("UIUndo");
+    redoAction_=tools->addAction(Tr("Повторить", "Redo"),this,[this]{Redo();});redoAction_->setShortcut(QKeySequence::Redo);redoAction_->setObjectName("UIRedo");tools->addSeparator();
     for(const auto& type:{"Panel","Label","Button","Bar","Group"}) {
         auto* action=tools->addAction(QString::fromLatin1(type),this,[this,type]{AddElement(QString::fromLatin1(type));});action->setObjectName("UIAdd"+QString::fromLatin1(type));
     }
@@ -171,7 +174,7 @@ UIEditorWindow::UIEditorWindow(const QString& file,QWidget* parent) : QMainWindo
     connect(colorBtn_,&QPushButton::clicked,this,[this]{
         auto* c=Color(selected_,colorProperty_->currentIndex());if(!c)return;
         const auto chosen=QColorDialog::getColor(QColor::fromRgbF(c->r,c->g,c->b,c->a),this,Tr("Цвет UI", "UI Color"),QColorDialog::ShowAlphaChannel);
-        if(chosen.isValid()){*c=glm::vec4(chosen.redF(),chosen.greenF(),chosen.blueF(),chosen.alphaF());Changed();}
+        if(chosen.isValid()){Checkpoint();*c=glm::vec4(chosen.redF(),chosen.greenF(),chosen.blueF(),chosen.alphaF());Changed();}
     });
     Reload();if(!canvas_->Ready())status_->setText(Tr("Не удалось создать атлас шрифта для предпросмотра.", "Failed to create font atlas for preview."));
     langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
@@ -198,6 +201,8 @@ void UIEditorWindow::RetranslateUi() {
     if (saveAction_) saveAction_->setText(Tr("Сохранить", "Save"));
     if (reloadAction_) reloadAction_->setText(Tr("Перечитать", "Reload"));
     if (deleteAction_) deleteAction_->setText(Tr("Удалить", "Delete"));
+    if (undoAction_) undoAction_->setText(Tr("Отменить", "Undo"));
+    if (redoAction_) redoAction_->setText(Tr("Повторить", "Redo"));
     if (tree_) tree_->setHeaderLabel(Tr("Иерархия", "Hierarchy"));
     if (labelName_) labelName_->setText(Tr("Имя", "Name"));
     if (labelText_) labelText_->setText(Tr("Текст", "Text"));
@@ -223,7 +228,7 @@ void UIEditorWindow::RetranslateUi() {
 bool UIEditorWindow::Reload() {
     std::unique_ptr<UIElement> next;std::string error;std::vector<std::string> warnings;
     if(!UIMarkup::Load(file_.toUtf8().toStdString(),next,error,&warnings)){status_->setText(QString::fromStdString(error));return false;}
-    root_=std::move(next);selected_=root_.get();dirty_=false;setWindowTitle(Tr("Редактор UI — ", "UI Editor — ")+QFileInfo(file_).fileName());
+    root_=std::move(next);selected_=root_.get();dirty_=false;undo_.clear();redo_.clear();UpdateHistoryActions();setWindowTitle(Tr("Редактор UI — ", "UI Editor — ")+QFileInfo(file_).fileName());
     RebuildTree();RefreshInspector();canvas_->update();status_->setText(warnings.empty()?file_:QString::fromStdString(warnings.front()));return true;
 }
 bool UIEditorWindow::Save() {
@@ -249,8 +254,8 @@ void UIEditorWindow::AddElement(const QString& type){
     if(!root_)return;std::unique_ptr<UIElement> next;
     if(type=="Panel")next=std::make_unique<UIPanel>();else if(type=="Label"){auto p=std::make_unique<UILabel>();p->SetText(Tr("Текст", "Text").toUtf8().toStdString());next=std::move(p);}else if(type=="Button"){auto p=std::make_unique<UIButton>();p->SetText(Tr("Кнопка", "Button").toUtf8().toStdString());next=std::move(p);}else if(type=="Bar"){auto p=std::make_unique<UIBar>();p->Fill=0.5f;next=std::move(p);}else if(type=="Group")next=std::make_unique<UIElement>();else return;
     int number=1;do{next->Name=type.toLower().toStdString()+std::to_string(number++);}while(root_->Find(next->Name));const bool box=type=="Panel"||type=="Group";next->Rect={UIAnchor::TopLeft,16,16,box?320.0f:200.0f,box?180.0f:36.0f};
-    auto* parent=selected_?selected_:root_.get();while(parent!=root_.get()&&Type(parent)!="Panel"&&Type(parent)!="Group")parent=parent->GetParent();selected_=parent->Add(std::move(next));Changed();RebuildTree();RefreshInspector();
+    auto* parent=selected_?selected_:root_.get();while(parent!=root_.get()&&Type(parent)!="Panel"&&Type(parent)!="Group")parent=parent->GetParent();Checkpoint();selected_=parent->Add(std::move(next));Changed();RebuildTree();RefreshInspector();
 }
-void UIEditorWindow::DeleteSelected(){if(!selected_||selected_==root_.get())return;auto* parent=selected_->GetParent();parent->RemoveChild(selected_);selected_=parent;Changed();RebuildTree();RefreshInspector();}
+void UIEditorWindow::DeleteSelected(){if(!selected_||selected_==root_.get())return;auto* parent=selected_->GetParent();Checkpoint();parent->RemoveChild(selected_);selected_=parent;Changed();RebuildTree();RefreshInspector();}
 bool UIEditorWindow::ConfirmClose(){if(!dirty_)return true;const auto choice=QMessageBox::question(this,Tr("Редактор UI", "UI Editor"),Tr("Сохранить изменения в ", "Save changes to ")+QFileInfo(file_).fileName()+"?",QMessageBox::Save|QMessageBox::Discard|QMessageBox::Cancel);return choice==QMessageBox::Discard||(choice==QMessageBox::Save&&Save());}
 void UIEditorWindow::closeEvent(QCloseEvent* event){if(ConfirmClose())event->accept();else event->ignore();}

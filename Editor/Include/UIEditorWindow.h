@@ -31,15 +31,22 @@ public:
     void Changed();
     void RebuildTree();
     void RetranslateUi();
+    void Checkpoint();
+    void Undo();
+    void Redo();
 protected:
     void closeEvent(QCloseEvent* event) override;
 private:
     void RefreshInspector();
     bool ApplyInspector();
     void BuildPropertyEditors(QFormLayout* form, QWidget* props);
+    void PushUndo(const std::string& snapshot);
+    void RestoreSnapshot(const std::string& text);
+    void UpdateHistoryActions();
     QString file_;
     std::unique_ptr<UIElement> root_;
     UIElement* selected_ = nullptr;
+    std::vector<std::string> undo_, redo_;
     bool refreshing_ = false, dirty_ = false;
     UICanvas* canvas_ = nullptr;
     QTreeWidget* tree_ = nullptr;
@@ -54,6 +61,8 @@ private:
     QAction* saveAction_ = nullptr;
     QAction* reloadAction_ = nullptr;
     QAction* deleteAction_ = nullptr;
+    QAction* undoAction_ = nullptr;
+    QAction* redoAction_ = nullptr;
     QLabel* labelName_ = nullptr;
     QLabel* labelText_ = nullptr;
     QLabel* labelRect_[4]{};
