@@ -6,6 +6,123 @@
 
 ---
 
+## Сессия feature/editor-graphs-ux-overhaul (автономный overhaul графов/редакторов, ТЗ Юрия от 17.11.2026)
+
+> Ветка создана от локальной main (6b9b053), дерево было чистое. Процесс переопределён ТЗ:
+> автономно до конца списка, остановки на ручную проверку отменены, Engine/Game разрешено
+> править отдельными коммитами engine:/game: (C-ABI, обратно совместимо), вопросы — в раздел
+> «Вопросы к Юрию». Проверки: Debug на шаг, Release на срез, тесты не хуже эталона;
+> полный GUI-прогон один раз на завершённую область.
+
+### Чек-лист session-задач
+- [ ] ШАГ 0.5: эталон тестов (редакторская часть готова, движковая — в прогоне)
+- [ ] ФАЗА 0: аудит А–Е (А готов, Б/В/Г/Д/Е в работе)
+- [ ] 1. Баги сцены: иконки world-transform, гизмо Play/Stop
+- [ ] 2. Общая база графов (по аудиту А: база уже есть — убрать дубли, интегрировать FileService)
+- [ ] 3. DnD-инфраструктура + сценарии
+- [ ] 4. Content Browser: контекстное меню по типам
+- [ ] 5. Общий UI графовых редакторов (иконки Tabler, «?», тулбар)
+- [ ] 6. Превью-модуль
+- [ ] 7. Редактор материалов (a–g)
+- [ ] 8. Visual Script
+- [ ] 9. Редактор UI (Hud.ui)
+- [ ] ФИНАЛ: отчёт
+
+### Эталон тестов (feature/editor-graphs-ux-overhaul @ 6b9b053, до правок)
+
+| Тест / Скрипт | Результат (эталон) | Примечание |
+|---|---|---|
+| Сборка EditorModule Debug + Release | **PASS** | 0 ошибок; известные warnings C4996 (`QMenu::addAction` legacy, MainWindow.cpp) |
+| `CoreTests.exe` | **1105/1105 PASS** | |
+| `HostTests.exe` | **165/165 PASS** | |
+| `UiTests.exe` | **~1335 checks PASS, 1 FAIL (красная база main)** | Сбой: `ViewportBillboardTests` «game camera tint from dark palette» — та же красная база, что зафиксирована в эталонах fix/editor-ui-polish. exit code 1. |
+| `check.ps1 -Full` | **FAIL на UiTests (красная база)** | Прервался до движковых скриптов; они запущены отдельным прогоном (лог: %TEMP%\pain-baseline-engine.log) |
+| Движковые скрипты (run.ps1, component-generation, edit-session, scene-module, run-viewport, skeletal, run-games, run-runtime, compatibility, project-workflow) | **в прогоне** | результаты будут дописаны |
+
+### Фаза 0 — аудит А (общая база графов): ВЫПОЛНЕН
+- Общее ядро УЖЕ есть: `Editor/Core/Graph/GraphDocument.h:16-119` (GraphPin/GraphNodeData/GraphConnectionData/GraphCommentData, ExportToJson/ImportFromJson, форматы Legacy `{"version":1}` и V1 `{"format":"ITMOEngine.Graph","version":1}`, IsNewerFormat), `GraphSchema.h:41-106`, `GraphHistory.h:11-38` (снимки JSON, Limit 200, mergeKey), `GraphClipboard.h:18-21`, `GraphSchemaRegistry.cpp:19-29` (material/code/fsm).
+- Общий вид: `GraphEditorWidget` (`Editor/Source/GraphEditorWidget.cpp`, 1688 строк; bezier :57-63, zoom :1224-1230 clamp 0.2–3.0, pan :1154-1189, PinAt :324). Наследники: MaterialGraphWidget (661), ScriptGraphWidget (299), FsmGraphWidget (364).
+- Ноды: материал — статические таблицы `MaterialGraphSchema.cpp:24-62`; скрипт — каталог из JSON движка `CodeGraphSchema::LoadCatalog` (`CodeGraphSchema.cpp:37-96`, вызов ScriptEditorWindow.cpp:194-218); FSM — `FsmGraphSchema.cpp` (495).
+- Undo графов — локальный GraphHistory, НЕ CommandRegistry. Сохранение окон — QFile/QSaveFile напрямую (ScriptEditorWindow.cpp:264, MaterialEditorWindow.cpp:702) — точка интеграции FileService.
+- Вне общей системы только UI-редактор: `UICanvas` внутри `UIEditorWindow.cpp:50-125` (QTreeWidget + QPainter-холст, свой scale/drag) — это layout-холст, не нодовый граф.
+- Вывод: задачу 2 выполнять как «убрать остаточные дубли + интеграция FileService», поведение не менять.
+
+### Фаза 0 — аудит Е (drag-and-drop): ВЫПОЛНЕН
+- Всего 3 реальных DnD-участника:
+  1) Источник Content Browser: `FileBrowser.cpp:199-200` DragOnly, MIME `text/uri-list` от QFileSystemModel; `FileBrowser.h:78` supportedDragActions=CopyAction.
+  2) Цель MaterialTextureSlot: `MaterialTextureTools.cpp:281,330-352` (фильтр DroppedTexture :120-125, IsTextureFile :162-165 png/jpg/jpeg/bmp/tga); колбэк → `MaterialEditorWindow.cpp:797` AssignTexture :1036-1075 — ПРЯМОЙ вызов, не команда.
+  3) SceneOutlinerTree InternalMove: `SceneOutlinerTree.h:13-42` → `SceneObjectsPanel.cpp:87-89` SetParentRequested → `MainWindow.cpp:790-793` → `QtHost.cpp:524-527` EditorCommand::SetParent (undo: SceneCommandHandler.cpp:134). Только currentItem(), multi-drag нет, мимо CommandRegistry.
+- Content Browser: модель readOnly (`FileBrowser.cpp:181`), внутреннего move/copy нет, SingleSelection, внешнего импорта через urls() нет (импорт кнопкой → `Assets.Import`, FileBrowser.cpp:117-130). Двойной клик → `AssetTools.cpp:91-207` UseAsset (спавн CreateModel в SpawnPosition() :169-186, SetMaterial/SetTexture/SetScript :150-158,203 через host_->PostCommand, не CommandRegistry).
+- Viewport: DnD нет вообще. Готовая база placement: `GizmoGeometry::ScreenToWorldRay` (`Core/GizmoGeometry.h:51`, .cpp:50; используется ViewportWidget.cpp:299,381 — пикинг уже есть).
+- Графы: drop из браузера нет, палитры нод нет (добавление через меню). Clipboard-форматы: `application/x-painengine-material-nodes` (MaterialGraphSchema.h:22), `application/x-itmoengine-fsm-nodes` (FsmGraphSchema.h:73), `application/x-itmoengine-script-nodes` (CodeGraphSchema.h:49); copy/paste GraphEditorWidget.cpp:1339-1353.
+- UI-редактор: палитры-drag нет (кнопки Panel/Label/Button/Bar → AddElement, UIEditorWindow.cpp:134-136); перемещение виджетов — сырой mouse-drag с прямой мутацией e->Rect без команд/undo (UICanvas::mousePress/Move :103-122); дерево UIHierarchy :140 без reparent-drag.
+- Inspector-карточки (MaterialCard/GeometryCard/ScriptCard): drop не принимают, только кнопки «Выбрать…» через AssetPickerDialog.
+- Доки: setDockNestingEnabled(true), AnimatedDocks|AllowNestedDocks|AllowTabbedDocks (MainWindow.cpp:105-106), Movable|Floatable|Closable — перестановка доков штатная Qt, кастомного tab-DnD нет.
+- Кирпичи для инфраструктуры: FileService (ResolveSandboxPath/WriteFileAtomic/IsProtectedDirectory), NormalizeVirtualPath (AssetExtensions.h:132), KindForFile (:74), CommandRegistry, ScreenToWorldRay. Ad-hoc песочница AssetTools.cpp:110-127,212-223 — кандидат на замену FileService.
+- Тесты DnD: только EditorUiTests.cpp:984-1027 (drop текстуры на MaterialSlot_BaseMap, негативный .txt). Тестов reparent-drag/графового DnD нет.
+
+### Фаза 0 — аудит Б (UI-система движка): ВЫПОЛНЕН
+- Движок: `Engine/Include/Engine/UI/UIElement.h` (289), `UIMarkup.h` (63), `FontAtlas.h`; реализация `Engine/Source/UI/UIElement.cpp` (357), `UIMarkup.cpp` (750), `FontAtlas.cpp` (244). Рантайм: `UIComponent.h` (LoadMarkup, горячая перезагрузка по mtime :108, BindClick/SetLabelText/SetBarFill :64-67).
+- Типы виджетов (4+контейнер): UIElement/Group (Name, Rect, Padding, bVisible :128, bInteractive :133, OnClick :135), UIPanel :227-237 (Color, BorderWidth, BorderColor), UILabel :240-253 (Text, Color, bAlignRight), UIBar :256-265 (Fill 0..1, TrackColor, FillColor), UIButton :271-289 (Text, Color, HoverColor, PressedColor, TextColor, BorderWidth, BorderColor).
+- Якоря: UIRect :43-50, 9 якорей UIAnchor :16-27; w/h=0 = растяжение до противоположного края :39-42. Padding UIEdges :30-36. Иерархия: Add/RemoveChild/ClearChildren/GetParent :139-153, Find/FindAs :156-165; z-order = порядок в дереве (:113-115); UIInputRouter :208-224. ТЕКСТУР НА ВИДЖЕТАХ НЕТ (только атлас шрифта + белый квад). Шрифт только глобальный (UIComponent::SetFont).
+- Формат .ui — XML БЕЗ версии: схема UIMarkup.h:9-44 (UI, Group, Panel, Label, Bar, Button; name, anchor, rect, x/y/width/height, padding, visible, interactive + per-tag свойства; цвета #RRGGBB[AA]). Парсер/сериализатор: UIMarkup.cpp ApplyCommon :447-521, ApplyTyped :523-609, Parse :671, Load :692, Serialize :705-750 (пишет все свойства; неизвестные атрибуты — warning :378-383). Выбор HUD: Content/ProjectHud.txt (ProjectHud.h:9-26).
+- C-ABI для UI НЕТ вообще; редактор компилирует движковые исходники напрямую: `EditorModule.vcxproj:243-251` (UIElement.cpp, UIMarkup.cpp, FontAtlas.cpp). UIEditorWindow работает с C++-классами в процессе Qt. Не хватает не ABI, а движковых методов: reparent, reorder ребёнка, тип Image/текстуры.
+- Редактор (UIEditorWindow.cpp 268 стр., HudTools.cpp 189): палитра-кнопки Panel/Label/Button/Bar :134-136; дерево UIHierarchy :140 (RebuildTree :230-238); инспектор Name/Text/X/Y/W/H/Anchor(9)/Visible/цвет :153-174; превью-разрешения :138; drag с якорем :103-121; добавление в выбранную панель :264; уникальность имени :252-253; Save/Reload :215-228.
+- НЕ выставлено (движок поддерживает): Padding, bInteractive, BorderWidth, bAlignRight, UIBar::Fill, создание Group, reparent/reorder, undo/redo, zoom/сетка, multi-select. Текстур/Image и per-widget шрифта нет в движке. Тест пробела: EditorUiTests.cpp:2345 «unexposed supported properties survive save».
+- Сохранение: прямой QSaveFile + UIMarkup::Serialize с повторным Parse для валидации (:221-227), БЕЗ FileService. Создание: HudTools.cpp:31-41.
+- Превью канваса — гибрид: настоящий WARP D3D11-девайс + GDI-атлас (:54-68), реальные UIElement::Layout/Build (:72,:80), квады компонует QPainter (:81-93) — не муляж.
+- Тесты: блок EditorUiTests.cpp ~2325-2367, Engine/tests/hud/HudTests.cpp, HudInputCommandletTests.ps1.
+
+### Фаза 0 — аудит В (превью): ВЫПОЛНЕН
+- Материал-превью рендерит ДВИЖОК в HWND: `MaterialPreviewWidget` (MaterialEditorWindow.cpp:283-338): WA_NativeWindow+WA_PaintOnScreen :292-293, paintEngine()=nullptr :298, attach в showEvent :308, resize :314, HighDPI PhysW/H :333-334, orbit/zoom :317-330, минимум 240×240 :295.
+- ABI: attachMaterialPreview/showMaterialPreview (:484-486), resizeMaterialPreview (:494), materialPreviewCamera (:501), detach (:1294). Заголовки: `EditSessionApi.h:94-101` («v6 material previews: one small scene per HWND, rendered by frame», формы sphere/cube/plane :44).
+- Движок: `SceneEditSession.h:84` map<uint64_t, unique_ptr<Game>> previews_; `SceneEditMaterials.cpp:90-93` RenderPreviews рендерит ВСЕ превью КАЖДЫЙ кадр (вызов SceneEditSession.cpp:228-229). Троттлинга/паузы на скрытие НЕТ.
+- Content Browser: тамбнейлов нет (TablerFileIconProvider, FileBrowser.cpp:49-60,170 — generic иконки).
+- AssetThumbnailCache (UI/AssetThumbnailCache.h/.cpp): только Texture в AssetPickerDialog.cpp:208-226; ключ path+mtime+size+dpr, QCache+mutex, асинхронный декод. Клиппинг: .cpp:128-136 KeepAspectRatio в квадрат (поля у неквадратных), setDevicePixelRatio :147.
+
+### Фаза 0 — аудит Г1 (контекстное меню CB): ВЫПОЛНЕН
+- Строится в `FileBrowser.cpp:293-418` OnContextMenu. ПЛОСКОЕ меню, без подменю «Создать» и категорий.
+- Пустое место: New Folder :307, New Material/Script/AI Machine :333-335, Stop Audio :332, Refresh :339.
+- Папка: те же Create + «Открыть в приложении» ПОКАЗЫВАЕТСЯ для папок (условие hasFile :336 не исключает isDir; QDesktopServices :409-410) + Reveal/Copy/Refresh/Delete :337-345.
+- Материал: Assign :320, Edit :323, Move/Rename :344, Delete, Open/Reveal/Copy. Текстура: Add Model/Assign Texture :322, Reimport :343. Модель: Use, Import Settings :341, Reimport. Звук: Прослушать/Остановить :331-332 → PostCommand(PlayAudio/StopAudio) :363-370. Скрипт: Assign/Edit :324; FSM: Edit AI Machine :326.
+- Через CommandRegistry: Assets.CreateFolder :312, Assets.EditImportSettings :357, Assets.Delete :361,486, Assets.RenameFolder :443. Прямые вызовы: UseAsset :376, OpenMaterialEditor :380, OpenScriptEditor :384, OpenAiMachineEditor :388, CreateAiMachine/CreateScript/CreateMaterial :395-407, UpdateAsset :372, QDesktopServices/explorer :409-413.
+
+### Фаза 0 — аудит Г2 (иконки иерархии): БАГ ПОДТВЕРЖДЁН
+- `ViewportOverlayHelper.cpp:167-190`: bb.x/y/z = obj.transform.position (ЛОКАЛЬНАЯ, :178-180); только камеры исправлены через CameraGuide::World (:182). Свет-child куба: иконка не едет за родителем.
+- Готовый helper: `CameraGuide.h:19-42` World(obj, scene) — рекурсия по o.parent :29-39, inheritScale :33-38.
+- Тот же баг рядом: линии радиуса света :238-240 (local), гизмо :253 и :276 (selectedObj->transform.position).
+
+### Фаза 0 — аудит Г3 (гизмо и Play/Stop): ПРИЧИНА НАЙДЕНА
+- Отрисовка: ViewportOverlayHelper.cpp:248-261 (BuildGizmoLines), :268-283 (BuildGizmoTriangles) → host->SetOverlayLines/Triangles :264,:284 → QtHost.cpp:166-177 → ABI ViewportOverlayApi.h.
+- Ввод: ViewportWidget.cpp:279-373 BeginGizmoDragGesture (гейт PlayState() != Edit :282), ApplyGizmoDragGesture :375+; хит-тест ViewportWidget_Input.cpp.
+- БАГ: таймер 16 мс ViewportWidget.cpp:48-108; :64 `if (state != Edit && HasScene()) return;` — в Play UpdateOverlays не вызывается, но старые линии/треугольники НЕ очищаются: InvalidateOverlays (QtHost.cpp:362,587-590) только dirty-флаги и пересылает старые данные → гизмо ЗАМИРАЕТ на экране в Play, а не скрывается.
+- Состояние режима: отдельного EditorMode-объекта нет; std::atomic<EditorState> playState_ (QtHost.h:45), синхронизация из scene_.getState (QtHost.cpp:179-184). PlaySettings — сценический объект Gameplay.PlaySettings (SceneCommandHandler.cpp:246), не режим.
+- Поток Play/Stop МИМО CommandRegistry: MainToolBar::PlayTriggered → MainWindow.cpp:442-451 PostCommand(TogglePlay/TogglePause) → DrainCommands → ViewportCommandHandler.cpp:55-75 (scene.control EnginePlay/Stop/Pause/Resume :60-63, playState.store :66). Space: ViewportWidget_Input.cpp:126,493. Кнопки: MainToolBar::UpdatePlayState (MainToolBar.cpp:199-210).
+
+### Фаза 0 — аудит Д (ABI-инвентарь): ВЫПОЛНЕН
+База: `ModuleApi.h` (v5, EngineGetModuleApiFn :54), `EditSessionApi.h` (v6, frozen static_assert EditExtensions.h:7). Правило версий: базовые layout заморожены, новое — только именованные расширения (`Engine/docs/ENGINE-VERSIONS.md:158`).
+1. Превью: HWND-based ЕСТЬ (attachMaterialPreview EditSessionApi.h:95, resize :96, detach :97, showMaterialPreview :98, materialPreviewCamera :101; формы Sphere/Cube/Plane :44; рендер через frame() :60). Readback в QImage/буфер/файл — НЕТ (внутренние Game::SaveFrame BMP Game.h:298, ImpostorAtlas — не ABI).
+2. Параметры материала: readMaterial :81, setMaterialRenderState :82, setMaterialParameter(name, float[4]) :83, setMaterialTexture :85, saveMaterial :87, revertMaterial :89, reloadShaderFile :92 — применяются сразу без перекомпиляции. Material::SetParameter/GetParameter/SetTexture (Render/Material.h:115-120, cbuffer b1 :149). MaterialAsset (.mat JSON: shader/render/params/textures, Render/MaterialAsset.h:27-56). MaterialInstance/per-object overrides — НЕТ.
+3. Граф↔HLSL: целиком в редакторе — `EditorCore::HlslGraphCompiler::Compile(GraphDocument)` (Core/HlslGraphCompiler.h:20-33; ноды Constant/ColorParam/ScalarParam/Vector2/3Param/ObjectColor/SurfaceDefaults/InstanceData/WorldPosition/SurfaceNormal/ViewDirection/FrontFace/Time/UVCoord/Panner/Texture2D/NormalMap/Fresnel/математика, .cpp:85-122,310-372). Использование MaterialEditorWindow.cpp:738,916 (сверка; при ручном изменении HLSL граф-режим отключается). ОБРАТНОГО парсера HLSL→граф НЕТ. Sidecar `<material>.graph.json` (:617-620).
+4. Live-переменные скрипта: ЕСТЬ — `EngineGraphTraceApi` (EditExtensions.h:108-118): listObjects, read (состояния нод), readValues (последние значения data-выходов пинов в Play; EngineGraphTraceValue{node,pin,text} :99-104), сервис Engine.Scene.GraphTrace 0x01475452. EngineScriptApi::getVariables (EditExtensions.h:69) — стартовые/дефолты, не live.
+5. Пикинг: pickObject(xNDC, yNDC, id) EditSessionApi.h:66 (NDC, Y вверх, miss=0), focusObject :67. Screen→world ray ABI нет, но есть GizmoGeometry::ScreenToWorldRay в редакторе + getCamera (ViewportOverlayApi.h:41-65). Движковые C++-хелперы: Trace::ScreenPointToRay (Scene/Trace.h:114), IntersectPlane :110, Scene::Raycast (Scene.h:92).
+6. Спавн: createObject (SceneModuleApi.h:66, каталог listTypes :63, StandardTypes.h:110-133 — звукового типа НЕТ), createModel(virtualPath,...) EditSessionApi.h:73, setTexture :76, setMaterial :78, скрипт EngineScriptApi::set (EditExtensions.h:62). Звук: только превью play/stop (EngineAudioPreviewApi, EditExtensions.h:180-186, Edit only); AudioSource-объекта в ABI нет.
+7. World-transform ABI НЕТ; readScene отдаёт локальный transform + parentId + inheritParentScale (SceneModuleApi.h:36-49). Reparent: setParent(child,parent,inheritScale) EditSessionApi.h:56; setTransform SceneModuleApi.h:70. C++: GameComponent::GetWorldMatrix (GameComponents.h:197,280).
+8. Префабы: NOT FOUND нигде (Engine/Editor/Game).
+9. Импорт: importAsset(source, kind 0/1/2, virtualPath) EditSessionApi.h:71; importWithOptions (EngineAssetImportApi, EditExtensions.h:192-199); reimport/move: EngineAuthoringApi::asset(op 0=reimport,1=move) AuthoringApi.h:12. Форматы: модели fbx/obj/gltf/glb (AssetUpdate.cpp:16), аудио wav/ogg/mp3/flac :17, текстуры png/jpg/jpeg/bmp/tga :63 (+dds/hdr VFS VirtualFileSystem.cpp:141), blend→glb :120. Host: AssetCommandHandler.cpp:48-94.
+10. Механизм расширений: (а) host→module getService FourCC (ModuleApi.h:35; регистрации Base.cpp:729-735); (б) module→host именованные таблицы EngineGetEditExtension (EditExtensions.h:12; экспорт SceneModule.inl:238-289; host-обёртка GameEditModule.cpp:47,101-105). Пример editor-side query: AssetCommandHandler.cpp:65-79 (GetModuleHandleEx + GetProcAddress + query "Engine.Asset.Import").
+- Include: Engine/Include/Engine/{AI,Base,Components,Display,InputDevice,MainGame,Physics,Project,Render,Resources,Runtime,SaveGame,Scene,Script,Sound,UI}. Ключевые: Render/MaterialAsset.h, Render/MeshPrimitives.h, Render/ShaderConstants.h, Resources/Paths.h, Resources/VirtualFileSystem.h, Runtime/VfsApi.h.
+
+### Выводы Фазы 0 для порядка работ
+- Задача 2: база графов уже общая — только убрать дубли и интегрировать FileService (поведение не менять).
+- Задача 6: Static-режим QImage требует НОВОГО ABI readback (engine-коммит); Realtime-пауза на скрытие — правка RenderPreviews/детача.
+- Задача 7c: HLSL→граф парсер писать в Core (автотест). 7d: setMaterialParameter уже есть. 7e: MaterialInstance — формата в движке нет, нужен editor-side формат + engine-поддержка per-object overrides (или Backlog с решением по умолчанию).
+- Задача 8: глаз переменной РЕАЛИЗУЕМ через существующий GraphTrace.readValues (новый ABI не нужен).
+- Задача 3 DnD: звук-спавн и префабы — путей в движке НЕТ → «Нужно в ABI»/Backlog, элементы не создавать.
+- Задача 9: UI-редактор работает с движковыми C++-классами напрямую (скомпилированы в EditorModule) — ABI не нужен; не хватает движковых reparent/reorder методов и выставления Padding/Interactive/Border/Align/Fill/Group в редакторе.
+
+---
+
 ## Сессия fix/editor-ui-polish (Задачи A, B, C, D, E)
 
 ### Чек-лист задач
