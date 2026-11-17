@@ -238,7 +238,7 @@ void ObjectInspectorPanel::BuildPhysicsCard(QVBoxLayout* layout)
 {
     cardPhysics_ = new CollapsibleCard(Tr("Физика", "Physics"), this, true);
     cardPhysics_->setObjectName(QStringLiteral("PhysicsCard"));
-    cardPhysics_->SetInfo(Tr("Физика", "Physics"), Tr("Физика Jolt Physics (режим Play):\n• Форма коллизии (куб, сфера, меш)\n• Масса, статичность и упругость", "Jolt Physics (Play mode):\n• Collision shape (box, sphere, mesh)\n• Mass, static flag, and restitution"));
+    cardPhysics_->SetInfo(Tr("Физика", "Physics"), Tr("Физика Jolt Physics — режим Play:\n• Форма коллизии [куб, сфера, меш]\n• Масса, статичность и упругость", "Jolt Physics — Play mode:\n• Collision shape [box, sphere, mesh]\n• Mass, static flag, and restitution"));
     physicsInspector_ = cardPhysics_;
     auto* cl = cardPhysics_->ContentLayout();
     auto emitChanged = [this] {

@@ -151,3 +151,4 @@ bool MaterialGraphWidget::PasteFromAi(const QString& text, QString* error)
     NotifyStructure();
     return true;
 }
+
