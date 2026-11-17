@@ -44,6 +44,7 @@ void EditorMainWindow::RegisterAssetCommands()
                 return false;
 
             const int kind = ctx.parameters.value(QStringLiteral("kind"), 0).toInt();
+            QStringList paths = ctx.parameters.value(QStringLiteral("paths")).toStringList();
             QString source = ctx.parameters.value(QStringLiteral("source")).toString();
             if (source.isEmpty())
                 source = ctx.parameters.value(QStringLiteral("path")).toString();
@@ -56,9 +57,8 @@ void EditorMainWindow::RegisterAssetCommands()
 
             const QString filter = EditorCore::DialogFilter(static_cast<EditorCore::AssetKind>(kind));
 
-            const QStringList paths = source.isEmpty()
-                                          ? QFileDialog::getOpenFileNames(this, title, {}, filter)
-                                          : QStringList{source};
+            if (paths.isEmpty())
+                paths = source.isEmpty() ? QFileDialog::getOpenFileNames(this, title, {}, filter) : QStringList{source};
 
             if (paths.isEmpty())
             {
@@ -106,10 +106,11 @@ void EditorMainWindow::RegisterAssetCommands()
 
             for (const auto& path : paths)
             {
+                const EditorCore::AssetKind fileKind = EditorCore::KindForFile(path);
                 EditorCommand c;
-                c.type = kind == 1
+                c.type = fileKind == EditorCore::AssetKind::Texture
                              ? EditorCommand::ImportTexture
-                             : kind == 2
+                             : fileKind == EditorCore::AssetKind::Audio
                                  ? EditorCommand::ImportAudio
                                  : EditorCommand::ImportModel;
                 c.path = path;
@@ -247,10 +248,13 @@ void EditorMainWindow::RegisterAssetCommands()
             return host_ && host_->HasScene() && !sceneBusy_ && host_->PlayState() == EditorQtHost::EditorState::Edit && selectedId_ != 0;
         }
     });
+
+    RegisterDragDropCommands();
 }
 
 void EditorMainWindow::UnregisterAssetCommands()
 {
+    UnregisterDragDropCommands();
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.Import"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.EditImportSettings"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.Delete"));

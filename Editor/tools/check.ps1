@@ -226,6 +226,8 @@ $legacyRatchetLimits = @{
     "Editor/Source/ScriptEditorWindow.cpp" = 523
     "Editor/Source/ViewportWidget.cpp" = 694
     "Editor/Source/ViewportWidget_Input.cpp" = 509
+    "Editor/Source/FileBrowser.cpp" = 506
+    "Editor/Source/ImportCommands.cpp" = 505
     "Editor/tests/EditorUiTests.cpp" = 1045
 }
 

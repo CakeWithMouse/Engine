@@ -136,6 +136,8 @@ private:
     void BuildToolsMenu();
     void RegisterAssetCommands();
     void UnregisterAssetCommands();
+    void RegisterDragDropCommands();
+    void UnregisterDragDropCommands();
     void HandleModelImported(const EditorCommand& command);
     float GetModelSpawnScale(const QString& path);
     void ConnectPanels();

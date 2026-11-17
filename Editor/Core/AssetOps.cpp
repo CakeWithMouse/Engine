@@ -338,6 +338,18 @@ QString AssetOps::GenerateDuplicateName(const QString& relPath)
     return dir + QStringLiteral("/") + copyName;
 }
 
+QString AssetOps::ConflictName(const QString& relPath, int index)
+{
+    const QFileInfo fi(relPath);
+    const QString base = fi.completeBaseName();
+    const QString ext = fi.suffix().isEmpty() ? QString() : (QStringLiteral(".") + fi.suffix());
+    const QString dir = fi.dir().path();
+    const QString name = QStringLiteral("%1_%2%3").arg(base).arg(index).arg(ext);
+    if (dir == QStringLiteral(".") || dir.isEmpty())
+        return name;
+    return dir + QStringLiteral("/") + name;
+}
+
 const QStringList& AssetOps::CompanionSuffixes()
 {
     static const QStringList suffixes = {

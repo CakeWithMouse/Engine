@@ -25,6 +25,7 @@ public:
     QStringList List(const QString& relDir = QString()) const;
 
     static QString GenerateDuplicateName(const QString& relPath);
+    static QString ConflictName(const QString& relPath, int index);
     static const QStringList& CompanionSuffixes();
 
 private:

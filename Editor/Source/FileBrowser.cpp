@@ -1,5 +1,6 @@
 #include "EditorTheme.h"
 #include "FileBrowser.h"
+#include "AssetTreeView.h"
 #include "FileService.h"
 #include "EditorLocale.h"
 #include "QtHost.h"
@@ -172,7 +173,7 @@ void FileBrowserDock::BuildUi()
     proxy_ = new ProjectFilesFilter(this);
     proxy_->project = QDir::cleanPath(projectDir_); proxy_->content = QDir::cleanPath(contentDir_);
     proxy_->setSourceModel(model_);
-    view_ = new QTreeView(panel);
+    view_ = new AssetTreeView(model_, proxy_, projectDir_, contentDir_, panel);
     view_->setObjectName("ProjectFiles");
     view_->setModel(proxy_);
     auto* folderDelegate = new FolderNameDelegate(view_);
@@ -196,8 +197,6 @@ void FileBrowserDock::BuildUi()
     view_->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     for (int c = 1; c < 3; ++c)
         view_->header()->setSectionResizeMode(c, QHeaderView::ResizeToContents);
-    view_->setDragEnabled(true);            // текстуры бросают на слоты редактора материала
-    view_->setDragDropMode(QAbstractItemView::DragOnly);
     view_->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(view_, &QTreeView::doubleClicked, this,
             [this](const QModelIndex& i) { OnDoubleClicked(i); });

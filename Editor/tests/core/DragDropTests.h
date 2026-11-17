@@ -2,6 +2,7 @@
 
 #include "../../Core/AssetDrag.h"
 #include "../../Core/DropRules.h"
+#include "../../Core/AssetOps.h"
 
 #include <QMimeData>
 #include <QTemporaryDir>
@@ -114,6 +115,12 @@ inline int RunDragDropTests()
     CheckDragDrop(spawn.allowed && spawn.commandId == QStringLiteral("Scene.SpawnModel"), "Spawn decision carries command id");
     const DropDecision blocked = DecideDrop(DragSource::ContentBrowser, DropTarget::Viewport, AssetKind::Audio);
     CheckDragDrop(!blocked.allowed && blocked.commandId.isEmpty(), "Blocked decision has no command");
+
+    // --- Name-conflict suffix (_1, _2 ...) preserves directory and extension ---
+    CheckDragDrop(AssetOps::ConflictName(QStringLiteral("Models/Hero.glb"), 1) == QStringLiteral("Models/Hero_1.glb"), "ConflictName inserts _1 before extension");
+    CheckDragDrop(AssetOps::ConflictName(QStringLiteral("Models/Hero.glb"), 2) == QStringLiteral("Models/Hero_2.glb"), "ConflictName increments index");
+    CheckDragDrop(AssetOps::ConflictName(QStringLiteral("Hero.glb"), 1) == QStringLiteral("Hero_1.glb"), "ConflictName without directory");
+    CheckDragDrop(AssetOps::ConflictName(QStringLiteral("Models/Archive.tar.gz"), 1) == QStringLiteral("Models/Archive.tar_1.gz"), "ConflictName uses complete base name");
 
     return gDragDropChecks;
 }
