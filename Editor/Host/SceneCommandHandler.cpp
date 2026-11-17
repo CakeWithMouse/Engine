@@ -17,7 +17,7 @@ bool SceneCommandHandler::CanHandle(EditorCommand::Type type) const
     case EditorCommand::UpdateObjectTransform: case EditorCommand::CreateObject: case EditorCommand::CreateModel:
     case EditorCommand::SetModel: case EditorCommand::SetTexture: case EditorCommand::SetMaterial: case EditorCommand::SetScript:
     case EditorCommand::SetScriptVariables: case EditorCommand::SetPointLight: case EditorCommand::SetProperty: case EditorCommand::SetProjectData:
-    case EditorCommand::SetPhysicsBody:
+    case EditorCommand::SetPhysicsBody: case EditorCommand::IsolateMaterialSlot:
     case EditorCommand::ConfigurePlay: case EditorCommand::RemoveObject: case EditorCommand::RenameObject:
     case EditorCommand::DuplicateObject: case EditorCommand::SetParent: case EditorCommand::SaveScene:
     case EditorCommand::LoadScene: case EditorCommand::NewScene: case EditorCommand::Undo: case EditorCommand::Redo:
@@ -75,6 +75,11 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
         {
             if (cmd.name == "toggle" && ctx.batch) PickSelection(cmd.objectId, true);
             else { selectedId_ = cmd.objectId; selectedIds_ = cmd.objectIds; }
+        }
+        else if (cmd.type == EditorCommand::IsolateMaterialSlot)
+        {
+            isolatedId_ = cmd.materialSlot >= 0 ? cmd.objectId : 0;
+            isolatedSlot_ = isolatedId_ ? cmd.materialSlot : -1;
         }
         else if (cmd.type == EditorCommand::FetchScene)
         {
@@ -520,6 +525,14 @@ void SceneCommandHandler::PublishScene(const Context& ctx, IEditorHost::EditorSt
     hasSelection_.store(selectedId_ != 0);
     if (const auto* batch = ctx.batch; batch && batch->select) batch->select(batch->context,selectedIds_.data(),playState==IEditorHost::Edit ? static_cast<uint32_t>(selectedIds_.size()) : 0);
     else if (ctx.selection.select) ctx.selection.select(ctx.selection.context, playState == IEditorHost::Edit ? selectedId_ : 0);
+    // Изоляция живёт, пока выделена та же одна модель; Play и смена выделения её снимают.
+    if (isolatedId_ && (isolatedId_ != selectedId_ || selectedIds_.size() > 1 || playState != IEditorHost::Edit)) { isolatedId_ = 0; isolatedSlot_ = -1; }
+    const auto* isolation = ctx.materialIsolation;
+    view.materialIsolation = isolation != nullptr;
+    if (isolation && isolation->isolate &&
+        isolation->isolate(isolation->context, isolatedId_, isolatedId_ ? static_cast<uint32_t>(isolatedSlot_) : EngineMaterialIsolationNone) != EngineSceneOk)
+    { isolatedId_ = 0; isolatedSlot_ = -1; isolation->isolate(isolation->context, 0, EngineMaterialIsolationNone); }
+    view.isolatedMaterialSlot = isolation ? isolatedSlot_ : -1;
 
     std::lock_guard lock(sceneMutex_);
     view.serial = snapshot_.serial + 1;

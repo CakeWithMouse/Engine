@@ -5,6 +5,7 @@
 #include "ImportSettingsV2EditTests.h"
 #include "AssetDeleteTests.h"
 #include "InspectorRefreshTests.h"
+#include "MaterialSlotListTests.h"
 #include "DockRedockTests.h"
 #include "ViewportBillboardTests.h"
 #include "UiSmokeTests.h"
@@ -51,6 +52,7 @@ int main(int argc, char* argv[])
     runSuite(InspectorRefreshTests::Run, "InspectorRefreshTests");
     runSuite(InspectorRefreshTests::RunMouseRefreshJitter, "InspectorRefreshTests::RunMouseRefreshJitter");
     runSuite(InspectorRefreshTests::RunModelReplaceButtonRegression, "InspectorRefreshTests::RunModelReplaceButtonRegression");
+    runSuite(MaterialSlotListTests::Run, "MaterialSlotListTests");
     runSuite(InspectorCardStyleTests::Run, "InspectorCardStyleTests");
     runSuite(EditorSeparatorTests::Run, "EditorSeparatorTests");
     runSuite(WheelGuardTests::Run, "WheelGuardTests");

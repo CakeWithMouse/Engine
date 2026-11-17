@@ -10,6 +10,7 @@
 #include <cstdint>
 
 #include "QtHost.h"
+#include "MaterialSlotList.h"
 
 class QLabel;
 class QLineEdit;
@@ -112,6 +113,7 @@ signals:
     void CharacterSpeedEditingFinished(quint64 objectId, double speed);
     void ChooseMaterialRequested();
     void EditMaterialRequested(const QString& virtualPath);
+    void MaterialIsolationRequested(quint64 objectId, int slot); // -1 — показать все части модели
     void ClearMaterialRequested();
     void OpenScriptRequested(const QString& virtualPath); // пустой путь: создать скрипт для объекта
     void ChooseScriptRequested();
@@ -126,6 +128,9 @@ private:
     void BuildUi();
     void RefreshProjectProperties(const EditorQtHost::Snapshot&, const EditorQtHost::SceneObject&);
     void SubmitProperty(const QString& path, const QJsonValue& value);
+    void BindMaterialSlots();
+    static QVector<MaterialSlotInfo> ModelMaterialSlots(const EditorQtHost::SceneObject& object);
+    QVector<MaterialSlotInfo> lastSlots_;
     QWidget* properties_ = nullptr;
     QVBoxLayout* propertiesLayout_ = nullptr;
     QString propertiesKey_;

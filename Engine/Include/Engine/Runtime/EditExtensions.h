@@ -26,6 +26,17 @@ struct EnginePointLightV2Api
     void* context;
     uint32_t (ENGINE_MODULE_CALL *set)(void*, uint64_t id, const EngineScenePointLight*, uint32_t castShadows);
 };
+// Editor view only (not saved, no undo): draw just the parts of one model that use a source
+// material slot. slot == EngineMaterialIsolationNone or id 0 shows every part again. Edit state only.
+constexpr const char* EngineMaterialIsolationExtension = "Engine.Scene.MaterialIsolation";
+constexpr uint32_t EngineMaterialIsolationService = 0x014D4953u;
+constexpr uint32_t EngineMaterialIsolationNone = 0xFFFFFFFFu;
+struct EngineMaterialIsolationApi
+{
+    uint32_t version; // 1
+    void* context;
+    uint32_t (ENGINE_MODULE_CALL *isolate)(void*, uint64_t id, uint32_t slot);
+};
 constexpr const char* EngineDocumentExtension = "Engine.Scene.Document";
 struct EngineDocumentCapabilities
 {

@@ -2,6 +2,9 @@
 #include "ObjectInspectorPanel.h"
 #include "PropertySection.h"
 #include "InspectorCardStyle.h"
+#include "MaterialCard.h"
+#include "AssetPickerDialog.h"
+#include "CommandRegistry.h"
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QFormLayout>
@@ -30,6 +33,46 @@ QJsonValue Read(const QJsonObject& data,const QString& path) {
 }
 bool Editing(QWidget* widget){auto* focus=QApplication::focusWidget();return focus&&(focus==widget||widget->isAncestorOf(focus));}
 }
+void ObjectInspectorPanel::BindMaterialSlots() {
+    cardMaterial_->onDropMaterial = [this](const QString& path) {
+        QVariantMap params;
+        params[QStringLiteral("objectId")] = static_cast<qulonglong>(selectedId_);
+        params[QStringLiteral("material")] = path;
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignMaterial"), params);
+    };
+    cardMaterial_->onIsolateSlot = [this](int slot) { if (selectedId_) emit MaterialIsolationRequested(selectedId_, slot); };
+    cardMaterial_->onAssignSlot = [this](int index, const QString& path) {
+        SubmitProperty(QStringLiteral("/materialSlots/%1").arg(index), path);
+    };
+    cardMaterial_->onChooseSlot = [this](int index) {
+        const QString root = property("contentRoot").toString();
+        if (root.isEmpty() || !selectedId_) return;
+        QString current, name;
+        for (const auto& slot : lastSlots_)
+            if (slot.index == index) { current = slot.path; name = slot.name; }
+        AssetPickerDialog picker(EditorCore::AssetKind::Material, root, current, this,
+                                 name.isEmpty() ? QString::number(index) : QStringLiteral("%1: %2").arg(index).arg(name));
+        if (picker.exec() != QDialog::Accepted || picker.SelectedVirtualPath().isEmpty()) return;
+        if (picker.SelectedVirtualPath() != current)
+            SubmitProperty(QStringLiteral("/materialSlots/%1").arg(index), picker.SelectedVirtualPath());
+    };
+}
+QVector<MaterialSlotInfo> ObjectInspectorPanel::ModelMaterialSlots(const EditorQtHost::SceneObject& object) {
+    QVector<MaterialSlotInfo> result;
+    if(object.propertySchema.empty())return result;
+    const auto fields=QJsonDocument::fromJson(QByteArray::fromStdString(object.propertySchema)).object()["fields"].toArray();
+    const auto data=QJsonDocument::fromJson(QByteArray::fromStdString(object.projectData)).object();
+    for(const auto& value:fields) {
+        const auto field=value.toObject();const auto path=field["path"].toString();
+        if(!path.startsWith("/materialSlots/"))continue;
+        bool ok=false;const int index=path.mid(15).toInt(&ok);if(!ok)continue;
+        MaterialSlotInfo slot;slot.index=index;slot.path=Read(data,path).toString();
+        const auto label=field["label"].toString();const auto colon=label.indexOf(QStringLiteral(": "));
+        slot.name=colon>=0?label.mid(colon+2):label;
+        result.push_back(slot);
+    }
+    return result;
+}
 void ObjectInspectorPanel::SubmitProperty(const QString& path,const QJsonValue& value) {
     if(refreshing_||!selectedId_)return;
     auto bytes=QJsonDocument(QJsonArray{value}).toJson(QJsonDocument::Compact);
@@ -52,6 +95,7 @@ void ObjectInspectorPanel::RefreshProjectProperties(const EditorQtHost::Snapshot
             const auto field=value.toObject();const auto path=field["path"].toString(),type=field["type"].toString();
             if(!path.startsWith('/')||path=="/version")continue;
             if(aiMachine&&(path=="/stateMachine"||path=="/machineMemory"))continue; // карточка «Автомат ИИ»
+            if(object.type=="Engine.Model"&&path.startsWith("/materialSlots/"))continue; // карточка «Материал»
             auto group=field["group"].toString(Tr("Свойства класса", "Class Properties"));if(group.isEmpty())group=Tr("Свойства класса", "Class Properties");
             auto* layout=propertiesLayout_;QString prefix;
             for(const auto& part:group.split('/',Qt::SkipEmptyParts)) {

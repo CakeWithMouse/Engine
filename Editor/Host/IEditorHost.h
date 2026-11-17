@@ -39,6 +39,7 @@ struct EditorCommand
         RunTask, WriteRecovery, DiscardRecovery, SetProperty, UpdateAsset,
         SetScript, // path: /Game путь .vscript, пустой — снять скрипт
         SetScriptVariables, // name: значения переменных скрипта у объекта, JSON {"Speed": 45}; пустой — значения скрипта
+        IsolateMaterialSlot, // objectId + materialSlot: показать только части модели с этим слотом; -1 — все части. Не меняет сцену
     };
 
     Type type = None;
@@ -59,6 +60,7 @@ struct EditorCommand
     QString name;
     float importScale = 1.0f;
     QString importOptionsJson;
+    int32_t materialSlot = -1;
 
     // RunTask: выполняется в потоке движка, если есть сессия сцены (редактор материалов)
     std::function<void(const EngineEditSessionApi&)> task;
@@ -118,6 +120,8 @@ public:
         std::vector<uint64_t> selectedIds;
         bool batchEditing = false, authoring = false;
         bool scripts = false; // игровой модуль поддерживает визуальные скрипты (Engine.Scene.Script)
+        bool materialIsolation = false; // игровой модуль умеет показывать части модели по слоту материала
+        int32_t isolatedMaterialSlot = -1; // слот, части которого показаны у выделенной модели; -1 — все части
     };
 
     virtual void PostCommand(const EditorCommand& c) = 0;

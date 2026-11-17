@@ -751,6 +751,9 @@ void EditorMainWindow::ConnectPanels()
         if (sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
         EditorCommand c; c.type = EditorCommand::SetProperty; c.objectId = id; c.path = path; c.name = value; host_->PostCommand(c);
     });
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::MaterialIsolationRequested, this, [this](quint64 id, int slot) {
+        EditorCommand c; c.type = EditorCommand::IsolateMaterialSlot; c.objectId = id; c.materialSlot = slot; host_->PostCommand(c);
+    });
     if (!sceneObjectsPanel_ || !objectInspectorPanel_)
         return;
 

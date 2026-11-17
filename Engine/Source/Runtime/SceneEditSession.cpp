@@ -6,6 +6,7 @@
 #include <Engine/Sound/AudioEngine.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
 #include <Engine/Components/Character.h>
+#include <Engine/Components/SpecificComponents/SkeletalMeshComponent.h>
 #include <Engine/AI/World.h>
 #include <cstring>
 #include <cmath>
@@ -291,6 +292,17 @@ EngineSelectionApi SceneEditSession::GetSelectionApi() noexcept
         return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
             if (id && !s.edit_->GetScene().FindComponent(id)) return EngineSceneNotFound;
             s.edit_->SetEditorSelection(id); return EngineSceneOk;
+        });
+    }};
+}
+EngineMaterialIsolationApi SceneEditSession::GetMaterialIsolationApi() noexcept
+{
+    return {1, this, [](void* p, uint64_t id, uint32_t slot) -> uint32_t {
+        return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+            if (!s.attached_) return EngineSceneFailure;
+            if (id && slot != EngineMaterialIsolationNone && !dynamic_cast<SkeletalMeshComponent*>(s.edit_->GetScene().FindComponent(id)))
+                return EngineSceneNotFound;
+            s.edit_->SetEditorMaterialIsolation(id, slot); return EngineSceneOk;
         });
     }};
 }

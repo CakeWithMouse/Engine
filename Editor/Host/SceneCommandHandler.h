@@ -19,6 +19,7 @@ public:
         const EnginePointLightV2Api* pointLightV2 = nullptr;
         const EnginePhysicsObjectApi* physicsObject = nullptr;
         const EngineScriptApi* script = nullptr;
+        const EngineMaterialIsolationApi* materialIsolation = nullptr;
     };
 
     SceneCommandHandler();
@@ -54,6 +55,8 @@ private:
     std::mutex sceneMutex_;
     IEditorHost::Snapshot snapshot_;
     uint64_t selectedId_ = 0;
+    uint64_t isolatedId_ = 0;    // изоляция частей по слоту материала: только у выделенной модели, сбрасывается сменой выделения
+    int32_t isolatedSlot_ = -1;
     std::vector<uint64_t> selectedIds_;
     std::atomic<bool> hasSelection_{false};
     bool dirty_ = false;

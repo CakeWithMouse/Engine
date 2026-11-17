@@ -284,6 +284,11 @@ extern "C" ENGINE_MODULE_EXPORT int ENGINE_MODULE_CALL EngineGetEditExtension(vo
         *static_cast<EnginePointLightV2Api*>(output) = static_cast<SceneEditSession*>(context)->GetPointLightV2Api();
         return 1;
     }
+    if (std::strcmp(name, EngineMaterialIsolationExtension) == 0 && size == sizeof(EngineMaterialIsolationApi))
+    {
+        *static_cast<EngineMaterialIsolationApi*>(output) = static_cast<SceneEditSession*>(context)->GetMaterialIsolationApi();
+        return 1;
+    }
     if (std::strcmp(name, EngineAudioPreviewExtension) == 0 && size == sizeof(EngineAudioPreviewApi))
     {
         *static_cast<EngineAudioPreviewApi*>(output) = static_cast<SceneEditSession*>(context)->GetAudioPreviewApi();

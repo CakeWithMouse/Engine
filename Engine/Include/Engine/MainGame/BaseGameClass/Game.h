@@ -346,6 +346,16 @@ public:
     void SetEditorSelection(uint64_t id) { EditorSelectedId = id; EditorSelectedIds.clear(); }
     void SetEditorSelections(std::vector<uint64_t> ids) { EditorSelectedIds = std::move(ids); EditorSelectedId = 0; }
     void RenderEditorSelection();
+    // Editor view only: the model with this id draws just the parts of one source material slot.
+    void SetEditorMaterialIsolation(uint64_t id, uint32_t slot)
+    {
+        if (slot == UINT32_MAX) id = 0;
+        if (id == EditorIsolatedId && (id == 0 || slot == EditorIsolatedSlot)) return;
+        EditorIsolatedId = id; EditorIsolatedSlot = id ? slot : UINT32_MAX;
+        InvalidateStaticShadow();
+    }
+    // UINT32_MAX when the object shows every part.
+    uint32_t GetEditorMaterialIsolation(uint64_t id) const { return id && id == EditorIsolatedId ? EditorIsolatedSlot : UINT32_MAX; }
 
     ID3D11VertexShader* GetVertexShader() { return BaseVertexShader.Get(); }
     ID3D11VertexShader* GetVertexShader(const std::string& VertexShaderName,
@@ -703,6 +713,8 @@ protected:
     uint64_t EditorSelectedId = 0;
     Microsoft::WRL::ComPtr<ID3D11VertexShader> SelectionVS;
     std::vector<uint64_t> EditorSelectedIds;
+    uint64_t EditorIsolatedId = 0;
+    uint32_t EditorIsolatedSlot = UINT32_MAX;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> SelectionPS;
     Microsoft::WRL::ComPtr<ID3D11Buffer> SelectionCB;
 

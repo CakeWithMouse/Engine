@@ -55,11 +55,15 @@ public:
 
 void SkeletalMeshComponent::AppendRenderParts(std::vector<GameComponent*>& output)
 {
-    if(materialParts.empty() || !GetMaterialAsset().empty() || GetMaterial()) { output.push_back(this);return; }
+    // Editor isolation keeps only the parts of one slot; with a model-wide material they borrow it.
+    const uint32_t isolated=GamePtr?GamePtr->GetEditorMaterialIsolation(GetComponentId()):UINT32_MAX;
+    const bool shared=!GetMaterialAsset().empty() || GetMaterial();
+    if(materialParts.empty() || (shared && (isolated==UINT32_MAX || GetMaterial()))) { output.push_back(this);return; }
     for(auto& part:materialParts) {
+        if(isolated!=UINT32_MAX && part->slot!=isolated)continue;
         part->SetGame(GamePtr);
         part->SynchronizeFlags();
-        const auto& path=materialSlots.at(part->slot);
+        const auto& path=shared?GetMaterialAsset():materialSlots.at(part->slot);
         if(part->GetMaterialAsset()!=path)part->SetMaterialAsset(path);
         output.push_back(part.get());
     }
