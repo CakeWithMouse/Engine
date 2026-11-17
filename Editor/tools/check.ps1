@@ -220,7 +220,7 @@ Write-Output "OK: Localization check passed."
 Write-Output "--- 3. Checking line counts of modified files ---"
 $legacyRatchetLimits = @{
     "Editor/Source/MainWindow.cpp" = 1715
-    "Editor/Source/MaterialEditorWindow.cpp" = 869
+    "Editor/Source/MaterialEditorWindow.cpp" = 1315
     "Editor/Source/ObjectInspectorPanel.cpp" = 625
     "Editor/Source/QtHost.cpp" = 641
     "Editor/Source/ScriptEditorWindow.cpp" = 523

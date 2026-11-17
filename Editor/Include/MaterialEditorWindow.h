@@ -114,6 +114,8 @@ private:
     void ReplaceSource(const QString& text);
 
     QString PhysicalPath(const QString& virtualPath) const;
+    QString ProjectRoot() const;
+    QString ContentRoot() const;
     // /Game путь файла; пустой, если файл вне Content.
     QString VirtualPath(const QString& file) const;
 

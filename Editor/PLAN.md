@@ -18,7 +18,7 @@
 - [x] ШАГ 0.5: эталон тестов (редактор + движок готовы; 3 красных движковых скрипта починены минимально, п. 51 «Решения»)
 - [x] ФАЗА 0: аудит А–Е (выполнен, коммит fe6a588; выводы ниже)
 - [x] 1. Баги сцены: иконки world-transform, гизмо Play/Stop (п. 52 «Решения»; billboard-тесты зелёные, CrossType red — pre-existing по контролю)
-- [ ] 2. Общая база графов (по аудиту А: база уже есть — убрать дубли, интегрировать FileService)
+- [x] 2. Общая база графов (по аудиту А: база уже есть — убрать дубли, интегрировать FileService)
 - [ ] 3. DnD-инфраструктура + сценарии
 - [ ] 4. Content Browser: контекстное меню по типам
 - [ ] 5. Общий UI графовых редакторов (иконки Tabler, «?», тулбар)
@@ -1221,7 +1221,9 @@
     - **Тест (`Editor/tests/core/GraphFileIoTests.h`, +18 checks, чистая Core-логика):** запись/чтение/перезапись/удаление внутри песочницы, идемпотентное удаление, создание родительских каталогов, отказ Write/Read/Delete/Exists для пути вне корня проекта и отсутствие файла вне песочницы. Подключён в CoreTests.cpp/CoreTests.vcxproj; GraphFileIo.cpp/.h — в EditorModule.vcxproj и CoreTests.vcxproj.
     - **Ratchet:** `ScriptEditorWindow.cpp` — legacy-файл, уже 517 строк на main (>500, записи в ratchet не было). Зарегистрирован в `check.ps1` `$legacyRatchetLimits` на новом baseline 523 (рост выше 523 заблокирован). AiMachineEditorWindow.cpp 451 (<500, без записи).
     - **Верификация (commit 1, check.ps1 -AllowEngine Debug):** Editor.dll build OK; CoreTests **1125** checks PASS (вкл. 18 новых GraphFileIo; негативные проверки песочницы дают ожидаемые [Error]-логи отказа), HostTests **165** PASS; UiTests — все suite PASS кроме ПРЕ-existing environmental `CrossTypeInfoButtonTests` («GeometryCard InfoPopupWindow strictly within screen bounds»), доказанного красным на main в контроле задачи 1 (код InfoButton/InfoButtonGeometry/ObjectInspectorPanel задачей 2 не тронут). Не хуже базы. Лог: %TEMP%\pain-task2-check1.log.
-    - **Material — следующий коммит (commit 2):** интеграция `LoadShaderText`/`LoadGraph`/`BackupGraphFiles`/`RestoreGraphFiles`/`WriteGraphFile`/`DisableGraph`/`WriteSource` через GraphFileIo с сохранением сообщений и веток отката.
+    - **Material (`LoadShaderText`/`LoadGraph`/`BackupGraphFiles`/`RestoreGraphFiles`/`WriteGraphFile`/`DisableGraph`/`WriteSource`):** весь дисковый ввод-вывод HLSL и `.graph.json` переведён на `GraphFileIo::Read/Write/Exists/Delete`. Сообщения и ветки отката сохранены байт-в-байт (включая `RestoreGraphFiles` с резервом в памяти и повторной попыткой, `DisableGraph` с удалением графа). Добавлены приватные `ProjectRoot()`/`ContentRoot()`. Неиспользуемые include `QFile`/`QSaveFile` удалены. Кириллица вне `Tr()` не добавлена (post-strip 1380 ≤ ratchet 1400).
+    - **Ratchet Material:** запись `MaterialEditorWindow.cpp` в `check.ps1` была устаревшей (869 при фактических 1305 на main — файл давно вырос, запись не проверялась, т.к. файл не модифицировался). Выставлен фактический baseline после правки 1315; рост выше 1315 заблокирован. Это коррекция устаревшего конфига, не ослабление (паттерн legacy-ratchet).
+    - **Верификация (commit 2, check.ps1 -AllowEngine Debug):** Editor.dll build OK (Material + moc пересобраны); CoreTests **1125** PASS, HostTests **165** PASS, UiSmokeTests **467** PASS; UiTests — все suite PASS кроме ПРЕ-existing environmental `CrossTypeInfoButtonTests` (тот же единственный красный, что и на main в контроле задачи 1; код InfoButton не тронут). Не хуже базы. Лог: %TEMP%\pain-task2-check2.log.
     - **Не проверено в рантайме:** живое открытие/сохранение графов Script/AiMachine/Material в GUI (полный GUI-прогон области «графы» — после задачи 5; сценарий ниже).
 
 ---

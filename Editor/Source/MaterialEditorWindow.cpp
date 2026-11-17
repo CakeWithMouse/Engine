@@ -2,6 +2,7 @@
 #include "MaterialTextureTools.h"
 #include "MaterialGraphWidget.h"
 #include "HlslGraphCompiler.h"
+#include "Graph/GraphFileIo.h"
 #include "EditorTheme.h"
 #include "EditorWindowSetup.h"
 
@@ -12,7 +13,6 @@
 #include <QComboBox>
 #include <QDir>
 #include <QDoubleSpinBox>
-#include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QFontDatabase>
@@ -28,7 +28,6 @@
 #include <QPointer>
 #include <QPushButton>
 #include <QRegularExpression>
-#include <QSaveFile>
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QSet>
@@ -354,6 +353,16 @@ QString MaterialEditorWindow::PhysicalPath(const QString& virtualPath) const
     return QDir(QString::fromUtf8(host_->host().contentRoot)).filePath(virtualPath.mid(6));
 }
 
+QString MaterialEditorWindow::ProjectRoot() const
+{
+    return QFileInfo(QString::fromUtf8(host_->host().projectFile)).dir().absolutePath();
+}
+
+QString MaterialEditorWindow::ContentRoot() const
+{
+    return QString::fromUtf8(host_->host().contentRoot);
+}
+
 void MaterialEditorWindow::BuildUi()
 {
     auto* tools = addToolBar(QStringLiteral("Материал"));
@@ -599,8 +608,8 @@ void MaterialEditorWindow::Apply(const MaterialEditorState& state, bool valid, b
 
 void MaterialEditorWindow::LoadShaderText()
 {
-    QFile file(shaderFile_);
-    sourceLoaded_ = !shaderFile_.isEmpty() && file.open(QIODevice::ReadOnly);
+    QByteArray data;
+    sourceLoaded_ = !shaderFile_.isEmpty() && EditorCore::GraphFileIo::Read(ProjectRoot(), ContentRoot(), shaderFile_, data);
     graphAction_->setEnabled(sourceLoaded_);
     if (!sourceLoaded_)
     {
@@ -610,7 +619,7 @@ void MaterialEditorWindow::LoadShaderText()
         return;
     }
     source_->setReadOnly(graphMode_);
-    source_->setPlainText(QString::fromUtf8(file.readAll()));
+    source_->setPlainText(QString::fromUtf8(data));
     source_->document()->setModified(false);
 }
 
@@ -622,18 +631,19 @@ QString MaterialEditorWindow::GraphFile() const
 
 void MaterialEditorWindow::LoadGraph()
 {
-    QFile file(GraphFile());
-    if (!sourceLoaded_ || !file.exists())
+    const QString graphFile = GraphFile();
+    if (!sourceLoaded_ || !EditorCore::GraphFileIo::Exists(ProjectRoot(), ContentRoot(), graphFile))
     {
         SetGraphMode(false);
         return;
     }
     EditorCore::MaterialGraphModel model;
-    if (!file.open(QIODevice::ReadOnly) || !model.ImportFromJson(QString::fromUtf8(file.readAll())))
+    QByteArray data;
+    if (!EditorCore::GraphFileIo::Read(ProjectRoot(), ContentRoot(), graphFile, data) || !model.ImportFromJson(QString::fromUtf8(data)))
     {
         // Битый граф не трогаем: HLSL остаётся последним скомпилированным, правится руками.
         SetGraphMode(false);
-        statusBar()->showMessage(QStringLiteral("Граф %1 не читается, материал открыт как код").arg(GraphFile()));
+        statusBar()->showMessage(QStringLiteral("Граф %1 не читается, материал открыт как код").arg(graphFile));
         return;
     }
     graph_->SetModel(model);
@@ -657,10 +667,10 @@ void MaterialEditorWindow::SetGraphMode(bool on)
 void MaterialEditorWindow::BackupGraphFiles()
 {
     if (graphBackup_.active) return;
-    QFile shader(shaderFile_), graph(GraphFile());
-    graphBackup_.hlsl = shader.open(QIODevice::ReadOnly) ? shader.readAll() : QByteArray();
-    graphBackup_.hadGraph = graph.open(QIODevice::ReadOnly);
-    graphBackup_.graph = graphBackup_.hadGraph ? graph.readAll() : QByteArray();
+    QByteArray hlsl, graph;
+    graphBackup_.hlsl = EditorCore::GraphFileIo::Read(ProjectRoot(), ContentRoot(), shaderFile_, hlsl) ? hlsl : QByteArray();
+    graphBackup_.hadGraph = EditorCore::GraphFileIo::Read(ProjectRoot(), ContentRoot(), GraphFile(), graph);
+    graphBackup_.graph = graphBackup_.hadGraph ? graph : QByteArray();
     graphBackup_.active = true;
 }
 
@@ -674,10 +684,10 @@ bool MaterialEditorWindow::RestoreGraphFiles()
                            "Устраните причину ошибки и повторите откат.").arg(path, error));
         return false;
     };
-    const auto write = [&failed](const QString& path, const QByteArray& bytes) {
-        QSaveFile file(path);
-        if (!file.open(QIODevice::WriteOnly) || file.write(bytes) != bytes.size() || !file.commit())
-            return failed(path, file.errorString());
+    const auto write = [&failed, this](const QString& path, const QByteArray& bytes) {
+        QString error;
+        if (!EditorCore::GraphFileIo::Write(ProjectRoot(), ContentRoot(), path, bytes, &error))
+            return failed(path, error);
         return true;
     };
     if (!write(shaderFile_, graphBackup_.hlsl)) return false;
@@ -685,10 +695,10 @@ bool MaterialEditorWindow::RestoreGraphFiles()
     {
         if (!write(GraphFile(), graphBackup_.graph)) return false;
     }
-    else if (QFile::exists(GraphFile()))
+    else if (EditorCore::GraphFileIo::Exists(ProjectRoot(), ContentRoot(), GraphFile()))
     {
-        QFile graph(GraphFile());
-        if (!graph.remove()) return failed(GraphFile(), graph.errorString());
+        QString error;
+        if (!EditorCore::GraphFileIo::Delete(ProjectRoot(), ContentRoot(), GraphFile(), &error)) return failed(GraphFile(), error);
     }
     // A partial restore can be retried: retain both original files until every operation succeeds.
     graphBackup_.active = false;
@@ -698,11 +708,11 @@ bool MaterialEditorWindow::RestoreGraphFiles()
 bool MaterialEditorWindow::WriteGraphFile()
 {
     if (!graphMode_) return true;
-    QSaveFile file(GraphFile());
-    if (!file.open(QIODevice::WriteOnly) || file.write(graph_->Model().ExportToJson().toUtf8()) < 0 || !file.commit())
+    QString error;
+    if (!EditorCore::GraphFileIo::Write(ProjectRoot(), ContentRoot(), GraphFile(), graph_->Model().ExportToJson().toUtf8(), &error))
     {
         QMessageBox::warning(this, QStringLiteral("Граф не сохранён"),
-                             QStringLiteral("Не удалось записать %1: %2").arg(GraphFile(), file.errorString()));
+                             QStringLiteral("Не удалось записать %1: %2").arg(GraphFile(), error));
         return false;
     }
     return true;
@@ -724,7 +734,7 @@ void MaterialEditorWindow::DisableGraph()
     if (!graphMode_ || saving_) return;
     ApplyGraph(); // HLSL должен соответствовать последнему виду графа
     BackupGraphFiles();
-    QFile::remove(GraphFile());
+    EditorCore::GraphFileIo::Delete(ProjectRoot(), ContentRoot(), GraphFile());
     SetGraphMode(false);
     UpdateTitle();
 }
@@ -1185,11 +1195,11 @@ void MaterialEditorWindow::ReplaceSource(const QString& text)
 
 bool MaterialEditorWindow::WriteSource()
 {
-    QSaveFile file(shaderFile_);
-    if (!file.open(QIODevice::WriteOnly) || file.write(source_->toPlainText().toUtf8()) < 0 || !file.commit())
+    QString error;
+    if (!EditorCore::GraphFileIo::Write(ProjectRoot(), ContentRoot(), shaderFile_, source_->toPlainText().toUtf8(), &error))
     {
         QMessageBox::warning(this, QStringLiteral("HLSL не сохранён"),
-                             QStringLiteral("Не удалось записать %1: %2").arg(shaderFile_, file.errorString()));
+                             QStringLiteral("Не удалось записать %1: %2").arg(shaderFile_, error));
         return false;
     }
     source_->document()->setModified(false);
