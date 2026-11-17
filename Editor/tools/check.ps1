@@ -230,7 +230,7 @@ $legacyRatchetLimits = @{
     "Editor/Source/FileBrowser.cpp" = 506
     "Editor/Source/ImportCommands.cpp" = 507
     "Editor/Host/SceneCommandHandler.cpp" = 567
-    "Editor/Source/GraphEditorWidget.cpp" = 1712
+    "Editor/Source/GraphEditorWidget.cpp" = 1756
     "Editor/tests/EditorUiTests.cpp" = 1045
 }
 

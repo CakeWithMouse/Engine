@@ -158,6 +158,7 @@ protected:
 
 private:
     void BuildUi();
+    void BuildToolbar();
     void RefreshToolbarIcons();
     void UpdateConnections();
     void UpdateFrames();
@@ -178,6 +179,7 @@ private:
     void UpdateHistoryButtons();
     QString ClipboardJson(const QList<int>& ids) const;
     QString ClipboardGraph() const;
+    void CopyWholeGraph();
     QList<int> InsertNodes(const QString& json, const QPointF& topLeft);
     QPointF CursorScenePos() const;
     bool IsFixed(int nodeId) const;

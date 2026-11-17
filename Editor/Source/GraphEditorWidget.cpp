@@ -3,6 +3,7 @@
 #include "EditorTheme.h"
 #include "IconProvider.h"
 #include "InfoButton.h"
+#include "GraphToolbarOverflow.h"
 #include "Graph/GraphClipboard.h"
 #include "Graph/GraphLayout.h"
 #include "Graph/GraphSchemaRegistry.h"
@@ -686,6 +687,24 @@ bool SameLink(const GraphConnectionData& a, const GraphConnectionData& b)
 {
     return a.fromNode == b.fromNode && a.fromPin == b.fromPin && a.toNode == b.toNode && a.toPin == b.toPin;
 }
+
+InfoButton* MakeGraphHelpButton(QWidget* parent)
+{
+    return new InfoButton(
+        QStringLiteral("Пин → пин: связь; потянуть подключённый вход — снять связь\n"
+                       "ПКМ по холсту или Tab — добавить ноду, по ноде — её меню\n"
+                       "Колесо — масштаб, ПКМ/СКМ с движением — сдвиг, F — показать всё\n"
+                       "Ctrl+Z / Ctrl+Y — отменить / повторить\n"
+                       "Ctrl+C / Ctrl+X / Ctrl+V / Ctrl+D — копировать / вырезать / вставить / дублировать\n"
+                       "Ctrl+A — выделить всё, Del — удалить"),
+        QStringLiteral("Pin to pin: link; drag a connected input to detach it\n"
+                       "RMB on the canvas or Tab: add a node; on a node: its menu\n"
+                       "Wheel: zoom, RMB/MMB drag: pan, F: frame all\n"
+                       "Ctrl+Z / Ctrl+Y: undo / redo\n"
+                       "Ctrl+C / Ctrl+X / Ctrl+V / Ctrl+D: copy / cut / paste / duplicate\n"
+                       "Ctrl+A: select all, Del: delete"),
+        parent);
+}
 } // namespace
 
 GraphEditorWidget::GraphEditorWidget(const GraphSchema& schema, QWidget* parent)
@@ -716,13 +735,9 @@ QString GraphEditorWidget::RenameTitle() const
     return Tr("Имя ноды", "Node name");
 }
 
-void GraphEditorWidget::BuildUi()
+void GraphEditorWidget::BuildToolbar()
 {
     const QString prefix = schema_.ObjectPrefix();
-    auto* layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
-
     toolbar_ = new QHBoxLayout;
     toolbar_->setContentsMargins(4, 3, 4, 3);
     auto* add = new QToolButton(this);
@@ -769,8 +784,25 @@ void GraphEditorWidget::BuildUi()
                            "A captioned frame around the selected nodes (without a selection — in the middle of the view)"));
     connect(comment, &QToolButton::clicked, this, [this] { AddComment(); });
     toolbar_->addWidget(comment);
+    auto* copyGraph = new QToolButton(this);
+    copyGraph->setObjectName(prefix + QStringLiteral("CopyGraph"));
+    copyGraph->setIconSize(QSize(16, 16));
+    copyGraph->setToolTip(Tr("Копировать весь граф в буфер обмена (JSON)", "Copy the whole graph to the clipboard (JSON)"));
+    connect(copyGraph, &QToolButton::clicked, this, [this] { CopyWholeGraph(); });
+    toolbar_->addWidget(copyGraph);
+    auto* pasteGraph = new QToolButton(this);
+    pasteGraph->setObjectName(prefix + QStringLiteral("PasteGraph"));
+    pasteGraph->setIconSize(QSize(16, 16));
+    pasteGraph->setToolTip(Tr("Вставить граф из буфера обмена (JSON)", "Paste a graph from the clipboard (JSON)"));
+    pasteGraph->setEnabled(CanPaste());
+    connect(pasteGraph, &QToolButton::clicked, this, [this] { PasteNodes(CursorScenePos()); });
+    connect(QGuiApplication::clipboard(), &QClipboard::dataChanged, this, [this, pasteGraph] {
+        pasteGraph->setEnabled(CanPaste());
+    });
+    toolbar_->addWidget(pasteGraph);
     RefreshToolbarIcons();
     toolbarIndex_ = toolbar_->count();
+    auto* overflow = new GraphToolbarOverflow(toolbar_, this);
 
     toolbar_->addStretch(1);
     auto* hint = new QLabel(Tr("ПКМ/Tab — ноды · ЛКМ по пину — связь · Ctrl+C/V/D/Z · Del",
@@ -779,28 +811,29 @@ void GraphEditorWidget::BuildUi()
     hintPalette.setColor(QPalette::WindowText, hintPalette.color(QPalette::PlaceholderText));
     hint->setPalette(hintPalette);
     toolbar_->addWidget(hint);
-    auto* help = new InfoButton(
-        QStringLiteral("Пин → пин: связь; потянуть подключённый вход — снять связь\n"
-                       "ПКМ по холсту или Tab — добавить ноду, по ноде — её меню\n"
-                       "Колесо — масштаб, ПКМ/СКМ с движением — сдвиг, F — показать всё\n"
-                       "Ctrl+Z / Ctrl+Y — отменить / повторить\n"
-                       "Ctrl+C / Ctrl+X / Ctrl+V / Ctrl+D — копировать / вырезать / вставить / дублировать\n"
-                       "Ctrl+A — выделить всё, Del — удалить"),
-        QStringLiteral("Pin to pin: link; drag a connected input to detach it\n"
-                       "RMB on the canvas or Tab: add a node; on a node: its menu\n"
-                       "Wheel: zoom, RMB/MMB drag: pan, F: frame all\n"
-                       "Ctrl+Z / Ctrl+Y: undo / redo\n"
-                       "Ctrl+C / Ctrl+X / Ctrl+V / Ctrl+D: copy / cut / paste / duplicate\n"
-                       "Ctrl+A: select all, Del: delete"),
-        this);
+    auto* help = MakeGraphHelpButton(this);
     help->setObjectName(prefix + QStringLiteral("Help"));
     toolbar_->addWidget(help);
+    overflow->AddWidget(hint);
+    overflow->AddButton(comment, Tr("Комментарий", "Comment"));
+    overflow->AddButton(arrange, Tr("Упорядочить", "Arrange"));
+    overflow->AddButton(frame, Tr("Показать всё", "Frame all"));
+    overflow->AddButton(pasteGraph, Tr("Вставить граф", "Paste graph"));
+    overflow->AddButton(copyGraph, Tr("Копировать граф", "Copy graph"));
+}
+
+void GraphEditorWidget::BuildUi()
+{
+    auto* layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    BuildToolbar();
     layout->addLayout(toolbar_);
 
     scene_ = new QGraphicsScene(this);
     scene_->setSceneRect(-5000, -5000, 10000, 10000);
     view_ = new GraphView(scene_, this, GridStep);
-    view_->setObjectName(prefix + QStringLiteral("View"));
+    view_->setObjectName(schema_.ObjectPrefix() + QStringLiteral("View"));
     view_->setRenderHint(QPainter::Antialiasing);
     view_->setDragMode(QGraphicsView::RubberBandDrag);
     view_->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
@@ -826,6 +859,17 @@ void GraphEditorWidget::RefreshToolbarIcons()
     apply("Frame", IconProvider::FrameIcon(color));
     apply("Arrange", IconProvider::ArrangeIcon(color));
     apply("Comment", IconProvider::CommentIcon(color));
+    apply("CopyGraph", IconProvider::CopyIcon(color));
+    apply("PasteGraph", IconProvider::PasteIcon(color));
+}
+
+void GraphEditorWidget::CopyWholeGraph()
+{
+    QList<int> ids;
+    for (const auto& node : document_.Nodes())
+        if (!schema_.IsFixed(node)) ids << node.id;
+    if (!CopyNodes(ids))
+        Notice(Tr("В графе нет нод для копирования.", "The graph has no nodes to copy."));
 }
 
 void GraphEditorWidget::AddToolbarWidget(QWidget* widget)
