@@ -34,7 +34,15 @@ jobs:
         toolset: [v143, ClangCL]
     steps:
       - uses: actions/checkout@v4
-      - run: cmake -S . -B build/cmake/windows -G "Visual Studio 17 2022" -A x64 -T ${{ matrix.toolset }}
+      # Project creation installs a complete engine release, including Editor.dll.
+      - name: Install Qt
+        uses: jurplel/install-qt-action@b344308e4483fc892e0d27b3cd1b173ebdd95f06 # v4
+        with:
+          version: '6.7.3'
+          arch: 'win64_msvc2019_64'
+          modules: 'qtsvg'
+          cache: true
+      - run: cmake -S . -B build/cmake/windows -G "Visual Studio 17 2022" -A x64 -T ${{ matrix.toolset }} -DPAIN_BUILD_EDITOR=ON "-DCMAKE_PREFIX_PATH=$env:QT_ROOT_DIR"
       - run: cmake --build build/cmake/windows --config Debug --parallel 4
       - run: ctest --test-dir build/cmake/windows -C Debug --output-on-failure
       - run: ./Engine/BuildSupport/tests/Test-CMakeProjects.ps1 -Runtime ./build/cmake/windows/bin/Debug/Runtime

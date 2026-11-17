@@ -7,14 +7,23 @@ $project = Join-Path $work 'CMake проект с пробелами'
 $manifest = Join-Path $project 'Project.json'
 $launcher = Join-Path (Split-Path $Runtime) 'EngineLauncher.exe'
 $script = Join-Path $Runtime 'SDK/ProjectTools.ps1'
+if (!(Test-Path -LiteralPath (Join-Path $Runtime 'Editor.dll') -PathType Leaf)) {
+    throw "CMake project tests require a complete engine release: Editor.dll is missing in $Runtime. Configure with -DPAIN_BUILD_EDITOR=ON and build the editor before running this test."
+}
 New-Item -ItemType Directory -Force $work | Out-Null
 $previousStore = $env:PAINENGINE_ENGINE_STORE
 $env:PAINENGINE_ENGINE_STORE = Join-Path $work 'EngineStore'
 function Check([bool]$value, [string]$message) { if (!$value) { throw $message } }
 try {
-    $create = Start-Process -FilePath $launcher -ArgumentList @('--create-project', ('"'+$project+'"'), 'CMakeTest') -WindowStyle Hidden -PassThru
-    if (!$create.WaitForExit(60000)) { $create.Kill(); throw 'Project creation timed out' }
-    Check ($create.ExitCode -eq 0) 'Project creation failed'
+    $createOutput = Join-Path $work 'create-project.stdout.log'
+    $createError = Join-Path $work 'create-project.stderr.log'
+    $create = Start-Process -FilePath $launcher -ArgumentList @('--create-project', ('"'+$project+'"'), 'CMakeTest') -WindowStyle Hidden -PassThru -RedirectStandardOutput $createOutput -RedirectStandardError $createError
+    if (!$create.WaitForExit(60000)) { $create.Kill(); throw "Project creation timed out. Logs: $createOutput, $createError" }
+    $create.WaitForExit()
+    if ($create.ExitCode -ne 0) {
+        $details = Get-Content -LiteralPath $createOutput, $createError -Raw -Encoding UTF8
+        throw "Project creation failed (exit code $($create.ExitCode)).`n$($details -join [Environment]::NewLine)`nLogs: $createOutput, $createError"
+    }
     # Call the same Windows PowerShell host used by the editor, not the caller's developer shell.
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $script -Action Enable -Project $manifest -Runtime $Runtime
     Check ($LASTEXITCODE -eq 0) 'CMake Enable failed'
