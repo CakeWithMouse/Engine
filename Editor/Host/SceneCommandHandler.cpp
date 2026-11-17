@@ -133,6 +133,10 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
         }
         else if (cmd.type == EditorCommand::SetParent) {
             result = ctx.scene.setParent ? ctx.scene.setParent(ctx.scene.context, cmd.objectId, cmd.parentId, 1) : EngineSceneReadOnly;
+            // "keepworld": UI precomputed the local transform that preserves the world pose;
+            // apply it inside the same checkpoint so reparent is a single undo step.
+            if (result == EngineSceneOk && cmd.path == QStringLiteral("keepworld"))
+                result = api.setTransform(api.context, cmd.objectId, &cmd.transform);
         }
         else if (cmd.type == EditorCommand::SetModel)
         {

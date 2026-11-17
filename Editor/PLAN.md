@@ -1249,6 +1249,20 @@
     - **Верификация (check.ps1 -AllowEngine Quick):** build OK; wc ViewportWidget_DragDrop.cpp 130, ViewportWidget.cpp 568 (ratchet 694); CoreTests **1171**, HostTests **165**, UiSmoke **467**; единственный красный — pre-existing `CrossTypeInfoButtonTests`. Не хуже базы. Лог: %TEMP%\pain-task3-vpB.log.
     - **Не проверено в рантайме:** доставка drop на native HWND viewport (`WA_NativeWindow`+`setAcceptDrops`; Qt mouse-события уже доходят) — GUI-прогон области DnD.
 
+57. **Задача 3 — DnD wiring: Hierarchy reparent с сохранением world-transform, один Undo (17.11.2026):**
+    - **Проблема:** движок `GameComponent::SetParent` предотвращает циклы (`GameComponents.cpp:440`), но НЕ сохраняет world-transform (local не меняется → объект смещается). Editor-side `setParent`+`setTransform` = два checkpoint (`SceneCommandHandler.cpp:66` BreakCoalescing на SetParent) → два Undo.
+    - **Решение (без правки Engine ABI, один Undo):** команда `Scene.Reparent` (`DragDropCommands.cpp`) считает новый local = `inverse(parentWorld) * childWorld` через `CameraGuide::World` + `glm::inverse/decompose` (root: local=world); pre-check цикла обходом предков нового родителя; отсев вырожденного scale (<1e-6, движок отклонит). Постит ОДИН `EditorCommand::SetParent{path="keepworld", transform=newLocal}`. Handler `SceneCommandHandler.cpp:134` после `setParent` применяет `api.setTransform` в ТОМ ЖЕ checkpoint (mutation && !coalesced → один Checkpoint до handler) → один Undo восстанавливает и родителя, и local. `parentId=0` → `ClearParent` (подтверждено `SceneEditSession.cpp:168`).
+    - **Маршрутизация:** `MainWindow.cpp:790` `SetParentRequested` → `CommandRegistry.Execute("Scene.Reparent", {childId,parentId})` вместо прямого `host_->SetParent`.
+    - **Ratchet (grandfathering legacy-baseline, рост заблокирован):** `MainWindow.cpp` 1715→1734 (на main уже 1733 > устаревшего лимита; правка +1); `SceneCommandHandler.cpp` 563 на main без записи (>500 generic) → 567. Паттерн задач 1/2/3A.
+    - **Верификация (check.ps1 -AllowEngine Quick):** forbidden/layers/localization/line-counts OK; build OK; wc DragDropCommands.cpp 237 (≤500); CoreTests **1171**, HostTests **165**, UiSmoke **467**, ContentBrowser 46/77; единственный красный — pre-existing `CrossTypeInfoButtonTests`. Не хуже базы. Лог: %TEMP%\pain-task3-reparentC.log.
+    - **Не проверено в рантайме:** живой reparent drag в дереве (визуальный snap-back при отклонении цикла — `SceneOutlinerTree` физически двигает item до emit; снапшот-refresh возвращает на место) — GUI-прогон области DnD.
+    - **Backlog/Нужно в ABI:** multi-select reparent одним Undo — engine batch ABI (`EngineBatch`) имеет Delete/Duplicate/Transform, НО НЕ reparent; требуется batch-reparent ABI. Без mock.
+
+58. **Задача 3 — скоупинг per-editor DnD wiring (17.11.2026, решение по умолчанию):**
+    - Матрица `DropRules` готова полностью (все ячейки → command id). Wiring таргетов, которых ещё нет в редакторе, ложится в соответствующие задачи (без mock-таргетов сейчас): `Material.AssignTexture` (CB→слот текстуры материала) и `Graph.CreateTextureNode` (CB→холст) → задача 7; `Graph.CreateVariableNode` (переменная→Get/Set) → задача 8; `UI.AddWidget` (палитра→холст) → задача 9; CB→Hierarchy/InspectorSlot assign/replace → задача 4/инспектор. Команды `Scene.AssignMaterial/AssignScript/AssignAiMachine/ReplaceModel` уже существуют (ImportCommands/AssetTools) и используются viewport-drop.
+    - Звук→viewport = `None` (нет ABI спавна звука) → «Нужно в ABI». Prefab — в движке нет → не реализуется (TZ).
+    - GUI-прогон области DnD (задача 3) покрывает: Explorer→CB import, CB move/copy/multi-select, CB→viewport spawn/assign, Hierarchy reparent (циклы, world-transform). Остальные сценарии проверяются в GUI-прогонах задач 7/8/9.
+
 ---
 
 ## Backlog

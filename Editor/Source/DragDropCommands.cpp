@@ -5,9 +5,56 @@
 #include "AssetExtensions.h"
 #include "FileService.h"
 #include "Logger.h"
+#include "CameraGuide.h"
 
 #include <QDir>
 #include <QFileInfo>
+#include <glm/gtc/matrix_inverse.hpp>
+
+namespace
+{
+// Local transform that keeps the child's world pose under a new parent. Rejects cycles
+// (child is an ancestor of the new parent) and degenerate scale the engine would refuse.
+bool KeepWorldTransform(const IEditorHost::Snapshot& scene, uint64_t childId, uint64_t parentId,
+                        EngineSceneTransform& out)
+{
+    const IEditorHost::SceneObject* child = nullptr;
+    const IEditorHost::SceneObject* parent = nullptr;
+    for (const auto& o : scene.objects)
+    {
+        if (o.id == childId) child = &o;
+        if (parentId != 0 && o.id == parentId) parent = &o;
+    }
+    if (!child || (parentId != 0 && !parent))
+        return false;
+    for (const IEditorHost::SceneObject* a = parent; a; )
+    {
+        if (a->id == childId)
+            return false;
+        const uint64_t up = a->parent;
+        a = nullptr;
+        if (up == 0) break;
+        for (const auto& o : scene.objects)
+            if (o.id == up) { a = &o; break; }
+    }
+    const glm::mat4 childWorld = CameraGuide::World(*child, scene);
+    const glm::mat4 local = parent
+        ? glm::inverse(CameraGuide::World(*parent, scene)) * childWorld
+        : childWorld;
+    glm::vec3 scale(1), translation(0), skew;
+    glm::vec4 perspective;
+    glm::quat rotation(1, 0, 0, 0);
+    if (!glm::decompose(local, scale, rotation, translation, skew, perspective))
+        return false;
+    if (std::abs(scale.x) < 1e-6f || std::abs(scale.y) < 1e-6f || std::abs(scale.z) < 1e-6f)
+        return false;
+    rotation = glm::normalize(rotation);
+    out.position[0] = translation.x; out.position[1] = translation.y; out.position[2] = translation.z;
+    out.rotation[0] = rotation.x; out.rotation[1] = rotation.y; out.rotation[2] = rotation.z; out.rotation[3] = rotation.w;
+    out.scale[0] = scale.x; out.scale[1] = scale.y; out.scale[2] = scale.z;
+    return true;
+}
+} // namespace
 
 void EditorMainWindow::RegisterDragDropCommands()
 {
@@ -152,6 +199,33 @@ void EditorMainWindow::RegisterDragDropCommands()
             return host_ && host_->HasScene() && !sceneBusy_ && host_->PlayState() == EditorQtHost::EditorState::Edit && selectedId_ != 0;
         }
     });
+
+    CommandRegistry::Instance().RegisterCommand({
+        QStringLiteral("Scene.Reparent"),
+        QStringLiteral("Reparent Object"),
+        QString(),
+        QStringLiteral("Reparent a scene object preserving its world transform"),
+        [this](const CommandContext& ctx) {
+            if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+                return false;
+            const uint64_t childId = ctx.parameters.value(QStringLiteral("childId")).toULongLong();
+            const uint64_t parentId = ctx.parameters.value(QStringLiteral("parentId")).toULongLong();
+            if (childId == 0 || childId == parentId)
+                return false;
+            EngineSceneTransform local{};
+            if (!KeepWorldTransform(host_->ReadSnapshot(), childId, parentId, local))
+                return false;
+            EditorCommand c;
+            c.type = EditorCommand::SetParent;
+            c.objectId = childId;
+            c.parentId = parentId;
+            c.path = QStringLiteral("keepworld");
+            c.transform = local;
+            host_->PostCommand(c);
+            return true;
+        },
+        canExecute
+    });
 }
 
 void EditorMainWindow::UnregisterDragDropCommands()
@@ -160,4 +234,5 @@ void EditorMainWindow::UnregisterDragDropCommands()
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.Copy"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Scene.SpawnModel"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Scene.AssignTexture"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Scene.Reparent"));
 }

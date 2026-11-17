@@ -789,7 +789,8 @@ void EditorMainWindow::ConnectPanels()
 
     connect(sceneObjectsPanel_, &SceneObjectsPanel::SetParentRequested, this, [this](quint64 childId, quint64 parentId) {
         if (sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
-        host_->SetParent(childId, parentId);
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.Reparent"),
+            {{QStringLiteral("childId"), QVariant::fromValue(childId)}, {QStringLiteral("parentId"), QVariant::fromValue(parentId)}});
     });
 
     connect(sceneObjectsPanel_, &SceneObjectsPanel::AddChildPrimitiveRequested, this,
