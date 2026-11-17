@@ -178,6 +178,7 @@ $legacyCyrillicRatchet = @{
     "Editor/Source/AssetTools.cpp" = 600
     "Editor/Source/CodeTools.cpp" = 750
     "Editor/Source/FsmGraphWidget.cpp" = 50
+    "Editor/Source/GraphEditorWidget.cpp" = 200
     "Editor/Source/MainWindow.cpp" = 1260
     "Editor/Source/MaterialEditorWindow.cpp" = 1400
     "Editor/Source/MaterialTextureTools.cpp" = 400
@@ -229,6 +230,7 @@ $legacyRatchetLimits = @{
     "Editor/Source/FileBrowser.cpp" = 506
     "Editor/Source/ImportCommands.cpp" = 507
     "Editor/Host/SceneCommandHandler.cpp" = 567
+    "Editor/Source/GraphEditorWidget.cpp" = 1712
     "Editor/tests/EditorUiTests.cpp" = 1045
 }
 

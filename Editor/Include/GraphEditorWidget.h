@@ -158,6 +158,7 @@ protected:
 
 private:
     void BuildUi();
+    void RefreshToolbarIcons();
     void UpdateConnections();
     void UpdateFrames();
     NodeItem* FindItem(int nodeId) const;
@@ -210,4 +211,5 @@ private:
     QString lastNotice_;
     QToolButton* undoButton_ = nullptr;
     QToolButton* redoButton_ = nullptr;
+    int themeSubId_ = 0;
 };

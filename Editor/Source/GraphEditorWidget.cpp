@@ -1,5 +1,8 @@
 #include "GraphEditorWidget.h"
 #include "EditorLocale.h"
+#include "EditorTheme.h"
+#include "IconProvider.h"
+#include "InfoButton.h"
 #include "Graph/GraphClipboard.h"
 #include "Graph/GraphLayout.h"
 #include "Graph/GraphSchemaRegistry.h"
@@ -35,6 +38,7 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QScrollBar>
+#include <QSize>
 #include <QTimer>
 #include <QToolButton>
 #include <QVBoxLayout>
@@ -689,9 +693,13 @@ GraphEditorWidget::GraphEditorWidget(const GraphSchema& schema, QWidget* parent)
 {
     if (!schema_.Id().isEmpty()) document_.SetSchema(schema_.Id(), schema_.Version());
     BuildUi();
+    themeSubId_ = EditorTheme::Instance().SubscribeThemeChanged([this] { RefreshToolbarIcons(); });
 }
 
-GraphEditorWidget::~GraphEditorWidget() = default;
+GraphEditorWidget::~GraphEditorWidget()
+{
+    if (themeSubId_) EditorTheme::Instance().UnsubscribeThemeChanged(themeSubId_);
+}
 
 QPointF GraphEditorWidget::Snap(const QPointF& point)
 {
@@ -727,31 +735,27 @@ void GraphEditorWidget::BuildUi()
     });
     toolbar_->addWidget(add);
 
-    auto history = [this, &prefix](const char* name, const char* glyph, const QString& tip, void (GraphEditorWidget::*slot)()) {
+    auto history = [this, &prefix](const char* name, const QString& tip, void (GraphEditorWidget::*slot)()) {
         auto* button = new QToolButton(this);
         button->setObjectName(prefix + QString::fromLatin1(name));
-        button->setText(QString::fromUtf8(glyph));
-        QFont font = button->font();
-        // Стрелки в обычном размере шрифта почти не видны.
-        if (font.pointSizeF() > 0) font.setPointSizeF(font.pointSizeF() * 1.4);
-        else if (font.pixelSize() > 0) font.setPixelSize(font.pixelSize() * 7 / 5);
-        button->setFont(font);
+        button->setIconSize(QSize(16, 16));
         button->setToolTip(tip);
         button->setEnabled(false);
         connect(button, &QToolButton::clicked, this, slot);
         toolbar_->addWidget(button);
         return button;
     };
-    undoButton_ = history("Undo", "↶", Tr("Отменить (Ctrl+Z)", "Undo (Ctrl+Z)"), &GraphEditorWidget::Undo);
-    redoButton_ = history("Redo", "↷", Tr("Повторить (Ctrl+Y)", "Redo (Ctrl+Y)"), &GraphEditorWidget::Redo);
+    undoButton_ = history("Undo", Tr("Отменить (Ctrl+Z)", "Undo (Ctrl+Z)"), &GraphEditorWidget::Undo);
+    redoButton_ = history("Redo", Tr("Повторить (Ctrl+Y)", "Redo (Ctrl+Y)"), &GraphEditorWidget::Redo);
     auto* frame = new QToolButton(this);
-    frame->setText(Tr("Показать всё", "Frame all"));
+    frame->setObjectName(prefix + QStringLiteral("Frame"));
+    frame->setIconSize(QSize(16, 16));
     frame->setToolTip(Tr("Уместить граф в окно, а при выделении — выделенные ноды (F)", "Fit the graph, or the selection, into view (F)"));
     connect(frame, &QToolButton::clicked, this, [this] { FrameNodes(); });
     toolbar_->addWidget(frame);
     auto* arrange = new QToolButton(this);
     arrange->setObjectName(prefix + QStringLiteral("Arrange"));
-    arrange->setText(Tr("Упорядочить", "Arrange"));
+    arrange->setIconSize(QSize(16, 16));
     arrange->setToolTip(schema_.LayoutStyle() == EditorCore::GraphLayoutStyle::Tree
                             ? Tr("Разложить дерево сверху вниз: дети под родителем в прежнем порядке слева направо",
                                  "Lay the tree out top to bottom: children under their parent, keeping their left-to-right order")
@@ -760,32 +764,37 @@ void GraphEditorWidget::BuildUi()
     toolbar_->addWidget(arrange);
     auto* comment = new QToolButton(this);
     comment->setObjectName(prefix + QStringLiteral("Comment"));
-    comment->setText(Tr("Комментарий", "Comment"));
+    comment->setIconSize(QSize(16, 16));
     comment->setToolTip(Tr("Рамка с подписью вокруг выделенных нод (без выделения — в центре вида)",
                            "A captioned frame around the selected nodes (without a selection — in the middle of the view)"));
     connect(comment, &QToolButton::clicked, this, [this] { AddComment(); });
     toolbar_->addWidget(comment);
+    RefreshToolbarIcons();
     toolbarIndex_ = toolbar_->count();
 
     toolbar_->addStretch(1);
     auto* hint = new QLabel(Tr("ПКМ/Tab — ноды · ЛКМ по пину — связь · Ctrl+C/V/D/Z · Del",
                                "RMB/Tab: nodes · LMB on a pin: link · Ctrl+C/V/D/Z · Del"), this);
-    hint->setToolTip(Tr("Пин → пин: связь; потянуть подключённый вход — снять связь\n"
-                        "ПКМ по холсту или Tab — добавить ноду, по ноде — её меню\n"
-                        "Колесо — масштаб, ПКМ/СКМ с движением — сдвиг, F — показать всё\n"
-                        "Ctrl+Z / Ctrl+Y — отменить / повторить\n"
-                        "Ctrl+C / Ctrl+X / Ctrl+V / Ctrl+D — копировать / вырезать / вставить / дублировать\n"
-                        "Ctrl+A — выделить всё, Del — удалить",
-                        "Pin to pin: link; drag a connected input to detach it\n"
-                        "RMB on the canvas or Tab: add a node; on a node: its menu\n"
-                        "Wheel: zoom, RMB/MMB drag: pan, F: frame all\n"
-                        "Ctrl+Z / Ctrl+Y: undo / redo\n"
-                        "Ctrl+C / Ctrl+X / Ctrl+V / Ctrl+D: copy / cut / paste / duplicate\n"
-                        "Ctrl+A: select all, Del: delete"));
     QPalette hintPalette = hint->palette(); // серый, но не выключенный: у выключенной надписи нет подсказки
     hintPalette.setColor(QPalette::WindowText, hintPalette.color(QPalette::PlaceholderText));
     hint->setPalette(hintPalette);
     toolbar_->addWidget(hint);
+    auto* help = new InfoButton(
+        QStringLiteral("Пин → пин: связь; потянуть подключённый вход — снять связь\n"
+                       "ПКМ по холсту или Tab — добавить ноду, по ноде — её меню\n"
+                       "Колесо — масштаб, ПКМ/СКМ с движением — сдвиг, F — показать всё\n"
+                       "Ctrl+Z / Ctrl+Y — отменить / повторить\n"
+                       "Ctrl+C / Ctrl+X / Ctrl+V / Ctrl+D — копировать / вырезать / вставить / дублировать\n"
+                       "Ctrl+A — выделить всё, Del — удалить"),
+        QStringLiteral("Pin to pin: link; drag a connected input to detach it\n"
+                       "RMB on the canvas or Tab: add a node; on a node: its menu\n"
+                       "Wheel: zoom, RMB/MMB drag: pan, F: frame all\n"
+                       "Ctrl+Z / Ctrl+Y: undo / redo\n"
+                       "Ctrl+C / Ctrl+X / Ctrl+V / Ctrl+D: copy / cut / paste / duplicate\n"
+                       "Ctrl+A: select all, Del: delete"),
+        this);
+    help->setObjectName(prefix + QStringLiteral("Help"));
+    toolbar_->addWidget(help);
     layout->addLayout(toolbar_);
 
     scene_ = new QGraphicsScene(this);
@@ -802,6 +811,21 @@ void GraphEditorWidget::BuildUi()
     view_->installEventFilter(this);
     layout->addWidget(view_, 1);
     view_->centerOn(400, 250);
+}
+
+void GraphEditorWidget::RefreshToolbarIcons()
+{
+    const QString prefix = schema_.ObjectPrefix();
+    const QColor color = EditorTheme::Instance().Palette().textSecondary;
+    auto apply = [&](const char* suffix, const QIcon& icon) {
+        if (auto* button = findChild<QToolButton*>(prefix + QString::fromLatin1(suffix)))
+            button->setIcon(icon);
+    };
+    apply("Undo", IconProvider::UndoIcon(color));
+    apply("Redo", IconProvider::RedoIcon(color));
+    apply("Frame", IconProvider::FrameIcon(color));
+    apply("Arrange", IconProvider::ArrangeIcon(color));
+    apply("Comment", IconProvider::CommentIcon(color));
 }
 
 void GraphEditorWidget::AddToolbarWidget(QWidget* widget)

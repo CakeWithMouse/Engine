@@ -63,6 +63,13 @@ namespace
         if (name == QLatin1String("info") || name == QLatin1String("info-circle")) return EditorIcons::TABLER_INFO_CIRCLE;
         if (name == QLatin1String("camera")) return EditorIcons::SVG_CAMERA;
         if (name == QLatin1String("particles")) return EditorIcons::SVG_PARTICLES;
+        if (name == QLatin1String("arrow-back-up") || name == QLatin1String("undo")) return EditorIcons::TABLER_ARROW_BACK_UP;
+        if (name == QLatin1String("arrow-forward-up") || name == QLatin1String("redo")) return EditorIcons::TABLER_ARROW_FORWARD_UP;
+        if (name == QLatin1String("copy")) return EditorIcons::TABLER_COPY;
+        if (name == QLatin1String("clipboard-list") || name == QLatin1String("paste")) return EditorIcons::TABLER_CLIPBOARD_LIST;
+        if (name == QLatin1String("layout-grid") || name == QLatin1String("arrange")) return EditorIcons::TABLER_LAYOUT_GRID;
+        if (name == QLatin1String("message-circle") || name == QLatin1String("comment")) return EditorIcons::TABLER_MESSAGE_CIRCLE;
+        if (name == QLatin1String("focus-2") || name == QLatin1String("frame")) return EditorIcons::TABLER_FOCUS_2;
         return nullptr;
     }
 
@@ -216,6 +223,13 @@ QIcon IconProvider::ChevronUpIcon(const QColor& color) { return GetIcon(QStringL
 QIcon IconProvider::ChevronDownIcon(const QColor& color) { return GetIcon(QStringLiteral("chevron-down"), color); }
 QIcon IconProvider::ChevronRightIcon(const QColor& color) { return GetIcon(QStringLiteral("chevron-right"), color); }
 QIcon IconProvider::HelpIcon(const QColor& color) { return GetIcon(QStringLiteral("help"), color); }
+QIcon IconProvider::UndoIcon(const QColor& color) { return GetIcon(QStringLiteral("undo"), color); }
+QIcon IconProvider::RedoIcon(const QColor& color) { return GetIcon(QStringLiteral("redo"), color); }
+QIcon IconProvider::CopyIcon(const QColor& color) { return GetIcon(QStringLiteral("copy"), color); }
+QIcon IconProvider::PasteIcon(const QColor& color) { return GetIcon(QStringLiteral("paste"), color); }
+QIcon IconProvider::ArrangeIcon(const QColor& color) { return GetIcon(QStringLiteral("arrange"), color); }
+QIcon IconProvider::CommentIcon(const QColor& color) { return GetIcon(QStringLiteral("comment"), color); }
+QIcon IconProvider::FrameIcon(const QColor& color) { return GetIcon(QStringLiteral("frame"), color); }
 
 void IconProvider::UploadIcons(IEditorHost* host, bool force)
 {

@@ -45,4 +45,11 @@ public:
     static QIcon ChevronDownIcon(const QColor& color = QColor());
     static QIcon ChevronRightIcon(const QColor& color = QColor());
     static QIcon HelpIcon(const QColor& color = QColor());
+    static QIcon UndoIcon(const QColor& color = QColor());
+    static QIcon RedoIcon(const QColor& color = QColor());
+    static QIcon CopyIcon(const QColor& color = QColor());
+    static QIcon PasteIcon(const QColor& color = QColor());
+    static QIcon ArrangeIcon(const QColor& color = QColor());
+    static QIcon CommentIcon(const QColor& color = QColor());
+    static QIcon FrameIcon(const QColor& color = QColor());
 };
