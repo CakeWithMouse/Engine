@@ -7,6 +7,7 @@
 #include "GeometryCard.h"
 #include "CameraGuideCard.h"
 #include "CommandRegistry.h"
+#include "InspectorCardStyle.h"
 #include "NoWheelDoubleSpinBox.h"
 #include "EditorLocale.h"
 #include "IconProvider.h"
@@ -34,9 +35,8 @@ ObjectInspectorPanel::ObjectInspectorPanel(QWidget* parent)
     : QWidget(parent)
 {
     BuildUi();
-    langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
-        RetranslateUi();
-    });
+    RetranslateUi();
+    langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] { RetranslateUi(); });
     themeSubId_ = EditorTheme::Instance().SubscribeThemeChanged([this] {
         if (lightColor_) lightColor_->setIcon(IconProvider::BulbIcon());
     });
@@ -85,10 +85,12 @@ void ObjectInspectorPanel::BuildUi()
     properties_ = new QWidget(content);
     propertiesLayout_ = new QVBoxLayout(properties_);
     propertiesLayout_->setContentsMargins(0,0,0,0);
+    propertiesLayout_->setSpacing(4);
     properties_->hide();
     BuildGeneralCard(inspectorLayout);
 
     cardTransform_ = new TransformCard(this);
+    cardTransform_->setObjectName(QStringLiteral("TransformCard"));
     cardTransform_->SetOnChanged([this] {
         if (refreshing_ || selectedId_ == 0) return;
         emit TransformEditingFinished(selectedId_, CurrentTransformValue());
@@ -100,6 +102,7 @@ void ObjectInspectorPanel::BuildUi()
     inspectorLayout->addWidget(properties_);
 
     cardGeometry_ = new GeometryCard(this);
+    cardGeometry_->setObjectName(QStringLiteral("GeometryCard"));
     cardGeometry_->onChooseModel = [this] {
         emit ChooseModelRequested();
         QVariantMap params;
@@ -108,6 +111,7 @@ void ObjectInspectorPanel::BuildUi()
     };
 
     cardMaterial_ = new MaterialCard(this);
+    cardMaterial_->setObjectName(QStringLiteral("MaterialCard"));
     cardMaterial_->onEditMaterial = [this](const QString& path) { emit EditMaterialRequested(path); };
     cardMaterial_->onChooseMaterial = [this] {
         CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignMaterial"));
@@ -136,6 +140,7 @@ void ObjectInspectorPanel::BuildUi()
     };
 
     BuildPointLightCard(inspectorLayout);
+    if (cardLight_) cardLight_->setObjectName(QStringLiteral("LightCard"));
     inspectorLayout->addWidget(cardGeometry_);
     inspectorLayout->addWidget(cardMaterial_);
     inspectorLayout->addWidget(cardScript_);
@@ -164,13 +169,12 @@ void ObjectInspectorPanel::BuildUi()
 
 void ObjectInspectorPanel::BuildGeneralCard(QVBoxLayout* layout)
 {
-    cardGeneral_ = new CollapsibleCard(Tr("Общие", "General"), this, true);
+    cardGeneral_ = new CollapsibleCard(Tr("Общие", "General"), this, true); cardGeneral_->setObjectName(QStringLiteral("GeneralCard"));
     auto* cl = cardGeneral_->ContentLayout();
 
     auto* rowHeader = new QWidget(cardGeneral_->Content());
     auto* layoutHeader = new QHBoxLayout(rowHeader);
-    layoutHeader->setContentsMargins(0, 0, 0, 0);
-    layoutHeader->setSpacing(6);
+    InspectorCardStyle::ApplyRowLayout(layoutHeader);
 
     typeBadgeLabel_ = new QLabel(QStringLiteral("None"), rowHeader);
     typeBadgeLabel_->setObjectName(QStringLiteral("TypeBadgeLabel"));
@@ -184,17 +188,15 @@ void ObjectInspectorPanel::BuildGeneralCard(QVBoxLayout* layout)
 
     auto* rowName = new QWidget(cardGeneral_->Content());
     auto* lName = new QHBoxLayout(rowName);
-    lName->setContentsMargins(0, 0, 0, 0);
-    lName->setSpacing(6);
+    InspectorCardStyle::ApplyRowLayout(lName);
 
     labelName_ = new QLabel(Tr("Имя", "Name"), rowName);
-    labelName_->setObjectName(QStringLiteral("CardFieldLabel"));
-    labelName_->setFixedWidth(40);
+    InspectorCardStyle::ApplyLabelStyle(labelName_);
     lName->addWidget(labelName_);
 
     objectName_ = new QLineEdit(rowName);
     objectName_->setMaxLength(120);
-    objectName_->setFixedHeight(22);
+    objectName_->setFixedHeight(InspectorCardStyle::kFieldHeight);
     connect(objectName_, &QLineEdit::editingFinished, this, [this] {
         if (refreshing_ || selectedId_ == 0) return;
         emit NameEditingFinished(selectedId_, objectName_->text().trimmed());
@@ -208,19 +210,21 @@ void ObjectInspectorPanel::BuildGeneralCard(QVBoxLayout* layout)
 void ObjectInspectorPanel::BuildCharacterCard(QVBoxLayout* layout)
 {
     cardCharacter_ = new CollapsibleCard(Tr("Персонаж", "Character"), this, true);
+    cardCharacter_->setObjectName(QStringLiteral("CharacterCard"));
+    cardCharacter_->SetInfo(Tr("Персонаж", "Character"), Tr("Параметры контроллера персонажа: скорость перемещения.", "Character controller parameters: movement speed."));
     characterInspector_ = cardCharacter_;
     auto* cl = cardCharacter_->ContentLayout();
 
     auto* rowSpeed = new QWidget(cardCharacter_->Content());
     auto* lSpeed = new QHBoxLayout(rowSpeed);
-    lSpeed->setContentsMargins(0, 0, 0, 0); lSpeed->setSpacing(6);
+    InspectorCardStyle::ApplyRowLayout(lSpeed);
     characterSpeedLabel_ = new QLabel(Tr("Скорость, ед/с", "Speed, u/s"), rowSpeed);
-    characterSpeedLabel_->setObjectName(QStringLiteral("CardFieldLabel"));
+    InspectorCardStyle::ApplyLabelStyle(characterSpeedLabel_);
     lSpeed->addWidget(characterSpeedLabel_);
 
     characterSpeed_ = new NoWheelDoubleSpinBox(rowSpeed);
     characterSpeed_->setObjectName(QStringLiteral("CharacterSpeed"));
-    characterSpeed_->setFixedHeight(22); characterSpeed_->setRange(0, 10000); characterSpeed_->setKeyboardTracking(false);
+    characterSpeed_->setFixedHeight(InspectorCardStyle::kFieldHeight); characterSpeed_->setRange(0, 10000); characterSpeed_->setKeyboardTracking(false);
     connect(characterSpeed_, &QDoubleSpinBox::editingFinished, this, [this] {
         if (!refreshing_ && selectedId_) emit CharacterSpeedEditingFinished(selectedId_, characterSpeed_->value());
     });
@@ -234,6 +238,8 @@ void ObjectInspectorPanel::BuildCharacterCard(QVBoxLayout* layout)
 void ObjectInspectorPanel::BuildPhysicsCard(QVBoxLayout* layout)
 {
     cardPhysics_ = new CollapsibleCard(Tr("Физика", "Physics"), this, true);
+    cardPhysics_->setObjectName(QStringLiteral("PhysicsCard"));
+    cardPhysics_->SetInfo(Tr("Физика", "Physics"), Tr("Физические свойства твердого тела — симуляция Jolt Physics в режиме Play.\nФорма коллизии, масса, трение и упругость.", "Rigid body physics properties: Jolt Physics simulation in Play mode.\nCollision shape, mass, friction, and restitution."));
     physicsInspector_ = cardPhysics_;
     auto* cl = cardPhysics_->ContentLayout();
     auto emitChanged = [this] {
@@ -243,8 +249,7 @@ void ObjectInspectorPanel::BuildPhysicsCard(QVBoxLayout* layout)
 
     auto* rowTop = new QWidget(cardPhysics_->Content());
     auto* lTop = new QHBoxLayout(rowTop);
-    lTop->setContentsMargins(0, 0, 0, 0);
-    lTop->setSpacing(6);
+    InspectorCardStyle::ApplyRowLayout(lTop);
     physicsEnabled_ = new QCheckBox(Tr("Включить физику", "Enable physics"), rowTop);
     physicsEnabled_->setObjectName(QStringLiteral("PhysicsEnabled"));
     connect(physicsEnabled_, &QCheckBox::clicked, this, emitChanged);
@@ -258,15 +263,13 @@ void ObjectInspectorPanel::BuildPhysicsCard(QVBoxLayout* layout)
     auto addComboRow = [&](int labelIndex, const QString& label, QComboBox*& combo) {
         auto* row = new QWidget(cardPhysics_->Content());
         auto* l = new QHBoxLayout(row);
-        l->setContentsMargins(0, 0, 0, 0);
-        l->setSpacing(6);
+        InspectorCardStyle::ApplyRowLayout(l);
         physicsRowLabels_[labelIndex] = new QLabel(label, row);
-        physicsRowLabels_[labelIndex]->setObjectName(QStringLiteral("CardFieldLabel"));
-        physicsRowLabels_[labelIndex]->setFixedWidth(80);
+        InspectorCardStyle::ApplyLabelStyle(physicsRowLabels_[labelIndex]);
         l->addWidget(physicsRowLabels_[labelIndex]);
         combo = new QComboBox(row);
         combo->setObjectName(QStringLiteral("PhysicsCombo%1").arg(labelIndex));
-        combo->setFixedHeight(22);
+        combo->setFixedHeight(InspectorCardStyle::kFieldHeight);
         connect(combo, &QComboBox::currentIndexChanged, this, [emitChanged](int) { emitChanged(); });
         l->addWidget(combo, 1);
         cl->addWidget(row);
@@ -278,19 +281,15 @@ void ObjectInspectorPanel::BuildPhysicsCard(QVBoxLayout* layout)
                           double minV, double maxV, double step) {
         auto* row = new QWidget(cardPhysics_->Content());
         auto* l = new QHBoxLayout(row);
-        l->setContentsMargins(0, 0, 0, 0);
-        l->setSpacing(6);
+        InspectorCardStyle::ApplyRowLayout(l);
         physicsRowLabels_[labelIndex] = new QLabel(label, row);
-        physicsRowLabels_[labelIndex]->setObjectName(QStringLiteral("CardFieldLabel"));
-        physicsRowLabels_[labelIndex]->setFixedWidth(80);
+        InspectorCardStyle::ApplyLabelStyle(physicsRowLabels_[labelIndex]);
         l->addWidget(physicsRowLabels_[labelIndex]);
         spin = new NoWheelDoubleSpinBox(row);
         spin->setObjectName(QStringLiteral("PhysicsValue%1").arg(labelIndex));
-        spin->setFixedHeight(22);
-        spin->setRange(minV, maxV);
-        spin->setDecimals(2);
-        spin->setSingleStep(step);
-        spin->setKeyboardTracking(false);
+        spin->setFixedHeight(InspectorCardStyle::kFieldHeight);
+        spin->setRange(minV, maxV); spin->setDecimals(2);
+        spin->setSingleStep(step); spin->setKeyboardTracking(false);
         connect(spin, &QDoubleSpinBox::editingFinished, this, emitChanged);
         l->addWidget(spin, 1);
         cl->addWidget(row);
@@ -454,45 +453,49 @@ void ObjectInspectorPanel::Refresh(
             continue;
 
         RefreshProjectProperties(view, object);
-        const bool sceneCamera = CameraGuide::IsCamera(object);
-        cardCamera_->setVisible(sceneCamera);
-        if (sceneCamera) {
+        selectedType_ = object.type;
+        const std::string& type = object.type;
+        const bool isModel = (type == "Engine.Model"), isPrimitive = (type.rfind("Primitive.", 0) == 0);
+        const bool isMesh = isModel || isPrimitive;
+        const bool isPointLight = object.hasPointLight || (type == "Light.Point") || (type == "Engine.PointLight");
+        const bool isDirLight = (type == "Light.Directional"), isLight = isPointLight || isDirLight;
+        selectedLight = isLight;
+        const bool isCharacter = (object.gameplayKind == 1 || type == "Gameplay.Character" || type == "Character");
+        const bool isCamera = CameraGuide::IsCamera(object);
+        const bool isParticles = (type == "Particles" || type.find("Particle") != std::string::npos);
+
+        // Preserved saved data guards (no silent loss of existing components)
+        const bool hasSavedPhysics = object.hasPhysics && object.physics.enabled != 0;
+        const bool hasSavedModel = !object.modelAsset.empty(), hasSavedMaterial = !object.materialAsset.empty();
+        const bool hasSavedScript = !object.scriptAsset.empty();
+
+        typeBadgeLabel_->setText(QString::fromStdString(object.type));
+        selectionLabel_->setText(QStringLiteral("%1 · ID %2").arg(QString::fromStdString(object.name)).arg(object.id));
+
+        cardCamera_->setVisible(isCamera);
+        if (isCamera) {
             EngineCameraInfo editor{};
             const bool valid = readViewportCamera && readViewportCamera(editor);
             cardCamera_->Refresh(object, view, valid ? &editor : nullptr);
         }
-        // selectedLight updated below after determining type
-        typeBadgeLabel_->setText(QString::fromStdString(object.type));
-        selectionLabel_->setText(QStringLiteral("%1 · ID %2").arg(QString::fromStdString(object.name)).arg(object.id));
-        characterInspector_->setVisible(object.gameplayKind == 1 && object.propertySchema.find("/moveSpeed") == std::string::npos);
+
+        characterInspector_->setVisible((isCharacter || object.gameplayKind == 1) && object.propertySchema.find("/moveSpeed") == std::string::npos);
         if (object.gameplayKind == 1 && canReplaceField(characterSpeed_))
             characterSpeed_->setValue(QJsonDocument::fromJson(QByteArray::fromStdString(object.projectData)).object()["moveSpeed"].toDouble(5));
 
-        // Physics is available on every object; unconfigured objects show the defaults.
-        {
+        const bool showPhysics = isMesh || isCharacter || (!isLight && !isCamera && hasSavedPhysics);
+        if (showPhysics) {
             const EnginePhysicsObjectState state = object.hasPhysics
                 ? object.physics
                 : EnginePhysicsObjectState{0u, 1u, 0u, 0.5f, 0.0f, 1000.0f};
             if (canReplaceField(physicsEnabled_)) physicsEnabled_->setChecked(state.enabled != 0);
-            if (canReplaceField(physicsBodyType_))
-                physicsBodyType_->setCurrentIndex(std::min(std::max(static_cast<int>(state.bodyType), 0), 2));
-            if (canReplaceField(physicsShape_))
-                physicsShape_->setCurrentIndex(std::min(std::max(static_cast<int>(state.shapeType), 0), 2));
+            if (canReplaceField(physicsBodyType_)) physicsBodyType_->setCurrentIndex(std::min(std::max(static_cast<int>(state.bodyType), 0), 2));
+            if (canReplaceField(physicsShape_)) physicsShape_->setCurrentIndex(std::min(std::max(static_cast<int>(state.shapeType), 0), 2));
             if (canReplaceField(physicsFriction_)) physicsFriction_->setValue(state.friction);
             if (canReplaceField(physicsRestitution_)) physicsRestitution_->setValue(state.restitution);
             if (canReplaceField(physicsDensity_)) physicsDensity_->setValue(state.density);
-            physicsInspector_->show();
         }
-
-        selectedType_ = object.type;
-        const std::string& type = object.type;
-        const bool isModel = (type == "Engine.Model");
-        const bool isPrimitive = (type.rfind("Primitive.", 0) == 0);
-        const bool isPointLight = object.hasPointLight || (type == "Light.Point") || (type == "Engine.PointLight");
-        const bool isDirLight = (type == "Light.Directional");
-        selectedLight = isPointLight || isDirLight;
-        const bool isCharacter = (object.gameplayKind == 1 || type == "Gameplay.Character" || type == "Character");
-        const bool isParticles = (type == "Particles" || type.find("Particle") != std::string::npos);
+        physicsInspector_->setVisible(showPhysics);
 
         if (isDirLight) {
             const auto data = QJsonDocument::fromJson(QByteArray::fromStdString(object.projectData)).object();
@@ -522,8 +525,8 @@ void ObjectInspectorPanel::Refresh(
             UpdateLightColorButton(object.pointLight.color); cardLight_->show();
         } else { cardLight_->hide(); }
 
-        const bool showGeometry = isModel || isPrimitive;
-        const bool showMaterial = isModel || isPrimitive;
+        const bool showGeometry = isMesh || (!isLight && !isCamera && hasSavedModel);
+        const bool showMaterial = isMesh || (!isLight && !isCamera && hasSavedMaterial);
         // Models expose per-part material slots through the property schema.
         const bool modelHasProperties = isModel && propertiesLayout_->count() > 0;
         const bool showProperties = modelHasProperties || (!isModel && !isPrimitive && !isPointLight && !isDirLight && !isParticles);
@@ -570,13 +573,15 @@ void ObjectInspectorPanel::Refresh(
         lastSlots_ = slotInfos;
         if (properties_->isHidden() == showProperties)
             properties_->setVisible(showProperties);
-        // Скрипт — у любого объекта сцены, если игровой модуль их поддерживает.
-        cardScript_->SetData(QString::fromStdString(object.scriptAsset), true);
-        cardScript_->SetVariables(QString::fromStdString(object.scriptAsset), QString::fromStdString(object.scriptVariables),
-                                  true);
-        cardScript_->setVisible(view.scripts);
-        // Карточка автомата — у типов со свойствами stateMachine и machineMemory (AiCharacter и его наследники).
-        const bool aiMachine = HasAiMachine(object.propertySchema);
+
+        const bool showScript = !isLight ? (view.scripts || hasSavedScript) : hasSavedScript;
+        if (showScript) {
+            cardScript_->SetData(QString::fromStdString(object.scriptAsset), true);
+            cardScript_->SetVariables(QString::fromStdString(object.scriptAsset), QString::fromStdString(object.scriptVariables), true);
+        }
+        cardScript_->setVisible(showScript);
+
+        const bool aiMachine = !isLight && !isCamera && HasAiMachine(object.propertySchema);
         if (aiMachine)
         {
             const auto data = QJsonDocument::fromJson(QByteArray::fromStdString(object.projectData)).object();

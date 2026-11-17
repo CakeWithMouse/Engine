@@ -1,0 +1,36 @@
+# Shared by repository targets and installed SDK consumers.
+function(pain_generate_components target catalog)
+    if(NOT catalog MATCHES "^[A-Za-z_][A-Za-z0-9_]*$")
+        message(FATAL_ERROR "Invalid component catalog: ${catalog}")
+    endif()
+    if(NOT ARGN)
+        message(FATAL_ERROR "pain_generate_components requires source roots")
+    endif()
+    set(output "${CMAKE_CURRENT_BINARY_DIR}/generated/${target}")
+    file(MAKE_DIRECTORY "${output}")
+    set(roots "")
+    foreach(root IN LISTS ARGN)
+        get_filename_component(root "${root}" ABSOLUTE BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+        string(APPEND roots "${root}\n")
+    endforeach()
+    file(GENERATE OUTPUT "${output}/roots.txt" CONTENT "${roots}")
+    if(CMAKE_CROSSCOMPILING)
+        if(NOT EXISTS "${PAIN_HOST_COMPONENT_GENERATOR}")
+            message(FATAL_ERROR "Cross compilation needs PAIN_HOST_COMPONENT_GENERATOR built for the build machine")
+        endif()
+        set(generator "${PAIN_HOST_COMPONENT_GENERATOR}")
+    elseif(TARGET ComponentGenerator)
+        set(generator ComponentGenerator)
+    else()
+        set(generator PainEngine::ComponentGenerator)
+    endif()
+    # Scan on every build to detect added and removed annotated files. The tool
+    # only rewrites changed outputs, preserving incremental compilation.
+    add_custom_target(${target}Components
+        COMMAND ${generator} "${output}/roots.txt" "${output}" "${catalog}"
+        BYPRODUCTS "${output}/GeneratedComponents.cpp" "${output}/GeneratedComponents.h" "${output}/ProjectTypes.tsv"
+        VERBATIM)
+    add_dependencies(${target} ${target}Components)
+    target_sources(${target} PRIVATE "${output}/GeneratedComponents.cpp")
+    target_include_directories(${target} PRIVATE "${output}")
+endfunction()

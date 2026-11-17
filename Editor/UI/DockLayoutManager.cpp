@@ -60,7 +60,8 @@ void DockLayoutManager::ApplyDefaultLayout(QMainWindow* window,
                                           QDockWidget* sceneObjectsDock,
                                           QDockWidget* inspectorDock,
                                           QDockWidget* fileDock,
-                                          QDockWidget* consoleDock)
+                                          QDockWidget* consoleDock,
+                                          QDockWidget* aiDiagnosticsDock)
 {
     if (!window) return;
 
@@ -70,6 +71,11 @@ void DockLayoutManager::ApplyDefaultLayout(QMainWindow* window,
             dock->show();
             UnlockDockResizing(dock);
         }
+    }
+    if (aiDiagnosticsDock) {
+        aiDiagnosticsDock->setFloating(false);
+        aiDiagnosticsDock->hide();
+        UnlockDockResizing(aiDiagnosticsDock);
     }
 
     if (sceneObjectsDock) window->addDockWidget(Qt::TopDockWidgetArea, sceneObjectsDock);
@@ -93,6 +99,10 @@ void DockLayoutManager::ApplyDefaultLayout(QMainWindow* window,
     if (fileDock && consoleDock) {
         window->tabifyDockWidget(consoleDock, fileDock);
         fileDock->raise();
+    }
+    if (inspectorDock && aiDiagnosticsDock) {
+        window->tabifyDockWidget(inspectorDock, aiDiagnosticsDock);
+        aiDiagnosticsDock->hide();
     }
 
     if (viewportDock && (fileDock || consoleDock)) {

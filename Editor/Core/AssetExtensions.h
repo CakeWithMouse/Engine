@@ -19,6 +19,9 @@ enum class AssetKind
     Texture,
     Audio,
     Material,
+    UI,
+    Script,
+    AiMachine,
     Unknown
 };
 
@@ -50,6 +53,24 @@ inline const QStringList& MaterialExtensions()
     return value;
 }
 
+inline const QStringList& UiExtensions()
+{
+    static const QStringList value{QStringLiteral("ui")};
+    return value;
+}
+
+inline const QStringList& ScriptExtensions()
+{
+    static const QStringList value{QStringLiteral("vscript")};
+    return value;
+}
+
+inline const QStringList& AiMachineExtensions()
+{
+    static const QStringList value{QStringLiteral("fsm")};
+    return value;
+}
+
 inline AssetKind KindForFile(const QString& path)
 {
     const QString extension = QFileInfo(path).suffix().toLower();
@@ -61,6 +82,12 @@ inline AssetKind KindForFile(const QString& path)
         return AssetKind::Audio;
     if (MaterialExtensions().contains(extension))
         return AssetKind::Material;
+    if (UiExtensions().contains(extension))
+        return AssetKind::UI;
+    if (ScriptExtensions().contains(extension))
+        return AssetKind::Script;
+    if (AiMachineExtensions().contains(extension))
+        return AssetKind::AiMachine;
     return AssetKind::Unknown;
 }
 
@@ -83,6 +110,12 @@ inline QString DialogFilter(AssetKind kind)
         return Tr("Аудио", "Audio") + QStringLiteral(" (") + patterns(AudioExtensions()) + QStringLiteral(")");
     case AssetKind::Material:
         return Tr("Материалы", "Materials") + QStringLiteral(" (") + patterns(MaterialExtensions()) + QStringLiteral(")");
+    case AssetKind::UI:
+        return Tr("Интерфейсы", "Interfaces") + QStringLiteral(" (") + patterns(UiExtensions()) + QStringLiteral(")");
+    case AssetKind::Script:
+        return Tr("Визуальные скрипты", "Visual scripts") + QStringLiteral(" (") + patterns(ScriptExtensions()) + QStringLiteral(")");
+    case AssetKind::AiMachine:
+        return Tr("Автоматы ИИ", "AI state machines") + QStringLiteral(" (") + patterns(AiMachineExtensions()) + QStringLiteral(")");
     case AssetKind::Unknown:
         break;
     }
@@ -94,6 +127,36 @@ inline bool ReimportSourceMatches(const QString& assetPath, const QString& sourc
 {
     const AssetKind kind = KindForFile(assetPath);
     return kind != AssetKind::Unknown && KindForFile(sourcePath) == kind;
+}
+
+inline QString NormalizeVirtualPath(const QString& path, const QString& contentRoot = QString())
+{
+    if (path.isEmpty())
+        return QString();
+
+    const QString clean = QDir::fromNativeSeparators(path.trimmed());
+    if (clean.startsWith(QStringLiteral("/Game/"), Qt::CaseInsensitive))
+        return QStringLiteral("/Game/") + clean.mid(6);
+    if (clean.startsWith(QStringLiteral("Game/"), Qt::CaseInsensitive))
+        return QStringLiteral("/Game/") + clean.mid(5);
+
+    if (!contentRoot.isEmpty() && QDir(contentRoot).exists())
+    {
+        const QDir root(contentRoot);
+        const QString rel = root.relativeFilePath(QFileInfo(path).absoluteFilePath());
+        if (rel != QStringLiteral("..") &&
+            !rel.startsWith(QStringLiteral("../")) &&
+            !rel.startsWith(QStringLiteral("..\\")) &&
+            !QDir::isAbsolutePath(rel))
+        {
+            return QStringLiteral("/Game/") + QDir::fromNativeSeparators(rel);
+        }
+    }
+
+    if (!clean.startsWith(QLatin1Char('/')) && !clean.contains(QLatin1Char(':')))
+        return QStringLiteral("/Game/") + clean;
+
+    return clean;
 }
 
 struct ProjectAssetItem
@@ -114,6 +177,9 @@ inline std::vector<ProjectAssetItem> ListProjectAssets(const QString& contentRoo
         : (kind == AssetKind::Texture) ? TextureExtensions()
         : (kind == AssetKind::Audio) ? AudioExtensions()
         : (kind == AssetKind::Material) ? MaterialExtensions()
+        : (kind == AssetKind::UI) ? UiExtensions()
+        : (kind == AssetKind::Script) ? ScriptExtensions()
+        : (kind == AssetKind::AiMachine) ? AiMachineExtensions()
         : QStringList{};
 
     if (extensions.isEmpty())

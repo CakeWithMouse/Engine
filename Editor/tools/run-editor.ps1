@@ -5,9 +5,10 @@
 )
 $ErrorActionPreference = 'Stop'
 
-if (!$All) {
-    $Fast = $true
-}
+# Mode selection:
+# -Fast activates fast mode (core editor targets only).
+# Without -Fast (or with -All), full build mode is used (entire solution, all games, Physics, AI).
+$isFastMode = $Fast -and !$All
 
 $repoRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot "../.."))
 
@@ -46,7 +47,7 @@ if (Test-Path -LiteralPath $enginesDir) {
     }
 }
 
-Log-Step "=== 4. Building Engine + Editor (Debug) [Mode: $(if ($Fast) {'Fast'} else {'All'})] ===" "Cyan"
+Log-Step "=== 4. Building Engine + Editor (Debug) [Mode: $(if ($isFastMode) {'Fast'} else {'Full'})] ===" "Cyan"
 $vswhere = Join-Path ([Environment]::GetEnvironmentVariable('ProgramFiles(x86)')) 'Microsoft Visual Studio\Installer\vswhere.exe'
 if (!(Test-Path -LiteralPath $vswhere)) { throw 'vswhere.exe not found.' }
 $msbuild = & $vswhere -latest -products '*' -requires Microsoft.Component.MSBuild -find 'MSBuild\**\Bin\MSBuild.exe' | Select-Object -First 1
@@ -92,23 +93,37 @@ if (Test-Path -LiteralPath $assimpHeader) {
         $buildArgs += ('/p:VcpkgRoot="' + $vcpkgClean + '\\"')
         $env:VCPKG_ROOT = $vcpkgClean
     }
-    Log-Step "Assimp detected in Engine/vcpkg_installed: building with EngineEnableAssimp=true" "Green"
+    Log-Step "Assimp detected in Engine/vcpkg_installed: building with EngineEnableAssimp=true (Model Import)" "Green"
 }
 
-if ($Fast) {
+$joltHeader = Join-Path $repoRoot 'Engine/vcpkg_installed/x64-windows/include/Jolt/Jolt.h'
+if (Test-Path -LiteralPath $joltHeader) {
+    $buildArgs += '/p:EngineEnableJolt=true'
+    Log-Step "Jolt Physics SDK detected: building with EngineEnableJolt=true (Physics enabled)" "Green"
+} else {
+    Log-Step "Jolt Physics SDK not found: building with fallback physics" "DarkGray"
+}
+
+$aiNavHeader = Join-Path $repoRoot 'Engine/Include/Engine/AI/Navigation.h'
+if (Test-Path -LiteralPath $aiNavHeader) {
+    Log-Step "AI & Navigation SDK detected: building with AI diagnostics and squad/guard controllers" "Green"
+}
+
+if ($isFastMode) {
     $fastProjects = @("Engine", "EngineRuntime", "SceneProject", "EditorModule", "EngineLauncher")
     
     # Check if untracked/modified files exist in standalone games or engine tests
     $gameDirs = @("Game/Pong", "Game/Battle", "Game/SunGame", "Game/BasicExamples", "Game/Katamari", "Engine/tests")
     $gitStatus = & git.exe -C $repoRoot status --porcelain -- $gameDirs 2>$null
     if ($gitStatus) {
-        Log-Step "Changes detected in Games/Tests; building full solution..." "Yellow"
+        Log-Step "Changes detected in Games/Tests; building full solution (all modules)..." "Yellow"
     } else {
-        Log-Step "Fast mode: building target projects ($($fastProjects -join ', '))..." "Green"
+        Log-Step "Fast mode (-Fast): building core targets ($($fastProjects -join ', '))..." "Green"
+        Log-Step "Note: Standalone game modules (Battle with AI, Pong, etc.) are skipped in -Fast mode." "DarkGray"
         $buildArgs += "/t:$($fastProjects -join ';')"
     }
 } else {
-    Log-Step "All mode: building entire solution..." "Yellow"
+    Log-Step "Full mode (without -Fast): building entire solution (Engine, Editor, SceneProject, Battle/AI, Physics, Games)..." "Cyan"
 }
 
 Log-Step "Invoking MSBuild on $solutionPath..." "Gray"
@@ -178,6 +193,17 @@ if ($proc.ExitCode -ne 0) {
 
 $buildTimeSec = [math]::Round($sw.Elapsed.TotalSeconds, 2)
 Log-Step "Build finished successfully in $buildTimeSec сек." "Green"
+Log-Step "=== Build Summary ===" "Cyan"
+Log-Step "  Configuration : Debug (x64)" "Gray"
+Log-Step "  Mode          : $(if ($isFastMode) {'Fast (Core projects only)'} else {'Full (All modules + Games + Physics + AI)'})" "Gray"
+Log-Step "  Physics (Jolt): $(if (Test-Path -LiteralPath $joltHeader) {'Enabled (Jolt.lib)'} else {'Disabled / Fallback'})" "Gray"
+Log-Step "  Model Import  : $(if (Test-Path -LiteralPath $assimpHeader) {'Enabled (Assimp)'} else {'Basic / Stub'})" "Gray"
+Log-Step "  AI Navigation : Enabled (Navigation Grid, Probe, AI Diagnostics)" "Gray"
+if (!$isFastMode) {
+    Log-Step "  Game Modules  : All built (SceneProject/Game.dll, Battle with AI, SunGame, Pong, Katamari)" "Gray"
+} else {
+    Log-Step "  Game Modules  : Core only (SceneProject/Game.dll). For Battle with AI run without -Fast." "Gray"
+}
 
 Log-Step "=== 5. Ensuring Shaders are deployed to Runtime and LocalAppData Engines ===" "Cyan"
 $sourceShader = Join-Path $repoRoot "Engine/Content/Shaders/EditorOverlay.hlsl"

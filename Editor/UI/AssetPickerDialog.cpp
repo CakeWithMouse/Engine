@@ -56,10 +56,30 @@ AssetPickerDialog::AssetPickerDialog(
         setObjectName(QStringLiteral("AssetPickerDialog"));
         setWindowTitle(Tr("Выбор модели", "Choose Model"));
     }
-    else
+    else if (kind_ == EditorCore::AssetKind::Material)
     {
         setObjectName(QStringLiteral("AssetPickerDialog"));
         setWindowTitle(Tr("Выбор материала", "Choose Material"));
+    }
+    else if (kind_ == EditorCore::AssetKind::UI)
+    {
+        setObjectName(QStringLiteral("AssetPickerDialog"));
+        setWindowTitle(Tr("Выбор интерфейса", "Choose Interface"));
+    }
+    else if (kind_ == EditorCore::AssetKind::Script)
+    {
+        setObjectName(QStringLiteral("AssetPickerDialog"));
+        setWindowTitle(Tr("Выбор скрипта", "Choose Script"));
+    }
+    else if (kind_ == EditorCore::AssetKind::AiMachine)
+    {
+        setObjectName(QStringLiteral("AssetPickerDialog"));
+        setWindowTitle(Tr("Выбор автомата ИИ", "Choose AI State Machine"));
+    }
+    else
+    {
+        setObjectName(QStringLiteral("AssetPickerDialog"));
+        setWindowTitle(Tr("Выбор ресурса", "Choose Asset"));
     }
 
     resize(640, 480);

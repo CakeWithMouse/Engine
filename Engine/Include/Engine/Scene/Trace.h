@@ -7,7 +7,9 @@
 #include <optional>
 #include <vector>
 #include <glm/glm.hpp>
+#if defined(_WIN32)
 #include <DirectXMath.h>
+#endif
 
 namespace Trace
 {
@@ -110,8 +112,13 @@ bool Valid(const Query &query);
 Result IntersectPlane(Ray ray, glm::vec3 point, glm::vec3 normal, Backfaces backfaces = Backfaces::Include);
 Result IntersectAabb(Ray ray, glm::vec3 minimum, glm::vec3 maximum);
 Result IntersectTriangle(Ray ray, glm::vec3 a, glm::vec3 b, glm::vec3 c, Backfaces backfaces = Backfaces::Include);
-// Matrices use Player's stored (shader-transposed) convention. Ray starts on the near plane.
+// Column-vector matrices, clip depth [0, 1]. Ray starts on the near plane.
+RayResult ScreenPointToRay(ViewportPoint point, uint32_t width, uint32_t height, const glm::mat4 &view,
+                           const glm::mat4 &projection, float maxDistance = 10000);
+#if defined(_WIN32)
+// Compatibility with Player's stored (shader-transposed) DirectX matrices.
 RayResult ScreenPointToRay(ViewportPoint point, uint32_t width, uint32_t height, const DirectX::XMFLOAT4X4 &view,
                            const DirectX::XMFLOAT4X4 &projection, float maxDistance = 10000);
+#endif
 const char *StatusName(Status status);
 } // namespace Trace

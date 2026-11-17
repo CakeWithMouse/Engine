@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EditorLocale.h"
+#include "InspectorCardStyle.h"
 
 #include <QComboBox>
 #include <QFormLayout>
@@ -31,8 +32,7 @@ public:
         : QWidget(parent), namePrefix_(std::move(namePrefix)), resetPrefix_(std::move(resetPrefix)), texts_(std::move(texts))
     {
         form_ = new QFormLayout(this);
-        form_->setContentsMargins(0, 0, 0, 0);
-        form_->setSpacing(3);
+        InspectorCardStyle::ApplyRowLayout(form_);
     }
 
     // declared — [{"name","type","value"}] из файла; values — JSON-объект значений объекта («» — все как в файле).
@@ -139,7 +139,7 @@ private:
         else
         {
             auto* field = new QLineEdit(row);
-            field->setFixedHeight(22);
+            field->setFixedHeight(InspectorCardStyle::kFieldHeight);
             field->setPlaceholderText(ValueText(fallback));
             field->setText(overridden ? ValueText(values_.value(name)) : QString());
             field->setToolTip(Tr(texts_.emptyRu, texts_.emptyEn).arg(ValueText(fallback)));

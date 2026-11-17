@@ -7,6 +7,13 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <cstring>
+#if defined(_WIN32)
+#define VFS_READ_STRNICMP _strnicmp
+#else
+#include <strings.h>
+#define VFS_READ_STRNICMP strncasecmp
+#endif
 
 namespace VfsRead
 {
@@ -98,7 +105,7 @@ namespace VfsRead
                 if (norm == mount.virtualRoot ||
                     (norm.size() > mount.virtualRoot.size() &&
                      norm[mount.virtualRoot.size()] == '/' &&
-                     _strnicmp(norm.c_str(), mount.virtualRoot.c_str(), mount.virtualRoot.size()) == 0))
+                     VFS_READ_STRNICMP(norm.c_str(), mount.virtualRoot.c_str(), mount.virtualRoot.size()) == 0))
                 {
                     return norm;
                 }
@@ -106,21 +113,21 @@ namespace VfsRead
         }
 
         // Check if starts with "Engine/" or "EngineContent/"
-        if (_strnicmp(pathStr.c_str(), "Engine/", 7) == 0)
+        if (VFS_READ_STRNICMP(pathStr.c_str(), "Engine/", 7) == 0)
         {
             return VirtualFileSystem::NormalizeVirtualPath("/" + pathStr);
         }
-        if (_strnicmp(pathStr.c_str(), "EngineContent/", 14) == 0)
+        if (VFS_READ_STRNICMP(pathStr.c_str(), "EngineContent/", 14) == 0)
         {
             return VirtualFileSystem::NormalizeVirtualPath("/Engine/" + pathStr.substr(14));
         }
 
         // Check if starts with "Game/" or "GameContent/"
-        if (_strnicmp(pathStr.c_str(), "Game/", 5) == 0)
+        if (VFS_READ_STRNICMP(pathStr.c_str(), "Game/", 5) == 0)
         {
             return VirtualFileSystem::NormalizeVirtualPath("/" + pathStr);
         }
-        if (_strnicmp(pathStr.c_str(), "GameContent/", 12) == 0)
+        if (VFS_READ_STRNICMP(pathStr.c_str(), "GameContent/", 12) == 0)
         {
             return VirtualFileSystem::NormalizeVirtualPath("/Game/" + pathStr.substr(12));
         }
@@ -151,7 +158,7 @@ namespace VfsRead
             const std::string mountGen = mount.physicalPath.generic_u8string();
             const size_t mLen = mountGen.size();
             if (absGeneric.size() >= mLen &&
-                _strnicmp(absGeneric.c_str(), mountGen.c_str(), mLen) == 0)
+                VFS_READ_STRNICMP(absGeneric.c_str(), mountGen.c_str(), mLen) == 0)
             {
                 if (absGeneric.size() == mLen)
                 {

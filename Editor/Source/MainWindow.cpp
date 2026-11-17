@@ -124,18 +124,18 @@ void EditorMainWindow::BuildUi()
 
     auto* headerBar = new ViewportHeaderBar(viewportContainer);
     viewport_->AttachHeaderBar(headerBar);
-    auto* aiDock = new QDockWidget(Tr("AI · Диагностика", "AI · Diagnostics"), this);
-    aiDock->setObjectName("AiDiagnosticsDock");
-    aiDock->setWidget(new AiDiagnosticsPanel(host_, viewport_, aiDock));
-    addDockWidget(Qt::RightDockWidgetArea, aiDock);
-    aiDock->hide();
-    auto* aiButton = new QToolButton(headerBar);
-    aiButton->setObjectName("btnAiDiagnostics");aiButton->setText("AI");
-    aiButton->setToolTip(Tr("Навигация, поля и диагностика AI", "Navigation, fields and AI diagnostics"));
-    aiButton->setCheckable(true);
-    static_cast<QHBoxLayout*>(headerBar->layout())->addWidget(aiButton);
-    connect(aiButton, &QToolButton::toggled, aiDock, &QDockWidget::setVisible);
-    connect(aiDock, &QDockWidget::visibilityChanged, aiButton, &QToolButton::setChecked);
+    aiDiagnosticsDock_ = new QDockWidget(Tr("Навигация и диагностика", "Navigation and Diagnostics"), this);
+    aiDiagnosticsDock_->setObjectName(QStringLiteral("AiDiagnosticsDock"));
+    aiDiagnosticsDock_->setAllowedAreas(Qt::AllDockWidgetAreas);
+    aiDiagnosticsDock_->setFeatures(
+        QDockWidget::DockWidgetMovable |
+        QDockWidget::DockWidgetFloatable |
+        QDockWidget::DockWidgetClosable
+    );
+    aiDiagnosticsDock_->setWidget(new AiDiagnosticsPanel(host_, viewport_, aiDiagnosticsDock_));
+    addDockWidget(Qt::RightDockWidgetArea, aiDiagnosticsDock_);
+    aiDiagnosticsDock_->hide();
+    DockLayoutManager::UnlockDockResizing(aiDiagnosticsDock_);
 
     viewportLayout->addWidget(headerBar);
     viewportLayout->addWidget(viewport_, 1);
@@ -232,6 +232,8 @@ void EditorMainWindow::BuildUi()
     actGrid_ = addToggle(Tr("Сетка", "Grid"), QStringLiteral("View.ToggleGrid"), QStringLiteral("view/grid"));
     actGizmo_ = addToggle(Tr("Гизмо", "Gizmo"), QStringLiteral("View.ToggleGizmo"), QStringLiteral("view/gizmo"));
     actIcons_ = addToggle(Tr("Иконки объектов", "Object Icons"), QStringLiteral("View.ToggleIcons"), QStringLiteral("view/icons"));
+    actAiDiag_ = addToggle(Tr("Показывать диагностику AI", "Show AI diagnostics"), QStringLiteral("View.ToggleAiDiagnostics"), QStringLiteral("ai/enabled"));
+    actAiDiag_->setObjectName(QStringLiteral("ViewAiDiagnostics"));
     auto* cameraGuides = viewMenu_->addAction(Tr("Камеры: направление и границы", "Cameras: direction and frustum"));
     cameraGuides->setObjectName("ViewCameraGuides");
     cameraGuides->setCheckable(true);
@@ -241,6 +243,7 @@ void EditorMainWindow::BuildUi()
         if (actGrid_) actGrid_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/grid"), true).toBool());
         if (actGizmo_) actGizmo_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/gizmo"), true).toBool());
         if (actIcons_) actIcons_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/icons"), true).toBool());
+        if (actAiDiag_) actAiDiag_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("ai/enabled"), false).toBool());
     });
 
     QMenu* aaMenu = viewMenu_->addMenu(Tr("Сглаживание", "Anti-aliasing"));
@@ -347,8 +350,10 @@ void EditorMainWindow::BuildSceneMenu()
     sceneMenu_->setEnabled(host_->HasScene());
     sceneMenu_->addAction(Tr("Восстановить несохранённую сцену…", "Recover Unsaved Scene…"), this, &EditorMainWindow::OfferRecovery);
     sceneMenu_->addAction(Tr("Сделать стартовой сценой", "Set Startup Scene"), this, [this] { SaveScene(false, [this] { SetStartupScene(); }); });
-    sceneMenu_->addAction(Tr("Экспорт игры…", "Export Game…"), this, [this] {
-        if (host_->PlayState() != EditorQtHost::Edit || !CloseMaterialEditors()) return;
+    auto* exportAction = sceneMenu_->addAction(Tr("Собрать EXE…", "Build Game EXE…"));
+    connect(exportAction, &QAction::triggered, this, [this, exportAction] {
+        if (exportProcess_ || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+        if (!CloseMaterialEditors([exportAction] { exportAction->trigger(); })) return;
         MaybeSave([this] { ExportProject(); });
     });
 
@@ -661,6 +666,8 @@ void EditorMainWindow::ShowViewportContextMenu(const QPoint& globalPos)
 
     if (inspectorDock_)
         menu.addAction(inspectorDock_->toggleViewAction());
+    if (aiDiagnosticsDock_)
+        menu.addAction(aiDiagnosticsDock_->toggleViewAction());
 
     menu.exec(globalPos);
 }
@@ -855,12 +862,9 @@ void EditorMainWindow::ConnectPanels()
         else CreateScriptForSelection();
     });
 
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseScriptRequested, this, [this]
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseScriptRequested, this, []
     {
-        if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit) return;
-        const QString path = QFileDialog::getOpenFileName(this, Tr("Скрипт из проекта", "Script from the project"),
-            QString::fromUtf8(host_->host().contentRoot), Tr("Визуальные скрипты (*.vscript)", "Visual scripts (*.vscript)"));
-        if (!path.isEmpty()) UseAsset(path);
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignScript"));
     });
 
     // Переменные скрипта у объекта: карточка читает их список из файла скрипта.
@@ -880,20 +884,9 @@ void EditorMainWindow::ConnectPanels()
     });
 
     connect(objectInspectorPanel_, &ObjectInspectorPanel::CreateAiMachineRequested, this, [this] { CreateAiMachineForSelection(); });
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseAiMachineRequested, this, [this]
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseAiMachineRequested, this, []
     {
-        if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit) return;
-        const QString root = QString::fromUtf8(host_->host().contentRoot);
-        const QString path = QFileDialog::getOpenFileName(this, Tr("Автомат ИИ из проекта", "AI state machine from the project"), root,
-                                                          Tr("Автоматы ИИ (*.fsm)", "AI state machines (*.fsm)"));
-        if (path.isEmpty()) return;
-        const QString relative = QDir(root).relativeFilePath(path);
-        if (relative.startsWith(QStringLiteral("..")) || QDir::isAbsolutePath(relative))
-        {
-            AppendLine(Tr("Автомат должен лежать в Content проекта.", "The machine must be inside the project's Content."));
-            return;
-        }
-        SetSelectedProperty(QStringLiteral("/stateMachine"), QStringLiteral("/Game/") + QDir::fromNativeSeparators(relative));
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignAiMachine"));
     });
     connect(objectInspectorPanel_, &ObjectInspectorPanel::OpenAiMachineRequested, this, [this](const QString& machine)
     {
@@ -1594,7 +1587,7 @@ void EditorMainWindow::ApplySavedOrInitialLayout()
     }
     else
     {
-        for (auto* dock : {static_cast<QDockWidget*>(viewportDock_), static_cast<QDockWidget*>(sceneObjectsDock_), static_cast<QDockWidget*>(inspectorDock_), static_cast<QDockWidget*>(fileDock_), static_cast<QDockWidget*>(consoleDock_)})
+        for (auto* dock : {static_cast<QDockWidget*>(viewportDock_), static_cast<QDockWidget*>(sceneObjectsDock_), static_cast<QDockWidget*>(inspectorDock_), static_cast<QDockWidget*>(fileDock_), static_cast<QDockWidget*>(consoleDock_), static_cast<QDockWidget*>(aiDiagnosticsDock_)})
         {
             if (dock) DockLayoutManager::UnlockDockResizing(dock);
         }
@@ -1603,7 +1596,7 @@ void EditorMainWindow::ApplySavedOrInitialLayout()
 
 void EditorMainWindow::ApplyDefaultLayout()
 {
-    DockLayoutManager::ApplyDefaultLayout(this, viewportDock_, sceneObjectsDock_, inspectorDock_, fileDock_, consoleDock_);
+    DockLayoutManager::ApplyDefaultLayout(this, viewportDock_, sceneObjectsDock_, inspectorDock_, fileDock_, consoleDock_, aiDiagnosticsDock_);
 }
 
 QString EditorMainWindow::ProjectPath() const
@@ -1704,19 +1697,40 @@ void EditorMainWindow::ExportProject()
     if (name == "." || name == ".." || name.contains('/') || name.contains('\\') || name.contains(':')) {
         QMessageBox::warning(this, QStringLiteral("Экспорт"), QStringLiteral("Укажите имя папки без пути.")); return;
     }
-    exportProcess_ = new QProcess(this);
-    exportProcess_->setProcessChannelMode(QProcess::MergedChannels);
-    connect(exportProcess_, &QProcess::readyReadStandardOutput, this, [this] { AppendLine(QString::fromUtf8(exportProcess_->readAllStandardOutput())); });
-    connect(exportProcess_, &QProcess::finished, this, [this](int code, QProcess::ExitStatus state) {
-        AppendLine(QString::fromUtf8(exportProcess_->readAllStandardOutput()));
-        QMessageBox::information(this, QStringLiteral("Экспорт игры"), code == 0 && state == QProcess::NormalExit
-            ? QStringLiteral("Готово. Запускайте Start.cmd в папке экспорта.") : QStringLiteral("Экспорт не завершён. Подробности в журнале и Validation.log временной папки."));
-        exportProcess_->deleteLater(); exportProcess_ = nullptr;
+    const auto destination = QDir(parent).filePath(name);
+    auto* process = exportProcess_ = new QProcess(this);
+    process->setProcessChannelMode(QProcess::MergedChannels);
+    connect(process, &QProcess::readyReadStandardOutput, this, [this, process] {
+        AppendLine(QString::fromUtf8(process->readAllStandardOutput()));
     });
-    connect(exportProcess_, &QProcess::errorOccurred, this, [this](QProcess::ProcessError error) {
+    connect(process, &QProcess::finished, this, [this, process, destination](int code, QProcess::ExitStatus state) {
+        AppendLine(QString::fromUtf8(process->readAllStandardOutput()));
+        process->deleteLater();
+        exportProcess_ = nullptr;
+        statusBar()->clearMessage();
+        const auto exe = QDir(destination).filePath(QStringLiteral("Game.exe"));
+        if (code != 0 || state != QProcess::NormalExit || !QFileInfo(exe).isFile()) {
+            consoleDock_->show();
+            consoleDock_->raise();
+            QMessageBox::warning(this, Tr("Сборка игры", "Game Build"),
+                Tr("Не удалось собрать Game.exe. Подробности в консоли.", "Could not build Game.exe. See the console for details."));
+            return;
+        }
+        if (QMessageBox::question(this, Tr("Сборка завершена", "Build Complete"),
+                Tr("%1\n\nЗапустить игру?", "%1\n\nRun the game?").arg(QDir::toNativeSeparators(exe))) == QMessageBox::Yes &&
+            !QProcess::startDetached(exe, {}, destination))
+            QMessageBox::warning(this, Tr("Сборка игры", "Game Build"), Tr("Не удалось запустить Game.exe.", "Could not start Game.exe."));
+    });
+    connect(process, &QProcess::errorOccurred, this, [this, process](QProcess::ProcessError error) {
         if (error != QProcess::FailedToStart) return;
-        AppendLine(exportProcess_->errorString()); exportProcess_->deleteLater(); exportProcess_ = nullptr;
+        AppendLine(process->errorString());
+        process->deleteLater();
+        exportProcess_ = nullptr;
+        statusBar()->clearMessage();
+        QMessageBox::warning(this, Tr("Сборка игры", "Game Build"),
+            Tr("Не удалось запустить EngineRuntime.exe для сборки.", "Could not start EngineRuntime.exe for the build."));
     });
-    exportProcess_->start(QDir(QCoreApplication::applicationDirPath()).filePath("EngineRuntime.exe"),
-        {"--export-project", QString::fromUtf8(host_->host().projectFile), "--destination", QDir(parent).filePath(name)});
+    statusBar()->showMessage(Tr("Сборка и проверка игры…", "Building and checking the game…"));
+    process->start(QDir(QCoreApplication::applicationDirPath()).filePath("EngineRuntime.exe"),
+        {"--export-project", QString::fromUtf8(host_->host().projectFile), "--destination", destination});
 }

@@ -126,6 +126,7 @@ void EditorTheme::UnsubscribeThemeChanged(int id)
 
 void EditorTheme::NotifyChanged()
 {
+    IconProvider::ClearCache();
     for (const auto& sub : subscribers_) {
         if (sub.second) sub.second();
     }

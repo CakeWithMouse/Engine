@@ -1,0 +1,6 @@
+file(GLOB libraries "${SOURCE}/*.dll")
+file(MAKE_DIRECTORY "${DESTINATION}")
+foreach(library IN LISTS libraries)
+    get_filename_component(name "${library}" NAME)
+    file(COPY_FILE "${library}" "${DESTINATION}/${name}" ONLY_IF_DIFFERENT)
+endforeach()

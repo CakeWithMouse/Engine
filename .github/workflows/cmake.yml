@@ -1,0 +1,51 @@
+name: CMake portability
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  portable:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            compiler: g++
+          - os: ubuntu-latest
+            compiler: clang++
+          - os: macos-latest
+            compiler: clang++
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake --preset portable -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}
+      - run: cmake --build --preset portable --parallel 4
+      - run: ctest --preset portable
+      - run: cmake --install build/cmake/portable --prefix build/sdk
+      - run: cmake -E rename build/sdk build/relocated-sdk
+      - run: cmake -S Engine/tests/portable/InstalledSdk -B build/sdk-consumer -DCMAKE_PREFIX_PATH=${{ github.workspace }}/build/relocated-sdk -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}
+      - run: cmake --build build/sdk-consumer --parallel 4
+      - run: ctest --test-dir build/sdk-consumer --output-on-failure
+  windows:
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        toolset: [v143, ClangCL]
+    steps:
+      - uses: actions/checkout@v4
+      # Project creation installs a complete engine release, including Editor.dll.
+      - name: Install Qt
+        uses: jurplel/install-qt-action@b344308e4483fc892e0d27b3cd1b173ebdd95f06 # v4
+        with:
+          version: '6.7.3'
+          arch: 'win64_msvc2019_64'
+          # QtSvg is included in the base archives, not an additional aqt module.
+          cache: true
+      - run: cmake -S . -B build/cmake/windows -G "Visual Studio 17 2022" -A x64 -T ${{ matrix.toolset }} -DPAIN_BUILD_EDITOR=ON "-DCMAKE_PREFIX_PATH=$env:QT_ROOT_DIR"
+      - run: cmake --build build/cmake/windows --config Debug --parallel 4
+      - run: ctest --test-dir build/cmake/windows -C Debug --output-on-failure
+      - run: ./Engine/BuildSupport/tests/Test-CMakeProjects.ps1 -Runtime ./build/cmake/windows/bin/Debug/Runtime
+      - run: cmake --install build/cmake/windows --config Debug --prefix build/sdk
+      - run: cmake -S build/sdk/share/PainEngine/ProjectTemplate -B build/sdk-game -G "Visual Studio 17 2022" -A x64 -T ${{ matrix.toolset }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/build/sdk
+      - run: cmake --build build/sdk-game --config Debug --parallel 4

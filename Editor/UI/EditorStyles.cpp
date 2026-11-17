@@ -91,6 +91,21 @@ QToolButton:pressed, QToolButton:checked {
     background-color: %11;
     border-color: %2;
 }
+QToolButton#InfoButton, QToolButton#CardInfoButton, QToolButton#AiLegendInfoButton, QToolButton#CameraGuideInfo {
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    padding: 0px;
+    margin: 0px;
+}
+QToolButton#InfoButton:hover, QToolButton#CardInfoButton:hover, QToolButton#AiLegendInfoButton:hover, QToolButton#CameraGuideInfo:hover {
+    background-color: %9;
+    border-color: %10;
+}
+QToolButton#InfoButton:pressed, QToolButton#CardInfoButton:pressed, QToolButton#AiLegendInfoButton:pressed, QToolButton#CameraGuideInfo:pressed {
+    background-color: %11;
+    border-color: %2;
+}
 QPushButton {
     background-color: %8;
     border: 1px solid %6;
@@ -292,7 +307,9 @@ QStatusBar {
 }
 
 /* Collapsible cards and inspector tokens */
-QFrame#CollapsibleCard, QWidget#CollapsibleCard {
+QFrame#CollapsibleCard, QWidget#CollapsibleCard, QFrame[collapsibleCard="true"], QWidget[collapsibleCard="true"],
+QFrame#GeneralCard, QFrame#TransformCard, QFrame#GeometryCard, QFrame#MaterialCard, QFrame#LightCard, QFrame#CharacterCard, QFrame#PhysicsCard,
+QFrame#ScriptCard, QWidget#ScriptCard, QFrame#AiMachineCard, QWidget#AiMachineCard, QFrame#CameraGuideCard, QWidget#CameraGuideCard {
     background-color: %7;
     border: 1px solid %6;
     border-radius: 4px;
@@ -327,27 +344,29 @@ QLabel#CardFieldLabel {
     font-weight: normal;
 }
 QLabel#CardFieldLabel:disabled,
+QFrame[collapsibleCard="true"] QLabel:disabled,
 QFrame#CollapsibleCard QLabel:disabled {
     color: %12;
 }
-QFrame#CollapsibleCard QLineEdit,
-QFrame#CollapsibleCard QSpinBox,
-QFrame#CollapsibleCard QDoubleSpinBox,
-QFrame#CollapsibleCard QComboBox {
+QFrame[collapsibleCard="true"] QLineEdit, QFrame[collapsibleCard="true"] QSpinBox,
+QFrame[collapsibleCard="true"] QDoubleSpinBox, QFrame[collapsibleCard="true"] QComboBox,
+QFrame#CollapsibleCard QLineEdit, QFrame#CollapsibleCard QSpinBox,
+QFrame#CollapsibleCard QDoubleSpinBox, QFrame#CollapsibleCard QComboBox {
     min-height: 22px;
     max-height: 22px;
     padding: 1px 4px;
     font-size: 11px;
     color: %1;
 }
-QFrame#CollapsibleCard QLineEdit:disabled,
-QFrame#CollapsibleCard QSpinBox:disabled,
-QFrame#CollapsibleCard QDoubleSpinBox:disabled,
-QFrame#CollapsibleCard QComboBox:disabled {
+QFrame[collapsibleCard="true"] QLineEdit:disabled, QFrame[collapsibleCard="true"] QSpinBox:disabled,
+QFrame[collapsibleCard="true"] QDoubleSpinBox:disabled, QFrame[collapsibleCard="true"] QComboBox:disabled,
+QFrame#CollapsibleCard QLineEdit:disabled, QFrame#CollapsibleCard QSpinBox:disabled,
+QFrame#CollapsibleCard QDoubleSpinBox:disabled, QFrame#CollapsibleCard QComboBox:disabled {
     color: %12;
     background-color: %8;
     border-color: %6;
 }
+QFrame[collapsibleCard="true"] QWidget#CardContent QPushButton,
 QFrame#CollapsibleCard QWidget#CardContent QPushButton {
     min-height: 24px;
     max-height: 24px;
@@ -473,19 +492,6 @@ QComboBox::down-arrow {
     height: 8px;
 }
 )QSS").arg(borderLight, bgButton, bgButtonHover, arrowUp, arrowDown);
-    }
-
-    if (!arrowRight.isEmpty() && !arrowDown.isEmpty()) {
-        qss += QString(R"QSS(
-QTreeView::branch:has-children:!has-siblings:closed,
-QTreeView::branch:closed:has-children:has-siblings {
-    image: url("%1");
-}
-QTreeView::branch:open:has-children:!has-siblings,
-QTreeView::branch:open:has-children:has-siblings {
-    image: url("%2");
-}
-)QSS").arg(arrowRight, arrowDown);
     }
 
     return qss;

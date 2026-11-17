@@ -1,4 +1,3 @@
-#define NOMINMAX
 #include <Engine/Scene/Trace.h>
 #include <algorithm>
 #include <cmath>
@@ -129,8 +128,8 @@ Result IntersectTriangle(Ray ray, glm::vec3 a, glm::vec3 b, glm::vec3 c, Backfac
         return {};
     return HitAt(ray, float(t), glm::vec3(normal / area));
 }
-RayResult ScreenPointToRay(ViewportPoint p, uint32_t w, uint32_t h, const DirectX::XMFLOAT4X4 &view,
-                           const DirectX::XMFLOAT4X4 &proj, float distance)
+RayResult ScreenPointToRay(ViewportPoint p, uint32_t w, uint32_t h, const glm::mat4 &view,
+                           const glm::mat4 &proj, float distance)
 {
     if (!std::isfinite(distance) || distance < 0)
         return {Status::InvalidQuery, {}};
@@ -142,24 +141,20 @@ RayResult ScreenPointToRay(ViewportPoint p, uint32_t w, uint32_t h, const Direct
         return {Status::OutsideViewport, {}};
     for (int i = 0; i < 4; ++i)
         for (int j = 0; j < 4; ++j)
-            if (!std::isfinite(view.m[i][j]) || !std::isfinite(proj.m[i][j]))
+            if (!std::isfinite(view[i][j]) || !std::isfinite(proj[i][j]))
                 return {Status::InvalidMatrix, {}};
-    using namespace DirectX;
-    const auto vp = XMMatrixTranspose(XMLoadFloat4x4(&view)) * XMMatrixTranspose(XMLoadFloat4x4(&proj));
-    XMVECTOR determinant;
-    const auto inverse = XMMatrixInverse(&determinant, vp);
-    const float det = XMVectorGetX(determinant);
+    const auto vp = proj * view;
+    const float det = glm::determinant(vp);
     if (!std::isfinite(det) || std::abs(det) < 1e-30f)
         return {Status::InvalidMatrix, {}};
+    const auto inverse = glm::inverse(vp);
     const float x = 2 * p.x / w - 1, y = 1 - 2 * p.y / h;
     auto unproject = [&](float z, glm::vec3 &out) {
-        const auto v = XMVector4Transform(XMVectorSet(x, y, z, 1), inverse);
-        const float weight = XMVectorGetW(v);
+        const auto v = inverse * glm::vec4(x, y, z, 1);
+        const float weight = v.w;
         if (!std::isfinite(weight) || std::abs(weight) < 1e-20f)
             return false;
-        XMFLOAT3 result;
-        XMStoreFloat3(&result, v / weight);
-        out = {result.x, result.y, result.z};
+        out = glm::vec3(v) / weight;
         return Finite(out);
     };
     glm::vec3 nearPoint, farPoint;
@@ -170,6 +165,20 @@ RayResult ScreenPointToRay(ViewportPoint p, uint32_t w, uint32_t h, const Direct
         result.status = Status::InvalidMatrix;
     return result;
 }
+#if defined(_WIN32)
+RayResult ScreenPointToRay(ViewportPoint p, uint32_t w, uint32_t h, const DirectX::XMFLOAT4X4 &view,
+                           const DirectX::XMFLOAT4X4 &proj, float distance)
+{
+    glm::mat4 v, projection;
+    for (int row = 0; row < 4; ++row)
+        for (int column = 0; column < 4; ++column)
+        {
+            v[column][row] = view.m[row][column];
+            projection[column][row] = proj.m[row][column];
+        }
+    return ScreenPointToRay(p, w, h, v, projection, distance);
+}
+#endif
 const char *StatusName(Status s)
 {
     switch (s)

@@ -1,5 +1,6 @@
 #include "EditorLocale.h"
 #include "CommandRegistry.h"
+#include "AssetPickerDialog.h"
 #include <QMenuBar>
 #define NOMINMAX
 #include "MainWindow.h"
@@ -19,6 +20,8 @@
 #include <QDialogButtonBox>
 #include <QMessageBox>
 #include <QLabel>
+#include <QJsonArray>
+#include <QJsonDocument>
 
 void EditorMainWindow::OpenUIEditor(const QString& path) {
     const auto key=QFileInfo(path).absoluteFilePath();
@@ -80,15 +83,102 @@ void EditorMainWindow::BuildToolsMenu()
         QStringLiteral("Open UI Editor"),
         QString(),
         QStringLiteral("Open an existing UI file in UI Editor"),
-        [this](const CommandContext&) {
-            auto file = QFileDialog::getOpenFileName(this, Tr("Интерфейс", "Interface"), QString::fromUtf8(host_->host().contentRoot), "UI (*.ui)");
+        [this](const CommandContext& ctx) {
+            QString file = ctx.parameters.value(QStringLiteral("file")).toString();
+            if (file.isEmpty()) {
+                AssetPickerDialog picker(EditorCore::AssetKind::UI, QString::fromUtf8(host_->host().contentRoot), QString(), this);
+                if (picker.exec() != QDialog::Accepted) return false;
+                file = picker.SelectedDiskPath();
+            }
             if (!file.isEmpty()) OpenUIEditor(file);
+            return true;
+        },
+        nullptr
+    });
+    CommandRegistry::Instance().RegisterCommand({
+        QStringLiteral("Scene.AssignScript"),
+        QStringLiteral("Assign Script"),
+        QString(),
+        QStringLiteral("Assign visual script to selected scene object"),
+        [this](const CommandContext& ctx) {
+            if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+                return false;
+            const uint64_t targetId = ctx.parameters.value(QStringLiteral("objectId"), selectedId_).toULongLong();
+            if (targetId == 0)
+                return false;
+            QString script = ctx.parameters.value(QStringLiteral("script")).toString();
+            if (script.isEmpty()) {
+                AssetPickerDialog picker(EditorCore::AssetKind::Script, QString::fromUtf8(host_->host().contentRoot), QString(), this);
+                if (picker.exec() != QDialog::Accepted) return false;
+                script = picker.SelectedVirtualPath();
+            }
+            if (script.isEmpty()) return false;
+            const QString normalized = EditorCore::NormalizeVirtualPath(script, QString::fromUtf8(host_->host().contentRoot));
+            EditorCommand c;
+            c.type = EditorCommand::SetScript;
+            c.objectId = targetId;
+            c.path = normalized;
+            host_->PostCommand(c);
+            return true;
+        },
+        [this]() {
+            return host_ && host_->HasScene() && !sceneBusy_ && host_->PlayState() == EditorQtHost::EditorState::Edit && selectedId_ != 0;
+        }
+    });
+    CommandRegistry::Instance().RegisterCommand({
+        QStringLiteral("Scene.AssignAiMachine"),
+        QStringLiteral("Assign AI Machine"),
+        QString(),
+        QStringLiteral("Assign AI state machine to selected scene object"),
+        [this](const CommandContext& ctx) {
+            if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+                return false;
+            const uint64_t targetId = ctx.parameters.value(QStringLiteral("objectId"), selectedId_).toULongLong();
+            if (targetId == 0)
+                return false;
+            QString machine = ctx.parameters.value(QStringLiteral("machine")).toString();
+            if (machine.isEmpty()) {
+                AssetPickerDialog picker(EditorCore::AssetKind::AiMachine, QString::fromUtf8(host_->host().contentRoot), QString(), this);
+                if (picker.exec() != QDialog::Accepted) return false;
+                machine = picker.SelectedVirtualPath();
+            }
+            if (machine.isEmpty()) return false;
+            const QString normalized = EditorCore::NormalizeVirtualPath(machine, QString::fromUtf8(host_->host().contentRoot));
+            const QByteArray json = QJsonDocument(QJsonArray{normalized}).toJson(QJsonDocument::Compact);
+            EditorCommand c;
+            c.type = EditorCommand::SetProperty;
+            c.objectId = targetId;
+            c.path = QStringLiteral("/stateMachine");
+            c.name = QString::fromUtf8(json);
+            host_->PostCommand(c);
+            return true;
+        },
+        [this]() {
+            return host_ && host_->HasScene() && !sceneBusy_ && host_->PlayState() == EditorQtHost::EditorState::Edit && selectedId_ != 0;
+        }
+    });
+
+    CommandRegistry::Instance().RegisterCommand({
+        QStringLiteral("Tools.ToggleAiDiagnostics"),
+        QStringLiteral("Navigation and Diagnostics"),
+        QString(),
+        QStringLiteral("Toggle AI navigation and diagnostics dock panel"),
+        [this](const CommandContext&) {
+            if (aiDiagnosticsDock_) {
+                aiDiagnosticsDock_->setVisible(!aiDiagnosticsDock_->isVisible());
+                if (aiDiagnosticsDock_->isVisible()) {
+                    aiDiagnosticsDock_->raise();
+                }
+            }
             return true;
         },
         nullptr
     });
 
     toolsMenu_ = menuBar()->addMenu(Tr("Инструменты", "Tools"));
+    toolsMenu_->addAction(Tr("Навигация и диагностика", "Navigation and Diagnostics"), this, [] {
+        CommandRegistry::Instance().Execute(QStringLiteral("Tools.ToggleAiDiagnostics"));
+    });
     uiSubMenu_ = toolsMenu_->addMenu(Tr("Интерфейс (UI)", "Interface (UI)"));
     actCreateUI_ = uiSubMenu_->addAction(Tr("Создать интерфейс…", "Create UI…"), this, [this] {
         CommandRegistry::Instance().Execute(QStringLiteral("UI.Create"));

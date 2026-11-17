@@ -36,6 +36,8 @@ if (!$Runtime) {
 $Runtime = [IO.Path]::GetFullPath($Runtime)
 $sdk = Join-Path $Runtime 'SDK'
 $sdkInfo = Get-Content -LiteralPath (Join-Path $sdk 'Sdk.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+$useCMake = $sdkInfo.buildSystem -eq 'cmake'
+if ($useCMake) { . "$PSScriptRoot/CMakeProject.ps1" }
 if ($sdkInfo.version -ne $pin.engineVersion -or $sdkInfo.configuration -ne $pin.engineConfiguration -or $sdkInfo.platform -ne 'x64') { throw 'SDK does not match Engine.lock.json. Upgrade a project copy explicitly.' }
 $buildLock = $null
 try { $buildLock = [IO.File]::Open((Join-Path $projectRoot '.project-build.lock'),[IO.FileMode]::OpenOrCreate,[IO.FileAccess]::ReadWrite,[IO.FileShare]::None) }
@@ -105,7 +107,7 @@ if ($Action -eq 'Enable' -and !(Test-Path -LiteralPath $codeFile)) {
     $compat = Join-Path $Runtime 'TemplateCompatibility.json'
     if (Test-Path -LiteralPath $compat) { $known += (Get-Content -LiteralPath $compat -Raw -Encoding UTF8 | ConvertFrom-Json).SceneProject }
     if ($hash -notin $known) { throw 'Custom DLL detected. Attach its existing sources; conversion cannot recover C++ from a DLL.' }
-    foreach($path in @('Source','Game.vcxproj','Game.sln','Build.ps1')) { if(Test-Path -LiteralPath (Join-Path $projectRoot $path)){throw "Conversion would overwrite $path"} }
+    foreach($path in @('Source','Game.vcxproj','Game.sln','CMakeLists.txt','Build.ps1')) { if(Test-Path -LiteralPath (Join-Path $projectRoot $path)){throw "Conversion would overwrite $path"} }
     WriteNew 'Source/RotatingCube.h' @'
 #pragma once
 #include <Engine/Components/ComponentAnnotations.h>
@@ -200,6 +202,7 @@ static std::unique_ptr<Game> ProjectGameFactory() { return SelectProjectGame(Eng
 #define SCENE_MODULE_CREATE_GAME ProjectGameFactory
 #include <Engine/Project/SceneModule.inl>
 '@
+    if (!$useCMake) {
     WriteNew 'Game.vcxproj' @'
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 <ItemGroup Label="ProjectConfigurations">
@@ -242,6 +245,7 @@ Global
  EndGlobalSection
 EndGlobal
 '@
+    } else { WriteNew 'CMakeLists.txt' (Get-Content -LiteralPath "$sdk/Build/Game.cmake" -Raw -Encoding UTF8) }
     WriteNew 'Build.ps1' @'
 param([string]$Runtime='')
 $ErrorActionPreference='Stop'
@@ -255,7 +259,7 @@ if(!$Runtime){
     WriteJson $codeFile @{format=1;state='prepared';originalModule=$manifest.module;sdk=$pin.engineVersion}
 }
 if (!(Test-Path -LiteralPath $codeFile)) { throw 'Enable C++ first' }
-if (Test-Path -LiteralPath "$sdk/Build/ProjectBootstrap.props") {
+if (!$useCMake -and (Test-Path -LiteralPath "$sdk/Build/ProjectBootstrap.props")) {
     # Upgrade existing generated projects without replacing user property groups.
     $vcxproj = Join-Path $projectRoot 'Game.vcxproj'
     $document = New-Object Xml.XmlDocument
@@ -277,29 +281,48 @@ if (Test-Path -LiteralPath "$sdk/Build/ProjectBootstrap.props") {
 }
 if ($Action -eq 'AddClass') { AddClass $Name $Kind $Base $BaseHeader; return }
 
+if ($useCMake) {
+    if (!(Test-Path -LiteralPath "$projectRoot/CMakeLists.txt")) {
+        WriteNew 'CMakeLists.txt' (Get-Content -LiteralPath "$sdk/Build/Game.cmake" -Raw -Encoding UTF8)
+    }
+    $toolchain = Get-ProjectCMakeTools $sdkInfo $Toolset $VCToolsVersion
+    Write-Output "Using CMake / $($toolchain.compiler)"
+} else {
 $toolchain = Resolve-EngineToolchain $sdkInfo -Toolset $Toolset -ExactVersion $VCToolsVersion
 Write-Output "Using $($toolchain.toolset), MSVC $($toolchain.version), Windows SDK $($toolchain.windowsSdk.version)."
 Write-Output "MSBuild: $($toolchain.msbuild)"
+}
 $toolchainIdentity = $toolchain | ConvertTo-Json -Depth 5 -Compress
 $fingerprintParts = @($sdkInfo.version,$sdkInfo.configuration,$toolchainIdentity)
-foreach ($inputFile in @(Get-Item -LiteralPath "$sdk/Sdk.json","$sdk/Toolchain.ps1","$sdk/ProjectTools.ps1","$sdk/Tools/ComponentGenerator.exe") + @(Get-ChildItem -LiteralPath "$sdk/Lib" -Filter '*.lib') + @(Get-ChildItem -LiteralPath "$sdk/Build" -File)) {
-    $fingerprintParts += $inputFile.Name,(Get-FileHash -LiteralPath $inputFile.FullName).Hash
+if ($useCMake) {
+    $sdkInputs = @(Get-Item -LiteralPath "$sdk/Sdk.json","$sdk/Toolchain.ps1","$sdk/ProjectTools.ps1","$sdk/CMakeProject.ps1","$sdk/bin/ComponentGenerator.exe") +
+        @(Get-ChildItem -LiteralPath "$sdk/lib","$sdk/Build","$sdk/include" -File -Recurse)
+} else {
+    $sdkInputs = @(Get-Item -LiteralPath "$sdk/Sdk.json","$sdk/Toolchain.ps1","$sdk/ProjectTools.ps1","$sdk/Tools/ComponentGenerator.exe") + @(Get-ChildItem -LiteralPath "$sdk/Lib" -Filter '*.lib') + @(Get-ChildItem -LiteralPath "$sdk/Build" -File)
+}
+foreach ($inputFile in ($sdkInputs | Sort-Object FullName)) {
+    $fingerprintParts += $inputFile.FullName.Substring($sdk.Length),(Get-FileHash -LiteralPath $inputFile.FullName).Hash
 }
 foreach($source in (Get-ChildItem -LiteralPath (Join-Path $projectRoot 'Source') -File -Recurse | Sort-Object FullName)) {
     $fingerprintParts += $source.FullName.Substring($projectRoot.Length),(Get-FileHash -LiteralPath $source.FullName).Hash
 }
-$fingerprintParts += (Get-FileHash -LiteralPath (Join-Path $projectRoot 'Game.vcxproj')).Hash
+$projectBuildFile = if ($useCMake) { 'CMakeLists.txt' } else { 'Game.vcxproj' }
+$fingerprintParts += (Get-FileHash -LiteralPath (Join-Path $projectRoot $projectBuildFile)).Hash
 $fingerprint = [Convert]::ToBase64String([Security.Cryptography.SHA256]::Create().ComputeHash($encoding.GetBytes(($fingerprintParts -join "`n"))))
 $codeState = Get-Content -LiteralPath $codeFile -Raw -Encoding UTF8 | ConvertFrom-Json
 $currentManifest = Get-Content -LiteralPath $projectFile -Raw -Encoding UTF8 | ConvertFrom-Json
 if (!$Rebuild -and $codeState.state -eq 'ready' -and $codeState.module -eq $currentManifest.module -and $codeState.fingerprint -eq $fingerprint -and (Test-Path -LiteralPath (Join-Path $projectRoot $currentManifest.module))) { Write-Output 'Project is already up to date'; return }
 
-$msbuild = $toolchain.msbuild
 $buildId = [guid]::NewGuid().ToString('N')
 $output = Join-Path $projectRoot ('Binaries/'+$pin.engineConfiguration+'/'+$buildId)
 [IO.Directory]::CreateDirectory($output) | Out-Null
 $buildLog = Join-Path $output 'build.log'
 $identity = ([BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash($encoding.GetBytes($toolchainIdentity)))).Replace('-','').Substring(0,16)
+WriteJson (Join-Path $output 'toolchain.json') $toolchain
+if ($useCMake) {
+    $result = Invoke-ProjectCMakeBuild $toolchain $projectRoot $sdk $pin.engineConfiguration $output $identity $buildLog ($Rebuild -or $codeState.fingerprint -ne $fingerprint)
+} else {
+$msbuild = $toolchain.msbuild
 $arguments = @((Join-Path $projectRoot 'Game.vcxproj'), '/nologo', '/m:1', '/nr:false', '/noconsolelogger',
     "/flp:LogFile=$buildLog;Encoding=UTF-8;Verbosity=minimal",
     (ConvertTo-MSBuildProperty 'Configuration' $pin.engineConfiguration),
@@ -309,8 +332,8 @@ $arguments += @(Get-EngineToolchainArguments $toolchain)
 # Copied/restored sources can be older than their existing .obj files. The
 # content fingerprint, not filesystem timestamps, decides whether they changed.
 if ($Rebuild -or $codeState.fingerprint -ne $fingerprint) { $arguments += '/t:Rebuild' }
-WriteJson (Join-Path $output 'toolchain.json') $toolchain
 $result = Invoke-ToolchainProcess $msbuild $arguments -Timeout 1800000
+}
 $buildText = if(Test-Path -LiteralPath $buildLog){[IO.File]::ReadAllText($buildLog,[Text.Encoding]::UTF8)}else{$result.stdout+[Environment]::NewLine+$result.stderr}
 Write-Output $buildText
 Write-Output "Full build log: $buildLog"

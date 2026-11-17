@@ -1,9 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-#ifndef ENGINE_MODULE_CALL
-#define ENGINE_MODULE_CALL __cdecl
-#endif
+#include <Engine/Platform/Abi.h>
 
 // ============================================================================
 // Engine VFS Service C-ABI Interface

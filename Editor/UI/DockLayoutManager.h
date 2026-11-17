@@ -17,6 +17,7 @@ public:
                                   QDockWidget* sceneObjectsDock,
                                   QDockWidget* inspectorDock,
                                   QDockWidget* fileDock,
-                                  QDockWidget* consoleDock);
+                                  QDockWidget* consoleDock,
+                                  QDockWidget* aiDiagnosticsDock = nullptr);
     static void ConfigureTabBars(QMainWindow* window);
 };

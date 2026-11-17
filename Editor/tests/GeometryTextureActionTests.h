@@ -42,6 +42,18 @@ inline void Run()
     check(modelAsset->text() == QStringLiteral("Models/CesiumMan.glb"), "Model displayed as relative project path");
     check(chooseModel->isEnabled(), "ChooseModel is enabled for models");
 
+    // Task M: Long path (200 characters) does not expand card sizeHint, text is elided, tooltip has full path
+    {
+        const int widthBefore = geometry.sizeHint().width();
+        const QString longModelPath = QStringLiteral("/Game/Models/") + QString(180, 'a') + QStringLiteral(".fbx");
+        geometry.SetModelData(longModelPath, true);
+        check(modelAsset->text() != QStringLiteral("Models/") + QString(180, 'a') + QStringLiteral(".fbx"),
+              "Long model path text is elided");
+        check(modelAsset->text().contains(QStringLiteral("…")), "Elided model path contains ellipsis");
+        check(modelAsset->toolTip() == longModelPath, "Long model path tooltip has full path");
+        check(geometry.sizeHint().width() == widthBefore, "200-char model path does not change geometry card sizeHint width");
+    }
+
     geometry.Clear();
     check(modelAsset->text().isEmpty(), "Clearing geometry card clears model text");
     check(!chooseModel->isEnabled(), "Clearing geometry card disables ChooseModel");
@@ -114,6 +126,22 @@ inline void Run()
     check(!edit->isEnabled(), "legacy module capability guard retained");
     edit->click();
     check(requests == 2, "unavailable material editing cannot dispatch");
+
+    // Task M: Long material path does not expand card sizeHint, text is elided, tooltip has full path, onEdit receives raw path
+    {
+        material.SetMaterialsAvailable(true);
+        const int matWidthBefore = material.sizeHint().width();
+        const QString longMatPath = QStringLiteral("/Game/Materials/") + QString(175, 'm') + QStringLiteral(".mat");
+        material.SetData(longMatPath, false);
+        auto* matAsset = material.findChild<QLineEdit*>(QStringLiteral("MaterialAsset"));
+        check(matAsset != nullptr, "MaterialAsset line edit found");
+        check(matAsset->text() != longMatPath, "Long material path text is elided");
+        check(matAsset->text().contains(QStringLiteral("…")), "Elided material path contains ellipsis");
+        check(matAsset->toolTip() == longMatPath, "Long material path tooltip has full path");
+        check(material.sizeHint().width() == matWidthBefore, "200-char material path does not change material card sizeHint width");
+        edit->click();
+        check(requested == longMatPath, "onEditMaterial receives full raw path when displayed elided");
+    }
 
     std::printf("Geometry texture action tests: %d checks passed\n", checks);
 }

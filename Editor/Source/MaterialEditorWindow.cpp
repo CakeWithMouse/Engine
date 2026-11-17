@@ -3,6 +3,7 @@
 #include "MaterialGraphWidget.h"
 #include "HlslGraphCompiler.h"
 #include "EditorTheme.h"
+#include "EditorWindowSetup.h"
 
 #include <QAction>
 #include <QCheckBox>
@@ -337,8 +338,9 @@ private:
 };
 
 MaterialEditorWindow::MaterialEditorWindow(EditorQtHost* host, const QString& material, QWidget* parent)
-    : QMainWindow(parent, Qt::Window), host_(host), material_(material)
+    : QMainWindow(nullptr, Qt::Window), host_(host), material_(material)
 {
+    EditorWindowSetup::ConfigureSubWindow(this, parent);
     setAttribute(Qt::WA_DeleteOnClose, false); // удаляет Shutdown, после отключения превью
     setObjectName(QStringLiteral("MaterialEditor"));
     BuildUi();

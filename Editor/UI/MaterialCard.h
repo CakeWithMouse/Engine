@@ -1,8 +1,10 @@
 #pragma once
 
+#include "AssetPathDisplay.h"
 #include "CollapsibleCard.h"
 #include "EditorLocale.h"
 #include "EditorTheme.h"
+#include "InspectorCardStyle.h"
 #include "MaterialSlotList.h"
 
 #include <QDir>
@@ -19,6 +21,7 @@ class MaterialDropField : public QLineEdit
 public:
     std::function<void(const QString&)> dropped;
     std::function<QString()> contentRoot;
+    std::function<QString()> current; // назначенный /Game путь: в поле он показан сокращённым
 
     explicit MaterialDropField(QWidget* parent = nullptr) : QLineEdit(parent) { setAcceptDrops(true); }
 
@@ -44,7 +47,7 @@ protected:
         if (path.isEmpty()) return;
         event->setDropAction(Qt::CopyAction);
         event->accept();
-        if (path != text() && dropped) dropped(path);
+        if ((!current || path != current()) && dropped) dropped(path);
     }
 
 public:
@@ -80,15 +83,20 @@ public:
     void SetData(const QString& material, bool hasPointLight, const QString& contentRoot = QString(), bool forceCheck = false)
     {
         contentRoot_ = contentRoot;
-        materialAsset_->setText(material);
+        rawMaterialPath_ = material;
+        EditorUI::FormatAssetPath(materialAsset_, material, material);
         clearMaterialButton_->setEnabled(!material.isEmpty());
+
+        const bool hasMat = !material.isEmpty();
+        editMaterialButton_->setText(hasMat ? Tr("Редактировать", "Edit Material") : Tr("Создать", "Create"));
+        editMaterialButton_->setObjectName(hasMat ? QStringLiteral("EditMaterial") : QStringLiteral("CreateMaterial"));
 
         if (!material.isEmpty() && !contentRoot.isEmpty())
         {
+            const QString rel = material.startsWith(QStringLiteral("/Game/")) ? material.mid(6) : material;
             if (forceCheck || material != cachedMaterialPath_)
             {
                 cachedMaterialPath_ = material;
-                const QString rel = material.startsWith(QStringLiteral("/Game/")) ? material.mid(6) : material;
                 cachedMaterialExists_ = QFileInfo::exists(QDir(contentRoot).filePath(rel));
             }
             if (!cachedMaterialExists_)
@@ -101,7 +109,6 @@ public:
             else
             {
                 SetFieldStyle(QString());
-                materialAsset_->setToolTip(QString());
                 editMaterialButton_->setEnabled(true);
                 editMaterialButton_->setToolTip(QString());
             }
@@ -111,7 +118,6 @@ public:
             cachedMaterialPath_.clear();
             cachedMaterialExists_ = true;
             SetFieldStyle(QString());
-            materialAsset_->setToolTip(QString());
             editMaterialButton_->setEnabled(!hasPointLight);
             editMaterialButton_->setToolTip(material.isEmpty()
                 ? Tr("Создать материал в Content/Materials, назначить его объекту и открыть редактор",
@@ -125,7 +131,7 @@ public:
     {
         hasSlots_ = !items.isEmpty();
         UpdateSharedLabel();
-        slotList_->SetSlots(items, contentRoot_, !materialAsset_->text().isEmpty(), forceCheck);
+        slotList_->SetSlots(items, contentRoot_, !rawMaterialPath_.isEmpty(), forceCheck);
     }
 
     MaterialSlotList* SlotList() const { return slotList_; }
@@ -139,23 +145,33 @@ public:
 
     void Clear()
     {
+        rawMaterialPath_.clear();
         materialAsset_->clear();
+        materialAsset_->setToolTip(QString());
         slotList_->SetSlots({}, contentRoot_, false, true);
         hasSlots_ = false;
         UpdateSharedLabel();
-        editMaterialButton_->setEnabled(false);
+        editMaterialButton_->setText(Tr("Создать", "Create"));
+        editMaterialButton_->setObjectName(QStringLiteral("CreateMaterial"));
+        editMaterialButton_->setEnabled(true);
         clearMaterialButton_->setEnabled(false);
         cachedMaterialPath_.clear();
         cachedMaterialExists_ = true;
         SetFieldStyle(QString());
-        materialAsset_->setToolTip(QString());
     }
 
     void RetranslateUi()
     {
         SetTitle(Tr("Материал", "Material"));
+        SetInfo(Tr("Материал", "Material"),
+                Tr("Материал объекта [.mat].\nПозволяет настроить шейдеры, текстуры и параметры отражения поверхности.",
+                   "Object material [.mat].\nConfigures shaders, textures, and surface reflection parameters."));
         UpdateSharedLabel();
-        if (editMaterialButton_) editMaterialButton_->setText(Tr("Редактировать", "Edit Material"));
+        const bool hasMat = !rawMaterialPath_.isEmpty();
+        if (editMaterialButton_)
+        {
+            editMaterialButton_->setText(hasMat ? Tr("Редактировать", "Edit Material") : Tr("Создать", "Create"));
+        }
         if (chooseMaterialButton_) chooseMaterialButton_->setText(Tr("Выбрать…", "Browse…"));
         if (clearMaterialButton_) clearMaterialButton_->setText(Tr("Убрать", "Clear"));
         if (slotList_) { slotList_->ApplyStyle(); slotList_->Retranslate(); }
@@ -173,38 +189,44 @@ public:
 private:
     void BuildCard()
     {
+        SetInfo(Tr("Материал", "Material"),
+                Tr("Материал объекта [.mat].\nПозволяет настроить шейдеры, текстуры и параметры отражения поверхности.",
+                   "Object material [.mat].\nConfigures shaders, textures, and surface reflection parameters."));
+
         auto* cl = ContentLayout();
 
-        labelMatTitle_ = new QLabel(Tr("Слот материала (.mat)", "Material Slot (.mat)"), Content());
+        labelMatTitle_ = new QLabel(Tr("Слот материала [.mat]", "Material Slot [.mat]"), Content());
         labelMatTitle_->setObjectName(QStringLiteral("CardSectionLabel"));
         cl->addWidget(labelMatTitle_);
 
         auto* field = new MaterialDropField(Content());
         field->contentRoot = [this] { return contentRoot_; };
+        field->current = [this] { return rawMaterialPath_; };
         field->dropped = [this](const QString& path) { if (onDropMaterial) onDropMaterial(path); };
         materialAsset_ = field;
         materialAsset_->setReadOnly(true);
         materialAsset_->setObjectName(QStringLiteral("MaterialAsset"));
-        materialAsset_->setFixedHeight(22);
+        materialAsset_->setFixedHeight(InspectorCardStyle::kFieldHeight);
+        materialAsset_->setMinimumWidth(0);
+        materialAsset_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
         materialAsset_->setPlaceholderText(Tr("по умолчанию", "default"));
         cl->addWidget(materialAsset_);
 
         materialActions_ = new QWidget(Content());
         auto* lMatBtns = new QHBoxLayout(materialActions_);
-        lMatBtns->setContentsMargins(0, 0, 0, 0);
-        lMatBtns->setSpacing(4);
+        InspectorCardStyle::ApplyRowLayout(lMatBtns);
 
-        editMaterialButton_ = new QPushButton(Tr("Редактировать", "Edit Material"), materialActions_);
-        editMaterialButton_->setObjectName(QStringLiteral("EditMaterial"));
-        editMaterialButton_->setFixedHeight(24);
+        editMaterialButton_ = new QPushButton(Tr("Создать", "Create"), materialActions_);
+        editMaterialButton_->setObjectName(QStringLiteral("CreateMaterial"));
+        editMaterialButton_->setFixedHeight(InspectorCardStyle::kButtonHeight);
         QObject::connect(editMaterialButton_, &QPushButton::clicked, [this] {
-            if (onEditMaterial) onEditMaterial(materialAsset_->text());
+            if (onEditMaterial) onEditMaterial(rawMaterialPath_);
         });
         lMatBtns->addWidget(editMaterialButton_);
 
         chooseMaterialButton_ = new QPushButton(Tr("Выбрать…", "Browse…"), materialActions_);
         chooseMaterialButton_->setObjectName(QStringLiteral("ChooseMaterial"));
-        chooseMaterialButton_->setFixedHeight(24);
+        chooseMaterialButton_->setFixedHeight(InspectorCardStyle::kButtonHeight);
         QObject::connect(chooseMaterialButton_, &QPushButton::clicked, [this] {
             if (onChooseMaterial) onChooseMaterial();
         });
@@ -212,7 +234,7 @@ private:
 
         clearMaterialButton_ = new QPushButton(Tr("Убрать", "Clear"), materialActions_);
         clearMaterialButton_->setObjectName(QStringLiteral("ClearMaterial"));
-        clearMaterialButton_->setFixedHeight(24);
+        clearMaterialButton_->setFixedHeight(InspectorCardStyle::kButtonHeight);
         QObject::connect(clearMaterialButton_, &QPushButton::clicked, [this] {
             if (onClearMaterial) onClearMaterial();
         });
@@ -230,8 +252,8 @@ private:
     void UpdateSharedLabel()
     {
         if (!labelMatTitle_) return;
-        labelMatTitle_->setText(hasSlots_ ? Tr("Общий материал всей модели (.mat)", "Model-wide material (.mat)")
-                                          : Tr("Слот материала (.mat)", "Material Slot (.mat)"));
+        labelMatTitle_->setText(hasSlots_ ? Tr("Общий материал всей модели [.mat]", "Model-wide material [.mat]")
+                                          : Tr("Слот материала [.mat]", "Material Slot [.mat]"));
         if (materialAsset_)
             materialAsset_->setPlaceholderText(hasSlots_ ? Tr("не задан — действуют слоты ниже", "not set — slots below apply")
                                                          : Tr("по умолчанию", "default"));
@@ -253,5 +275,6 @@ private:
     QString contentRoot_;
     bool hasSlots_ = false;
     QString cachedMaterialPath_;
+    QString rawMaterialPath_;
     bool cachedMaterialExists_ = true;
 };

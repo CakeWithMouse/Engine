@@ -1,8 +1,14 @@
 // Deliberately a small annotation scanner, not a C++ parser/preprocessor.
 // Supported declaration grammar and rejection rules: docs/COMPONENT-GENERATION.md.
+#if defined(_WIN32)
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 #include <Windows.h>
+#endif
 #include <algorithm>
 #include <cctype>
 #include <filesystem>
@@ -254,16 +260,26 @@ static void Scan(const fs::path& path, bool header, std::vector<Type>& types)
 static void WriteChanged(const fs::path& path, const std::string& contents)
 {
     if (fs::exists(path) && Read(path) == contents) return;
-    const fs::path temporary = path.wstring() + L".tmp";
+    fs::path temporary = path;
+    temporary += ".tmp";
     {
         std::ofstream out(temporary, std::ios::binary | std::ios::trunc);
         out << contents; out.close();
         if (!out) throw std::runtime_error("Cannot write " + temporary.u8string());
     }
+#if defined(_WIN32)
     if (!MoveFileExW(temporary.c_str(), path.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH))
         throw std::runtime_error("Cannot replace " + path.u8string());
+#else
+    // POSIX rename replaces the destination atomically in the same directory.
+    fs::rename(temporary, path);
+#endif
 }
+#if defined(_WIN32)
 int wmain(int argc, wchar_t** argv)
+#else
+int main(int argc, char** argv)
+#endif
 {
     try
     {

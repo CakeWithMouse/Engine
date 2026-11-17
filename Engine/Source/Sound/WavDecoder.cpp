@@ -1,6 +1,7 @@
 ﻿#include "Engine/Sound/WavDecoder.h"
 
 #include <cstring>
+#include <algorithm>
 
 namespace audio
 {
@@ -152,7 +153,7 @@ namespace audio
         }
 
         uint64_t framesLeft = framesAvailable - positionFrames_;
-        uint64_t framesToActuallyRead = min(framesToRead, framesLeft);
+        uint64_t framesToActuallyRead = (std::min)(uint64_t(framesToRead), framesLeft);
 
         DWORD bytesToRead =
             static_cast<DWORD>(framesToActuallyRead * format_.blockAlign);
