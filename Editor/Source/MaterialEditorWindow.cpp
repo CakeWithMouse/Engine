@@ -5,6 +5,7 @@
 #include "Graph/GraphFileIo.h"
 #include "EditorTheme.h"
 #include "EditorWindowSetup.h"
+#include "PreviewWidget.h"
 
 #include <QAction>
 #include <QCheckBox>
@@ -278,64 +279,6 @@ private:
     QSet<int> errorLines_;
 };
 
-// Нативное окно, в которое движок рисует превью. Перетаскивание вращает камеру, колесо — приближает.
-class MaterialPreviewWidget final : public QWidget
-{
-public:
-    std::function<void(void* hwnd, uint32_t width, uint32_t height)> attach;
-    std::function<void(uint32_t width, uint32_t height)> resized;
-    std::function<void(float yaw, float pitch, float zoom)> orbit;
-
-    explicit MaterialPreviewWidget(QWidget* parent) : QWidget(parent)
-    {
-        setAttribute(Qt::WA_NativeWindow, true);
-        setAttribute(Qt::WA_PaintOnScreen, true); // сюда Present'ит движок
-        setAttribute(Qt::WA_NoSystemBackground, true);
-        setMinimumSize(240, 240);
-    }
-
-    QPaintEngine* paintEngine() const override { return nullptr; }
-
-protected:
-    void paintEvent(QPaintEvent*) override {}
-
-    void showEvent(QShowEvent* event) override
-    {
-        QWidget::showEvent(event);
-        if (attached_ || !attach) return;
-        attached_ = true;
-        attach(reinterpret_cast<void*>(winId()), PhysW(), PhysH()); // winId создаёт нативное окно
-    }
-
-    void resizeEvent(QResizeEvent* event) override
-    {
-        QWidget::resizeEvent(event);
-        if (attached_ && resized) resized(PhysW(), PhysH());
-    }
-
-    void mousePressEvent(QMouseEvent* event) override { last_ = event->position(); }
-
-    void mouseMoveEvent(QMouseEvent* event) override
-    {
-        if (!(event->buttons() & (Qt::LeftButton | Qt::RightButton)) || !orbit) return;
-        const QPointF delta = event->position() - last_;
-        last_ = event->position();
-        orbit(static_cast<float>(delta.x()) * 0.01f, static_cast<float>(delta.y()) * 0.01f, 0.0f);
-    }
-
-    void wheelEvent(QWheelEvent* event) override
-    {
-        if (orbit) orbit(0.0f, 0.0f, static_cast<float>(event->angleDelta().y()) / 120.0f);
-    }
-
-private:
-    uint32_t PhysW() const { return static_cast<uint32_t>(std::lround(width() * devicePixelRatioF())); }
-    uint32_t PhysH() const { return static_cast<uint32_t>(std::lround(height() * devicePixelRatioF())); }
-
-    bool attached_ = false;
-    QPointF last_;
-};
-
 MaterialEditorWindow::MaterialEditorWindow(EditorQtHost* host, const QString& material, QWidget* parent)
     : QMainWindow(nullptr, Qt::Window), host_(host), material_(material)
 {
@@ -393,7 +336,7 @@ void MaterialEditorWindow::BuildUi()
     graphAction_->setObjectName(QStringLiteral("MaterialGraphToggle"));
     graphAction_->setEnabled(false); // до загрузки HLSL
 
-    preview_ = new MaterialPreviewWidget(this);
+    preview_ = new PreviewWidget(this);
     preview_->setObjectName(QStringLiteral("MaterialPreview"));
 
     auto* settings = new QWidget(this);
@@ -508,6 +451,17 @@ void MaterialEditorWindow::BuildUi()
         Engine([engine, yaw, pitch, zoom](const EngineEditSessionApi& api)
         {
             if (engine->preview) api.materialPreviewCamera(api.context, engine->preview, yaw, pitch, zoom);
+        });
+    };
+    preview_->detach = [this, engine]()
+    {
+        Engine([engine](const EngineEditSessionApi& api)
+        {
+            if (engine->preview)
+            {
+                api.detachMaterialPreview(api.context, engine->preview);
+                engine->preview = 0;
+            }
         });
     };
     connect(shape_, &QComboBox::currentIndexChanged, this, [this, material, engine](int index)

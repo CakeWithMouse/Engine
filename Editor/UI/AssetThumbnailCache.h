@@ -1,34 +1,17 @@
 #pragma once
 
 #include "AssetExtensions.h"
+#include "Preview/TexturePreviewSource.h"
 
-#include <QCache>
-#include <QImage>
-#include <QMutex>
 #include <QPixmap>
 #include <QString>
 #include <functional>
 
 class QObject;
 
-struct ThumbnailKey
-{
-    QString path;
-    qint64 mtime = 0;
-    int size = 96;
-    qreal dpr = 1.0;
-
-    bool operator==(const ThumbnailKey& o) const
-    {
-        return size == o.size && qFuzzyCompare(dpr, o.dpr) && mtime == o.mtime && path == o.path;
-    }
-};
-
-inline size_t qHash(const ThumbnailKey& k, size_t seed = 0)
-{
-    return qHash(k.path, seed) ^ qHash(k.mtime) ^ qHash(k.size) ^ qHash(static_cast<int>(k.dpr * 100));
-}
-
+// UI adapter over the Core static preview source: turns cached/decoded QImages into
+// QPixmaps for icon views and supplies themed category placeholders. The decode, LRU
+// cache, aspect fit and HighDPI sizing live in EditorCore::TexturePreviewSource.
 class AssetThumbnailCache
 {
 public:
@@ -55,11 +38,10 @@ public:
     static QPixmap CategoryIcon(EditorCore::AssetKind kind, int size, qreal dpr);
 
 private:
-    AssetThumbnailCache();
+    AssetThumbnailCache() = default;
     ~AssetThumbnailCache() = default;
     AssetThumbnailCache(const AssetThumbnailCache&) = delete;
     AssetThumbnailCache& operator=(const AssetThumbnailCache&) = delete;
 
-    mutable QMutex mutex_;
-    QCache<ThumbnailKey, QPixmap> cache_;
+    EditorCore::TexturePreviewSource source_;
 };

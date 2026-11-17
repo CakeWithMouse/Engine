@@ -2,11 +2,9 @@
 #include "EditorTheme.h"
 #include "IconProvider.h"
 
-#include <QImageReader>
-#include <QMetaObject>
+#include <QImage>
 #include <QPainter>
-#include <QPointer>
-#include <QThreadPool>
+#include <QPixmap>
 
 AssetThumbnailCache& AssetThumbnailCache::Instance()
 {
@@ -14,37 +12,29 @@ AssetThumbnailCache& AssetThumbnailCache::Instance()
     return instance;
 }
 
-AssetThumbnailCache::AssetThumbnailCache()
-{
-    cache_.setMaxCost(256);
-}
-
 QPixmap AssetThumbnailCache::FindInCache(const QString& filePath, qint64 mtime, int size, qreal dpr) const
 {
-    QMutexLocker locker(&mutex_);
-    const ThumbnailKey key{filePath, mtime, size, dpr};
-    if (cache_.contains(key))
-        return *cache_[key];
-    return QPixmap();
+    const QImage image = source_.Cached(filePath, mtime, QSize(size, size), dpr);
+    if (image.isNull())
+        return QPixmap();
+    QPixmap pixmap = QPixmap::fromImage(image);
+    pixmap.setDevicePixelRatio(dpr);
+    return pixmap;
 }
 
 void AssetThumbnailCache::Insert(const QString& filePath, qint64 mtime, int size, qreal dpr, const QPixmap& pixmap)
 {
-    QMutexLocker locker(&mutex_);
-    const ThumbnailKey key{filePath, mtime, size, dpr};
-    cache_.insert(key, new QPixmap(pixmap));
+    source_.Insert(filePath, mtime, QSize(size, size), dpr, pixmap.toImage());
 }
 
 void AssetThumbnailCache::Clear()
 {
-    QMutexLocker locker(&mutex_);
-    cache_.clear();
+    source_.Clear();
 }
 
 int AssetThumbnailCache::Count() const
 {
-    QMutexLocker locker(&mutex_);
-    return cache_.count();
+    return source_.Count();
 }
 
 QPixmap AssetThumbnailCache::CategoryIcon(EditorCore::AssetKind kind, int size, qreal dpr)
@@ -106,49 +96,24 @@ QPixmap AssetThumbnailCache::GetOrCreate(
     std::function<void(const QPixmap&)> onLoaded
 )
 {
-    const ThumbnailKey key{filePath, mtime, size, dpr};
-
+    const QSize logical(size, size);
+    const QImage cached = source_.Cached(filePath, mtime, logical, dpr);
+    if (!cached.isNull())
     {
-        QMutexLocker locker(&mutex_);
-        if (cache_.contains(key))
-            return *cache_[key];
+        QPixmap pixmap = QPixmap::fromImage(cached);
+        pixmap.setDevicePixelRatio(dpr);
+        return pixmap;
     }
 
     const QPixmap placeholder = CategoryIcon(kind, size, dpr);
 
     if (kind == EditorCore::AssetKind::Texture && !filePath.isEmpty() && receiver)
     {
-        QPointer<QObject> guard(receiver);
-        QThreadPool::globalInstance()->start([key, guard, onLoaded]() {
-            if (guard.isNull())
-                return;
-
-            QImageReader reader(key.path);
-            reader.setAutoTransform(true);
-            const int physicalSize = qMax(1, qRound(key.size * key.dpr));
-            const QSize orig = reader.size();
-            if (orig.isValid())
-                reader.setScaledSize(orig.scaled(physicalSize, physicalSize, Qt::KeepAspectRatio));
-
-            QImage img = reader.read();
-            if (!img.isNull())
-            {
-                img = img.scaled(physicalSize, physicalSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-            }
-
-            if (guard.isNull() || img.isNull())
-                return;
-
-            QMetaObject::invokeMethod(guard.data(), [guard, key, img, onLoaded]() {
-                if (guard.isNull() || img.isNull())
-                    return;
-
-                QPixmap pm = QPixmap::fromImage(img);
-                pm.setDevicePixelRatio(key.dpr);
-                AssetThumbnailCache::Instance().Insert(key.path, key.mtime, key.size, key.dpr, pm);
-                if (onLoaded)
-                    onLoaded(pm);
-            }, Qt::QueuedConnection);
+        source_.Request(filePath, mtime, logical, dpr, receiver, [dpr, onLoaded](const QImage& image) {
+            QPixmap pixmap = QPixmap::fromImage(image);
+            pixmap.setDevicePixelRatio(dpr);
+            if (onLoaded)
+                onLoaded(pixmap);
         });
     }
 

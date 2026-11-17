@@ -171,6 +171,7 @@
         <ClCompile Include="UI/MainToolBar.cpp"/>
         <ClCompile Include="UI/IconProvider.cpp"/>
         <ClCompile Include="UI/AssetThumbnailCache.cpp"/>
+        <ClCompile Include="UI/PreviewWidget.cpp"/>
         <ClCompile Include="UI/AssetPickerDialog.cpp"/>
         <ClCompile Include="UI/ImportSettingsDialog.cpp"/>
         <ClCompile Include="UI/ModelImportEditFlow.cpp"/>
@@ -215,6 +216,8 @@
         <ClCompile Include="Core/AssetOps.cpp"/>
         <ClCompile Include="Core/AssetDrag.cpp"/>
         <ClCompile Include="Core/DropRules.cpp"/>
+        <ClCompile Include="Core/Preview/PreviewImage.cpp"/>
+        <ClCompile Include="Core/Preview/TexturePreviewSource.cpp"/>
         <ClCompile Include="Core/HlslGraphCompiler.cpp"/>
         <ClCompile Include="Core/MaterialGraphModel.cpp"/>
         <ClCompile Include="Core/Graph/GraphDocument.cpp"/>
@@ -301,6 +304,9 @@
         <ClInclude Include="Core/AssetOps.h"/>
         <ClInclude Include="Core/AssetDrag.h"/>
         <ClInclude Include="Core/DropRules.h"/>
+        <ClInclude Include="Core/Preview/IPreviewSource.h"/>
+        <ClInclude Include="Core/Preview/PreviewImage.h"/>
+        <ClInclude Include="Core/Preview/TexturePreviewSource.h"/>
         <ClInclude Include="Core/HlslGraphCompiler.h"/>
         <ClInclude Include="Core/MaterialGraphModel.h"/>
         <ClInclude Include="Core/Graph/GraphDocument.h"/>
@@ -358,6 +364,7 @@
         <ClInclude Include="UI/EditorApp.h"/>
         <ClInclude Include="UI/IconProvider.h"/>
         <ClInclude Include="UI/AssetThumbnailCache.h"/>
+        <ClInclude Include="UI/PreviewWidget.h"/>
         <ClInclude Include="UI/AssetPickerDialog.h"/>
         <ClInclude Include="UI/ViewportOverlayHelper.h"/>
         <ClInclude Include="UI/SpinBoxArrowStyle.h"/>

@@ -19,7 +19,7 @@ class QTabWidget;
 class QTimer;
 class QAction;
 class MaterialGraphWidget;
-class MaterialPreviewWidget;
+class PreviewWidget;
 class MaterialSourceEditor;
 
 // Состояние материала в том виде, в каком его вернул readMaterial (копия для потока UI).
@@ -152,7 +152,7 @@ private:
     bool saving_ = false;
     bool edited_ = false; // правка отправлена, а ответ движка с флагом modified ещё не пришёл
 
-    MaterialPreviewWidget* preview_ = nullptr;
+    PreviewWidget* preview_ = nullptr;
     QComboBox* shape_ = nullptr;
     MaterialSourceEditor* source_ = nullptr;
     QListWidget* errors_ = nullptr;

@@ -80,6 +80,8 @@
         <ClCompile Include="../Core/AssetOps.cpp"/>
         <ClCompile Include="../Core/AssetDrag.cpp"/>
         <ClCompile Include="../Core/DropRules.cpp"/>
+        <ClCompile Include="../Core/Preview/PreviewImage.cpp"/>
+        <ClCompile Include="../Core/Preview/TexturePreviewSource.cpp"/>
         <ClCompile Include="../Core/HlslGraphCompiler.cpp"/>
         <ClCompile Include="../Core/MaterialGraphModel.cpp"/>
         <ClCompile Include="../Core/Graph/GraphDocument.cpp"/>
@@ -144,6 +146,9 @@
         <ClInclude Include="../Core/AssetOps.h"/>
         <ClInclude Include="../Core/AssetDrag.h"/>
         <ClInclude Include="../Core/DropRules.h"/>
+        <ClInclude Include="../Core/Preview/IPreviewSource.h"/>
+        <ClInclude Include="../Core/Preview/PreviewImage.h"/>
+        <ClInclude Include="../Core/Preview/TexturePreviewSource.h"/>
         <ClInclude Include="../Core/HlslGraphCompiler.h"/>
         <ClInclude Include="../Core/MaterialGraphModel.h"/>
         <ClInclude Include="../Core/Graph/GraphDocument.h"/>
