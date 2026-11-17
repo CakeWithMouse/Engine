@@ -39,16 +39,16 @@ namespace
             return static_cast<uint32_t>(EditorIcons::IconId::SunSky);
         }
 
-        if (CameraGuide::IsCamera(obj) && obj.gameplayKind != 2)
-        {
-            outColor = TintFromColor(pal.iconCamera);
-            return static_cast<uint32_t>(EditorIcons::IconId::Camera);
-        }
-
         if (obj.gameplayKind == 2 || obj.type == "Gameplay.Camera" || obj.type == "GameCamera")
         {
             outColor = TintFromColor(pal.iconGameCamera);
             return static_cast<uint32_t>(EditorIcons::IconId::GameCamera);
+        }
+
+        if (CameraGuide::IsCamera(obj))
+        {
+            outColor = TintFromColor(pal.iconCamera);
+            return static_cast<uint32_t>(EditorIcons::IconId::Camera);
         }
 
         if (obj.type.rfind("Particle.", 0) == 0 || obj.type == "Particles" || obj.name.find("Particle") != std::string::npos)
@@ -78,6 +78,20 @@ void ViewportOverlayHelper::UpdateOverlays(
     GizmoGeometry::Handle activeHandle)
 {
     if (!host) return;
+
+    // Play/Pause hides editor overlays; hash sentinel 0 marks "cleared" so the
+    // clear is pushed once per transition and Edit rebuilds on the next tick.
+    if (host->PlayState() != IEditorHost::Edit)
+    {
+        if (inOutHash != 0)
+        {
+            host->SetOverlayLines({}, 1.0f);
+            host->SetOverlayBillboards({});
+            host->SetOverlayTriangles({});
+            inOutHash = 0;
+        }
+        return;
+    }
 
     IconProvider::UploadIcons(host);
 
@@ -175,13 +189,10 @@ void ViewportOverlayHelper::UpdateOverlays(
             {
                 EngineOverlayBillboard bb{};
                 bb.iconId = iconId;
-                bb.x = obj.transform.position[0];
-                bb.y = obj.transform.position[1];
-                bb.z = obj.transform.position[2];
-                if (CameraGuide::IsCamera(obj)) {
-                    const auto world = CameraGuide::World(obj, snapshot);
-                    bb.x=world[3].x;bb.y=world[3].y;bb.z=world[3].z;
-                }
+                const auto world = CameraGuide::World(obj, snapshot);
+                bb.x = world[3].x;
+                bb.y = world[3].y;
+                bb.z = world[3].z;
                 bb.sizePixels = BillboardMetrics::SizePixels(static_cast<float>(cam.height));
                 bb.rgbaTint = iconColor;
                 bb.objectId = obj.id;
@@ -201,9 +212,16 @@ void ViewportOverlayHelper::UpdateOverlays(
         if (len > 1e-4f) { dirX /= len; dirY /= len; dirZ /= len; }
         else { dirX = 0.0f; dirY = -0.707f; dirZ = -0.707f; }
 
-        const float px = selectedObj->transform.position[0];
-        const float py = selectedObj->transform.position[1];
-        const float pz = selectedObj->transform.position[2];
+        const auto sunWorld = CameraGuide::World(*selectedObj, snapshot);
+        const float px = sunWorld[3].x;
+        const float py = sunWorld[3].y;
+        const float pz = sunWorld[3].z;
+
+        glm::vec3 worldDir = glm::mat3(sunWorld) * glm::vec3(dirX, dirY, dirZ);
+        const float worldLen = glm::length(worldDir);
+        if (worldLen > 1e-4f) worldDir /= worldLen;
+        else worldDir = glm::vec3(0.0f, -0.707f, -0.707f);
+        dirX = worldDir.x; dirY = worldDir.y; dirZ = worldDir.z;
 
         EngineOverlayLine sunLine{};
         sunLine.x0 = px + dirX * 0.8f;
@@ -234,10 +252,11 @@ void ViewportOverlayHelper::UpdateOverlays(
                 static_cast<uint8_t>(std::clamp(selectedObj->pointLight.color[2] * 255.0f, 0.0f, 255.0f)),
                 160
             );
+            const auto lightWorld = CameraGuide::World(*selectedObj, snapshot);
             auto radiusLines = ViewportOverlay::GenerateLightRadiusLines(
-                selectedObj->transform.position[0],
-                selectedObj->transform.position[1],
-                selectedObj->transform.position[2],
+                lightWorld[3].x,
+                lightWorld[3].y,
+                lightWorld[3].z,
                 selectedObj->pointLight.radius,
                 lightCol,
                 48
@@ -299,6 +318,7 @@ uint64_t ViewportOverlayHelper::HitTestBillboard(
     float tolerancePixels)
 {
     if (!host || cam.width <= 0 || cam.height <= 0) return 0;
+    if (host->PlayState() != IEditorHost::Edit) return 0;
 
     const bool overlaysEnabled = SettingsService::Instance().GetValue(QStringLiteral("view/icons"), true).toBool();
     if (!overlaysEnabled) return 0;
@@ -314,17 +334,10 @@ uint64_t ViewportOverlayHelper::HitTestBillboard(
         if (GetBillboardIcon(obj, iconPalette, col) == 0)
             continue;
 
-        float pos[3] = {
-            obj.transform.position[0],
-            obj.transform.position[1],
-            obj.transform.position[2]
-        };
+        const auto world = CameraGuide::World(obj, snapshot);
+        float pos[3] = { world[3].x, world[3].y, world[3].z };
 
         float screen[2]{};
-        if(CameraGuide::IsCamera(obj)) {
-            const auto world=CameraGuide::World(obj,snapshot);
-            pos[0]=world[3].x;pos[1]=world[3].y;pos[2]=world[3].z;
-        }
         if (GizmoGeometry::ProjectPointToScreen(pos, cam.viewMatrix, cam.projMatrix, cam.width, cam.height, screen))
         {
             float dx = screen[0] - screenX;

@@ -275,7 +275,7 @@ bool ViewportWidget::HandleMouseMove(QMouseEvent* mouse)
         return true;
     }
 
-    if (!looking_ && !draggingSelectedObject_ && hasCameraInfo_)
+    if (!looking_ && !draggingSelectedObject_ && hasCameraInfo_ && host_->PlayState() == EditorQtHost::Edit)
     {
         uint64_t selId = 0;
         EngineSceneTransform selTrans{};

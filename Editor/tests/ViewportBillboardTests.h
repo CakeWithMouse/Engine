@@ -39,7 +39,11 @@ public:
     Snapshot snapshot;
     EngineCameraInfo camera{};
     std::vector<EngineOverlayBillboard> billboards;
+    std::vector<EngineOverlayLine> lines;
+    std::vector<EngineOverlayTriangle> triangles;
     std::vector<QImage> icons;
+    EditorState state = Edit;
+    int linePushes = 0;
 
     Host()
     {
@@ -58,8 +62,8 @@ public:
     bool HasScene() const override { return true; }
     bool GetCamera(EngineCameraInfo& info) const override { info = camera; return true; }
     void SetOverlayBillboards(const std::vector<EngineOverlayBillboard>& bb) override { billboards = bb; }
-    void SetOverlayLines(const std::vector<EngineOverlayLine>&, float) override {}
-    void SetOverlayTriangles(const std::vector<EngineOverlayTriangle>&) override {}
+    void SetOverlayLines(const std::vector<EngineOverlayLine>& l, float) override { lines = l; ++linePushes; }
+    void SetOverlayTriangles(const std::vector<EngineOverlayTriangle>& t) override { triangles = t; }
     void SetOverlayIcon(uint32_t id, uint32_t width, uint32_t height, const uint8_t* data) override
     {
         if (icons.size() <= id) icons.resize(id + 1);
@@ -71,7 +75,7 @@ public:
     bool HasMaterials() const override { return false; }
     bool HasViewport() const override { return true; }
     bool ViewportActive() const override { return true; }
-    EditorState PlayState() const override { return Edit; }
+    EditorState PlayState() const override { return state; }
     double LastDt() const override { return 0.0; }
     uint64_t UpdateCount() const override { return 0; }
     const EngineModuleHost& host() const override { static EngineModuleHost h{}; return h; }
@@ -230,5 +234,113 @@ inline void Run()
 
     EditorTheme::Instance().SetMode(ThemeMode::Dark);
     std::printf("Viewport billboard tint checks: PASS\n");
+
+    // Parent chain: icons follow the WORLD transform (translation/rotation/scale).
+    Host chain;
+    auto cube = MakeObject(10, "Primitive.Cube", 5.0f, 0.0f, -2.0f);
+    auto child = MakeObject(11, "Light.Point", 1.0f, 1.0f, 0.0f);
+    for (auto* o : {&cube, &child})
+    {
+        for (int i = 0; i < 3; ++i) o->transform.scale[i] = 1.0f;
+        o->transform.rotation[3] = 1.0f;
+    }
+    child.parent = 10;
+    child.hasPointLight = true;
+    child.pointLight.radius = 1.0f;
+    chain.snapshot.objects.push_back(cube);
+    chain.snapshot.objects.push_back(child);
+    uint64_t chainHash = 0;
+    ViewportOverlayHelper::UpdateOverlays(&chain, chain.camera, true,
+        GizmoGeometry::Handle::None, 0, false, chainHash, GizmoGeometry::Handle::None);
+    const auto* childBb = Find(chain, 11);
+    Check(childBb && Near(childBb->x, 6.0f) && Near(childBb->y, 1.0f) && Near(childBb->z, -2.0f),
+        "child light billboard sits at parent translation + local offset");
+    Check(Find(chain, 10) == nullptr, "icon-less cube gets no billboard");
+
+    chain.snapshot.objects[0].transform.position[0] = 8.0f;
+    ViewportOverlayHelper::UpdateOverlays(&chain, chain.camera, true,
+        GizmoGeometry::Handle::None, 0, false, chainHash, GizmoGeometry::Handle::None);
+    childBb = Find(chain, 11);
+    Check(childBb && Near(childBb->x, 9.0f) && Near(childBb->y, 1.0f) && Near(childBb->z, -2.0f),
+        "moving the parent cube moves the child light icon");
+
+    const float worldPos[3] = {9.0f, 1.0f, -2.0f};
+    float childScreen[2]{};
+    Check(GizmoGeometry::ProjectPointToScreen(worldPos, chain.camera.viewMatrix, chain.camera.projMatrix,
+        chain.camera.width, chain.camera.height, childScreen), "child world position projects to screen");
+    Check(ViewportOverlayHelper::HitTestBillboard(&chain, chain.camera, childScreen[0], childScreen[1], 2.0f) == 11,
+        "clicking the world-position icon selects the child light");
+
+    // Parent rotated +90 deg around Y: local +X offset becomes world -Z.
+    chain.snapshot.objects[0].transform.position[0] = 0.0f;
+    chain.snapshot.objects[0].transform.position[2] = 0.0f;
+    chain.snapshot.objects[0].transform.rotation[1] = 0.70710678f;
+    chain.snapshot.objects[0].transform.rotation[3] = 0.70710678f;
+    ViewportOverlayHelper::UpdateOverlays(&chain, chain.camera, true,
+        GizmoGeometry::Handle::None, 0, false, chainHash, GizmoGeometry::Handle::None);
+    childBb = Find(chain, 11);
+    Check(childBb && Near(childBb->x, 0.0f) && Near(childBb->y, 1.0f) && Near(childBb->z, -1.0f),
+        "rotated parent rotates the child icon offset");
+
+    // Parent scale 2: inheritScale=true scales the offset, false keeps it metric.
+    chain.snapshot.objects[0].transform.rotation[1] = 0.0f;
+    chain.snapshot.objects[0].transform.rotation[3] = 1.0f;
+    chain.snapshot.objects[0].transform.position[0] = 5.0f;
+    chain.snapshot.objects[0].transform.position[2] = -2.0f;
+    for (int i = 0; i < 3; ++i) chain.snapshot.objects[0].transform.scale[i] = 2.0f;
+    ViewportOverlayHelper::UpdateOverlays(&chain, chain.camera, true,
+        GizmoGeometry::Handle::None, 0, false, chainHash, GizmoGeometry::Handle::None);
+    childBb = Find(chain, 11);
+    Check(childBb && Near(childBb->x, 7.0f) && Near(childBb->y, 2.0f) && Near(childBb->z, -2.0f),
+        "inheritScale=true applies parent scale to the child icon offset");
+    chain.snapshot.objects[1].inheritScale = false;
+    ViewportOverlayHelper::UpdateOverlays(&chain, chain.camera, true,
+        GizmoGeometry::Handle::None, 0, false, chainHash, GizmoGeometry::Handle::None);
+    childBb = Find(chain, 11);
+    Check(childBb && Near(childBb->x, 6.0f) && Near(childBb->y, 1.0f) && Near(childBb->z, -2.0f),
+        "inheritScale=false keeps the child icon offset unscaled");
+    std::printf("Viewport billboard parent-chain checks: PASS\n");
+
+    // Play/Pause: overlays cleared once via the unified host state, restored on Stop.
+    Host play;
+    auto playLight = MakeObject(1, "Light.Point", 1.0f, 2.0f, 3.0f);
+    playLight.hasPointLight = true;
+    playLight.pointLight.radius = 1.0f;
+    play.snapshot.objects.push_back(playLight);
+    play.snapshot.selected = 1;
+    uint64_t playHash = 0;
+    ViewportOverlayHelper::UpdateOverlays(&play, play.camera, true,
+        GizmoGeometry::Handle::None, 0, false, playHash, GizmoGeometry::Handle::None);
+    Check(!play.billboards.empty() && !play.lines.empty(), "edit mode shows icons and grid/gizmo lines");
+    const int pushesBeforePlay = play.linePushes;
+
+    play.state = IEditorHost::Play;
+    ViewportOverlayHelper::UpdateOverlays(&play, play.camera, true,
+        GizmoGeometry::Handle::None, 0, false, playHash, GizmoGeometry::Handle::None);
+    Check(play.billboards.empty() && play.lines.empty() && play.triangles.empty(),
+        "Play clears gizmo, icons and grid overlays");
+    Check(play.linePushes == pushesBeforePlay + 1, "overlay clear pushed exactly once on Play");
+    ViewportOverlayHelper::UpdateOverlays(&play, play.camera, true,
+        GizmoGeometry::Handle::None, 0, false, playHash, GizmoGeometry::Handle::None);
+    Check(play.linePushes == pushesBeforePlay + 1, "no per-tick overlay pushes while playing");
+    Check(ViewportOverlayHelper::HitTestBillboard(&play, play.camera, 400.0f, 300.0f, 1000.0f) == 0,
+        "hidden icons are not pickable in Play");
+
+    play.state = IEditorHost::Edit;
+    ViewportOverlayHelper::UpdateOverlays(&play, play.camera, true,
+        GizmoGeometry::Handle::None, 0, false, playHash, GizmoGeometry::Handle::None);
+    Check(!play.billboards.empty() && !play.lines.empty(), "Stop restores overlays");
+    Check(play.snapshot.selected == 1 && Find(play, 1) != nullptr,
+        "Stop restores the icon for the unchanged selection");
+
+    play.state = IEditorHost::Pause;
+    ViewportOverlayHelper::UpdateOverlays(&play, play.camera, true,
+        GizmoGeometry::Handle::None, 0, false, playHash, GizmoGeometry::Handle::None);
+    Check(play.billboards.empty() && play.lines.empty(), "Pause also hides editor overlays");
+    play.state = IEditorHost::Edit;
+    ViewportOverlayHelper::UpdateOverlays(&play, play.camera, true,
+        GizmoGeometry::Handle::None, 0, false, playHash, GizmoGeometry::Handle::None);
+    Check(!play.billboards.empty(), "resume from Pause restores overlays");
+    std::printf("Viewport overlay Play/Stop checks: PASS\n");
 }
 } // namespace ViewportBillboardTests
