@@ -91,6 +91,15 @@ inline void RegisterViewportCommands(ViewportWidget* viewport, EditorQtHost* hos
         return true;
     });
 
+    reg(QStringLiteral("View.ToggleAiDiagnostics"), QStringLiteral("Toggle AI Diagnostics"), [](const CommandContext& ctx) {
+        bool current = SettingsService::Instance().GetValue(QStringLiteral("ai/enabled"), false).toBool();
+        bool next = ctx.parameters.contains(QStringLiteral("enabled"))
+            ? ctx.parameters.value(QStringLiteral("enabled")).toBool()
+            : !current;
+        SettingsService::Instance().SetValue(QStringLiteral("ai/enabled"), next);
+        return true;
+    });
+
     reg(QStringLiteral("View.SetAntialiasing"), QStringLiteral("Set Antialiasing Mode"), [host](const CommandContext& ctx) {
         QString modeStr = ctx.parameters.value(QStringLiteral("mode")).toString();
         if (modeStr.isEmpty()) modeStr = QStringLiteral("fxaa");
@@ -119,5 +128,6 @@ inline void UnregisterViewportCommands()
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("View.ToggleOverlays"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("View.ToggleGizmo"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("View.ToggleIcons"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("View.ToggleAiDiagnostics"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("View.SetAntialiasing"));
 }

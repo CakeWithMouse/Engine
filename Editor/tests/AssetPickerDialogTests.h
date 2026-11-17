@@ -245,6 +245,106 @@ inline void Run()
         check(sizedTop == sizedRight, "Uniform margin: top equals right");
     }
 
+    // 8. UI, Script, and AiMachine asset kinds (Task U)
+    {
+        QTemporaryDir temp;
+        check(temp.isValid(), "Temporary directory for UI/Script/AI picker created");
+        const QString root = temp.path();
+        QDir(root).mkpath(QStringLiteral("UI"));
+        QDir(root).mkpath(QStringLiteral("Scripts"));
+        QDir(root).mkpath(QStringLiteral("AI"));
+
+        auto touch = [](const QString& path) {
+            QFile f(path);
+            f.open(QIODevice::WriteOnly);
+            f.write("content");
+            f.close();
+        };
+
+        touch(root + QStringLiteral("/UI/MainMenu.ui"));
+        touch(root + QStringLiteral("/Scripts/Movement.vscript"));
+        touch(root + QStringLiteral("/AI/Patrol.fsm"));
+
+        // UI Picker
+        {
+            AssetPickerDialog picker(EditorCore::AssetKind::UI, root);
+            check(picker.ListWidget() != nullptr, "UI picker list exists");
+            check(picker.ListWidget()->count() == 1, "UI picker lists only .ui assets");
+            check(picker.windowTitle() == Tr("Выбор интерфейса", "Choose Interface"), "UI picker title");
+            check(picker.ListWidget()->item(0)->text() == QStringLiteral("MainMenu.ui"), "UI item name");
+        }
+
+        // Script Picker
+        {
+            AssetPickerDialog picker(EditorCore::AssetKind::Script, root);
+            check(picker.ListWidget() != nullptr, "Script picker list exists");
+            check(picker.ListWidget()->count() == 1, "Script picker lists only .vscript assets");
+            check(picker.windowTitle() == Tr("Выбор скрипта", "Choose Script"), "Script picker title");
+            check(picker.ListWidget()->item(0)->text() == QStringLiteral("Movement.vscript"), "Script item name");
+        }
+
+        // AI Machine Picker
+        {
+            AssetPickerDialog picker(EditorCore::AssetKind::AiMachine, root);
+            check(picker.ListWidget() != nullptr, "AI picker list exists");
+            check(picker.ListWidget()->count() == 1, "AI picker lists only .fsm assets");
+            check(picker.windowTitle() == Tr("Выбор автомата ИИ", "Choose AI State Machine"), "AI picker title");
+            check(picker.ListWidget()->item(0)->text() == QStringLiteral("Patrol.fsm"), "AI item name");
+
+            AssetPickerDialog::SetExecHookForTesting([](AssetPickerDialog* dlg) {
+                dlg->ListWidget()->setCurrentRow(0);
+                dlg->accept();
+                return QDialog::Accepted;
+            });
+            check(picker.exec() == QDialog::Accepted, "AI picker test hook accepts");
+            check(picker.SelectedVirtualPath() == QStringLiteral("/Game/AI/Patrol.fsm"), "Selected virtual path formatted");
+            AssetPickerDialog::SetExecHookForTesting(nullptr);
+        }
+    }
+
+    // 8. Virtual path normalization (Task L)
+    {
+        QTemporaryDir temp;
+        check(temp.isValid(), "Temporary directory for normalization tests created");
+        const QString root = temp.path();
+        QDir(root).mkpath(QStringLiteral("Scripts"));
+        QDir(root).mkpath(QStringLiteral("AI"));
+
+        // Empty path
+        check(EditorCore::NormalizeVirtualPath(QString()).isEmpty(), "Empty path normalizes to empty");
+
+        // Already virtual path with /Game/
+        check(EditorCore::NormalizeVirtualPath(QStringLiteral("/Game/Scripts/Hero.vscript")) == QStringLiteral("/Game/Scripts/Hero.vscript"),
+              "Virtual path starting with /Game/ preserved");
+        check(EditorCore::NormalizeVirtualPath(QStringLiteral("/Game/AI/Enemy.fsm")) == QStringLiteral("/Game/AI/Enemy.fsm"),
+              "Virtual path starting with /Game/ AI machine preserved");
+
+        // Virtual path without leading slash Game/
+        check(EditorCore::NormalizeVirtualPath(QStringLiteral("Game/Scripts/Hero.vscript")) == QStringLiteral("/Game/Scripts/Hero.vscript"),
+              "Virtual path Game/... gets leading slash");
+
+        // Backslashes
+        check(EditorCore::NormalizeVirtualPath(QStringLiteral("\\Game\\Scripts\\Hero.vscript")) == QStringLiteral("/Game/Scripts/Hero.vscript"),
+              "Backslashes in virtual path normalized");
+
+        // Relative path inside project
+        check(EditorCore::NormalizeVirtualPath(QStringLiteral("Scripts/Hero.vscript"), root) == QStringLiteral("/Game/Scripts/Hero.vscript"),
+              "Relative path inside project gets /Game/ prefix");
+
+        // Absolute disk path inside content root
+        const QString fullScriptDiskPath = QDir(root).filePath(QStringLiteral("Scripts/Hero.vscript"));
+        check(EditorCore::NormalizeVirtualPath(fullScriptDiskPath, root) == QStringLiteral("/Game/Scripts/Hero.vscript"),
+              "Absolute disk path inside content root maps to /Game/...");
+
+        const QString fullAiDiskPath = QDir(root).filePath(QStringLiteral("AI/Enemy.fsm"));
+        check(EditorCore::NormalizeVirtualPath(fullAiDiskPath, root) == QStringLiteral("/Game/AI/Enemy.fsm"),
+              "Absolute AI disk path inside content root maps to /Game/...");
+
+        // Whitespace trimming
+        check(EditorCore::NormalizeVirtualPath(QStringLiteral("  /Game/Scripts/Hero.vscript  ")) == QStringLiteral("/Game/Scripts/Hero.vscript"),
+              "Surrounding whitespace trimmed");
+    }
+
     std::printf("AssetPickerDialog tests: %d checks passed\n", checks);
 }
 

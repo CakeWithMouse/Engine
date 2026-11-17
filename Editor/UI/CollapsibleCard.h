@@ -3,11 +3,15 @@
 #include <QFrame>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QWidget>
 #include <QString>
 #include <functional>
+#include "EditorLocale.h"
 #include "EditorTheme.h"
 #include "IconProvider.h"
+#include "InfoButton.h"
+#include "InspectorCardStyle.h"
 
 class CollapsibleCard : public QFrame
 {
@@ -16,6 +20,7 @@ public:
         : QFrame(parent), expanded_(expanded), titleText_(title)
     {
         setObjectName(QStringLiteral("CollapsibleCard"));
+        InspectorCardStyle::ApplyCardStyle(this);
 
         auto* mainLayout = new QVBoxLayout(this);
         mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -24,7 +29,18 @@ public:
         headerBtn_ = new QPushButton(this);
         headerBtn_->setObjectName(QStringLiteral("CardHeaderBtn"));
         headerBtn_->setCursor(Qt::PointingHandCursor);
-        headerBtn_->setFixedHeight(22);
+        headerBtn_->setFixedHeight(InspectorCardStyle::kHeaderHeight);
+
+        auto* headerLayout = new QHBoxLayout(headerBtn_);
+        headerLayout->setContentsMargins(0, 0, 4, 0);
+        headerLayout->setSpacing(0);
+        headerLayout->addStretch(1);
+
+        infoBtn_ = new InfoButton(headerBtn_);
+        infoBtn_->setObjectName(QStringLiteral("CardInfoButton"));
+        infoBtn_->hide();
+        headerLayout->addWidget(infoBtn_);
+
         UpdateHeaderText();
 
         QObject::connect(headerBtn_, &QPushButton::clicked, [this] {
@@ -35,8 +51,8 @@ public:
         content_ = new QWidget(this);
         content_->setObjectName(QStringLiteral("CardContent"));
         contentLayout_ = new QVBoxLayout(content_);
-        contentLayout_->setContentsMargins(6, 4, 6, 4);
-        contentLayout_->setSpacing(4);
+        contentLayout_->setContentsMargins(InspectorCardStyle::CardMargins());
+        contentLayout_->setSpacing(InspectorCardStyle::kCardSpacing);
         mainLayout->addWidget(content_);
 
         content_->setVisible(expanded_);
@@ -61,6 +77,8 @@ public:
         UpdateHeaderText();
     }
 
+    const QString& Title() const { return titleText_; }
+
     void SetExpanded(bool exp)
     {
         if (expanded_ == exp)
@@ -84,6 +102,45 @@ public:
     QWidget* Content() const { return content_; }
     QVBoxLayout* ContentLayout() const { return contentLayout_; }
 
+    void SetInfo(const QString& title, const QString& text)
+    {
+        infoTitle_ = title;
+        infoText_ = text;
+        if (!infoBtn_) return;
+        if (text.isEmpty() && title.isEmpty())
+        {
+            infoBtn_->hide();
+        }
+        else
+        {
+            infoBtn_->SetInfoText(title, text, text);
+            infoBtn_->show();
+        }
+    }
+
+    void SetInfo(const QString& text)
+    {
+        SetInfo(titleText_, text);
+    }
+
+    void SetInfo(const QString& ruTitle, const QString& enTitle, const QString& ruText, const QString& enText)
+    {
+        infoTitle_ = EditorLocale::Instance().Language() == EditorLanguage::Ru ? ruTitle : enTitle;
+        infoText_ = EditorLocale::Instance().Language() == EditorLanguage::Ru ? ruText : enText;
+        if (!infoBtn_) return;
+        if (ruText.isEmpty() && enText.isEmpty())
+        {
+            infoBtn_->hide();
+        }
+        else
+        {
+            infoBtn_->SetInfoText(infoTitle_, ruText, enText);
+            infoBtn_->show();
+        }
+    }
+
+    InfoButton* InfoBtn() const { return infoBtn_; }
+
 private:
     void UpdateHeaderText()
     {
@@ -96,7 +153,10 @@ private:
 
     bool expanded_ = true;
     QString titleText_;
+    QString infoTitle_;
+    QString infoText_;
     QPushButton* headerBtn_ = nullptr;
+    InfoButton* infoBtn_ = nullptr;
     QWidget* content_ = nullptr;
     QVBoxLayout* contentLayout_ = nullptr;
     int subId_ = 0;

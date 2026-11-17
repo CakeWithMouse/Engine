@@ -9,6 +9,9 @@
 #include <QPainter>
 #include <QImage>
 #include <QByteArray>
+#include <QMutex>
+#include <QHash>
+#include <algorithm>
 #include <vector>
 
 namespace
@@ -56,28 +59,39 @@ namespace
         if (name == QLatin1String("chevron-up") || name == QLatin1String("arrow-up")) return EditorIcons::TABLER_CHEVRON_UP;
         if (name == QLatin1String("chevron-down") || name == QLatin1String("arrow-down")) return EditorIcons::TABLER_CHEVRON_DOWN;
         if (name == QLatin1String("chevron-right") || name == QLatin1String("arrow-right")) return EditorIcons::TABLER_CHEVRON_RIGHT;
+        if (name == QLatin1String("help") || name == QLatin1String("help-circle")) return EditorIcons::TABLER_HELP;
+        if (name == QLatin1String("info") || name == QLatin1String("info-circle")) return EditorIcons::TABLER_INFO_CIRCLE;
         if (name == QLatin1String("camera")) return EditorIcons::SVG_CAMERA;
         if (name == QLatin1String("particles")) return EditorIcons::SVG_PARTICLES;
         return nullptr;
     }
 
-    QPixmap RenderSvgPixmap(const char* svgData, const QColor& color, int size)
+    QMutex s_cacheMutex;
+    QHash<QString, QPixmap> s_pixmapCache;
+    QHash<QString, QIcon> s_iconCache;
+
+    QPixmap RenderSvgPixmap(const char* svgData, const QColor& color, int size, qreal dpr)
     {
         if (!svgData) return QPixmap();
+        if (dpr <= 0.0) dpr = 1.0;
+        const int physSize = std::max(1, qRound(size * dpr));
+
         QString svgStr = QString::fromUtf8(svgData);
         svgStr.replace(QStringLiteral("currentColor"), color.name(QColor::HexRgb));
         svgStr.replace(QStringLiteral("#FFFFFF"), color.name(QColor::HexRgb));
         svgStr.replace(QStringLiteral("#ffffff"), color.name(QColor::HexRgb));
         const QByteArray bytes = svgStr.toUtf8();
 
-        QPixmap pix(size, size);
+        QPixmap pix(physSize, physSize);
         pix.fill(Qt::transparent);
+        pix.setDevicePixelRatio(dpr);
 #ifdef ENGINE_HAS_QTSVG
         QSvgRenderer renderer(bytes);
         if (renderer.isValid())
         {
             QPainter painter(&pix);
-            renderer.render(&painter);
+            renderer.render(&painter, QRectF(0, 0, size, size));
+            painter.end();
             return pix;
         }
 #endif
@@ -85,18 +99,45 @@ namespace
         img.loadFromData(bytes, "SVG");
         if (!img.isNull())
         {
-            return QPixmap::fromImage(img.scaled(size, size, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            QPixmap p = QPixmap::fromImage(img.scaled(physSize, physSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            p.setDevicePixelRatio(dpr);
+            return p;
         }
-        return QPixmap::fromImage(RenderFallback(svgData, color, size));
+        QImage fallback = RenderFallback(svgData, color, physSize);
+        QPixmap p = QPixmap::fromImage(fallback);
+        p.setDevicePixelRatio(dpr);
+        return p;
     }
 }
 
-QPixmap IconProvider::GetPixmap(const QString& name, const QColor& color, int size)
+QPixmap IconProvider::GetPixmap(const QString& name, const QColor& color, int size, qreal dpr)
 {
     const char* svg = GetTablerSvg(name);
+    if (!svg) return QPixmap();
+    if (dpr <= 0.0) dpr = 1.0;
+
     const auto& theme = EditorTheme::Instance();
     const QColor baseColor = color.isValid() ? color : theme.TextPrimary();
-    return RenderSvgPixmap(svg, baseColor, size);
+
+    const QString key = QStringLiteral("%1_%2_%3_%4")
+        .arg(name)
+        .arg(baseColor.rgba(), 8, 16, QLatin1Char('0'))
+        .arg(size)
+        .arg(qRound(dpr * 100));
+
+    {
+        QMutexLocker lock(&s_cacheMutex);
+        auto it = s_pixmapCache.find(key);
+        if (it != s_pixmapCache.end())
+            return it.value();
+    }
+
+    QPixmap pix = RenderSvgPixmap(svg, baseColor, size, dpr);
+    {
+        QMutexLocker lock(&s_cacheMutex);
+        s_pixmapCache.insert(key, pix);
+    }
+    return pix;
 }
 
 QIcon IconProvider::GetIcon(const QString& name, const QColor& color, int size)
@@ -106,15 +147,45 @@ QIcon IconProvider::GetIcon(const QString& name, const QColor& color, int size)
 
     const auto& theme = EditorTheme::Instance();
     const QColor baseColor = color.isValid() ? color : theme.TextPrimary();
+
+    const QString iconKey = QStringLiteral("%1_%2_%3")
+        .arg(name)
+        .arg(baseColor.rgba(), 8, 16, QLatin1Char('0'))
+        .arg(size);
+
+    {
+        QMutexLocker lock(&s_cacheMutex);
+        auto it = s_iconCache.find(iconKey);
+        if (it != s_iconCache.end())
+            return it.value();
+    }
+
     const QColor disabledColor = theme.Palette().textDisabled;
     const QColor activeColor = theme.Palette().accent;
+    const QColor selectedColor(0xFF, 0xFF, 0xFF);
 
     QIcon icon;
-    icon.addPixmap(RenderSvgPixmap(svg, baseColor, size), QIcon::Normal, QIcon::Off);
-    icon.addPixmap(RenderSvgPixmap(svg, disabledColor, size), QIcon::Disabled, QIcon::Off);
-    icon.addPixmap(RenderSvgPixmap(svg, activeColor, size), QIcon::Active, QIcon::Off);
-    icon.addPixmap(RenderSvgPixmap(svg, QColor(0xFF, 0xFF, 0xFF), size), QIcon::Selected, QIcon::Off);
+    const qreal dprs[] = {1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0};
+    for (qreal d : dprs)
+    {
+        icon.addPixmap(GetPixmap(name, baseColor, size, d), QIcon::Normal, QIcon::Off);
+        icon.addPixmap(GetPixmap(name, disabledColor, size, d), QIcon::Disabled, QIcon::Off);
+        icon.addPixmap(GetPixmap(name, activeColor, size, d), QIcon::Active, QIcon::Off);
+        icon.addPixmap(GetPixmap(name, selectedColor, size, d), QIcon::Selected, QIcon::Off);
+    }
+
+    {
+        QMutexLocker lock(&s_cacheMutex);
+        s_iconCache.insert(iconKey, icon);
+    }
     return icon;
+}
+
+void IconProvider::ClearCache()
+{
+    QMutexLocker lock(&s_cacheMutex);
+    s_pixmapCache.clear();
+    s_iconCache.clear();
 }
 
 QIcon IconProvider::PlayIcon(const QColor& color) { return GetIcon(QStringLiteral("player-play"), color.isValid() ? color : QColor(0x4A, 0xDE, 0x80)); }
@@ -144,6 +215,7 @@ QIcon IconProvider::AdjustmentsIcon(const QColor& color) { return GetIcon(QStrin
 QIcon IconProvider::ChevronUpIcon(const QColor& color) { return GetIcon(QStringLiteral("chevron-up"), color); }
 QIcon IconProvider::ChevronDownIcon(const QColor& color) { return GetIcon(QStringLiteral("chevron-down"), color); }
 QIcon IconProvider::ChevronRightIcon(const QColor& color) { return GetIcon(QStringLiteral("chevron-right"), color); }
+QIcon IconProvider::HelpIcon(const QColor& color) { return GetIcon(QStringLiteral("help"), color); }
 
 void IconProvider::UploadIcons(IEditorHost* host, bool force)
 {

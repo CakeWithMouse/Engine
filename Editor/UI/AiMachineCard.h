@@ -2,6 +2,7 @@
 
 #include "CollapsibleCard.h"
 #include "EditorLocale.h"
+#include "InspectorCardStyle.h"
 #include "VariableValuesEditor.h"
 
 #include <QHBoxLayout>
@@ -26,7 +27,7 @@ public:
 
         machine_ = new QLineEdit(Content());
         machine_->setObjectName(QStringLiteral("AiMachine"));
-        machine_->setFixedHeight(22);
+        machine_->setFixedHeight(InspectorCardStyle::kFieldHeight);
         machine_->setMaxLength(4096);
         QObject::connect(machine_, &QLineEdit::editingFinished, machine_, [this] {
             const QString text = machine_->text().trimmed();
@@ -56,8 +57,7 @@ public:
 
         auto* actions = new QWidget(Content());
         auto* row = new QHBoxLayout(actions);
-        row->setContentsMargins(0, 0, 0, 0);
-        row->setSpacing(4);
+        InspectorCardStyle::ApplyRowLayout(row);
         open_ = Button(actions, row, "AiMachineOpen", [this] {
             if (shown_.isEmpty()) { if (onCreate) onCreate(); }
             else if (onOpen) onOpen(shown_);
@@ -130,6 +130,9 @@ public:
     void RetranslateUi()
     {
         SetTitle(Tr("Автомат ИИ", "AI State Machine"));
+        SetInfo(Tr("Автомат ИИ", "AI State Machine"),
+                Tr("Конечный автомат поведения персонажа: файл .fsm или имя C++ автомата.\nПоддерживает локальные переопределения переменных памяти.",
+                   "Finite state machine for character behavior: a .fsm file or C++ machine name.\nSupports local overrides of machine memory variables."));
         label_->setText(Tr("Файл .fsm или имя автомата из C++", "A .fsm file or the name of a C++ machine"));
         machine_->setPlaceholderText(Tr("нет", "none"));
         choose_->setText(Tr("Выбрать…", "Browse…"));
@@ -152,7 +155,7 @@ private:
     {
         auto* button = new QPushButton(parent);
         button->setObjectName(QString::fromLatin1(name));
-        button->setFixedHeight(24);
+        button->setFixedHeight(InspectorCardStyle::kButtonHeight);
         QObject::connect(button, &QPushButton::clicked, std::forward<F>(clicked));
         row->addWidget(button);
         return button;

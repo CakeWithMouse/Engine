@@ -4,6 +4,7 @@
 #include "CommandRegistry.h"
 #include "EditorSettings.h"
 #include "EditorTheme.h"
+#include "EditorSeparator.h"
 
 #include <QAction>
 #include <QComboBox>
@@ -64,9 +65,8 @@ public:
         });
         layout_->addWidget(btnScale_);
 
-        auto* sep1 = new QFrame(this);
-        sep1->setFrameShape(QFrame::VLine);
-        sep1->setFixedSize(1, 16);
+        auto* sep1 = new EditorSeparator(Qt::Vertical, this);
+        sep1->setFixedSize(6, 16);
         sep1->setObjectName(QStringLiteral("HeaderSep1"));
         layout_->addWidget(sep1);
 
@@ -81,9 +81,8 @@ public:
         });
         layout_->addWidget(btnCoordSpace_);
 
-        auto* sep2 = new QFrame(this);
-        sep2->setFrameShape(QFrame::VLine);
-        sep2->setFixedSize(1, 16);
+        auto* sep2 = new EditorSeparator(Qt::Vertical, this);
+        sep2->setFixedSize(6, 16);
         sep2->setObjectName(QStringLiteral("HeaderSep2"));
         layout_->addWidget(sep2);
 

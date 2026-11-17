@@ -92,6 +92,7 @@
         <ClCompile Include="../Core/ModelImportSidecar.cpp"/>
         <ClCompile Include="../Core/AssetOps.cpp"/>
         <ClCompile Include="../UI/ImportSettingsDialog.cpp"/>
+        <ClCompile Include="../UI/PlaySettingsDialog.cpp"/>
         <ClCompile Include="../UI/AssetThumbnailCache.cpp"/>
         <ClCompile Include="../UI/AssetPickerDialog.cpp"/>
         <ClCompile Include="../UI/ModelImportEditFlow.cpp"/>
@@ -123,6 +124,8 @@
         <ClInclude Include="DockRedockTests.h"/>
         <ClInclude Include="ViewportBillboardTests.h"/>
         <ClInclude Include="UiSmokeTests.h"/>
+        <ClInclude Include="..\UI\InfoButton.h"/>
+        <ClInclude Include="CrossTypeInfoButtonTests.h"/>
     </ItemGroup>
 
     <ItemGroup>

@@ -97,24 +97,37 @@ void EditorMainWindow::UseAsset(const QString& path)
         return;
     }
 
-    const QDir content(QString::fromUtf8(host_->host().contentRoot));
-    const QString relative = content.relativeFilePath(QFileInfo(path).absoluteFilePath());
+    const QString contentRoot = QString::fromUtf8(host_->host().contentRoot);
+    QString virtualPath;
 
-    if (relative == QStringLiteral("..") ||
-        relative.startsWith(QStringLiteral("../")) ||
-        relative.startsWith(QStringLiteral("..\\")) ||
-        QDir::isAbsolutePath(relative))
+    if (path.startsWith(QStringLiteral("/Game/"), Qt::CaseInsensitive) ||
+        path.startsWith(QStringLiteral("Game/"), Qt::CaseInsensitive))
     {
-        QMessageBox::warning(
-            this,
-            Tr("Ресурс вне проекта", "Asset Outside Project"),
-            Tr("Сначала импортируйте файл кнопкой «Импорт модели» или «Импорт текстуры».", "First import the file via Import Model or Import Texture.")
-        );
+        virtualPath = EditorCore::NormalizeVirtualPath(path, contentRoot);
+    }
+    else
+    {
+        const QDir content(contentRoot);
+        const QString relative = content.relativeFilePath(QFileInfo(path).absoluteFilePath());
 
-        return;
+        if (relative == QStringLiteral("..") ||
+            relative.startsWith(QStringLiteral("../")) ||
+            relative.startsWith(QStringLiteral("..\\")) ||
+            QDir::isAbsolutePath(relative))
+        {
+            QMessageBox::warning(
+                this,
+                Tr("Ресурс вне проекта", "Asset Outside Project"),
+                Tr("Сначала импортируйте файл кнопкой «Импорт модели» или «Импорт текстуры».", "First import the file via Import Model or Import Texture.")
+            );
+
+            return;
+        }
+
+        virtualPath = QStringLiteral("/Game/") + QDir::fromNativeSeparators(relative);
     }
 
-    const QString extension = QFileInfo(path).suffix().toLower();
+    const QString extension = QFileInfo(virtualPath).suffix().toLower();
 
     const bool model = QStringList{
         QStringLiteral("glb"),
@@ -141,7 +154,7 @@ void EditorMainWindow::UseAsset(const QString& path)
         EditorCommand c;
         c.type = EditorCommand::SetScript;
         c.objectId = snapshot.selected;
-        c.path = QStringLiteral("/Game/") + QDir::fromNativeSeparators(relative);
+        c.path = virtualPath;
         host_->PostCommand(c);
         return;
     }
@@ -151,12 +164,12 @@ void EditorMainWindow::UseAsset(const QString& path)
 
     EditorCommand c;
 
-    c.path = QStringLiteral("/Game/") + QDir::fromNativeSeparators(relative);
+    c.path = virtualPath;
 
     if (model)
     {
         c.type = EditorCommand::CreateModel;
-        c.name = QFileInfo(path).completeBaseName();
+        c.name = QFileInfo(virtualPath).completeBaseName();
 
         std::array<double, 3> spawn{};
 
@@ -166,7 +179,7 @@ void EditorMainWindow::UseAsset(const QString& path)
         for (int i = 0; i < 3; ++i)
             c.transform.position[i] = static_cast<float>(spawn[i]);
 
-        const float s = GetModelSpawnScale(path);
+        const float s = GetModelSpawnScale(virtualPath);
         c.transform.scale[0] = s;
         c.transform.scale[1] = s;
         c.transform.scale[2] = s;

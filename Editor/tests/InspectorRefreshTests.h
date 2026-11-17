@@ -48,7 +48,9 @@ inline QWidget* CardOf(QWidget* panel, const QString& editObjectName)
     auto* edit = panel->findChild<QLineEdit*>(editObjectName);
     if (!edit) return nullptr;
     QWidget* w = edit;
-    while (w && w->objectName() != QStringLiteral("CollapsibleCard"))
+    while (w && w->objectName() != QStringLiteral("CollapsibleCard") &&
+           w->objectName() != QStringLiteral("GeometryCard") &&
+           w->objectName() != QStringLiteral("MaterialCard"))
         w = w->parentWidget();
     return w;
 }

@@ -1,8 +1,10 @@
 #pragma once
 
+#include "AssetPathDisplay.h"
 #include "CollapsibleCard.h"
 #include "EditorLocale.h"
 #include "EditorTheme.h"
+#include "InspectorCardStyle.h"
 
 #include <QDir>
 #include <QFileInfo>
@@ -27,7 +29,7 @@ public:
         primitiveType_.clear();
 
         const QString rel = model.startsWith(QStringLiteral("/Game/")) ? model.mid(6) : model;
-        modelAsset_->setText(rel);
+        EditorUI::FormatAssetPath(modelAsset_, model, rel);
         chooseModel_->setEnabled(canChooseModel);
         chooseModel_->setToolTip(canChooseModel ? QString() : Tr("Замена модели недоступна", "Model replacement unavailable"));
 
@@ -46,7 +48,6 @@ public:
             else
             {
                 modelAsset_->setStyleSheet(QString());
-                modelAsset_->setToolTip(QString());
             }
         }
         else
@@ -54,7 +55,6 @@ public:
             cachedModelPath_.clear();
             cachedModelExists_ = true;
             modelAsset_->setStyleSheet(QString());
-            modelAsset_->setToolTip(QString());
         }
     }
 
@@ -119,7 +119,10 @@ public:
     void RetranslateUi()
     {
         SetTitle(Tr("Геометрия", "Geometry"));
-        if (labelModelTitle_) labelModelTitle_->setText(Tr("Модель (.obj / .fbx / .glb)", "Model (.obj / .fbx / .glb)"));
+        SetInfo(Tr("Геометрия", "Geometry"),
+                Tr("Поддерживаемые форматы моделей: .obj, .fbx, .glb.\nДля процедурных примитивов замена геометрии заблокирована.",
+                   "Supported model formats: .obj, .fbx, .glb.\nGeometry replacement is blocked for procedural primitives."));
+        if (labelModelTitle_) labelModelTitle_->setText(Tr("Модель [.obj / .fbx / .glb]", "Model [.obj / .fbx / .glb]"));
         if (modelAsset_)
         {
             if (isPrimitive_)
@@ -135,27 +138,32 @@ public:
 private:
     void BuildCard()
     {
+        SetInfo(Tr("Геометрия", "Geometry"),
+                Tr("Поддерживаемые форматы моделей: .obj, .fbx, .glb.\nДля процедурных примитивов замена геометрии заблокирована.",
+                   "Supported model formats: .obj, .fbx, .glb.\nGeometry replacement is blocked for procedural primitives."));
+
         auto* cl = ContentLayout();
 
-        labelModelTitle_ = new QLabel(Tr("Модель (.obj / .fbx / .glb)", "Model (.obj / .fbx / .glb)"), Content());
+        labelModelTitle_ = new QLabel(Tr("Модель [.obj / .fbx / .glb]", "Model [.obj / .fbx / .glb]"), Content());
         labelModelTitle_->setObjectName(QStringLiteral("CardSectionLabel"));
         cl->addWidget(labelModelTitle_);
 
         modelAsset_ = new QLineEdit(Content());
         modelAsset_->setReadOnly(true);
         modelAsset_->setObjectName(QStringLiteral("ModelAsset"));
-        modelAsset_->setFixedHeight(22);
+        modelAsset_->setFixedHeight(InspectorCardStyle::kFieldHeight);
+        modelAsset_->setMinimumWidth(0);
+        modelAsset_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
         modelAsset_->setPlaceholderText(Tr("нет модели", "none"));
         cl->addWidget(modelAsset_);
 
         auto* btnRow = new QWidget(Content());
         auto* lBtns = new QHBoxLayout(btnRow);
-        lBtns->setContentsMargins(0, 0, 0, 0);
-        lBtns->setSpacing(4);
+        InspectorCardStyle::ApplyRowLayout(lBtns);
 
         chooseModel_ = new QPushButton(Tr("Заменить модель…", "Replace Model…"), btnRow);
         chooseModel_->setObjectName(QStringLiteral("ChooseModel"));
-        chooseModel_->setFixedHeight(24);
+        chooseModel_->setFixedHeight(InspectorCardStyle::kButtonHeight);
         QObject::connect(chooseModel_, &QPushButton::clicked, [this] {
             if (onChooseModel) onChooseModel();
         });

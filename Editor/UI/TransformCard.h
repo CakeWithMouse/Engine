@@ -4,6 +4,7 @@
 #include "NoWheelDoubleSpinBox.h"
 #include "EditorLocale.h"
 #include "EditorTheme.h"
+#include "InspectorCardStyle.h"
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -71,7 +72,7 @@ private:
         layout->setSpacing(0);
 
         auto* badge = new QLabel(axisLetter, cell);
-        badge->setFixedSize(16, 22);
+        badge->setFixedSize(16, InspectorCardStyle::kFieldHeight);
         badge->setAlignment(Qt::AlignCenter);
         badge->setStyleSheet(QStringLiteral(
             "background-color: %1; color: white; font-weight: bold; font-size: 10px; "
@@ -80,7 +81,7 @@ private:
         layout->addWidget(badge);
 
         spin->setParent(cell);
-        spin->setFixedHeight(22);
+        spin->setFixedHeight(InspectorCardStyle::kFieldHeight);
         // Large numeric ranges must not force every axis to reserve the width of
         // its longest possible value. Long values remain editable in the field.
         spin->setMinimumWidth(48);
@@ -99,7 +100,7 @@ private:
         const auto makeResetBtn = [this](const QString& toolTip) {
             auto* btn = new QPushButton(Content());
             btn->setIcon(EditorTheme::CreateResetIcon());
-            btn->setFixedSize(22, 22);
+            btn->setFixedSize(InspectorCardStyle::kFieldHeight, InspectorCardStyle::kFieldHeight);
             btn->setToolTip(toolTip);
 
             return btn;
@@ -112,12 +113,10 @@ private:
         // 1. Position
         auto* rowPos = new QWidget(Content());
         auto* lPos = new QHBoxLayout(rowPos);
-        lPos->setContentsMargins(0, 0, 0, 0);
-        lPos->setSpacing(4);
+        InspectorCardStyle::ApplyRowLayout(lPos);
 
         labelPosRow_ = new QLabel(Tr("Позиция", "Position"), rowPos);
-        labelPosRow_->setObjectName(QStringLiteral("CardFieldLabel"));
-        labelPosRow_->setFixedWidth(56);
+        InspectorCardStyle::ApplyLabelStyle(labelPosRow_);
         lPos->addWidget(labelPosRow_);
 
         for (int i = 0; i < 3; ++i)
@@ -142,12 +141,10 @@ private:
         // 2. Rotation
         auto* rowRot = new QWidget(Content());
         auto* lRot = new QHBoxLayout(rowRot);
-        lRot->setContentsMargins(0, 0, 0, 0);
-        lRot->setSpacing(4);
+        InspectorCardStyle::ApplyRowLayout(lRot);
 
         labelRotRow_ = new QLabel(Tr("Поворот", "Rotation"), rowRot);
-        labelRotRow_->setObjectName(QStringLiteral("CardFieldLabel"));
-        labelRotRow_->setFixedWidth(56);
+        InspectorCardStyle::ApplyLabelStyle(labelRotRow_);
         lRot->addWidget(labelRotRow_);
 
         for (int i = 3; i < 6; ++i)
@@ -172,12 +169,10 @@ private:
         // 3. Scale
         auto* rowScale = new QWidget(Content());
         auto* lScale = new QHBoxLayout(rowScale);
-        lScale->setContentsMargins(0, 0, 0, 0);
-        lScale->setSpacing(4);
+        InspectorCardStyle::ApplyRowLayout(lScale);
 
         labelScaleRow_ = new QLabel(Tr("Масштаб", "Scale"), rowScale);
-        labelScaleRow_->setObjectName(QStringLiteral("CardFieldLabel"));
-        labelScaleRow_->setFixedWidth(56);
+        InspectorCardStyle::ApplyLabelStyle(labelScaleRow_);
         lScale->addWidget(labelScaleRow_);
 
         for (int i = 6; i < 9; ++i)

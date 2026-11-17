@@ -1,5 +1,8 @@
 #pragma once
 
+#include "EditorTheme.h"
+#include "IconProvider.h"
+
 #include <QProxyStyle>
 #include <QPainter>
 #include <QPainterPath>
@@ -13,6 +16,33 @@ public:
 
     void drawPrimitive(PrimitiveElement pe, const QStyleOption* opt, QPainter* p, const QWidget* w = nullptr) const override
     {
+        if (pe == PE_IndicatorBranch)
+        {
+            if (!opt || !p) return;
+            if (opt->state & State_Children)
+            {
+                const bool isOpen = (opt->state & State_Open);
+                const auto& theme = EditorTheme::Instance();
+                const QColor color = theme.TextPrimary();
+                const qreal dpr = p->device() ? p->device()->devicePixelRatio() : (w ? w->devicePixelRatio() : 1.0);
+                const QPixmap pix = IconProvider::GetPixmap(
+                    isOpen ? QStringLiteral("chevron-down") : QStringLiteral("chevron-right"),
+                    color, 12, dpr);
+                if (!pix.isNull())
+                {
+                    const int iconSize = 12;
+                    const QRect r = opt->rect;
+                    const QRect target(
+                        r.x() + (r.width() - iconSize) / 2,
+                        r.y() + (r.height() - iconSize) / 2,
+                        iconSize, iconSize);
+                    p->drawPixmap(target, pix);
+                    return;
+                }
+            }
+            return;
+        }
+
         if (pe == PE_IndicatorSpinUp || pe == PE_IndicatorSpinDown ||
             pe == PE_IndicatorArrowUp || pe == PE_IndicatorArrowDown)
         {

@@ -14,6 +14,7 @@ struct TestObject {
     std::string name;
     std::string type;
     std::string model;
+    std::string material;
     EngineSceneTransform transform{};
 };
 
@@ -22,8 +23,8 @@ struct Scene {
     EngineEditSessionApi api{};
 
     Scene() {
-        objects[1] = {"Character", "Engine.Model", "/Game/Models/CesiumMan.glb", {{0,0,0},{0,0,0,1},{1,1,1}}};
-        objects[2] = {"Box", "Primitive.Cube", "", {{1,0,0},{0,0,0,1},{1,1,1}}};
+        objects[1] = {"Character", "Engine.Model", "/Game/Models/CesiumMan.glb", "Content/Materials/Test.mat", {{0,0,0},{0,0,0,1},{1,1,1}}};
+        objects[2] = {"Box", "Primitive.Cube", "", "", {{1,0,0},{0,0,0,1},{1,1,1}}};
 
         api.context = api.scene.context = this;
         api.saveScene = [](void* p, const char* path, char*, uint32_t) -> uint32_t {
@@ -37,6 +38,8 @@ struct Scene {
                 QJsonObject assets;
                 assets["model"] = QString::fromStdString(obj.model);
                 assets["texture"] = "";
+                if (!obj.material.empty())
+                    assets["material"] = QString::fromStdString(obj.material);
                 o["assets"] = assets;
                 rows.append(o);
             }
@@ -57,6 +60,7 @@ struct Scene {
                 obj.name = o["name"].toString().toStdString();
                 obj.type = o["type"].toString().toStdString();
                 obj.model = o["assets"].toObject()["model"].toString().toStdString();
+                obj.material = o["assets"].toObject()["material"].toString().toStdString();
                 s.objects[o["id"].toInteger()] = obj;
             }
             *id = 1;
@@ -70,6 +74,7 @@ struct Scene {
                 o.name = obj.name.c_str();
                 o.typeName = obj.type.c_str();
                 o.modelAsset = obj.model.c_str();
+                o.materialAsset = obj.material.c_str();
                 visitor(user, &o);
             }
             return EngineSceneOk;
@@ -90,6 +95,8 @@ inline int Run() {
 
     // 1. Initial state
     check(s.objects[1].model == "/Game/Models/CesiumMan.glb", "Initial model is CesiumMan");
+    check(s.objects[1].material == "Content/Materials/Test.mat", "Initial material is Test.mat");
+    check(host.ReadSnapshot().objects[0].materialAsset == "Content/Materials/Test.mat", "Initial snapshot has material");
 
     // 2. Replace model on Engine.Model (id=1)
     EditorCommand select;
@@ -105,6 +112,8 @@ inline int Run() {
     host.Update(0.016);
 
     check(s.objects[1].model == "/Game/Models/Hero.fbx", "Model replaced to Hero.fbx");
+    check(s.objects[1].material == "Content/Materials/Test.mat", "Material retained identical after model replacement");
+    check(host.ReadSnapshot().objects[0].materialAsset == "Content/Materials/Test.mat", "Snapshot retains material after model replacement");
     check(host.ReadSnapshot().canUndo, "Exactly one Undo point recorded");
 
     // 3. Undo rolls back to original model
@@ -114,6 +123,7 @@ inline int Run() {
     host.Update(0.016);
 
     check(s.objects[1].model == "/Game/Models/CesiumMan.glb", "Undo restored original model CesiumMan");
+    check(s.objects[1].material == "Content/Materials/Test.mat", "Undo preserves material");
     check(host.ReadSnapshot().canRedo, "canRedo is true after undo");
 
     // 4. Redo reapplies replaced model
@@ -123,6 +133,7 @@ inline int Run() {
     host.Update(0.016);
 
     check(s.objects[1].model == "/Game/Models/Hero.fbx", "Redo reapplied replaced model");
+    check(s.objects[1].material == "Content/Materials/Test.mat", "Redo preserves material");
 
     // 5. Empty model path rejected (prevents 'no project data codec' bug)
     const auto modelBeforeEmpty = s.objects[1].model;

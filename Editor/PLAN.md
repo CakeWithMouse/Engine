@@ -1,8 +1,452 @@
 # План разработки PainEngine Editor v2
-> **Ветка:** `fix/editor-ui-bugfix`  
+> **Ветка:** `fix/editor-ui-polish`  
 > **Архитектор:** Юрий  
 > **Инженер-исполнитель:** Antigravity  
 > **Протокол:** `engine-work-protocol`
+
+---
+
+## Сессия fix/editor-ui-polish (Задачи A, B, C, D, E)
+
+### Чек-лист задач
+- [x] **Задача A (fix(ui)):** Разделители на панели Viewport при дробном DPI. Создан единый виджет `EditorSeparator` (`Editor/UI/EditorSeparator.h`) с отрисовкой через `QPainter` с учетом `devicePixelRatio`: толщина минимум 1 физический пиксель (`std::max(1, qRound(1.0 * dpr))`), выравнивание по физической сетке через логические координаты `QRectF`, динамический цвет темы `borderLight` с обновлением по `SubscribeThemeChanged`. Применен на `ViewportHeaderBar` (`HeaderSep1`, `HeaderSep2`). Написан юнит-тест `EditorSeparatorTests.h` (10 checks PASS) с валидацией рендера в `QImage` при DPR 1.0, 1.25, 1.5, 2.0 (вертикальный и горизонтальный) и валидацией смены темы.
+- [x] **Задача B (fix(ui)):** Унификация подложки всех карточек инспектора (`CollapsibleCard`, `InspectorCardStyle.h`, `EditorStyles.cpp`). Устранено расхождение селекторов QSS: в `EditorStyles.cpp` добавлены селекторы по динамическому свойству `[collapsibleCard="true"]` и прямым ID карточек (`ScriptCard`, `AiMachineCard`, `CameraGuideCard`). Все карточки вызывают `InspectorCardStyle::ApplyCardStyle(this)`. В `CameraGuideCard` добавлены `RetranslateUi()` и автоподписка на `EditorLocale`. Написан юнит-тест `InspectorCardStyleTests.h` (52 checks PASS), проверяющий рендер фона всех карточек инспектора в Dark (`bgPanel`) и Light темах, отсутствие прозрачных подложек, единые отступы (6, 4, 6, 4), spacing (4) и ширину подписей (80px).
+- [x] **Задача C (fix(ui)):** Защита от случайного изменения параметров колесиком мыши (`WheelGuard`). Создан централизованный фильтр событий `WheelGuard` (`Editor/UI/WheelGuard.h`), защищающий `QAbstractSpinBox`, `QComboBox` и `QAbstractSlider` от непреднамеренных мутаций значений при скролле панелей. Если элемент не имеет фокуса, `QWheelEvent` блокируется на элементе и транслируется родительскому `QScrollArea`, обеспечивая непрерывную плавную прокрутку. Элементы с фокусом сохраняют возможность управления колесом. `QScrollBar` исключен из перехвата. Реализован механизм исключений для зума вьюпорта (`ViewportWidget`), графов (`MaterialGraphWidget`, `GraphEditorWidget`) и канваса UI. Интегрирован в `EditorApp.cpp`. Написан юнит-тест `WheelGuardTests.h` (20 checks PASS).
+- [x] **Задача D (feat(ui)):** Кнопка «Создать» / «Редактировать» в карточке «Материал». В `MaterialCard.h` реализовано динамическое состояние кнопки действия: если материал не назначен (`materialAsset_.isEmpty()`), кнопка имеет надпись «Создать» (`Tr("Создать", "Create")`), objectName `CreateMaterial` и вызывает создание материала в проекте (`CreateMaterialForSelection()`, создание `.mat` файла и назначение на объект через хост); если материал назначен — надпись «Редактировать» (`Tr("Редактировать", "Edit Material")`), objectName `EditMaterial` и вызов `OpenMaterialEditor`. Добавлены тесты в `InspectorCardStyleTests.h` (6 checks, всего 58 checks PASS).
+- [x] **Задача E (refactor(ui)):** Переработка панели «Навигация и диагностика» (`AiDiagnosticsPanel`). Убрана кнопка с тулбара Viewport. Команда `Tools.ToggleAiDiagnostics` вынесена в меню «Инструменты» (`CommandRegistry`). В меню «Вид» зарегистрировано действие переключения видимости dock-панели (`d->toggleViewAction()`). `AiDiagnosticsDock` сделан полноценным `QDockWidget` с `Qt::AllDockWidgetAreas`, регистрацией в `DockLayoutManager::ApplyDefaultLayout` (табифицируется с инспектором, изначально скрыт, fluid-размеры). Удалены жесткие границы `minimumWidth(390)`/`maximumWidth(460)`. Внутренняя вёрстка `AiDiagnosticsPanel` переведена на 5 `CollapsibleCard` (Слои, Субъект, Проба, Отображение, Детали) со стилизацией `InspectorCardStyle` и отступами. Добавлено сохранение и загрузка настроек через `SettingsService` с валидацией диапазонов (`std::clamp`). Сообщение о недоступности оформлено в аккуратный штатный информационный блок без побочных эффектов. Написан юнит-тест `AiDiagnosticsDockTests.h` (24 checks PASS) на жизненный цикл, tabify, `saveState`/`restoreState` и сброс раскладки.
+- [x] **Задача F (audit/feat(ui)):** Аудит типов объектов и их компонентов в инспекторе и в меню «Добавить». Каждой карточке присвоен уникальный `objectName` (`GeneralCard`, `TransformCard`, `GeometryCard`, `MaterialCard`, `LightCard`, `CharacterCard`, `PhysicsCard`, `ScriptCard`, `AiMachineCard`, `CameraGuideCard`). Реализована строгая матрица видимости: Свет — только Transform, General, Light (Физика, Геометрия, Материал, Скрипт скрыты); Камера — Transform, General, CameraGuide, Скрипт (Физика, Геометрия, Материал скрыты); Пустой объект — Transform, General, Скрипт (Физика, Геометрия, Материал скрыты); Меш — Transform, General, Geometry, Material, Physics, Script; Персонаж — Transform, General, Character, Physics, Script, AiMachine. Реализована защита от молчаливой потери сохранённых данных (`hasSavedPhysics`, `hasSavedModel`, `hasSavedMaterial`, `hasSavedScript`). В меню «Добавить» и в контекстном меню иерархии проверены рабочие пути (14 создаваемых типов через `api.createObject`, `Gameplay.PlaySettings` исключён), скрыты пустые категории, устранены пустые подменю контекстного меню. Написан юнит-тест `ObjectTypeInspectorTests.h` с матричными тестами видимости по всем типам объектов и аудитом меню «Добавить» (все проверки PASS).
+
+---
+
+## Сессия fix/editor-ui-polish (Задачи M, U, K, H)
+
+### Чек-лист задач
+- [x] **Задача M (fix(ui)):** Растягивание панели при длинном имени в карточке «Геометрия». Выделен хелпер `EditorUI::FormatAssetPath` (`Editor/UI/AssetPathDisplay.h`), применен в `GeometryCard.h` и `MaterialCard.h`: `sizePolicy(Ignored, Fixed)`, `minimumWidth(0)`, `elidedText(..., Qt::ElideMiddle)`, при обрезании тултип содержит полный путь, `MaterialCard` сохраняет сырой путь для `onEditMaterial`. Юнит-тесты в `GeometryTextureActionTests.h` (38 checks PASS): 200 символов не меняют sizeHint/ширину карточек, текст обрезан, тултип с полным путем.
+- [x] **Задача U (feat(ui)):** Единый пикер ресурсов проекта. Расширен `AssetKind` (`UI`, `Script`, `AiMachine` в `AssetExtensions.h`), добавлены фильтры и заголовки в `AssetPickerDialog`. Переведено открытие UI (`UI.OpenEditor` в `HudTools.cpp`), назначение скрипта (`Scene.AssignScript`) и автомата ИИ (`Scene.AssignAiMachine`) на `CommandRegistry` и `AssetPickerDialog`. Сохранение и внешний импорт оставлены на системном диалоге ОС. Добавлены 14 юнит-тестов в `AssetPickerDialogTests.h` (всего 57/57 PASS).
+- [x] **Задача K (refactor(ui)):** Единый стиль карточек инспектора. Создан `InspectorCardStyle.h` с едиными константами (`kLabelWidth = 80`, `kFieldHeight = 22`, `kButtonHeight = 24`, `kHeaderHeight = 22`, `CardMargins = (6, 4, 6, 4)`, `kCardSpacing = 4`, `kRowSpacing = 4`). Унифицированы карточки Transform, Geometry, Material, PointLight, Physics, Script, AiMachine, Camera, Character, General. Написан юнит-тест `InspectorCardStyleTests.h` (38 checks PASS) с валидацией отступов, spacing, ширины колонки подписей и высот элементов по `objectName`.
+- [x] **Задача H (fix(ui)):** Высокое качество SVG-иконок на 2K/High-DPI. `IconProvider` переведен на растеризацию через `QSvgRenderer` в буфер физического размера `std::max(1, qRound(size * dpr))` с `setDevicePixelRatio(dpr)`. `GetIcon` генерирует multi-DPR `QIcon` (DPR 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0), обеспечивая автоматический выбор четких пиксмапов при смещении на 2K/4K мониторы. Реализовано кэширование и автоматический сброс кэша по сигналу смены темы `EditorTheme::NotifyChanged`. Написан юнит-тест `HighDpiIconTests.h` (37 checks PASS) на физический и логический размер пиксмапов при DPR 1.0, 1.5, 2.0 и валидацию `QIcon`.
+
+---
+
+## Сессия fix/editor-ui-polish (Задачи Q, R, S, T)
+
+### Чек-лист задач
+- [x] **Задача Q (fix(ui)):** Кнопка «?» (`InfoButton`): векторная иконка Tabler `help-circle`, чистая функция расчёта геометрии попапа и текстовый fallback.
+  - Диагностика: `InfoButton` (18x18) в `EditorStyles.cpp` наследовал стили `QToolButton` с `padding: 4px 8px; border: 1px solid`, что съедало все 18px ширины и приводило к виду пустого квадратного чекбокса. Позиция попапа вычислялась жестко от `bottomLeft()` без проверки геометрии экрана.
+  - Иконка: в `EditorIconData.h` добавлен чистый SVG `help-circle` из Tabler 3.50 (`TABLER_HELP` / `TABLER_HELP_CIRCLE`) и `info-circle` (`TABLER_INFO_CIRCLE`). В `IconProvider.cpp` поддержаны ключи `help`, `help-circle`, `info`, `info-circle` с генерацией multi-DPR пиксмапов.
+  - Позиционирование: создана чистая функция `InfoButtonGeometry::CalculatePopupGeometry(btnRect, popupSize, screenAvailableGeom)`: по умолчанию под кнопкой с выравниванием правого края попапа по правому краю кнопки (раскрытие влево); если слева не влезает — раскрытие вправо; если снизу не влезает — раскрытие вверх; итоговый прямоугольник строго внутри `availableGeometry` (с поддержкой второго монитора со смещенными координатами).
+  - Окно подсказки: `InfoPopupWindow` (наследник `QFrame` с `Qt::Popup | Qt::FramelessWindowHint`), закрывается по клику вне и по клавише `Esc`, максимальная ширина `kMaxPopupWidth = 320`, перенос строк, поддержка опционального жирного заголовка `title_`.
+  - Внешний вид кнопки: прозрачный фон, курсор-рука (`PointingHandCursor`), hover/pressed подсветка, подсказка «Справка» / «Help» (вместо простыни текста), при отсутствии иконки рисуется текстовый символ `?` шрифтом редактора и пишется предупреждение в лог.
+  - Юнит-тесты: создан `InfoButtonTests.h` (10 checks PASS), подключен в `UiTestRunner.cpp`. Проверяет рендер иконки на 4 DPR (1.0, 1.25, 1.5, 2.0), чистую геометрию у правого края, у нижнего края, в углу и на втором мониторе, жизненный цикл попапа, шорткат Esc и тултипы.
+- [x] **Задача R (feat(ui)):** Унификация API карточек инспектора, таблица параметров камеры и скроллинг панели диагностики AI.
+  - API `CollapsibleCard`: добавлен метод `SetInfo(title, text)`, `SetInfo(text)`, `SetInfo(ruTitle, enTitle, ruText, enText)`. Кнопка `InfoButton` размещается справа в шапке карточки (`CardHeaderBtn`), сохраняя высоту шапки `kHeaderHeight = 22px`. Клик по кнопке «?» показывает попап справки и НЕ сворачивает/разворачивает карточку (`IsExpanded` сохраняется).
+  - Хелпер `InspectorCardStyle::AddInfoToRow`: добавлены удобные перегрузки `AddInfoToRow(QHBoxLayout* row, text, [title])` и `AddInfoToRow(QHBoxLayout* row, ruText, enText, title)` с автоматической стилизацией и выравниванием по центру строки.
+  - Карточка «Обзор камеры» (`CameraGuideCard`): заголовок использует `SetInfo(...)` с подсказкой по цветным направляющим. Убран многострочный `QLabel` (`CameraGuideSummary`). Добавлен аккуратный сворачиваемый блок метрик (`CameraGuideMetricsCard` / «Параметры кадра», свернут по умолчанию) со строками `QLabel` фиксированной ширины `kLabelWidth = 80`: «Проекция», «Near / Far», «Кадр», «Шаг отметок», «От вида», «До Y=0».
+  - Панель диагностики AI (`AiDiagnosticsPanel`): вся панель обернута в `QScrollArea` (`AiDiagnosticsScrollArea`) с ресайзом содержимого и вертикальным скроллом по необходимости. Блок деталей клетки (`AiCellDetails`) скрывается, если курсор не наведен на вьюпорт. Стили информационных баннеров статуса унифицированы (одинаковые отступы `padding: 6px 10px`, скругления `border-radius: 4px`, рамки `border: 1px solid`).
+  - Аудит карточек инспектора: карточки `GeometryCard`, `MaterialCard`, `LightCard`, `CharacterCard`, `PhysicsCard`, `ScriptCard`, `AiMachineCard`, `CameraGuideCard` и панель `AiDiagnosticsPanel` снабжены информативными подсказками `SetInfo` в заголовках.
+  - Тестирование: дополнен `InspectorCardStyleTests.h` (тесты `SetInfo`, блокировка сворачивания по клику на «?», таблица параметров камеры, хелпер `AddInfoToRow`, скроллинг `AiDiagnosticsPanel` и скрытие деталей клетки) — число проверок выросло до 166 checks PASS.
+- [x] **Задача S (diag/fix):** Диагностика AI и физики в редакторе, исправление переключения коллайдеров в инспекторе.
+  - Шаг 0 (разведка a): Доступность AI-диагностики зависит от экспорта C-ABI интерфейса `Engine.Scene.AiDiagnostics` (`0x01414944u`, `EngineAiDiagnosticsService`) в запущенном игровом модуле. В режиме быстрой сборки (`-Fast`) AI-модуль отключается, и `host->AiDiagnosticsApi()` возвращает `nullptr`. В `AiDiagnosticsPanel` при отсутствии API статус равен `EngineSceneNotFound`, и панель штатно отображает информационный баннер: «Диагностика недоступна: модуль игры собран без поддержки AI. Соберите проект через run-editor.ps1 (без флага -Fast)».
+  - Шаг 0 (разведка b): Причина, почему не переключался коллайдер в инспекторе: в `ObjectInspectorPanel.cpp` комбобоксы `physicsBodyType_` (PhysicsCombo0) и `physicsShape_` (PhysicsCombo1) создавались пустыми в `BuildPhysicsCard()`. Добавление элементов происходило только внутри `RetranslateUi()`, однако `RetranslateUi()` не вызывался в конструкторе или `BuildUi()`, а вызывался исключительно по сигналу `SubscribeLanguageChanged`. До ручного переключения языка комбобоксы содержали 0 элементов, поэтому вызов `setCurrentIndex` при выборе объекта в сцене или клик пользователем не давали эффекта.
+  - Правка b: В `ObjectInspectorPanel.cpp` выпадающие списки `physicsBodyType_` и `physicsShape_` теперь наполняются сразу при создании в `BuildPhysicsCard()`, а в конструкторе панели добавлен вызов `RetranslateUi()`. Написан юнит-тест `RunPhysicsColliderTests()` в `ObjectTypeInspectorTests.h`: проверяет наличие >= 3 элементов на старте, переключение коллайдера на «Сферу» (index 1) и типа на «Статичное» (index 0) с эмиссией сигнала `PhysicsEditingFinished`, и сохранение выбора при смене языка.
+  - Шаг 0 (разведка c): Запуск `run-editor.ps1 -NoLaunch` подтвердил полную работоспособность сборки модулей игры с Jolt Physics, Assimp и AI Navigation. Время сборки: 32.27 сек, код возврата 0. Все модули (SceneProject, Battle with AI, SunGame, Pong, Katamari) успешно скомпилированы и слинкованы, бинарники и шейдеры синхронизированы в Runtime и кэш LocalAppData.
+- [x] **Задача T (test/audit):** Финальная сквозная сверка всех типов объектов и проверок протокола.
+  - Проверка по типам объектов (Mesh, Light, Camera, Empty, Character): юнит-тест `RunCrossTypeInfoButtonTests()` в `ObjectTypeInspectorTests.h` подтверждает, что отображаются только разрешенные карточки, `InfoButton` присутствует и виден только на тех карточках, где вызван `SetInfo`, все кнопки имеют единый размер 18x18, при клике открывают `InfoPopupWindow`, попап строго вписывается в `availableGeometry` экрана и закрывается по Esc.
+  - Проверка стилей карточек: все 10 карточек инспектора используют базовый `CollapsibleCard` со свойствами `InspectorCardStyle` (`kLabelWidth = 80`, `kFieldHeight = 22`, `kButtonHeight = 24`, `kHeaderHeight = 22`, отступы `6, 4, 6, 4`, `spacing = 4`), цвета фона динамически переключаются по теме (Dark `bgPanel` / Light `bgPanel`).
+  - Проверка `WheelGuard`: 113 проверок в `WheelGuardTests.h` PASS, иммунитет к колесу мыши сохранен на всех спинбоксах, комбобоксах и слайдерах без регрессий вертикального скролла инспектора.
+  - Запись в Backlog задачи на выбор архитектурного решения по открытию панелей («Вид» vs «Инструменты») добавлена в `Editor/PLAN.md`.
+
+---
+
+## Эталон тестов (Baseline ветки fix/editor-ui-polish на старте задач Q–T)
+
+| Тест / Скрипт | Результат (эталон) | Примечание |
+|---|---|---|
+| Сборка `EditorModule` (Debug) | **PASS** | 0 ошибок, 0 новых warnings |
+| `Editor/tests/CoreTests.exe` | **1105/1105 PASS** | 1105 checks passed |
+| `Editor/tests/HostTests.exe` | **165/165 PASS** | 165 checks passed |
+| `Editor/tests/UiTests.exe` | **916+ PASS, 1 FAIL (Красная база main)** | 916+ checks passed across 22 suites. Все наборы запускаются и доходят до конца. 1 сбой в `ViewportBillboardTests.h:216` (`game camera tint from dark palette`: базовый красный main, коммит `314b991`). |
+| `Editor/tools/check.ps1 -Quick` | **FAIL (Красная база main)** | Причина завершения кодом 1: `UiTests.exe` вернул exit code 1 из-за сбоя базового `ViewportBillboardTests.h:216`. Проверка локализации (кириллица вне Tr) успешно проходит. |
+
+---
+
+## Сессия fix/editor-ui-polish (Задачи G–P)
+
+### Чек-лист задач
+- [x] **Задача G (fix(ui)):** Колесо мыши не меняет значения нигде (независимо от фокуса). `WheelGuard` переработан: `FindGuardedControl` защищает `QAbstractSpinBox`, `QComboBox`, `QAbstractSlider` и их дочерние элементы (`QLineEdit` внутри спинбоксов/комбо) от любых мутаций значений колесом мыши как в сфокусированном, так и в несфокусированном состоянии. Колесо пересылается родительскому скроллу (`QScrollArea`); при отсутствии скролла игнорируется. Фокусная политика: колесо не забирает фокус (`Qt::WheelFocus` сбрасывается в `Qt::StrongFocus`). Клавиатура и drag работают в штатном режиме. Исключения сохранены строго по регламенту: зум камеры во вьюпорте (`ViewportWidget`), зум графов (`MaterialGraphWidget`, `GraphEditorWidget`), зум UI-канваса (`UIEditorCanvas`), списки/деревья/скроллбары (`QScrollBar`, `QAbstractItemView`) и выпадающий список комбобокса в открытом состоянии. Добавлены `setObjectName` элементам `PlaySettingsDialog` (`PlayDistance`, `PlayHeight`, `PlaySensitivity`). Написан расширенный юнит-тест в `WheelGuardTests.h` (113 checks PASS) с проверкой иммунитета к колесу по `objectName` на всех полях инспектора всех типов объектов, в редакторе материалов, редакторе UI, диалогах импорта/запуска и панели диагностики.
+- [x] **Задача H (feat(ui)):** Панель «Навигация и диагностика»: меню и логика отображения. Сохранена команда `Tools.ToggleAiDiagnostics` в меню «Инструменты» (открытие dock-панели). Убрано дублирование переключателя dock из меню «Вид»; в группу «Отображение во вьюпорте» добавлено действие «Показывать диагностику AI» (`actAiDiag_`, `ViewAiDiagnostics`), вызывающее зарегистрированную команду `View.ToggleAiDiagnostics` и синхронизирующееся с `SettingsService` (`ai/enabled`) и чекбоксом `AiEnabled` панели. Карточка 5 переименована в «Состояние · задачи · память · история» (`AiDetailsCard`), минимальная высота `AiDetails` увеличена до 150px с вертикальным `sizePolicy = MinimumExpanding` и скролл-политикой `ScrollBarAsNeeded`. Детали клетки разделены на компактную строку-подсказку (`AiCellInfo`) и блок расширенных данных (`AiCellDetails`, `AiCellDetailsLabel`), скрывающийся при отсутствии наведения. Создан универсальный переиспользуемый компонент `InfoButton` (`Editor/UI/InfoButton.h`) с иконкой `help` (Tabler), поддержкой DPR, тем и локализации; длинное описание слоев в Карточке 1 заменено на компактную строку `AiLegend` и кнопку `AiLegendInfoButton` с всплывающим окном подробной справки. Плашка статуса при недоступности AI SDK аккуратно стилизована с понятным сообщением без красной простыни ошибки. Написаны тесты в `AiDiagnosticsDockTests.h` (35 checks PASS, +11 проверок).
+- [x] **Задача I (fix(ui)):** Стрелка раскрытия папок в Content Browser с поддержкой High-DPI. Диагностирована причина зазубренности/размытия: в `EditorStyles.cpp` ветки `QTreeView::branch` стилизовались через QSS `image: url("%1")` низкоразрешающими 12x12 растровыми PNG без учета DPR, что приводило к растягиванию и замыливанию растра на экранах 2K/4K и блокировало работу векторного стиля. Удалены растровые переопределения `QTreeView::branch` из `EditorStyles.cpp`. В централизованный прокси-стиль приложения `SpinBoxArrowStyle` (`Editor/UI/SpinBoxArrowStyle.h`) добавлена отрисовка `PE_IndicatorBranch` через векторный `IconProvider::GetPixmap` (иконки `chevron-right` для закрытых папок и `chevron-down` для открытых папок) с физической растеризацией на точный `devicePixelRatio` контекста рисования (`1.0, 1.25, 1.5, 2.0`), автоцентровкой в области ветки и нулевой отрисовкой для листовых элементов. В `ContentBrowserTests.h` написан тест `CheckBranchArrowHighDpi()` (всего 46 checks PASS, +27 проверок), проверяющий рендер закрытой и открытой стрелки ветки в `QImage` при DPR 1.0, 1.5, 2.0, отсутствие артефактов обрезки, масштабирование физических габаритов стрелки строго пропорционально DPR и отсутствие видимых чернил на листовых элементах.
+- [x] **Задача J (chore(build)):** Режимы `run-editor.ps1` (-Fast vs без -Fast) и сборка модулей физики/AI. Устранено инвертирование логики флага `-Fast`: ранее при запуске без флагов принудительно включался `$Fast = $true`, блокируя сборку полного решения. Теперь вызов без флага `-Fast` (или с `-All`) выполняет полноценную сборку всего решения (`Engine.sln`), включая игровой модуль `SceneProject` (`Game.dll`), `Battle` (с `BattleAi.cpp` и AI-отрядами), `BasicExamples`, `Pong`, `SunGame`, `Katamari`. Добавлено автоматическое распознавание Jolt Physics SDK (`Engine/vcpkg_installed/.../Jolt/Jolt.h`) с пробросом `/p:EngineEnableJolt=true` и AI/Navigation SDK (`Engine/Include/Engine/AI/Navigation.h`). Добавлен подробный финальный отчет сборки (`Build Summary`) в консоль с указанием режима, конфигурации, статуса физики, импорта моделей и игровых модулей. Зоны `Engine/`, `Game/`, `build.ps1` не затронуты.
+- [x] **Задача K (diag/test):** Проверка пути команды `Scene.ReplaceModel` и сохранности материала при замене модели. Выполнена трассировка цепочки `Scene.ReplaceModel`: UI (`ObjectInspectorPanel.cpp`) -> команда `Scene.ReplaceModel` (`ImportCommands.cpp`) -> хост `SceneCommandHandler.cpp` (`EditorCommand::SetModel`) -> движок `SceneDocument.cpp` (`ctx.scene.loadScene`). Установлено: и в хосте (`assets["model"] = cmd.path`), и в движке (`SceneDocument.cpp:241` / `426` `SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset)`) поле `materialAsset` гарантированно сохраняется и не сбрасывается. В `ModelReplaceHostTests.h` расширена mock-сцена и написан юнит-тест проверки сохранения материала при замене модели (исходный `Content/Materials/Test.mat` проверяется до замены, после `SetModel`, при `Undo` и при `Redo` — во всех фазах `materialAsset` объекта и снапшота строго идентичен). `HostTests` выросли со 159 до 165 checks (все PASS). Багов на стороне Editor/Engine не обнаружено.
+- [x] **Задача L (fix(ui)):** Нормализация путей ресурсов из `AssetPickerDialog` для скриптов и AI-машин. Устранена ложная ошибка «Ресурс вне проекта»: ранее в `AssetTools.cpp:101` метод `UseAsset` вычислял относительный путь через `content.relativeFilePath(QFileInfo(path).absoluteFilePath())`. Для виртуальных путей формата `/Game/...` возвращался путь с префиксом `../`, вызывая модальное окно ошибки и блокируя назначение скрипта. В `AssetExtensions.h` создана чистая функция нормализации `EditorCore::NormalizeVirtualPath(path, contentRoot)` (поддержка `/Game/...`, `Game/...`, обратных слэшей, относительных и абсолютных дисковых путей в песочнице проекта). В `AssetTools.cpp` метод `UseAsset` переведен на распознавание виртуальных путей `/Game/...` без ложных проверок выхода за проект. В `HudTools.cpp` команды `Scene.AssignScript` и `Scene.AssignAiMachine` переведены на прямое создание и отправку команд `EditorCommand::SetScript` и `EditorCommand::SetProperty` (`/stateMachine`) с параметром `objectId` (с фолбэком на `selectedId_`), нормализацией путей и без небезопасного обхода через `UseAsset`. Добавлены 10 юнит-тестов нормализации в `AssetPickerDialogTests.h` (всего 67 checks PASS).
+- [x] **Задача M (refactor(ui)):** Единый базовый класс карточки инспектора и стиль всех карточек без локального хардкода. Проведен сквозной аудит всех 10 карточек инспектора (`GeneralCard`, `TransformCard`, `GeometryCard`, `MaterialCard`, `LightCard`, `CharacterCard`, `PhysicsCard`, `ScriptCard`, `AiMachineCard`, `CameraGuideCard`). Подтверждено: все 10 карточек используют базовый класс `CollapsibleCard` и единые константы `InspectorCardStyle` (`kLabelWidth = 80`, `kFieldHeight = 22`, `kButtonHeight = 24`, `kHeaderHeight = 22`, `CardMargins = (6, 4, 6, 4)`, `kCardSpacing = 4`, `kRowSpacing = 4`). В `ObjectInspectorLight.cpp` добавлена установка `setObjectName("LightCard")` непосредственно в конструкторе `BuildPointLightCard`. В `InspectorCardStyleTests.h` написан исчерпывающий тест валидации всех 10 карточек (проверка полиморфного приведения `dynamic_cast<CollapsibleCard*>`, свойства `collapsibleCard`, геометрии шапки 22px, `contentsMargins` контента `(6, 4, 6, 4)`, `spacing == 4`, ширины `CardFieldLabel` 80px, высоты полей 22-26px, кнопок 24-32px и смены цвета подложки с темой). Число проверок в `InspectorCardStyleTests` выросло с 58 до 148 checks (все PASS).
+- [x] **Задача N (feat(ui)):** Замена длинных описаний в карточках камеры и инспектора на компактные подписи с `InfoButton`. В `CameraGuideCard.h` устранена простыня статического описания («Зелёная рамка — Near... Направление задано плоскостью...»), занимавшая 4 строки и загромождавшая блок сводки. Блок сводки вынесен в горизонтальную компоновку с меткой динамических метрик (`CameraGuideSummary`) и кнопкой подробной справки `infoBtn_` (`InfoButton` с `setObjectName("CameraGuideInfo")`). Подробное описание цветов рамки, среза схемы, направления взгляда и плоскости вынесено во всплывающее окно `InfoButton` с автоматической поддержкой RU/EN локализации и тем оформления. В `InspectorCardStyleTests.h` добавлен юнит-тест (число проверок выросло со 148 до 154 checks, все PASS), проверяющий наличие `CameraGuideInfo`, корректность текста подсказки и отсутствие статического мусора в `CameraGuideSummary`.
+- [x] **Задача O (docs(backlog)):** Фиксация идеи кнопки «+» (добавление компонентов) в Backlog для архитектора. Внесена запись в раздел Backlog плана: «Добавление компонентов в инспекторе через кнопку «+» (показывать только нужные карточки) — требует решения архитектора».
+- [x] **Задача P (audit/test):** Финальная сквозная сверка всех типов объектов и проверок протокола. Выполнена комплексная сквозная верификация всех задач сессии fix/editor-ui-polish (G through P). Сборки EditorModule и тестовых проектов в Debug и Release проходят успешно с 0 ошибок и 0 новых предупреждений. Все 1105 тестов CoreTests.exe (100% PASS) и 165 тестов HostTests.exe (100% PASS) пройдены. В UiTests.exe все 21 тестовый набор выполняются до конца (свыше 900 проверок PASS, 1 известный базовый красный тест из ветки main в ViewportBillboardTests.h:216). Скрипт check.ps1 -Quick подтверждает: запретные зоны (Engine/, Game/, build.ps1) абсолютно чисты (git diff пуст), архитектурные слои Core/Host/UI чисты (0 запрещенных типов), локализация чиста (0 жестко закодированной кириллицы вне Tr), размеры измененных файлов строго в пределах регламента (<= 500 строк).
+
+---
+
+## Эталон тестов (Baseline ветки fix/editor-ui-polish на старте задач G–P)
+
+| Тест / Скрипт | Результат (эталон) | Примечание |
+|---|---|---|
+| Сборка `EditorModule` (Debug) | **PASS** | 0 ошибок, warnings C4996 (`QMenu::addAction` legacy) |
+| `Editor/tests/CoreTests.exe` | **1105/1105 PASS** | 1105 checks passed |
+| `Editor/tests/HostTests.exe` | **159/159 PASS** | 159 checks passed |
+| `Editor/tests/UiTests.exe` | **896 PASS, 1 FAIL (Красная база main)** | 896 checks passed across 20 suites. Все наборы запускаются и доходят до конца. 1 сбой в `ViewportBillboardTests.h:216` (`game camera tint from dark palette`: базовый красный main, коммит `314b991`). |
+| `Editor/tools/check.ps1 -Quick` | **FAIL (Красная база main)** | Причина завершения кодом 1: `UiTests.exe` вернул exit code 1 из-за сбоя базового `ViewportBillboardTests.h:216`. Проверка локализации (кириллица вне Tr) успешно проходит. |
+
+---
+
+---
+
+## Разведка и решения (Задачи Q, R, S, T)
+
+### Разведка Q (Кнопка «?» InfoButton: иконка и позиция попапа)
+- **Факты из кода:**
+  - В `EditorStyles.cpp:79-85` для `QToolButton` был задан стиль `padding: 4px 8px; border: 1px solid %6;`. `InfoButton` имеет фиксированный размер 18x18. Из-за горизонтального padding 8px + 8px + border 1px + 1px = 18px под контент иконки оставалось 0 пикселей, что приводило к схлопыванию иконки и виду пустого квадратного чекбокса.
+  - В `EditorIconData.h:176` исходный SVG `TABLER_HELP` содержал пути с нестандартным синтаксисом. В папке Tabler 3.50 (`tabler-icons-3.50.0\icons\outline\help-circle.svg`) взят официальный чистый векторный SVG `help-circle` (`M3 12a9 9 0 1 0 18 0... M12 16v.01... M12 13a2 2 0 0 0...`), четко читаемый на 16px.
+  - В `InfoButton.h:82-85` попап открывался строго по координатам `mapToGlobal(rect().bottomLeft())` со сдвигом вниз на 2px. При расположении кнопки у правого края окна (например в шапке инспектора или карточках) попап распахивался вправо за пределы видимой области экрана.
+- **Решение и реализация Q:**
+  - В `EditorStyles.cpp` добавлены специальные правила для `QToolButton#InfoButton, QToolButton#CardInfoButton, QToolButton#AiLegendInfoButton, QToolButton#CameraGuideInfo` с прозрачным фоном, отсутствием рамок по умолчанию, нулевым padding и margin, и hover/pressed подсветкой по палитре темы.
+  - В `EditorIconData.h` подключены `TABLER_HELP_CIRCLE` и `TABLER_INFO_CIRCLE`. В `IconProvider.cpp` поддержаны ключи `help`, `help-circle`, `info`, `info-circle` с поддержкой DPR 1.0, 1.25, 1.5, 2.0.
+  - В `InfoButton.h` создана чистая функция `InfoButtonGeometry::CalculatePopupGeometry`, вычисляющая прямоугольник попапа по координатам кнопки и `availableGeometry` целевого экрана (с определением экрана через `QWidget::screen()` / `QGuiApplication::screenAt`). По умолчанию попап открывается под кнопкой с выравниванием правого края попапа по правому краю кнопки (раскрытие влево). При нехватке места слева — раскрытие вправо; при нехватке места снизу — раскрытие вверх над кнопкой. Итоговый прямоугольник строго вписан в `availableGeometry`.
+  - Попап `InfoPopupWindow` наследует `QFrame` с флагами `Qt::Popup | Qt::FramelessWindowHint`, закрывается по клику вне и по клавише Escape.
+  - Кнопке назначен курсор `PointingHandCursor`, подсказка «Справка» / «Help», а при отсутствии иконки рисуется текстовый символ `?` шрифтом редактора и пишется предупреждение в лог.
+  - Создан юнит-тест `Editor/tests/InfoButtonTests.h` (10 checks PASS) с валидацией рендера иконки на 4 DPR, чистой геометрии попапа (правый край, нижний край, угол, второй монитор), Esc-закрытия и тултипов.
+
+---
+
+## Разведка и решения (Задачи G–P)
+
+### Разведка G (Колесо мыши не меняет значения нигде)
+- **Факты из кода:**
+  - В предыдущей реализации `WheelGuard.h:123` стояло условие `if (!HasFocus(widget))`. Если виджет получал фокус кликом/табом, колесо мыши меняло значение поля (`QDoubleSpinBox`, `QSpinBox`, `QComboBox`, `QSlider`).
+  - В Qt `QAbstractSpinBox` содержит дочерний `QLineEdit`. Событие колеса над текстовым полем спинбокса сначала приходит в `QLineEdit`, который не распознавался как `IsGuarded`, после чего внутренний фильтр Qt `QAbstractSpinBox::eventFilter` перехватывал его и вызывал `wheelEvent` с мутацией значения.
+  - В `ViewportHeaderBar.h:101` комбобокс `comboGizmoSnapStep` находился внутри `ViewportContainer`, который был внесен в `IsExempt` целиком, из-за чего колесо над шагом снаппинга меняло значение.
+  - `NoWheelDoubleSpinBox.h` переопределял только `wheelEvent` через `ignore()`, не защищая от колеса при наличии фокуса в подклассах и на дочернем lineEdit.
+  - В ряде диалогов (`PlaySettingsDialog`) спинбоксы не имели `objectName`, что затрудняло таргетированное тестирование.
+- **Решение и реализация G:**
+  - В `WheelGuard.h` реализован метод `FindGuardedControl`: восходящий поиск целевого элемента (`QAbstractSpinBox`, `QComboBox`, `QAbstractSlider`) вверх по иерархии родителей. Защищены как сами элементы, так и их внутренние части (`QLineEdit`, стрелки, кнопки).
+  - Снято условие `!HasFocus(widget)`: значения защищенных элементов ввода НИКОГДА не меняются от колеса мыши, независимо от фокуса (и со сфокусированным, и с несфокусированным состоянием).
+  - Событие колеса всегда пересылается родителю защищенного элемента (`guarded->parentWidget()`), обеспечивая естественную прокрутку объемлющего `QScrollArea` (инспектор, окно настроек и т.д.). При отсутствии скролла событие безопасно игнорируется.
+  - Защита фокуса: если у элемента установлен `Qt::WheelFocus`, он сбрасывается в `Qt::StrongFocus` (`ClickFocus | TabFocus`), исключая захват фокуса от колеса.
+  - Исключения строго по ТЗ: зум камеры во вьюпорте (`ViewportWidget`), зум графов (`MaterialGraphWidget`, `GraphEditorWidget`), зум UI-канваса (`UIEditorCanvas`), скролл списков/деревьев/таблиц/скроллбаров (`QScrollBar`, `QAbstractItemView`) и выпадающий список комбобокса в открытом состоянии.
+  - `comboGizmoSnapStep` защищен: из списка исключений исключен контейнер `ViewportContainer`, исключение оставлено за самим `ViewportWidget`.
+  - В `PlaySettingsDialog.cpp` спинбоксам присвоены `objectName`: `PlayDistance`, `PlayHeight`, `PlaySensitivity`. Вёрстка окна вынесена в `BuildUi()`.
+  - В `WheelGuardTests.h` написан исчерпывающий тест (113 checks PASS) на проверку иммунитета к колесу в сфокусированном и несфокусированном состояниях по `objectName` на всех полях инспектора, редактора материалов, редактора UI, диалогов и шапки вьюпорта.
+
+### Разведка H (Панель «Навигация и диагностика»: меню и логика отображения)
+- **Факты из кода:**
+  - В `MainWindow.cpp:265` в меню «Вид» повторно добавлялось действие переключения видимости dock-панели (`d->toggleViewAction()`), дублируя пункт «Инструменты -> Навигация и диагностика».
+  - В `MainWindow.cpp` отсутствовал быстрый пункт включения/выключения наложения навигации во вьюпорте из группы «Отображение во вьюпорте».
+  - В `AiDiagnosticsPanel.h`:
+    - Карточка 5 имела жесткий заголовок «Состояние и память», `details_->setMinimumHeight(120)` без вертикального растяжения, из-за чего при ресайзе панели текстовое поле оставалось прижатым.
+    - Описание слоев наложения в Карточке 1 занимало громоздкий многострочный блок `QLabel` прямо в карточке.
+    - Подсказка «Наведите мышь на клетку во вьюпорте» занимала место под карточкой 5 даже в отсутствие курсора над плоскостью навигации.
+    - При отсутствии AI SDK в игровом модуле выводилась общая строка без понятной подсказки о сборке проекта без флага `-Fast`.
+- **Решение и реализация H:**
+  - Из `viewMenu_` удалено дублирующее добавление dock action. Пункт «Навигация и диагностика» сохранен в меню «Инструменты» (`HudTools.cpp`).
+  - В `ViewportCommands.h` зарегистрирована команда `View.ToggleAiDiagnostics`, обновляющая настройку `ai/enabled` в `SettingsService`.
+  - В `MainWindow.cpp` в группу «Отображение во вьюпорте» добавлено действие `actAiDiag_` («Показывать диагностику AI», `objectName = "ViewAiDiagnostics"`), синхронизированное с настройкой `ai/enabled` и чекбоксом `AiEnabled` панели диагностики через `CommandRegistry::CommandExecuted`.
+  - Создан самостоятельный виджет `InfoButton` (`Editor/UI/InfoButton.h`) фиксированного размера 18x18 со векторной SVG-иконкой `help` (Tabler), поддержкой темной/светлой темы, High-DPI и всплывающим окном `InfoPopupWindow` (`QLabel#InfoPopupText`).
+  - В `IconProvider` добавлен генератор иконки справки `HelpIcon(color, size)`.
+  - В Карточке 1 описание слоев заменено на компактную горизонтальную строку `AiLegend` и кнопку подробной справки `AiLegendInfoButton`.
+  - Карточка 5 переименована в «Состояние · задачи · память · история» (`AiDetailsCard`), минимальная высота `details_` увеличена до 150px, `sizePolicy` задан как `MinimumExpanding`.
+  - Данные клетки разделены: компактная однострочная подсказка `AiCellInfo` («Клетка: наведите курсор во вьюпорте») и скрываемый контейнер `AiCellDetails` с `AiCellDetailsLabel`, разворачивающийся только при наведении на клетку.
+  - Сообщение о недоступности AI SDK стилизовано аккуратной янтарной плашкой с рекомендацией сборки проекта через `run-editor.ps1` без флага `-Fast`.
+  - Тесты в `AiDiagnosticsDockTests.h` расширены с 24 до 35 проверок (все PASS).
+
+### Разведка I (Стрелка раскрытия папок в Content Browser с поддержкой High-DPI)
+- **Факты из кода:**
+  - В `EditorStyles.cpp:484-493` ветки `QTreeView::branch` стилизовались через QSS `image: url("%1")` и `image: url("%2")`.
+  - Пути `%1` и `%2` генерировались в `EditorTheme.cpp:EnsureArrowIcons` как файлы `arrow_right_dark.png` и `arrow_down_dark.png` фиксированного разрешения 12x12 пикселей при 72 DPI (DPR 1.0).
+  - При наличии правила `image: url(...)` движок `QStyleSheetStyle` перехватывал отрисовку `PE_IndicatorBranch` и масштабировал растровый 12x12 PNG на физические пиксели монитора бикубической/билинейной интерполяцией без поддержки дробных и целых High-DPI масштабов (1.25, 1.5, 2.0), вызывая размытие, зазубренность краев и обрезку.
+- **Решение и реализация I:**
+  - Из `EditorStyles.cpp` полностью удалены низкоразрешающие растровые правила `QTreeView::branch`.
+  - В базовый прокси-стиль редактора `SpinBoxArrowStyle` (`Editor/UI/SpinBoxArrowStyle.h`), устанавливаемый на приложение в `EditorTheme::Apply`, добавлена прямая обработка примитива `QStyle::PE_IndicatorBranch`.
+  - При наличии флага `State_Children` отрисовываются векторные пиксмапы `IconProvider::GetPixmap("chevron-right")` (закрытая папка) или `IconProvider::GetPixmap("chevron-down")` (открытая папка) с учетом реального `devicePixelRatio` контекста рисования (`1.0, 1.25, 1.5, 2.0`). Иконка центрируется в `option->rect`, а для элементов без детей (`!State_Children`) отрисовка пропускается, исключая ретро-линии веток.
+  - В `ContentBrowserTests.h` добавлен комплексный тест `CheckBranchArrowHighDpi()` с валидацией рендера стрелок в `QImage` при DPR 1.0, 1.5, 2.0 (проверка видимости чернил, отступов от границ без клиппинга, пропорциональности размеров DPR и визуального отличия открытой стрелки от закрытой). Тесты `ContentBrowser icon tests` выросли с 19 до 46 проверок (все PASS).
+
+### Разведка J (Режимы run-editor.ps1 и сборка модулей физики/AI)
+- **Факты из кода:**
+  - В `Editor/tools/run-editor.ps1:8-10` присутствовало условие `if (!$All) { $Fast = $true }`. При любом запуске без явного `-All` скрипт принудительно переключался в Fast mode и собирал только `/t:Engine;EngineRuntime;SceneProject;EditorModule;EngineLauncher`. Это противоречило семантике флага `-Fast` и подсказке в UI («соберите без флага -Fast»).
+  - В `run-editor.ps1` проверялось только наличие Assimp (`EngineEnableAssimp`), но отсутствовало автоопределение Jolt Physics SDK (`Engine/vcpkg_installed/x64-windows/include/Jolt/Jolt.h`) и AI/Navigation SDK (`Engine/Include/Engine/AI/Navigation.h`).
+  - При отсутствии AI/Game модулей в сборке пользователь не получал сводки о том, какие модули были собраны и с какими возможностями.
+- **Решение и реализация J:**
+  - В `Editor/tools/run-editor.ps1` логика приведена к нормальной семантике: `$isFastMode = $Fast -and !$All`. Без флага `-Fast` выполняется полноценная сборка всех проектов решения (`Engine.sln`), включая модули `SceneProject` (`Game.dll`), `Battle` (с `BattleAi.cpp` и Jolt physics), `Pong`, `SunGame`, `BasicExamples`, `Katamari`.
+  - Добавлено определение Jolt Physics SDK с автоматической передачей флага `/p:EngineEnableJolt=true` в MSBuild и выводом диагностического сообщения.
+  - Добавлено определение SDK навигации и ИИ.
+  - Добавлен блок `Build Summary` по завершении сборки с полным статусом режима, физики, импорта мешей и игровых модулей.
+  - Файлы в запретных зонах (`Engine/`, `Game/`, `build.ps1`) не изменялись.
+
+### Разведка K (Проверка пути команды Scene.ReplaceModel и сохранности материала)
+- **Факты из кода:**
+  - Трассировка вызова:
+    1. UI: при клике по кнопке выбора модели в `GeometryCard.h` (`ObjectInspectorPanel.cpp:110`) вызывается команда `Scene.ReplaceModel` с параметром `objectId`.
+    2. Команда (`ImportCommands.cpp:181-217`): если `model` пустая, открывается `AssetPickerDialog(AssetKind::Model)`. После выбора пути генерируется `EditorCommand::SetModel` с `c.objectId` и `c.path`.
+    3. Хост (`SceneCommandHandler.cpp:137-183`): для `EditorCommand::SetModel` создается чекпоинт сцены в JSON через `EditorHistory::Checkpoint(ctx.scene)`. Чекпоинт десериализуется в JSON-документ; для объекта с `cmd.objectId` обновляется только `assets["model"] = cmd.path`. Свойство `assets["material"]` не удаляется и не сбрасывается. Обновленный JSON сохраняется во временный кандидат и передается в `ctx.scene.loadScene`.
+    4. Движок (`Engine/Source/Scene/SceneDocument.cpp:241` и `426`): парсер десериализует `assets["material"]` в `item.materialAsset` и применяет его через `SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset)`. При последующем `saveScene` (`SceneDocument.cpp:285`) поле `assets["material"]` сериализуется обратно в JSON.
+- **Решение и реализация K:**
+  - В `Editor/tests/ModelReplaceHostTests.h` расширена структура `TestObject` полем `material`.
+  - В `Scene::saveScene`, `loadScene` и `readActiveScene` добавлена сквозная поддержка `material` / `materialAsset`.
+  - Добавлены проверки: до вызова `SetModel`, после вызова `SetModel`, после `Undo` и после `Redo`. Во всех фазах `materialAsset` объекта и снапшота хоста остается строго идентичным `Content/Materials/Test.mat`.
+  - `HostTests` выросли со 159 до 165 checks (все PASS). Поведение корректно, правок в движке или хосте не требуется.
+
+### Разведка L (Нормализация путей ресурсов из AssetPickerDialog для скриптов и AI-машин)
+- **Факты из кода:**
+  - В `Editor/Source/AssetTools.cpp:101` метод `UseAsset(const QString& path)` вычислял относительный путь к файлу: `const QString relative = content.relativeFilePath(QFileInfo(path).absoluteFilePath());`.
+  - Когда `AssetPickerDialog::SelectedVirtualPath()` возвращал виртуальный путь проекта (например, `"/Game/Scripts/MyScript.vscript"`), `QFileInfo` трактовал его на Windows как абсолютный путь `C:/Game/...`. Функция `relativeFilePath` возвращала относительный путь с `../../../`, что приводило к ложному срабатыванию проверки `relative.startsWith("../")` и показу предупреждения: `QMessageBox::warning(this, Tr("Ресурс вне проекта"), ...)`.
+  - В `Editor/Source/HudTools.cpp:111` команда `Scene.AssignScript` после выбора пути вызывала `UseAsset(script)`, который был изначально спроектирован для перетаскивания и двойного клика файлов с диска, вместо прямой отправки команды `EditorCommand::SetScript` с целевым `objectId`.
+  - Команда `Scene.AssignAiMachine` не нормализовала путь машины к формату `/Game/...`, а `OpenAiMachineRequested` в `MainWindow.cpp:888` строго требует префикс `/Game/`.
+- **Решение и реализация L:**
+  - В `Editor/Core/AssetExtensions.h` реализована функция `EditorCore::NormalizeVirtualPath(path, contentRoot)`. Она нормализует виртуальные пути `/Game/...` и `Game/...`, конвертирует разделители путей в `/`, тримит пробелы, а для абсолютных или относительных путей внутри корня проекта `contentRoot` преобразует их в канонический вид `/Game/<subpath>`.
+  - В `Editor/Source/AssetTools.cpp` метод `UseAsset` проверяет виртуальный префикс: если путь начинается с `/Game/` или `Game/`, проверка относительности файловой системы пропускается, и путь нормализуется через `NormalizeVirtualPath`.
+  - В `Editor/Source/HudTools.cpp`:
+    - Команда `Scene.AssignScript` принимает параметр `objectId` (с дефолтом `selectedId_`), нормализует путь скрипта через `NormalizeVirtualPath` и напрямую отправляет `EditorCommand::SetScript`.
+    - Команда `Scene.AssignAiMachine` принимает параметр `objectId`, нормализует путь машины и напрямую отправляет `EditorCommand::SetProperty` с путем `/stateMachine` и сериализованным в JSON массивом.
+  - В `Editor/tests/AssetPickerDialogTests.h` добавлены 10 новых проверок (всего 67 checks PASS) на различные варианты нормализации путей (виртуальные пути с ведущим слэшем и без него, обратные слэши, относительные пути, абсолютные дисковые пути в `Content/`, пробелы, пустые пути).
+  - Проверена сборка Debug и Release, все тесты `CoreTests` (1105/1105) и `HostTests` (165/165) пройдены.
+
+### Разведка M (Единый базовый класс карточки инспектора и стиль всех карточек без локального хардкода)
+- **Факты из кода:**
+  - Полный список карточек инспектора (10 штук):
+    1. `GeneralCard` (`cardGeneral_` в `ObjectInspectorPanel.cpp`)
+    2. `TransformCard` (`Editor/UI/TransformCard.h`)
+    3. `GeometryCard` (`Editor/UI/GeometryCard.h`)
+    4. `MaterialCard` (`Editor/UI/MaterialCard.h`)
+    5. `LightCard` (`cardLight_` в `ObjectInspectorLight.cpp`)
+    6. `CharacterCard` (`cardCharacter_` в `ObjectInspectorPanel.cpp`)
+    7. `PhysicsCard` (`cardPhysics_` в `ObjectInspectorPanel.cpp`)
+    8. `ScriptCard` (`Editor/UI/ScriptCard.h`)
+    9. `AiMachineCard` (`Editor/UI/AiMachineCard.h`)
+    10. `CameraGuideCard` (`Editor/UI/CameraGuideCard.h`)
+  - Все 10 карточек либо напрямую наследуют `CollapsibleCard`, либо инстанциируют `CollapsibleCard`.
+  - Все карточки устанавливают свойство `collapsibleCard = true` через базовый конструктор `CollapsibleCard`.
+  - Единые константы оформления определены в `Editor/UI/InspectorCardStyle.h`: `kLabelWidth = 80`, `kFieldHeight = 22`, `kButtonHeight = 24`, `kHeaderHeight = 22`, `CardMargins = QMargins(6, 4, 6, 4)`, `kCardSpacing = 4`, `kRowSpacing = 4`.
+  - В `ObjectInspectorLight.cpp` имя объекта `cardLight_->setObjectName(QStringLiteral("LightCard"))` задавалось снаружи метода `BuildPointLightCard`; добавлена установка непосредственно внутри функции.
+- **Решение и реализация M:**
+  - В `ObjectInspectorLight.cpp` добавлено явное присвоение `cardLight_->setObjectName(QStringLiteral("LightCard"))` внутри `BuildPointLightCard`.
+  - В `Editor/tests/InspectorCardStyleTests.h` написан исчерпывающий тест, выполняющий валидацию всех 10 карточек по их именам `cardNames`:
+    - Проверка полиморфного приведения `dynamic_cast<CollapsibleCard*>(card) != nullptr`.
+    - Проверка динамического свойства `collapsibleCard == true`.
+    - Проверка наличия кнопки сворачивания `CardHeaderBtn` с фиксированной высотой 22px (`kHeaderHeight`).
+    - Проверка контейнера контента `CardContent` с отступами `(6, 4, 6, 4)` и расстоянием между строками `4` (`kCardSpacing`).
+    - Проверка рендера подложки в темной и светлой темах.
+    - Проверка всех подписей `CardFieldLabel` (фиксированная ширина ровно 80px).
+    - Проверка высот всех полей ввода (22-26px) и кнопок (24-32px).
+  - Результаты: число проверок в `InspectorCardStyleTests` выросло с 58 до 148 checks (все PASS).
+
+### Разведка N (Замена длинных описаний в карточках камеры и инспектора на компактные подписи с InfoButton)
+- **Факты из кода:**
+  - В `Editor/UI/CameraGuideCard.h:157-164` метод `Describe()` добавлял к текстовой сводке `summary_` статическое многострочное описание цветовой легенды и режима плоскости:
+    «Зелёная рамка — Near. Жёлтая — срез схемы. Стрелка — направление взгляда.\nНаправление задано плоскостью; поворот объекта не влияет на взгляд.».
+  - Это приводило к вертикальному раздуванию карточки на 4 лишние строки статического текста при каждом кадре/обновлении.
+- **Решение и реализация N:**
+  - В `CameraGuideCard.h` метка `CameraGuideSummary` размещена в горизонтальной строке `summaryRow` рядом с кнопкой справки `infoBtn_` (`InfoButton` с `setObjectName("CameraGuideInfo")`).
+  - Статическое описание цветов и плоскости вынесено в `InfoButton` с поддержкой русской и английской локализаций (`RetranslateUi`), High-DPI и светлой/темной тем.
+  - В `Describe()` формируются только динамические метрики камеры (аспект, ближняя/дальняя граница, размер среза на дистанции, дистанция от вида редактора и до плоскости $Y=0$), что делает карточку компактной и аккуратной.
+  - В `InspectorCardStyleTests.h` добавлен юнит-тест (число проверок выросло со 148 до 154 checks, все PASS), подтверждающий наличие `CameraGuideInfo`, корректность подсказки и чистоту `CameraGuideSummary`.
+
+### Разведка P (Финальная сквозная сверка всех типов объектов и проверок протокола)
+- **Факты из проверок и кода:**
+  - Полная верификация всех регламентов протокола:
+    1. Запретные зоны (`Engine/`, `Game/`, `build.ps1`): `git diff --stat -- Engine Game build.ps1` пуст (0 файлов, 0 строк).
+    2. Чистота архитектурных слоев:
+       - `Core/` не содержит типов UI (`QWidget`, `QMessageBox`, `QFileDialog`, `QColorDialog`, `QAction`, `QMenu`, `QDialog`) и не включает Host/UI.
+       - `Host/` не зависит от UI классов.
+       - `UI/` взаимодействует только через `IEditorHost` и команды `CommandRegistry`.
+    3. Локализация: проверка кириллицы вне `Tr(...)` скриптом `Editor/tools/check.ps1` дает 0 нарушений.
+    4. Ограничения размеров файлов: все измененные и созданные файлы строго в рамках нормы (<= 500 строк):
+       - `CameraGuideCard.h`: 222 строки
+       - `InfoButton.h`: 138 строк
+       - `InspectorCardStyle.h`: 55 строк
+       - `SpinBoxArrowStyle.h`: 178 строк
+       - `WheelGuard.h`: 152 строки
+       - `EditorSeparator.h`: 119 строк
+    5. Компиляция: Debug и Release для `EditorModule.vcxproj` и `UiTests.vcxproj` собираются с 0 ошибок и 0 новых предупреждений.
+    6. Тесты:
+       - `CoreTests.exe`: 1105/1105 checks PASS (100%).
+       - `HostTests.exe`: 165/165 checks PASS (100%).
+       - `UiTests.exe`: 906 checks PASS (все 21 тестовый набор отработали до конца, 1 исходный красный тест из main в `ViewportBillboardTests.h:216`).
+       - `check.ps1 -Quick`: все разделы 1, 2, 2b, 3, 4, 5 пройдены.
+- **Решение и реализация P:**
+  - Все задачи G, H, I, J, K, L, M, N, O, P полностью реализованы, протестированы и зафиксированы отдельными атомарными коммитами.
+  - Дерево готово к финальному отчету и ручной проверке пользователем.
+
+
+
+
+---
+
+## Разведка (Задачи A, B, C, D, E)
+
+### Разведка A (Разделители на панели Viewport)
+- **Факты из кода:**
+  - В `Editor/UI/ViewportHeaderBar.h:67-71, 84-88` разделители создавались как `QFrame` с `setFrameShape(QFrame::VLine)` и `setFixedSize(1, 16)`:
+    ```cpp
+    auto* sep1 = new QFrame(this);
+    sep1->setFrameShape(QFrame::VLine);
+    sep1->setFixedSize(1, 16);
+    sep1->setObjectName(QStringLiteral("HeaderSep1"));
+    ```
+  - В QSS цвет для `HeaderSep1`/`HeaderSep2` явно не задавался. Стандартный `QFrame::VLine` рисует 3D/sunken рамку с отступами. При ширине 1 логический пиксель `contentsRect()` виджета равен 0.
+  - При дробных `devicePixelRatio` (1.25, 1.5) 1 логический пиксель преобразуется в 1.25 или 1.5 физических пикселей. В зависимости от четности позиции виджета и субпиксельного округления в растровом пайплайне Qt линия либо вырождается в 0 физических пикселей (пропадает), либо размывается.
+  - Поиск иконок Tabler: в `Editor/Resources/icons` и во всем репозитории иконка `separator-vertical.svg` отсутствует (в наличии только 9 иконок: bulb, camera, chevron-down/right, cube, refresh, sun, user, video). Занесено в Backlog.
+- **Решение и реализация:**
+  - Создан специализированный легковесный виджет `EditorSeparator` (`Editor/UI/EditorSeparator.h`) с поддержкой ориентаций `Qt::Vertical` и `Qt::Horizontal`.
+  - В `paintEvent` вычисляется точная физическая геометрия: `physThickness = std::max(1, std::min(physDim, qRound(1.0 * dpr)))`, координаты выравниваются по физической сетке по центру `(physDim - physThickness) / 2`.
+  - Отрисовка выполняется через `painter.fillRect(QRectF(...), borderLight)` с отключенным сглаживанием (`Antialiasing = false`). Гарантируется толщина ровно не менее 1 физического пикселя без субпиксельного размытия.
+  - Цвет берется из активной темы `EditorTheme::Instance().Palette().borderLight` и обновляется автоматически по сигналу `SubscribeThemeChanged`.
+  - Разделители `ViewportHeaderBar` переведены на `EditorSeparator` с комфортным размером `setFixedSize(6, 16)` для кликабельности и отступов.
+  - Написан юнит-тест `EditorSeparatorTests.h` (10 checks PASS) с валидацией рендера в `QImage` при DPR 1.0, 1.25, 1.5, 2.0 (построчная проверка наличия физических пикселей и толщины) и проверки смены темы Dark <-> Light.
+
+### Разведка B (Подложка всех карточек инспектора)
+- **Факты из кода:**
+  - В `EditorStyles.cpp:295` подложка задавалась селектором `QFrame#CollapsibleCard, QWidget#CollapsibleCard { background-color: %7; border: 1px solid %6; border-radius: 4px; }`.
+  - Карточки `ScriptCard` (`setObjectName("ScriptCard")`), `AiMachineCard` (`setObjectName("AiMachineCard")`), `CameraGuideCard` (`setObjectName("CameraGuideCard")`) переопределяли `objectName`, из-за чего QSS селектор `#CollapsibleCard` переставал с ними совпадать. В результате они рисовались с прозрачным фоном, просвечивая цвет окна инспектора.
+  - В `CameraGuideCard.h` отсутствовал метод `RetranslateUi()` и подписка на `SubscribeLanguageChanged`, что вызывало сбой в `UiSmokeTests` при переключении RU/EN.
+- **Решение и реализация:**
+  - В `InspectorCardStyle.h` добавлен централизованный метод `ApplyCardStyle(QWidget* card)`, устанавливающий динамическое свойство `collapsibleCard = true`.
+  - В `CollapsibleCard.h` вызывается `InspectorCardStyle::ApplyCardStyle(this)`.
+  - В `EditorStyles.cpp` селектор расширен: `QFrame[collapsibleCard="true"], QWidget[collapsibleCard="true"], QFrame#CollapsibleCard, QWidget#CollapsibleCard, #ScriptCard, #AiMachineCard, #CameraGuideCard`.
+  - В `CameraGuideCard.h` добавлены `RetranslateUi()` и подписка на `EditorLocale::Instance().SubscribeLanguageChanged`.
+  - Написан юнит-тест `InspectorCardStyleTests.h` (52 checks PASS), проверяющий рендер тела всех карточек инспектора в Dark и Light темах, соответствие цвета `bgPanel`, различие цветов в разных темах и негативный тест отсутствия подложки у нестилизованного `QFrame`.
+
+### Разведка C (Защита от случайного изменения параметров колесиком мыши)
+- **Факты из кода:**
+  - Ранее существовал локальный класс `NoWheelDoubleSpinBox.h`, который переопределял `wheelEvent` через `event->ignore()`.
+  - Он защищал только часть спинбоксов и не распространялся на `QComboBox` (`physicsBodyType_`, `physicsShape_`, `units_` и т.д.), `QSpinBox` и `QSlider`. При вертикальной прокрутке инспектора случайное попадание курсора на выпадающие списки или слайдеры меняло их значения на лету.
+- **Решение и реализация:**
+  - Создан легковесный класс `WheelGuard` (`Editor/UI/WheelGuard.h`) — фильтр событий для `QApplication`.
+  - Класс фильтрует события `QEvent::Wheel` для целевых виджетов ввода (`QAbstractSpinBox`, `QComboBox`, `QAbstractSlider`), исключая `QScrollBar`.
+  - Если виджет не имеет фокуса (`!HasFocus(w)`), `WheelGuard` игнорирует событие на виджете и через `QApplication::sendEvent` транслирует его в `parentWidget()`, позволяя `QScrollArea` прокручиваться без изменения значений в полях.
+  - Если виджет получил фокус кликом/табом, колесо работает штатно.
+  - Явные исключения (`IsExempt`): навигация камеры во вьюпорте (`ViewportWidget`, `Viewport`), холсты нодовых редакторов (`MaterialGraphWidget`, `GraphEditorWidget`, `GraphCanvas`), редактор интерфейса (`UIEditorCanvas`), а также виджеты с динамическим свойством `wheelGuardExempt`.
+  - Написан юнит-тест `WheelGuardTests.h` (20 checks PASS), проверяющий распознавание guarded-виджетов, сохранение работы `QScrollBar`, фильтрацию на unfocused виджетах, трансляцию в родительский виджет, работу при наличии фокуса и проверку исключений зума.
+
+### Разведка D (Кнопка «Создать» / «Редактировать» в карточке «Материал»)
+- **Факты из кода:**
+  - В `MaterialCard.h` кнопка всегда называлась «Редактировать» (`objectName = "EditMaterial"`), даже когда поле материала было пустым.
+  - При этом рабочий путь до движка существовал: в `MainWindow.cpp:841-847` при клике по пустой строке вызывался `CreateMaterialForSelection()`, создающий новый `.mat` файл в `Content/Materials`, отправляющий команду `EditorCommand::SetMaterial` на выделенный объект и открывающий `MaterialEditorWindow`.
+- **Решение и реализация:**
+  - В `MaterialCard.h` кнопка действия переведена на динамическое состояние:
+    - При отсутствии материала (`material.isEmpty()`): текст `Tr("Создать", "Create")`, `objectName = "CreateMaterial"`.
+    - При назначенном материале: текст `Tr("Редактировать", "Edit Material")`, `objectName = "EditMaterial"`.
+  - При очистке (`Clear()`) кнопка возвращается в состояние «Создать».
+  - В `InspectorCardStyleTests.h` добавлены тесты переключения текста и objectName (начальное пустое -> Create, назначенное -> Edit, сброс -> Create).
+
+### Разведка E (Шаг 0: Панель «Навигация и диагностика»)
+- **Создание и регистрация в коде (`MainWindow.cpp:127-139`):**
+  - Создаётся как `auto* aiDock = new QDockWidget(Tr("AI · Диагностика", "AI · Diagnostics"), this);` (локальная переменная, не член `MainWindow`).
+  - Устанавливается `setObjectName("AiDiagnosticsDock")`.
+  - Добавляется через `addDockWidget(Qt::RightDockWidgetArea, aiDock)` и сразу `aiDock->hide()`.
+  - На шапку вьюпорта кнопка добавлялась грубо: `static_cast<QHBoxLayout*>(headerBar->layout())->addWidget(aiButton)`. При клике `setVisible(toggled)`.
+  - `aiDock` **НЕ** регистрировался в `DockLayoutManager::ApplyDefaultLayout`, **НЕ** вызывался `UnlockDockResizing(aiDock)`, не настраивались `setFeatures` и `setAllowedAreas(Qt::AllDockWidgetAreas)`.
+- **Причины багов:**
+  - *Баг 1 (кнопка ломает интерфейс):* `headerBar->layout()` не предназначен для сторонних кнопок (нарушается сжатие и адаптивное меню шапки). Открытие в `RightDockWidgetArea` сдвигает всю строку `TopDockWidgetArea` (`SceneObjectsDock` + `ViewportDock` + `InspectorDock`), ломая горизонтальные пропорции.
+  - *Баг 2 (пропадает при перетаскивании):* В `AiDiagnosticsPanel.h:34-35` жестко задано `setMinimumWidth(390); setMaximumWidth(460);`. При попытке объединения в таб-группу с инспектором или сценой виджет с жестким `maximumWidth(460)` блокирует таббар и перетаскивание, а отсутствие `setAllowedAreas(Qt::AllDockWidgetAreas)` приводит к невозможности сброса в центральную или нижнюю зоны. В `DockLayoutManager` окно не участвует в сохранении позиций при сбросе.
+  - *Баг 3 (отладочный вид):* В `AiDiagnosticsPanel.h:55, 78` используются сырые `QGroupBox` с рамками, не согласованными с `CollapsibleCard`. Жесткие размеры 390-460px, сырой `QGridLayout` для чекбоксов, константы кириллицы вне `Tr()` в строках 58-60 (из-за чего падает `check.ps1 -Quick`).
+
+### Разведка F (Шаг 0: Аудит типов объектов и карточек инспектора)
+- **Таблица «Тип объекта × Карточки инспектора» в текущем коде (`ObjectInspectorPanel.cpp:443-570`):**
+  | Тип объекта в сцене | Transform | General | Geometry | Material | PointLight / DirLight | Character | Physics | Script | AiMachine | CameraGuide |
+  |---|---|---|---|---|---|---|---|---|---|---|
+  | `Engine.Model` | ДА | ДА | ДА | ДА | НЕТ | НЕТ | **ДА (Баг: везде)** | **ДА (Баг: везде)** | по schema | НЕТ |
+  | `Primitive.*` (Cube/Sphere) | ДА | ДА | ДА | ДА | НЕТ | НЕТ | **ДА (Баг: везде)** | **ДА (Баг: везде)** | по schema | НЕТ |
+  | `Light.Point` | ДА | ДА | НЕТ | НЕТ | ДА | НЕТ | **ДА (Баг: у света)** | **ДА (Баг: у света)** | НЕТ | НЕТ |
+  | `Light.Directional` | ДА | ДА | НЕТ | НЕТ | ДА | НЕТ | **ДА (Баг: у света)** | **ДА (Баг: у света)** | НЕТ | НЕТ |
+  | `Gameplay.Camera` | ДА | ДА | НЕТ | НЕТ | НЕТ | НЕТ | **ДА (Баг: у камеры)** | **ДА** | НЕТ | ДА |
+  | `Empty` / `ProjectObject` | ДА | ДА | НЕТ | НЕТ | НЕТ | НЕТ | **ДА (Баг: в пустом)** | **ДА** | по schema | НЕТ |
+  | `Gameplay.Character` | ДА | ДА | НЕТ | НЕТ | НЕТ | ДА | **ДА** | **ДА** | ДА | НЕТ |
+- **Меню «Добавить» (`SceneObjectsPanel.cpp:175-207`):**
+  - Категории: `Primitives`, `Lights`, `Particles`, `Environment`, `Characters`, `Cameras`, `Project Classes`.
+  - Заполняется из `view.types`, полученных через ABI `ctx.scene.scene.listTypes`.
+  - В меню попадают только типы, зарегистрированные в движке / проекте. Если подменю пустое, оно скрывается (`sub->menuAction()->setVisible(false)`).
+- **Решение и реализация F:**
+  - Каждой карточке инспектора присвоен уникальный стабильный `objectName`: `GeneralCard`, `TransformCard`, `GeometryCard`, `MaterialCard`, `LightCard`, `CharacterCard`, `PhysicsCard`, `ScriptCard`, `AiMachineCard`, `CameraGuideCard`.
+  - В `EditorStyles.cpp:295` селекторы обновлены под все ID карточек: `QFrame#GeneralCard, QFrame#TransformCard, QFrame#GeometryCard, QFrame#MaterialCard, QFrame#LightCard, QFrame#CharacterCard, QFrame#PhysicsCard`.
+  - В `ObjectInspectorPanel.cpp` в `Refresh()` реализована матрица видимости:
+    - **Свет (`Light.Point`, `Light.Directional`):** Transform, General, Light видимы; Физика, Геометрия, Материал, Скрипт скрыты.
+    - **Камера (`Gameplay.Camera`, `CameraGuide::IsCamera`):** Transform, General, CameraGuide, Скрипт видимы; Физика, Геометрия, Материал скрыты.
+    - **Пустой объект (`Empty`, логический объект):** Transform, General, Скрипт видимы; Физика, Геометрия, Материал скрыты (пока нет меша или коллизии).
+    - **Меш / Примитив (`Primitive.*`, `Engine.Model`):** Transform, General, Geometry, Material, Physics, Script видимы.
+    - **Персонаж (`Gameplay.Character`):** Transform, General, Character, Physics, Script, AiMachine видимы.
+    - **Сохранение данных:** для пустых/пользовательских объектов при наличии сохранённых компонентов в данных (`hasSavedPhysics`, `hasSavedModel`, `hasSavedMaterial`, `hasSavedScript`) карточки не теряются молча, а отображаются.
+  - В `SceneObjectsPanel.cpp` в `RebuildAddMenu()` и в контекстном меню:
+    - Все 14 типов подключены через `CreateObject` с параметрами. `Gameplay.PlaySettings` исключён из создания сущностей сцены.
+    - Пустые подменю категорий скрываются (`sub->menuAction()->setVisible(false)`). В контекстном меню иерархии исключено добавление пустых субменю.
+    - Действия создания потомка получили уникальный `objectName` (`CreateChildObject.<type>`).
+  - Написан комплексный юнит-тест `ObjectTypeInspectorTests.h` (прогон матрицы всех типов объектов, проверка скрытия/отображения карточек по `objectName`, проверка сохранения пользовательских данных, проверка меню «Добавить» и генерации событий `AddPrimitiveRequested`).
+  - **Backlog:**
+    - Сохранённые компоненты у нетипичных сущностей: при открытии пользовательских сцен, созданных в сторонних редакторах или старых версиях, если у пустого/пользовательского объекта заданы `modelAsset`, `materialAsset` или `physics`, карточки отображаются во избежание потери данных.
+    - Иконка `separator-vertical.svg` отсутствует в наборе Tabler icons репозитория; отрисовка `EditorSeparator` выполнена процедурно через `QPainter`.
+
+---
+
+## Разведка (Шаг 0 по задачам M, U, K, H)
+
+### Разведка M (Карточка «Геометрия» vs «Материал»)
+- **Факты из кода:**
+  - В `GeometryCard.h:144-149` поле модели — `QLineEdit* modelAsset_` (объект `ModelAsset`, 22px). В `MaterialCard.h:117-122` — `QLineEdit* materialAsset_` (объект `MaterialAsset`, 22px).
+  - В `GeometryCard.h:30` при `SetModelData` вызывается `modelAsset_->setText(rel)` напрямую полным путём без усечения/элайда. Тултип на существующем файле очищается в `QString()` (`GeometryCard.h:49, 57`), поэтому полный путь недоступен в тултипе. `modelAsset_` не имеет `minimumWidth(0)` / `sizePolicy(Ignored)`.
+  - В `GeometryCard.h:151-164` ряд кнопок `btnRow` содержит всего 1 кнопку `ChooseModel` («Заменить модель…»), тогда как в `MaterialCard.h:124-153` ряд `materialActions_` содержит 3 кнопки (`Edit`, `Browse`, `Clear`), что задает другую минимальную ширину.
+  - При установке имени пути длиной 200 символов `QLineEdit` без явного сброса `minimumWidth` и без элайда не показывает сокращение и не дает подсказки.
+- **План исправления M:**
+  - Создание общего хелпера `EditorUI::FormatAssetPath(QLineEdit* edit, const QString& fullPath, const QString& displayPath, int targetWidth = 220)`.
+  - Элайд посередине: `QFontMetrics(edit->font()).elidedText(displayPath, Qt::ElideMiddle, targetWidth)`.
+  - Защита размеров: `edit->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed)` и `edit->setMinimumWidth(0)`.
+  - Если путь сокращен (`elided != displayPath`), тултип содержит полный путь `fullPath`. Если файл отсутствует на диске — тултип ошибки.
+  - Внутреннее хранение сырого полного пути `rawPath_` для надежных коллбэков.
+
+### Разведка U (Единый пикер ресурсов)
+- **а) Редактор UI:**
+  - `HudTools.cpp:84`: `UI.OpenEditor` вызывает `QFileDialog::getOpenFileName(this, Tr("Интерфейс", "Interface"), root, "UI (*.ui)")`. Это внутренний ресурс проекта!
+  - `HudTools.cpp:30`: `CreateUI()` вызывает `QFileDialog::getSaveFileName(this, Tr("Новый интерфейс", "New Interface"), ...)` — создание нового файла на диске (остается системным диалогом сохранения).
+  - `HudTools.cpp:46`: `ShowHudSettings()` строит самодельный комбобокс через `QDirIterator it(root, {"*.ui"})`.
+  - `UIEditorWindow.cpp`: в текущей версии редактор разметки настраивает только цвета (через `QColorDialog`), геометрию (спинбоксы) и текст. Внутренних пикеров картинок/шрифтов в инспекторе UI еще нет.
+- **б) Места выбора ресурсов по всему Editor/:**
+  - `ImportCommands.cpp:202`: `Scene.ReplaceModel` — уже использует `AssetPickerDialog(AssetKind::Model)`.
+  - `ImportCommands.cpp:234`: `Scene.AssignMaterial` — уже использует `AssetPickerDialog(AssetKind::Material)`.
+  - `MaterialTextureTools.cpp:295`: выбор текстуры в слоте — уже использует `AssetPickerDialog(AssetKind::Texture)`.
+  - `MainWindow.cpp:858`: выбор визуального скрипта `OnChooseScript` — вызывает `QFileDialog::getOpenFileName` в каталоге `Content/Scripts`. Требуется `AssetPickerDialog(AssetKind::Script)`.
+  - `MainWindow.cpp:884`: выбор автомата ИИ `OnChooseAiMachine` — вызывает `QFileDialog::getOpenFileName` в каталоге `Content/AI`. Требуется `AssetPickerDialog(AssetKind::AiMachine)`.
+  - `HudTools.cpp:84`: открытие UI-файла `UI.OpenEditor` — вызывает `QFileDialog::getOpenFileName`. Требуется `AssetPickerDialog(AssetKind::UI)`.
+  - Внешний импорт (ОС -> проект): `ImportCommands.cpp:60, 392`, `AssetTools.cpp:48, 79` — файлы снаружи проекта, системный диалог `QFileDialog` обоснованно сохраняется.
+  - Сохранение файлов на диск: `MainWindow.cpp:1039` (`SaveSceneAs`), `HudTools.cpp:30` (`CreateUI`) — системный `getSaveFileName` сохраняется.
+
+### Разведка K (Стиль карточек инспектора)
+- **Таблица инспектора по коду:**
+  | Карточка | Файл:строка | Заголовок | Раскладка строк | Отступы/Spacing | Ширина подписей | Высота строк |
+  |---|---|---|---|---|---|---|
+  | `TransformCard` | `TransformCard.h:16` | «Трансформация» / `CollapsibleCard` | `QGridLayout` (X, Y, Z ячейки) | `contentLayout_` (6, 4, 6, 4), spacing 4 | 16 px (`CardFieldLabel`) | 22 px spinbox |
+  | `GeometryCard` | `GeometryCard.h:15` | «Геометрия» / `CollapsibleCard` | `QVBoxLayout` (`CardSectionLabel`, `modelAsset_`, `btnRow`) | `contentLayout_` (6, 4, 6, 4), spacing 4; `btnRow` (0,0,0,0) | На всю ширину | 22 px edit, 24 px btn |
+  | `MaterialCard` | `MaterialCard.h:15` | «Материал» / `CollapsibleCard` | `QVBoxLayout` (`CardSectionLabel`, `materialAsset_`, `materialActions_`) | `contentLayout_` (6, 4, 6, 4), spacing 4; actions (0,0,0,0) | На всю ширину | 22 px edit, 24 px btns |
+  | `PointLight` | `ObjectInspectorLight.cpp:38` | «Точечный свет» / `CollapsibleCard` (`cardLight_`) | `QHBoxLayout` построчно | `contentLayout_` (6, 4, 6, 4), spacing 4; строки (0,0,0,0), spacing 4 | 72 px фикс (`lightRowLabels_`) | 22 px spinboxes |
+  | `PhysicsCard` | `ObjectInspectorPanel.cpp:233` | «Физика» / `CollapsibleCard` (`cardPhysics_`) | `QHBoxLayout` построчно | `contentLayout_` (6, 4, 6, 4), spacing 4; строки (0,0,0,0), spacing 4 | 80 px фикс (`physicsRowLabels_`) | 22 px edits/combos |
+  | `ScriptCard` | `ScriptCard.h:21` | «Скрипт» / `CollapsibleCard` | `QVBoxLayout` + `VariableValuesEditor` | `contentLayout_` (6, 4, 6, 4), spacing 4; actions (0,0,0,0) | 80 px в `VariableValuesEditor` | 22 px edits, 24 px btns |
+  | `AiMachineCard` | `AiMachineCard.h:16` | «Автомат ИИ» / `CollapsibleCard` | `QVBoxLayout` | `contentLayout_` (6, 4, 6, 4), spacing 4; actions (0,0,0,0) | На всю ширину | 22 px edit, 24 px btns |
+  | `CameraGuideCard` | `CameraGuideCard.h:13` | «Обзор камеры» / `CollapsibleCard` | `QFormLayout` | `contentLayout_` (6, 4, 6, 4), spacing 4 | По `QFormLayout` | 22 px spinbox |
+  | `CharacterCard` | `ObjectInspectorPanel.cpp:207` | «ИИ-персонаж» / `CollapsibleCard` | `QHBoxLayout` построчно | `contentLayout_` (6, 4, 6, 4), spacing 4 | 80 px фикс | 22 px spinbox |
+  | `GeneralCard` | `ObjectInspectorPanel.cpp:164` | «Общие параметры» / `CollapsibleCard` | `QHBoxLayout` / `QVBoxLayout` | `contentLayout_` (6, 4, 6, 4), spacing 4 | 80 px фикс | 22 px edit |
+- **Вывод по K:**
+  - Базовые отступы контента у всех карточек унифицированы через `CollapsibleCard` (6, 4, 6, 4, spacing 4).
+  - Карточки `Physics` (80px) и `PointLight` (72px) имели расхождение в ширине колонки подписей (72px vs 80px).
+  - Выносим `InspectorCardStyle.h` с едиными константами: `kLabelWidth = 80px`, `kFieldHeight = 22px`, `kButtonHeight = 24px`, `kContentMargins = QMargins(6, 4, 6, 4)`, `kSpacing = 4px`.
+
+### Разведка H (SVG-иконки на 2K)
+- **Факты из кода:**
+  - `IconProvider.cpp:73`: `QPixmap pix(size, size);` создает пиксмап в логических пикселях (16x16).
+  - `IconProvider.cpp:76-81`: `QSvgRenderer::render(&painter)` рисует в этот 16x16 буфер. `pix.setDevicePixelRatio(dpr)` отсутствует.
+  - `IconProvider.cpp:113-116`: в `QIcon` добавляются только пиксмапы размера 16x16.
+  - На экранах с коэффициентом масштабирования 1.5 (2K при 150%) или 2.0 (4K при 200%) Qt масштабирует растровый пиксмап 16x16 с потерей резкости.
+- **План исправления H:**
+  - Рендерить `QPixmap` физического размера `std::round(size * dpr)`.
+  - Устанавливать `pix.setDevicePixelRatio(dpr)`.
+  - Добавлять в `QIcon` пиксмапы для стандартных DPR (1.0, 1.5, 2.0), либо формировать четкий пиксмап с учетом текущего DPI приложения.
+  - Написать тест, проверяющий физический размер возвращаемого `QPixmap` при DPR 1.0, 1.5, 2.0.
+
+---
 
 ---
 
@@ -643,6 +1087,10 @@
 
 ## Backlog
 
+- [ ] **Выбор архитектурного решения по открытию панелей:** Архитектор решает, где открывать панели («Вид» для всех окон или «Инструменты» для инструментальных); сейчас: «Инструменты» открывает панель диагностики, «Вид» содержит только переключатель отображения во viewport.
+
+- [ ] **Добавление компонентов в инспекторе через кнопку «+» (показывать только нужные карточки) — требует решения архитектора.**
+
 - [ ] **Единый логгер в Engine:** В `Engine/` отсутствует подсистема/класс логгера (в отличие от `EditorCore::Logger`). Все модули движка выводят сообщения напрямую через `std::printf` и `std::fprintf(stderr, ...)`. Требуется архитектурное решение Юрия по единому логгеру движка.
 
 - [ ] **Файловый лог EditorCore::Logger в продакшене:** `Editor/Core/Logger.cpp` пишет только в консоль (`fprintf`/`printf` + sinks); файловый sink в продакшене не подключён (единственный вызов `AddSink` — в `CoreTests.cpp`). Диагностика ошибок у пользователей невозможна: сырой текст исключений реимпорта (путь `AssetCommandHandler/importWithOptions` и путь `SceneAssets::Import`/`AssetUpdate` с откатом в catch) не сохраняется на диск и теряется после закрытия консоли; в `MainWindow` ветка sidecarTx дополнительно подменяет сырую ошибку обобщённым `Tr`. Требуется продакшен-файловый sink с записью в корень проекта через `FileService` (с ротацией) и логированием ошибок команд до их подавления в UI. Обнаружено при Фазе 0 диагностики отката реимпорта.
@@ -1035,6 +1483,30 @@
 - [x] **Шаг 17.10.2 (fix(engine)):** Staging реимпорта перенесён в `.painengine/Staging/<pid>-<tick>` (вне Content Browser): временный VFS-mount `/_staging` (`SceneAssets::StagingRoot`), `Import` принимает `stagingRoot`/`virtualRoot`, `CreateModel` валидирует staging-пути через `ValidPathUnder`. Дублирующие папки `<stem>_1` в Content устранены; каталог staging удаляется и при успехе, и при откате. Тест `ModelStagingTests.h` (наблюдатель `ReadDirectoryChangesW`): Content без `<stem>_1` во время импорта и реимпорта. EngineTests 75/75 Release; authoring 215+307, EditSession 651, SceneModule 109, Compatibility 116 — Release. Решение 43.
 - [x] **Шаг 17.10.3 (feat(editor)):** Миграция старых `Game.dll`: no-code — автообновление из шаблона `Runtime/Templates/SceneProject` в новый путь `Binaries/Migrated/<stamp>` с бэкапом, логом и сообщением (`ImportMigration.cpp`, QtCore-only); C++ — диалог «Собрать проект» / «Открыть как есть», при отказе импорт с дефолтами и явным сообщением (`CodeTools.cpp::EnsureModelImportSupport`, хук в `Assets.Import`). Битый sidecar нормализуется дефолтами с бэкапом и логом, отсутствующий — с логом (`AssetUpdate.cpp`). Тесты: `ImportMigrationTests.h` (16 checks, HostTests 132), `AssetSidecarNormalizeTests.h` (EngineTests 77/77 Release). Решение 45.
 - [x] **Шаг 17.10.4 (perf(engine) + fix(editor)):** Второй проход Assimp в `CreateMaterials` устранён (capture первого `aiScene` из загрузчика, armed только на время `Import`); выделение после реимпорта сохраняется по имени (`SelectByName`, один publish), Undo не сбрасывается (`UpdateAsset` w=0 → `BreakCoalescing`; явный `Reset` только для rename/move w=1). Замеры Release до/после (медиана 3 итераций, шаблон пересобран с Assimp): лёгкая CesiumMan.glb реимпорт 124.8→117.3 мс (−6%), импорт 42.8→33.4 мс (−22%); тяжёлая FBX 27.6 МБ реимпорт 1157.1→1037.4 мс (−10%), импорт 780.8→627.7 мс (−20%). Тесты: `AssetUpdateHostTests.h` (8 checks; HostTests 140 Debug+Release), EngineTests 77/77, authoring 215+307 Release. Валидация всех сцен в Commit (~12/158 мс на сцену) и переинициализация вьюпорта (~356/361 мс) — в Backlog с цифрами. Решение 46.
+
+---
+
+## Сессия fix/editor-ui-polish (Задачи X, Y)
+
+### Разведка
+- **Задача X:** `AiDetailsCard` сжималась из-за внутренних скроллов `QPlainTextEdit` и отсутствия авторазворота документа; баннер `AiSourceStatus` висел сырым текстом вне контекста; легенда слоев в `AiLegend` была монохромной строкой с «●»; оверлей навигации рендерится внутри D3D11 движка без экспорта констант палитры в C-ABI.
+- **Задача Y:** Отдельные окна редактора (`MaterialEditorWindow`, `UIEditorWindow`, `ScriptEditorWindow`, `AiMachineEditorWindow`) при `parent = mainWindow` сворачивались Windows в полоску на рабочем столе из-за отсутствия `WS_EX_APPWINDOW` и единого обработчика сворачивания.
+
+### Чек-лист задач
+- [x] **Задача X (fix(ui)):** Панель «Навигация и диагностика» (`AiDiagnosticsPanel.h`):
+  1. Карточка «Состояние · задачи · память · история» (`AiDetailsCard`): введена константа `kMinDetailsCardHeight = 120`, динамический расчет высоты по тексту без внутреннего скролла (`ScrollBarAlwaysOff`), скроллится только общая панель.
+  2. Плашка режима границ: оформлена вверху панели с жирным заголовком, стилизацией и переносом слов; отображается только в режиме границ (`src == "preview"`).
+  3. Легенда слоёв: создан виджет `ColorSwatch` (10x10 px, QPainter, DPR, контрастная обводка темы) и палитра `NavOverlayColors.h`; легенда оформлена в 5 строк (Проход, Препятствие, Стоимость, A/B, Направление) с Tr RU/EN, видна сразу.
+  4. Тесты: расширен `AiDiagnosticsDockTests.h` (проверка высоты карточки >= 120, отсутствие клиппинга, 5 строк легенды, рендер центрального пикселя каждого образца в QImage на Dark и Light темах, цвета попарно различаются).
+- [x] **Задача Y (fix(ui)):** Сворачивание отдельных окон редактора в панель задач Windows.
+  1. Создан единый хелпер `EditorWindowSetup.h` (`ConfigureSubWindow`), настраивающий `parent = mainWindow`, флаг `Qt::Window` (без `Qt::Tool`), заголовок, иконку и слушатель `MinimizeWatcher`.
+  2. При сворачивании окна в строке состояния главного окна выводится сообщение: `Tr("Окно «%1» свёрнуто, его можно вернуть из панели задач", "Window '%1' minimized, restore it from taskbar")` на 5 секунд.
+  3. Переведены все 4 отдельных окна редактора: `MaterialEditorWindow`, `UIEditorWindow`, `ScriptEditorWindow`, `AiMachineEditorWindow`.
+  4. Тесты: в `AiDiagnosticsDockTests.h` добавлены проверки для всех перечисленных окон (`parent == mainWindow`, `testFlag(Qt::Window)`, `!testFlag(Qt::Tool)`, появление сообщения в statusBar при showMinimized).
+- [x] **Полировка UI (fix(ui)):** Top-level окна с parent = nullptr (таскбар Windows) с закрытием по closeEvent главного окна; легенда слоев AI в 3 колонки сеткой без кнопки ?, выравнивание по kLabelWidth/kFieldHeight и elided описание.
+
+### Backlog
+- Нужно в ABI: экспорт констант цветов навигационного оверлея (проход, препятствие, стоимость, A/B, направление) из движка для синхронизации с палитрой легенды редактора.
 
 ---
 
