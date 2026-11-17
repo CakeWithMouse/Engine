@@ -1,6 +1,7 @@
 #pragma once
 
 #include <directxmath.h>
+#include <cstddef>
 #include <functional>
 #include <glm/glm.hpp>
 #include <memory>
@@ -150,6 +151,23 @@ public:
         for (auto it = Children.begin(); it != Children.end(); ++it)
             if (it->get() == child) { Children.erase(it); return true; }
         return false;
+    }
+
+    /** Removes the child without destroying it and hands back ownership; Parent is cleared.
+     *  Returns nullptr when the child does not belong to this element. Used to reparent. */
+    std::unique_ptr<UIElement> TakeChild(UIElement* child) {
+        for (auto it = Children.begin(); it != Children.end(); ++it)
+            if (it->get() == child) { auto taken = std::move(*it); Children.erase(it); taken->Parent = nullptr; return taken; }
+        return nullptr;
+    }
+
+    /** Takes ownership of a child and inserts it at index (clamped to the end), setting Parent.
+     *  Drawing and hit order follow the child order, so this is how siblings are reordered. */
+    void InsertChild(size_t index, std::unique_ptr<UIElement> child) {
+        if (!child) return;
+        child->Parent = this;
+        if (index >= Children.size()) Children.push_back(std::move(child));
+        else Children.insert(Children.begin() + static_cast<std::ptrdiff_t>(index), std::move(child));
     }
 
     /** Depth-first search by name, this element included. Returns nullptr when there is no match. */
