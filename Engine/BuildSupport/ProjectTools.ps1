@@ -295,7 +295,7 @@ Write-Output "MSBuild: $($toolchain.msbuild)"
 $toolchainIdentity = $toolchain | ConvertTo-Json -Depth 5 -Compress
 $fingerprintParts = @($sdkInfo.version,$sdkInfo.configuration,$toolchainIdentity)
 if ($useCMake) {
-    $sdkInputs = @(Get-Item -LiteralPath "$sdk/Sdk.json","$sdk/Toolchain.ps1","$sdk/ProjectTools.ps1","$sdk/CMakeProject.ps1","$sdk/bin/ComponentGenerator.exe") +
+    $sdkInputs = @(Get-Item -LiteralPath "$sdk/Sdk.json","$sdk/Toolchain.ps1","$sdk/ProjectTools.ps1","$sdk/CMakeProject.ps1","$sdk/Invoke-Utf8Tool.ps1","$sdk/bin/ComponentGenerator.exe") +
         @(Get-ChildItem -LiteralPath "$sdk/lib","$sdk/Build","$sdk/include" -File -Recurse)
 } else {
     $sdkInputs = @(Get-Item -LiteralPath "$sdk/Sdk.json","$sdk/Toolchain.ps1","$sdk/ProjectTools.ps1","$sdk/Tools/ComponentGenerator.exe") + @(Get-ChildItem -LiteralPath "$sdk/Lib" -Filter '*.lib') + @(Get-ChildItem -LiteralPath "$sdk/Build" -File)

@@ -102,7 +102,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PainEngineConfig.cmake
 if(PAIN_BUILD_DESKTOP)
     install(DIRECTORY cmake/ProjectTemplate/ DESTINATION ${CMAKE_INSTALL_DATADIR}/PainEngine/ProjectTemplate)
     install(FILES Engine/BuildSupport/ProjectTools.ps1 Engine/BuildSupport/Toolchain.ps1
-        Engine/BuildSupport/CMakeProject.ps1 DESTINATION .)
+        Engine/BuildSupport/CMakeProject.ps1 Engine/BuildSupport/Invoke-Utf8Tool.ps1 DESTINATION .)
     install(FILES cmake/ProjectTemplate/CMakeLists.txt DESTINATION Build RENAME Game.cmake)
     string(REPLACE "\\" "/" pain_sdk_compiler "${CMAKE_CXX_COMPILER}")
     string(REPLACE "\\" "\\\\" pain_sdk_flags "${CMAKE_CXX_FLAGS}")

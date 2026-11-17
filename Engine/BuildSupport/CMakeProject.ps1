@@ -21,6 +21,9 @@ function Get-ProjectCMakeTools($SdkInfo, [string]$Toolset, [string]$ExactVersion
     $sdkBin = Join-Path $native.windowsSdk.root ("bin/"+$native.windowsSdk.version+'/x64')
     [pscustomobject]@{
         cmake=$cmake; ninja=$ninja; compiler=$compiler; flags=$flags; native=$native
+        # Include the encoding in the build identity: old Ninja dependency caches
+        # may already contain paths damaged by the system code page.
+        consoleCodePage=65001
         environment=@{ INCLUDE=$properties.IncludePath; LIB=$properties.LibraryPath
             PATH=($native.bin+';'+$sdkBin+';'+$env:PATH); VSLANG='1033' }
     }
@@ -33,12 +36,14 @@ function Invoke-ProjectCMakeBuild($Tools, [string]$ProjectRoot, [string]$Sdk, [s
         "-DCMAKE_CXX_COMPILER=$($Tools.compiler)", "-DCMAKE_CXX_FLAGS=$($Tools.flags)",
         "-DCMAKE_MAKE_PROGRAM=$($Tools.ninja)", "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=$Output",
         "-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=$Output")
-    $configured = Invoke-ToolchainProcess $Tools.cmake $configure -Timeout 120000 -Environment $Tools.environment
+    $launcher = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File',
+        (Join-Path $PSScriptRoot 'Invoke-Utf8Tool.ps1'), $Tools.cmake)
+    $configured = Invoke-ToolchainProcess powershell.exe ($launcher + $configure) -Timeout 120000 -Environment $Tools.environment
     [IO.File]::WriteAllText($Log, $configured.stdout+$configured.stderr, [Text.UTF8Encoding]::new($false))
     if ($configured.exitCode) { return $configured }
     $arguments = @('--build',$binary,'--parallel','8')
     if ($Clean) { $arguments += '--clean-first' }
-    $built = Invoke-ToolchainProcess $Tools.cmake $arguments -Timeout 1800000 -Environment $Tools.environment
+    $built = Invoke-ToolchainProcess powershell.exe ($launcher + $arguments) -Timeout 1800000 -Environment $Tools.environment
     [IO.File]::AppendAllText($Log, $built.stdout+$built.stderr, [Text.UTF8Encoding]::new($false))
     return $built
 }

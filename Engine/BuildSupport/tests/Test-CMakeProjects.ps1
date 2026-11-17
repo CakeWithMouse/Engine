@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 $Runtime = [IO.Path]::GetFullPath($Runtime)
 $work = Join-Path $Runtime ('../../../sdk-checks/' + [guid]::NewGuid().ToString('N'))
 $work = [IO.Path]::GetFullPath($work)
-$project = Join-Path $work 'CMake проект с пробелами'
+$project = Join-Path $work 'CMake проект 日本語'
 $manifest = Join-Path $project 'Project.json'
 $launcher = Join-Path (Split-Path $Runtime) 'EngineLauncher.exe'
 $script = Join-Path $Runtime 'SDK/ProjectTools.ps1'
@@ -31,6 +31,13 @@ try {
     Check (!(Test-Path -LiteralPath "$project/Game.vcxproj")) 'CMake SDK generated an MSBuild project'
     $state = Get-Content -LiteralPath "$project/Project.code.json" -Raw -Encoding UTF8 | ConvertFrom-Json
     Check ($state.state -eq 'ready') 'Module was not validated and activated'
+    # A mismatched compiler output encoding can silently disable header tracking.
+    $cache = Get-ChildItem -LiteralPath "$project/Intermediate/CMake" -Filter CMakeCache.txt -Recurse | Select-Object -First 1
+    $ninjaEntry = Select-String -LiteralPath $cache.FullName -Pattern '^CMAKE_MAKE_PROGRAM:[^=]+='
+    $ninja = ($ninjaEntry.Line -split '=', 2)[1]
+    $dependencies = & $ninja -C $cache.Directory.FullName -t deps
+    Check ($LASTEXITCODE -eq 0) 'Cannot read Ninja header dependencies'
+    Check (($dependencies -join "`n").Contains('ProjectComponent.h')) 'Ninja lost header dependencies; check compiler output encoding'
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $script -Action Build -Project $manifest -Runtime $Runtime
     Check ($LASTEXITCODE -eq 0) 'No-op build failed'
     Check ((Get-Content -LiteralPath "$project/Project.code.json" -Raw -Encoding UTF8 | ConvertFrom-Json).buildId -eq $state.buildId) 'No-op build changed module'
