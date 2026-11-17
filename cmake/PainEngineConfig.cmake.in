@@ -1,0 +1,12 @@
+@PACKAGE_INIT@
+include(CMakeFindDependencyMacro)
+find_dependency(Threads)
+foreach(pain_dependency IN ITEMS @PAIN_SDK_DEPENDENCIES@)
+    file(GLOB pain_dependency_configs "${CMAKE_CURRENT_LIST_DIR}/PainDependency-${pain_dependency}-*.cmake")
+    foreach(pain_dependency_config IN LISTS pain_dependency_configs)
+        include("${pain_dependency_config}")
+    endforeach()
+endforeach()
+include("${CMAKE_CURRENT_LIST_DIR}/PainEngineTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/Components.cmake")
+check_required_components(PainEngine)

@@ -1,11 +1,11 @@
 #pragma once
 #include <stdint.h>
+#include <Engine/Platform/Abi.h>
 
 // ABI v5: Windows x64, C calling convention, no STL, exceptions or cross-DLL deletes.
 // All strings are UTF-8 and borrowed for the duration of the session.
 // Host and its user pointer remain valid until Destroy returns. Callbacks are
 // synchronous, on the host thread; modules must not keep work alive after Destroy.
-#define ENGINE_MODULE_CALL __cdecl
 #define ENGINE_MODULE_VERSION 5u
 #define ENGINE_MODULE_GAME 1u
 #define ENGINE_MODULE_EDITOR 2u

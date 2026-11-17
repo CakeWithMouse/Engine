@@ -1,0 +1,42 @@
+{
+  "version": 5,
+  "cmakeMinimumRequired": { "major": 3, "minor": 24, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "ninja",
+      "displayName": "Desktop, native compiler (Developer shell on Windows)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/cmake/${presetName}",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug", "BUILD_TESTING": "ON" }
+    },
+    {
+      "name": "portable",
+      "inherits": "ninja",
+      "displayName": "Portable core and tools, no desktop dependencies",
+      "cacheVariables": { "PAIN_BUILD_DESKTOP": "OFF" }
+    },
+    {
+      "name": "clang",
+      "inherits": "ninja",
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" },
+      "cacheVariables": { "CMAKE_CXX_COMPILER": "clang-cl" }
+    },
+    {
+      "name": "editor",
+      "inherits": "ninja",
+      "cacheVariables": { "PAIN_BUILD_EDITOR": "ON" }
+    }
+  ],
+  "buildPresets": [
+    { "name": "ninja", "configurePreset": "ninja" },
+    { "name": "portable", "configurePreset": "portable" },
+    { "name": "clang", "configurePreset": "clang" },
+    { "name": "editor", "configurePreset": "editor" }
+  ],
+  "testPresets": [
+    { "name": "ninja", "configurePreset": "ninja", "output": { "outputOnFailure": true } },
+    { "name": "portable", "configurePreset": "portable", "output": { "outputOnFailure": true } },
+    { "name": "clang", "configurePreset": "clang", "output": { "outputOnFailure": true } },
+    { "name": "editor", "configurePreset": "editor", "output": { "outputOnFailure": true } }
+  ]
+}

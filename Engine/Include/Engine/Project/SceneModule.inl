@@ -43,7 +43,7 @@ struct Session
     explicit Session(const EngineModuleHost& value) : host(value) { game->AttachSession(gameSession); game->SetSceneLightingEnabled(true); game->Saves().SetCatalog(ProjectComponentTypes()); }
 };
 void Log(Session* s, const char* text) { s->host.log(s->host.user, text); }
-void* __cdecl Create(const EngineModuleHost* host)
+void* ENGINE_MODULE_CALL Create(const EngineModuleHost* host)
 {
     if (!host || host->version != ENGINE_MODULE_VERSION || !host->log || !host->requestExit) return nullptr;
     bool boundVfs = false;
@@ -96,7 +96,7 @@ void* __cdecl Create(const EngineModuleHost* host)
     Log(s, "GameCreate");
     return s;
 }
-int __cdecl Start(void* instance)
+int ENGINE_MODULE_CALL Start(void* instance)
 {
     auto* s = static_cast<Session*>(instance);
     s->startCalled = true;
@@ -121,7 +121,7 @@ int __cdecl Start(void* instance)
     s->started = true;
     return 1;
 }
-int __cdecl Update(void* instance, double dt)
+int ENGINE_MODULE_CALL Update(void* instance, double dt)
 {
     auto* s = static_cast<Session*>(instance);
     ++s->updates;
@@ -139,7 +139,7 @@ int __cdecl Update(void* instance, double dt)
     catch (...) { Log(s, "Game scene update failed"); return 0; }
     return 1;
 }
-void __cdecl Stop(void* instance)
+void ENGINE_MODULE_CALL Stop(void* instance)
 {
     auto* s = static_cast<Session*>(instance);
     char count[96];
@@ -149,7 +149,7 @@ void __cdecl Stop(void* instance)
     s->gameSession.Stop();
     s->started = false;
 }
-void __cdecl Destroy(void* instance)
+void ENGINE_MODULE_CALL Destroy(void* instance)
 {
     auto* s = static_cast<Session*>(instance);
     Log(s, "GameDestroy");
@@ -159,14 +159,14 @@ void __cdecl Destroy(void* instance)
 }
 }
 // Allocation and user Tick failures are caught inside the module.
-extern "C" __declspec(dllexport) int __cdecl EngineGetModuleApi(uint32_t version, EngineModuleApi* api)
+extern "C" ENGINE_MODULE_EXPORT int ENGINE_MODULE_CALL EngineGetModuleApi(uint32_t version, EngineModuleApi* api)
 {
     if (!api || version != ENGINE_MODULE_VERSION) return 0;
     *api = {ENGINE_MODULE_VERSION, ENGINE_MODULE_GAME, Create, Start, Update, nullptr, Stop, Destroy};
     return 1;
 }
 
-extern "C" __declspec(dllexport) int __cdecl EngineGetSceneApi(uint32_t version,
+extern "C" ENGINE_MODULE_EXPORT int ENGINE_MODULE_CALL EngineGetSceneApi(uint32_t version,
     uint32_t outputSize, void* instance, EngineSceneApi* output)
 {
     if (version != ENGINE_SCENE_API_VERSION || outputSize != sizeof(EngineSceneApi) || !instance || !output) return 0;
@@ -176,7 +176,7 @@ extern "C" __declspec(dllexport) int __cdecl EngineGetSceneApi(uint32_t version,
     return 1;
 }
 
-extern "C" __declspec(dllexport) int __cdecl EngineGetGameSceneApi(uint32_t version,
+extern "C" ENGINE_MODULE_EXPORT int ENGINE_MODULE_CALL EngineGetGameSceneApi(uint32_t version,
     uint32_t size, void* instance, EngineGameSceneApi* output)
 {
     if (version != ENGINE_GAME_SCENE_API_VERSION || size != sizeof(EngineGameSceneApi) || !instance || !output) return 0;
@@ -221,7 +221,7 @@ extern "C" __declspec(dllexport) int __cdecl EngineGetGameSceneApi(uint32_t vers
     return 1;
 }
 
-extern "C" __declspec(dllexport) int __cdecl EngineGetGameWindowApi(uint32_t version,
+extern "C" ENGINE_MODULE_EXPORT int ENGINE_MODULE_CALL EngineGetGameWindowApi(uint32_t version,
     uint32_t size, void* instance, EngineGameWindowApi* output)
 {
     if (version != ENGINE_GAME_WINDOW_API_VERSION || size != sizeof(EngineGameWindowApi) || !instance || !output) return 0;
@@ -235,7 +235,7 @@ extern "C" __declspec(dllexport) int __cdecl EngineGetGameWindowApi(uint32_t ver
 }
 
 // Independent, edit-safe lifecycle. No ordinary game Create/Start/Update calls.
-extern "C" __declspec(dllexport) int __cdecl EngineGetEditExtension(void* context,
+extern "C" ENGINE_MODULE_EXPORT int ENGINE_MODULE_CALL EngineGetEditExtension(void* context,
     const char* name, uint32_t version, uint32_t size, void* output)
 {
     if (!context || !name || !output || version != 1) return 0;
@@ -330,7 +330,7 @@ extern "C" __declspec(dllexport) int __cdecl EngineGetEditExtension(void* contex
     return 1;
 }
 
-extern "C" __declspec(dllexport) int __cdecl EngineGetEditModuleApi(uint32_t version,
+extern "C" ENGINE_MODULE_EXPORT int ENGINE_MODULE_CALL EngineGetEditModuleApi(uint32_t version,
     uint32_t size, EngineEditModuleApi* output)
 {
     if (version != ENGINE_EDIT_API_VERSION || size != sizeof(EngineEditModuleApi) || !output) return 0;

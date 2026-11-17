@@ -71,18 +71,21 @@ namespace audio
 
         SoundId LoadSound(const std::wstring& filePath);
 
-        bool Play2D(SoundId id, const PlayOptions& options = {});
+        bool Play2D(SoundId id, const PlayOptions& options);
+        bool Play2D(SoundId id) { return Play2D(id, PlayOptions{}); }
 
         bool Play3D(
             SoundId id,
             const AudioEmitter3D& emitter,
-            const PlayOptions& options = {}
+            const PlayOptions& options
         );
+        bool Play3D(SoundId id, const AudioEmitter3D& emitter) { return Play3D(id, emitter, PlayOptions{}); }
 
         StreamHandle PlayStream(
             const std::wstring& filePath,
-            const StreamOptions& options = {}
+            const StreamOptions& options
         );
+        StreamHandle PlayStream(const std::wstring& filePath) { return PlayStream(filePath, StreamOptions{}); }
 
         void StopStream(StreamHandle handle);
 

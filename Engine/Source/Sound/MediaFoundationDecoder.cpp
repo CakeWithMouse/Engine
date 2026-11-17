@@ -1,5 +1,6 @@
 ﻿#include "Engine/Sound/MediaFoundationDecoder.h"
 #include <new>
+#include <algorithm>
 
 namespace
 {
@@ -231,7 +232,7 @@ namespace audio
                 uint64_t framesLeft = bytesLeft / format_.blockAlign;
 
                 uint64_t framesToCopy =
-                    min(framesLeft, framesToRead - framesWritten);
+                    (std::min)(framesLeft, framesToRead - framesWritten);
 
                 std::size_t bytesToCopy =
                     framesToCopy * format_.blockAlign;

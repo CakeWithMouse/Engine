@@ -4,6 +4,11 @@
 
 Учебный движок C++17 / Windows / Direct3D 11.
 
+**Сборка CMake:** [Windows MSVC/Clang, переносимое ядро Linux/macOS и SDK](docs/CMAKE-BUILD.md).
+`./Engine/build-cmake.ps1 -Test` собирает Windows runtime и игры без MSBuild;
+`cmake --preset portable` настраивает ядро и генератор без графических зависимостей.
+Полный графический runtime пока требует Windows/D3D11.
+
 **Редактор:** Qt-окно показывает сцены BasicExamples, Pong, SunGame и Battle
 во встроенном D3D11 viewport. Выберите игру в лаунчере → «Редактировать».
 Нужен Qt SDK в `Editor/ThirdParty/Qt6.7` или `QTDIR`.

@@ -8,7 +8,7 @@ function ConvertTo-NativeArgument([string]$Value) {
 function ConvertTo-MSBuildProperty([string]$Name, [string]$Value) {
     '/p:' + $Name + '=' + $Value.Replace('%','%25').Replace(';','%3B').Replace(',','%2C')
 }
-function Invoke-ToolchainProcess([string]$File, [string[]]$Arguments, [int]$Timeout = 60000) {
+function Invoke-ToolchainProcess([string]$File, [string[]]$Arguments, [int]$Timeout = 60000, [hashtable]$Environment = @{}) {
     foreach ($group in ([Environment]::GetEnvironmentVariables().Keys | Group-Object { $_.ToUpperInvariant() } | Where-Object Count -gt 1)) {
         $value = [Environment]::GetEnvironmentVariable($group.Group[0])
         foreach ($key in $group.Group) { [Environment]::SetEnvironmentVariable($key, $null, 'Process') }
@@ -28,6 +28,7 @@ function Invoke-ToolchainProcess([string]$File, [string[]]$Arguments, [int]$Time
     # A developer prompt for another VS instance must not choose our tools/headers.
     foreach ($key in @('VSINSTALLDIR','VCINSTALLDIR','VCTOOLSINSTALLDIR','VCTOOLSVERSION','VCTARGETSPATH',
         'WINDOWSSDKDIR','WINDOWSSDKVERSION','INCLUDE','LIB','LIBPATH','VISUALSTUDIOVERSION','PSMODULEPATH')) { $start.EnvironmentVariables.Remove($key) }
+    foreach ($key in $Environment.Keys) { $start.EnvironmentVariables[$key.ToUpperInvariant()] = $Environment[$key] }
     $process = [Diagnostics.Process]::Start($start)
     try {
         $stdout = $process.StandardOutput.ReadToEndAsync(); $stderr = $process.StandardError.ReadToEndAsync()

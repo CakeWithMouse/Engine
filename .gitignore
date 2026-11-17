@@ -55,6 +55,7 @@ vcpkg_installed/
 
 # New solution outputs
 build/
+CMakeUserPresets.json
 !AGENTS.md
 !Game/Katamari/Content/Models/*.obj
 !Engine/docs/tutorial/resources/pyramid.obj
