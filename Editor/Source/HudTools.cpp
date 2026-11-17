@@ -26,7 +26,7 @@
 void EditorMainWindow::OpenUIEditor(const QString& path) {
     const auto key=QFileInfo(path).absoluteFilePath();
     if(uiEditors_.value(key)){uiEditors_[key]->show();uiEditors_[key]->raise();uiEditors_[key]->activateWindow();return;}
-    auto* window=new UIEditorWindow(key,this);window->setWindowFlag(Qt::Window);uiEditors_[key]=window;window->show();
+    auto* window=new UIEditorWindow(host_,key,this);window->setWindowFlag(Qt::Window);uiEditors_[key]=window;window->show();
 }
 QString EditorMainWindow::CreateUI(const QString& supplied) {
     const auto root=QString::fromUtf8(host_->host().contentRoot);QDir(root).mkpath("UI");

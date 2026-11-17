@@ -15,10 +15,11 @@ class QAction;
 class QFormLayout;
 class QDropEvent;
 class UICanvas;
+class EditorQtHost;
 
 class UIEditorWindow : public QMainWindow {
 public:
-    explicit UIEditorWindow(const QString& file, QWidget* parent = nullptr);
+    explicit UIEditorWindow(EditorQtHost* host, const QString& file, QWidget* parent = nullptr);
     ~UIEditorWindow() override;
     bool Save();
     bool Reload();
@@ -45,6 +46,9 @@ private:
     void PushUndo(const std::string& snapshot);
     void RestoreSnapshot(const std::string& text);
     void UpdateHistoryActions();
+    QString ProjectRoot() const;
+    QString ContentRoot() const;
+    EditorQtHost* host_ = nullptr;
     QString file_;
     std::unique_ptr<UIElement> root_;
     UIElement* selected_ = nullptr;

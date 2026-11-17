@@ -1441,7 +1441,14 @@ QJsonObject Run(const QString &command, const QJsonObject &in) {
   if (command == "ui.edit-text") {
     const auto path = in["file"].toString();
     Require(!path.isEmpty(), "file is required (modified in place)");
-    UIEditorWindow editor(path);
+    const QDir fileDir = QFileInfo(path).absoluteDir();
+    const QByteArray projectFile = fileDir.filePath("commandlet.painproj").toUtf8();
+    const QByteArray contentRoot = fileDir.absolutePath().toUtf8();
+    EngineModuleHost hostInfo{};
+    hostInfo.projectFile = projectFile.constData();
+    hostInfo.contentRoot = contentRoot.constData();
+    EditorQtHost host(hostInfo);
+    UIEditorWindow editor(&host, path);
     Require(editor.Root(), "cannot load UI file");
     auto *element = editor.Root()->Find(in["element"].toString().toStdString());
     Require(element, "element not found");

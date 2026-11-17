@@ -2,6 +2,9 @@
 #include "UIEditorWindow.h"
 #include "EditorLocale.h"
 #include "EditorWindowSetup.h"
+#include "QtHost.h"
+#include "Graph/GraphFileIo.h"
+#include "IconProvider.h"
 #include <Engine/UI/UIMarkup.h>
 #include <QTreeWidget>
 #include <QAbstractItemView>
@@ -17,9 +20,9 @@
 #include <QLabel>
 #include <QToolBar>
 #include <QAction>
-#include <QFile>
 #include <QFileInfo>
-#include <QSaveFile>
+#include <QDir>
+#include <QByteArray>
 #include <QMessageBox>
 #include <QColorDialog>
 #include <QPainter>
@@ -127,10 +130,10 @@ private:
     double scale_=1;bool drag_=false;bool checkpointed_=false;QPointF start_;UIRect original_;
 };
 
-UIEditorWindow::UIEditorWindow(const QString& file,QWidget* parent) : QMainWindow(nullptr, Qt::Window),file_(file) {
+UIEditorWindow::UIEditorWindow(EditorQtHost* host,const QString& file,QWidget* parent) : QMainWindow(nullptr, Qt::Window),host_(host),file_(file) {
     EditorWindowSetup::ConfigureSubWindow(this, parent);
     setObjectName("UIEditorWindow");setAttribute(Qt::WA_DeleteOnClose);resize(1200,760);
-    auto* tools=addToolBar(QStringLiteral("UI"));
+    auto* tools=addToolBar(QStringLiteral("UI"));tools->setIconSize(QSize(16,16));
     saveAction_=tools->addAction(Tr("Сохранить", "Save"),this,[this]{Save();});saveAction_->setShortcut(QKeySequence::Save);saveAction_->setObjectName("UISave");
     reloadAction_=tools->addAction(Tr("Перечитать", "Reload"),this,[this]{if(ConfirmClose())Reload();});tools->addSeparator();
     undoAction_=tools->addAction(Tr("Отменить", "Undo"),this,[this]{Undo();});undoAction_->setShortcut(QKeySequence::Undo);undoAction_->setObjectName("UIUndo");
@@ -139,6 +142,8 @@ UIEditorWindow::UIEditorWindow(const QString& file,QWidget* parent) : QMainWindo
         auto* action=tools->addAction(QString::fromLatin1(type),this,[this,type]{AddElement(QString::fromLatin1(type));});action->setObjectName("UIAdd"+QString::fromLatin1(type));
     }
     deleteAction_=tools->addAction(Tr("Удалить", "Delete"),this,[this]{DeleteSelected();});deleteAction_->setObjectName("UIDelete");
+    saveAction_->setIcon(IconProvider::FileIcon());reloadAction_->setIcon(IconProvider::ResetIcon());
+    undoAction_->setIcon(IconProvider::UndoIcon());redoAction_->setIcon(IconProvider::RedoIcon());deleteAction_->setIcon(IconProvider::TrashIcon());
     auto* size=new QComboBox(this);size->setObjectName("UIPreviewSize");size->addItems({"1280 × 720","1920 × 1080","800 × 600","720 × 1280"});tools->addWidget(size);
     auto* split=new QSplitter(this);setCentralWidget(split);
     auto* hierarchy=new UIHierarchyTree(split);hierarchy->editor=this;tree_=hierarchy;tree_->setHeaderLabel(Tr("Иерархия", "Hierarchy"));tree_->setObjectName("UIHierarchy");
@@ -227,9 +232,17 @@ void UIEditorWindow::RetranslateUi() {
     RefreshInspector();
 }
 
+QString UIEditorWindow::ProjectRoot() const {
+    return QFileInfo(QString::fromUtf8(host_->host().projectFile)).dir().absolutePath();
+}
+QString UIEditorWindow::ContentRoot() const {
+    return QString::fromUtf8(host_->host().contentRoot);
+}
 bool UIEditorWindow::Reload() {
+    QByteArray data;QString readError;
+    if(!EditorCore::GraphFileIo::Read(ProjectRoot(),ContentRoot(),file_,data,&readError)){status_->setText(readError);return false;}
     std::unique_ptr<UIElement> next;std::string error;std::vector<std::string> warnings;
-    if(!UIMarkup::Load(file_.toUtf8().toStdString(),next,error,&warnings)){status_->setText(QString::fromStdString(error));return false;}
+    if(!UIMarkup::Parse(data.toStdString(),file_.toStdString(),next,error,&warnings)){status_->setText(QString::fromStdString(error));return false;}
     root_=std::move(next);selected_=root_.get();dirty_=false;undo_.clear();redo_.clear();UpdateHistoryActions();setWindowTitle(Tr("Редактор UI — ", "UI Editor — ")+QFileInfo(file_).fileName());
     RebuildTree();RefreshInspector();canvas_->update();status_->setText(warnings.empty()?file_:QString::fromStdString(warnings.front()));return true;
 }
@@ -238,7 +251,8 @@ bool UIEditorWindow::Save() {
     if(!ApplyInspector())return false;
     const auto text=UIMarkup::Serialize(*root_);std::unique_ptr<UIElement> check;std::string error;
     if(!UIMarkup::Parse(text,file_.toStdString(),check,error)){status_->setText(QString::fromStdString(error));return false;}
-    QSaveFile file(file_);if(!file.open(QIODevice::WriteOnly)||file.write(text.data(),qint64(text.size()))!=qint64(text.size())||!file.commit()){status_->setText(file.errorString());return false;}
+    QString writeError;
+    if(!EditorCore::GraphFileIo::Write(ProjectRoot(),ContentRoot(),file_,QByteArray(text.data(),int(text.size())),&writeError)){status_->setText(writeError);return false;}
     dirty_=false;setWindowTitle(Tr("Редактор UI — ", "UI Editor — ")+QFileInfo(file_).fileName());status_->setText(Tr("Сохранено: ", "Saved: ")+file_);return true;
 }
 void UIEditorWindow::Changed(){dirty_=true;setWindowTitle(Tr("Редактор UI — ", "UI Editor — ")+QFileInfo(file_).fileName()+" *");canvas_->update();}

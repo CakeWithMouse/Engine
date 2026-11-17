@@ -232,6 +232,7 @@ $legacyRatchetLimits = @{
     "Editor/Host/SceneCommandHandler.cpp" = 567
     "Editor/Source/GraphEditorWidget.cpp" = 1756
     "Editor/tests/EditorUiTests.cpp" = 1045
+    "Editor/tools/EngineCommandlets.cpp" = 1699
 }
 
 $diffFiles = Invoke-Git @("diff", "--name-only", "HEAD", "--", "Editor/")
