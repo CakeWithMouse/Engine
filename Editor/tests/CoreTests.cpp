@@ -16,6 +16,7 @@
 #include "core/FsmGraphSchemaTests.h"
 #include "core/GraphToolsTests.h"
 #include "core/GraphFileIoTests.h"
+#include "core/DragDropTests.h"
 #include "../Core/SceneFile.h"
 #include "core/SceneFileTests.h"
 #include "../Core/Terminal.h"
@@ -466,6 +467,10 @@ int main(int argc, char* argv[])
     std::printf("[Test] TestAssetExtensions...\n");
     std::fflush(stdout);
     AssetExtensionsTests::Run(gChecks);
+
+    std::printf("[Test] TestDragDrop...\n");
+    std::fflush(stdout);
+    gChecks += RunDragDropTests();
 
     RunCameraGuideTests(gChecks);
     std::printf("CoreTests: %d checks passed.\n", gChecks);

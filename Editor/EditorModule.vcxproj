@@ -208,6 +208,8 @@
         <ClCompile Include="Core/EditorSettings.cpp"/>
         <ClCompile Include="Core/SettingsService.cpp"/>
         <ClCompile Include="Core/AssetOps.cpp"/>
+        <ClCompile Include="Core/AssetDrag.cpp"/>
+        <ClCompile Include="Core/DropRules.cpp"/>
         <ClCompile Include="Core/HlslGraphCompiler.cpp"/>
         <ClCompile Include="Core/MaterialGraphModel.cpp"/>
         <ClCompile Include="Core/Graph/GraphDocument.cpp"/>
@@ -288,6 +290,8 @@
         <ClInclude Include="Core/GizmoGeometry.h"/>
         <ClInclude Include="Core/GizmoTriangles.h"/>
         <ClInclude Include="Core/AssetOps.h"/>
+        <ClInclude Include="Core/AssetDrag.h"/>
+        <ClInclude Include="Core/DropRules.h"/>
         <ClInclude Include="Core/HlslGraphCompiler.h"/>
         <ClInclude Include="Core/MaterialGraphModel.h"/>
         <ClInclude Include="Core/Graph/GraphDocument.h"/>
