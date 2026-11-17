@@ -36,6 +36,7 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
     }
     setFocusPolicy(Qt::StrongFocus);
     setMouseTracking(true);
+    setAcceptDrops(true);
     updateGizmoToolTip();
 
     schemeSubId_ = EditorSettings::Instance().SubscribeControlSchemeChanged([this](ControlScheme s) { if (headerBar_) headerBar_->SetControlScheme(s); });

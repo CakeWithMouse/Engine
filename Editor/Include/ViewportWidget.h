@@ -12,6 +12,9 @@
 #include "GizmoGeometry.h"
 
 class ViewportHeaderBar;
+class QDragEnterEvent;
+class QDragMoveEvent;
+class QDropEvent;
 
 class ViewportWidget : public QWidget
 {
@@ -61,6 +64,9 @@ protected:
     bool HandleMouseMove(QMouseEvent* e);
     bool HandleMouseRelease(QMouseEvent* e);
     bool HandleWheel(QWheelEvent* e);
+    void dragEnterEvent(QDragEnterEvent* e) override;
+    void dragMoveEvent(QDragMoveEvent* e) override;
+    void dropEvent(QDropEvent* e) override;
 
     QSet<int> keys_;
     QPointF lastMouse_;
@@ -72,6 +78,7 @@ private:
     void RequestResize();
     bool RefreshCameraInfo();
     QPointF ToCameraPixels(const QPointF& logicalPos) const;
+    bool DropWorldPosition(const QPointF& logicalPos, float outWorld[3]);
 
     void SendCursor(QPointF point, bool valid);
     uint32_t PhysW() const;

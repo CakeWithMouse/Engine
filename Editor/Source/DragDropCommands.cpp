@@ -2,6 +2,7 @@
 #include "QtHost.h"
 #include "CommandRegistry.h"
 #include "AssetOps.h"
+#include "AssetExtensions.h"
 #include "FileService.h"
 #include "Logger.h"
 
@@ -96,10 +97,67 @@ void EditorMainWindow::RegisterDragDropCommands()
         [moveOrCopy](const CommandContext& ctx) { return moveOrCopy(ctx, true); },
         canExecute
     });
+
+    CommandRegistry::Instance().RegisterCommand({
+        QStringLiteral("Scene.SpawnModel"),
+        QStringLiteral("Spawn Model"),
+        QString(),
+        QStringLiteral("Spawn a project model into the scene at a world position"),
+        [this, contentRoot](const CommandContext& ctx) {
+            if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+                return false;
+            const QString model = ctx.parameters.value(QStringLiteral("model")).toString();
+            if (model.isEmpty())
+                return false;
+            const QString normalized = EditorCore::NormalizeVirtualPath(model, contentRoot);
+            EditorCommand c;
+            c.type = EditorCommand::CreateModel;
+            c.path = normalized;
+            c.name = QFileInfo(normalized).completeBaseName();
+            c.transform.position[0] = ctx.parameters.value(QStringLiteral("x"), 0.0).toFloat();
+            c.transform.position[1] = ctx.parameters.value(QStringLiteral("y"), 0.0).toFloat();
+            c.transform.position[2] = ctx.parameters.value(QStringLiteral("z"), 0.0).toFloat();
+            const float scale = GetModelSpawnScale(normalized);
+            c.transform.scale[0] = scale;
+            c.transform.scale[1] = scale;
+            c.transform.scale[2] = scale;
+            host_->PostCommand(c);
+            return true;
+        },
+        canExecute
+    });
+
+    CommandRegistry::Instance().RegisterCommand({
+        QStringLiteral("Scene.AssignTexture"),
+        QStringLiteral("Assign Texture"),
+        QString(),
+        QStringLiteral("Assign project texture to selected scene object"),
+        [this, contentRoot](const CommandContext& ctx) {
+            if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+                return false;
+            const uint64_t targetId = ctx.parameters.value(QStringLiteral("objectId"), selectedId_).toULongLong();
+            if (targetId == 0)
+                return false;
+            const QString texture = ctx.parameters.value(QStringLiteral("texture")).toString();
+            if (texture.isEmpty())
+                return false;
+            EditorCommand c;
+            c.type = EditorCommand::SetTexture;
+            c.objectId = targetId;
+            c.path = EditorCore::NormalizeVirtualPath(texture, contentRoot);
+            host_->PostCommand(c);
+            return true;
+        },
+        [this]() {
+            return host_ && host_->HasScene() && !sceneBusy_ && host_->PlayState() == EditorQtHost::EditorState::Edit && selectedId_ != 0;
+        }
+    });
 }
 
 void EditorMainWindow::UnregisterDragDropCommands()
 {
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.Move"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.Copy"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Scene.SpawnModel"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Scene.AssignTexture"));
 }

@@ -185,6 +185,7 @@
         <ClCompile Include="Source/DragDropCommands.cpp"/>
         <ClCompile Include="Source/ViewportWidget.cpp"/>
         <ClCompile Include="Source/ViewportWidget_Input.cpp"/>
+        <ClCompile Include="Source/ViewportWidget_DragDrop.cpp"/>
         <ClCompile Include="UI/ViewportOverlayHelper.cpp"/>
         <ClCompile Include="Source/ObjectInspectorPanel.cpp"/>
         <ClCompile Include="Source/ObjectInspectorLight.cpp"/>

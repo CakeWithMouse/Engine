@@ -1243,6 +1243,12 @@
     - **Верификация (check.ps1 -AllowEngine Quick):** forbidden/layers/localization OK; wc AssetTreeView.cpp 176, DragDropCommands.cpp 105, AssetTreeView.h 38 (≤500); MOC AssetTreeView.h + build OK; CoreTests **1171** PASS (1167 + 4 ConflictName), HostTests **165**, UiSmoke **467**; ContentBrowser icon/type tests 46/77 PASS (замена view не сломала); единственный красный — ПРЕ-existing environmental `CrossTypeInfoButtonTests`. Не хуже базы. Лог: %TEMP%\pain-task3-cbA2.log.
     - **Не проверено в рантайме:** живые жесты CB drag/move/copy/import (GUI-прогон области DnD — после завершения wiring задачи 3).
 
+56. **Задача 3 — DnD wiring: Viewport таргет, spawn/assign (17.11.2026):**
+    - **Drop-таргет viewport (`Editor/Source/ViewportWidget_DragDrop.cpp`, новый; overrides в `ViewportWidget.h`, `setAcceptDrops(true)` в ctor `ViewportWidget.cpp`):** `dragEnter/dragMove` принимают свой MIME только при `HasScene && Edit` и `DecideDrop(ContentBrowser,Viewport,kind).allowed`; курсор `CopyAction`/forbidden. `dropEvent`: `SpawnModel` → мировая точка под курсором (`ScreenToWorldRay`→`RayPlaneIntersection` ground y=0, fallback ro+rd*5) → `Scene.SpawnModel{model,x,y,z}`; assign-действия → `objectId=ReadSnapshot().selected` (0 → ignore), ключ material/texture/script/machine → `Execute(decision.commandId)`.
+    - **Команды (`DragDropCommands.cpp`):** `Scene.SpawnModel` → `EditorCommand::CreateModel` с `GetModelSpawnScale`; `Scene.AssignTexture` → `SetTexture`. Звук→viewport = `None` в матрице (нет ABI спавна звука) → «Нужно в ABI», без mock.
+    - **Верификация (check.ps1 -AllowEngine Quick):** build OK; wc ViewportWidget_DragDrop.cpp 130, ViewportWidget.cpp 568 (ratchet 694); CoreTests **1171**, HostTests **165**, UiSmoke **467**; единственный красный — pre-existing `CrossTypeInfoButtonTests`. Не хуже базы. Лог: %TEMP%\pain-task3-vpB.log.
+    - **Не проверено в рантайме:** доставка drop на native HWND viewport (`WA_NativeWindow`+`setAcceptDrops`; Qt mouse-события уже доходят) — GUI-прогон области DnD.
+
 ---
 
 ## Backlog
