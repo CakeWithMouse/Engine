@@ -43,9 +43,29 @@ jobs:
           # QtSvg is included in the base archives, not an additional aqt module.
           cache: true
       - run: cmake -S . -B build/cmake/windows -G "Visual Studio 17 2022" -A x64 -T ${{ matrix.toolset }} -DPAIN_BUILD_EDITOR=ON "-DCMAKE_PREFIX_PATH=$env:QT_ROOT_DIR"
-      - run: cmake --build build/cmake/windows --config Debug --parallel 4
+      - name: Build
+        run: |
+          cmake --build build/cmake/windows --config Debug --parallel 4 2>&1 | Tee-Object -FilePath build/windows-build.log
+          $result = $LASTEXITCODE
+          if ($result) {
+            $details = (Get-Content build/windows-build.log -Tail 60) -join "`n"
+            Write-Output "::error::$($details.Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A'))"
+            exit $result
+          }
       - run: ctest --test-dir build/cmake/windows -C Debug --output-on-failure
-      - run: ./Engine/BuildSupport/tests/Test-CMakeProjects.ps1 -Runtime ./build/cmake/windows/bin/Debug/Runtime
+      - name: Test project SDK
+        run: |
+          try {
+            ./Engine/BuildSupport/tests/Test-CMakeProjects.ps1 -Runtime ./build/cmake/windows/bin/Debug/Runtime *>&1 | Tee-Object -FilePath build/windows-sdk-test.log
+            if ($LASTEXITCODE) { throw "SDK test exited with code $LASTEXITCODE" }
+          } catch {
+            $details = $_.Exception.Message
+            if (Test-Path build/windows-sdk-test.log) {
+              $details = ((Get-Content build/windows-sdk-test.log -Tail 60) -join "`n") + "`n" + $details
+            }
+            Write-Output "::error::$($details.Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A'))"
+            exit 1
+          }
       - run: cmake --install build/cmake/windows --config Debug --prefix build/sdk
       - run: cmake -S build/sdk/share/PainEngine/ProjectTemplate -B build/sdk-game -G "Visual Studio 17 2022" -A x64 -T ${{ matrix.toolset }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/build/sdk
       - run: cmake --build build/sdk-game --config Debug --parallel 4

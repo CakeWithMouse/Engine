@@ -192,9 +192,6 @@ set(PAIN_Editor_SOURCES
     Editor/Core/Terminal.cpp
     Editor/Source/UIEditorWindow.cpp
     Editor/Source/HudTools.cpp
-    Editor/../Engine/Source/UI/UIElement.cpp
-    Editor/../Engine/Source/UI/UIMarkup.cpp
-    Editor/../Engine/Source/UI/FontAtlas.cpp
     Editor/Source/CodeTools.cpp
     Editor/Source/ImportMigration.cpp
 )
