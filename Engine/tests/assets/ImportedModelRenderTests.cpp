@@ -224,6 +224,14 @@ void RunImportedModelRenderTests(HWND hwnd,const fs::path& content) {
     auto magenta=[](const std::vector<unsigned char>& pixels){size_t n=0;for(size_t i=0;i<pixels.size();i+=4)if(pixels[i]>80 && pixels[i+2]>80 && pixels[i+1]<40)++n;return n;};
     const auto multicolored=game.Pixels();
     Check(magenta(multicolored)>100,"second Blender material appears on its own submesh");
+    // Editor isolation draws only the parts of one source slot until it is cleared; nothing is saved.
+    game.SetEditorMaterialIsolation(added.id,slots.rbegin()->first);
+    Check(game.RenderViewportFrame(0) && magenta(game.Pixels())>100 && game.Pixels()!=multicolored,"isolation keeps only the parts of the chosen slot");
+    game.SetEditorMaterialIsolation(added.id,slots.begin()->first);
+    Check(game.RenderViewportFrame(0) && magenta(game.Pixels())==0,"isolating the other slot hides the magenta parts");
+    Check(multiple->SaveProjectData()==savedData,"isolation does not touch project data");
+    game.SetEditorMaterialIsolation(added.id,UINT32_MAX);
+    Check(game.RenderViewportFrame(0) && game.Pixels()==multicolored,"clearing isolation restores every part");
     const auto originalDepth=game.ShadowDepth();
     // A slot can have its own blend/shadow state without moving the opaque slot
     // into the transparent pass or dropping its G-buffer contribution.

@@ -167,6 +167,45 @@ inline void Run()
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Scene.AssignMaterial"));
     ++checks;
 
+    // Изоляция: глаз в строке просит показать только её части, повторно — всю модель. Щелчок по строке её не трогает.
+    {
+        auto click = [](QWidget* row) {
+            const QPointF at = row->rect().center();
+            QMouseEvent press(QEvent::MouseButtonPress, at, row->mapToGlobal(at), Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
+            QMouseEvent release(QEvent::MouseButtonRelease, at, row->mapToGlobal(at), Qt::LeftButton, Qt::NoButton, Qt::NoModifier);
+            QApplication::sendEvent(row, &press);
+            QApplication::sendEvent(row, &release);
+        };
+        auto eye = [&](int index) { return panel.findChild<QToolButton*>(QStringLiteral("MaterialSlotIsolate_%1").arg(index)); };
+        quint64 isolatedId = 0; int isolated = -2;
+        auto connection = QObject::connect(&panel, &ObjectInspectorPanel::MaterialIsolationRequested, &panel,
+            [&](quint64 i, int slot) { isolatedId = i; isolated = slot; });
+        auto* row = static_cast<MaterialSlotRow*>(panel.findChild<QFrame*>("MaterialSlot_1"));
+        Check(eye(1) && !eye(1)->isEnabled(), "eye disabled when the game module lacks the extension");
+        snap.materialIsolation = true;
+        panel.Refresh(snap, 41, false);
+        Check(eye(1)->isEnabled(), "eye enabled with the extension");
+        click(row);
+        Check(isolated == -2, "clicking the row itself does not isolate");
+        eye(1)->click();
+        Check(isolatedId == 41 && isolated == 1, "eye isolates its slot");
+        Check(!eye(1)->isChecked(), "eye waits for the scene snapshot before showing the state");
+        snap.isolatedMaterialSlot = 1;
+        panel.Refresh(snap, 41, false);
+        QApplication::processEvents();
+        Check(row->IsActive() && eye(1)->isChecked() && !eye(0)->isChecked(), "isolated row and its eye are highlighted");
+        Check(panel.findChild<QLabel*>("MaterialSlotIsolationHint")->isVisibleTo(&panel), "isolation hint shown");
+        eye(1)->click();
+        Check(isolated == -1, "pressing the active eye shows the whole model");
+        eye(2)->click();
+        Check(isolated == 2, "another eye switches isolation");
+        snap.isolatedMaterialSlot = -1;
+        panel.Refresh(snap, 41, false);
+        Check(!row->IsActive() && !eye(1)->isChecked() && !panel.findChild<QLabel*>("MaterialSlotIsolationHint")->isVisibleTo(&panel), "cleared isolation removes highlight");
+        QObject::disconnect(connection);
+        ++checks;
+    }
+
     // Много слотов: фильтр по имени.
     auto* filter = panel.findChild<QLineEdit*>("MaterialSlotFilter");
     snap.objects[0] = Model(MaterialSlotList::kFilterThreshold, QJsonObject{}, "");

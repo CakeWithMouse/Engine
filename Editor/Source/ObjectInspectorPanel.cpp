@@ -566,6 +566,7 @@ void ObjectInspectorPanel::Refresh(
         QVector<MaterialSlotInfo> slotInfos;
         if (isModel) slotInfos = ModelMaterialSlots(object);
         cardMaterial_->SetSlots(slotInfos, selectionChanged);
+        cardMaterial_->SetIsolation(view.isolatedMaterialSlot, view.materialIsolation);
         lastSlots_ = slotInfos;
         if (properties_->isHidden() == showProperties)
             properties_->setVisible(showProperties);

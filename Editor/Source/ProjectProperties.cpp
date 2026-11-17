@@ -39,6 +39,7 @@ void ObjectInspectorPanel::BindMaterialSlots() {
         params[QStringLiteral("material")] = path;
         CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignMaterial"), params);
     };
+    cardMaterial_->onIsolateSlot = [this](int slot) { if (selectedId_) emit MaterialIsolationRequested(selectedId_, slot); };
     cardMaterial_->onAssignSlot = [this](int index, const QString& path) {
         SubmitProperty(QStringLiteral("/materialSlots/%1").arg(index), path);
     };

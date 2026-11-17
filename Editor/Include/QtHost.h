@@ -110,6 +110,11 @@ public:
         return graphTrace_.read ? &graphTrace_ : nullptr;
     }
     // Визуальные скрипты: из сервиса runtime (перезапрашивается после hot reload) или заданные тестом.
+    const EngineMaterialIsolationApi* MaterialIsolationApi() const {
+        if (!host_.getService) return nullptr;
+        const auto* api = static_cast<const EngineMaterialIsolationApi*>(host_.getService(host_.user, EngineMaterialIsolationService, 1));
+        return api && api->version == 1 && api->isolate ? api : nullptr;
+    }
     const EngineScriptApi* ScriptApi() const {
         if (host_.getService) return static_cast<const EngineScriptApi*>(host_.getService(host_.user, EngineScriptService, 1));
         return script_.set ? &script_ : nullptr;

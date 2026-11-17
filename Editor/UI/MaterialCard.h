@@ -129,6 +129,7 @@ public:
     }
 
     MaterialSlotList* SlotList() const { return slotList_; }
+    void SetIsolation(int slot, bool available) { slotList_->SetIsolation(slot, available); }
 
     void InvalidateCache()
     {
@@ -167,6 +168,7 @@ public:
     std::function<void(const QString&)> onDropMaterial;            // .mat брошен на общее поле
     std::function<void(int, const QString&)> onAssignSlot;         // слот, /Game путь или пусто
     std::function<void(int)> onChooseSlot;
+    std::function<void(int)> onIsolateSlot;                        // -1 — показать все части
 
 private:
     void BuildCard()
@@ -221,6 +223,7 @@ private:
         slotList_->onAssign = [this](int index, const QString& path) { if (onAssignSlot) onAssignSlot(index, path); };
         slotList_->onChoose = [this](int index) { if (onChooseSlot) onChooseSlot(index); };
         slotList_->onEdit = [this](const QString& path) { if (onEditMaterial) onEditMaterial(path); };
+        slotList_->onIsolate = [this](int slot) { if (onIsolateSlot) onIsolateSlot(slot); };
         cl->addWidget(slotList_);
     }
 

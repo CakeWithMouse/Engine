@@ -37,6 +37,7 @@ public:
     EngineViewportCursorApi GetViewportCursorApi() noexcept;
     EngineViewportOverlayApi GetViewportOverlayApi() noexcept;
     EnginePointLightV2Api GetPointLightV2Api() noexcept;
+    EngineMaterialIsolationApi GetMaterialIsolationApi() noexcept;
     EngineAudioPreviewApi GetAudioPreviewApi() noexcept;
     EnginePhysicsApi GetPhysicsApi() noexcept;
     EnginePhysicsObjectApi GetPhysicsObjectApi() noexcept;

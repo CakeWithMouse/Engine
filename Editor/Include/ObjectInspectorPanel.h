@@ -113,6 +113,7 @@ signals:
     void CharacterSpeedEditingFinished(quint64 objectId, double speed);
     void ChooseMaterialRequested();
     void EditMaterialRequested(const QString& virtualPath);
+    void MaterialIsolationRequested(quint64 objectId, int slot); // -1 — показать все части модели
     void ClearMaterialRequested();
     void OpenScriptRequested(const QString& virtualPath); // пустой путь: создать скрипт для объекта
     void ChooseScriptRequested();

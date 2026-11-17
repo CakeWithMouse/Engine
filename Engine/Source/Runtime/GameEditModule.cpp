@@ -89,6 +89,12 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
             {
                 if (plV2.version == 1 && plV2.set) pointLightV2_ = plV2;
             }
+            EngineMaterialIsolationApi isolation{};
+            if (query && query(extensionContext, EngineMaterialIsolationExtension, 1, sizeof(isolation), &isolation))
+            {
+                // Editor view only: a broken table switches isolation off instead of rejecting the module.
+                if (isolation.version == 1 && isolation.context == extensionContext && isolation.isolate) materialIsolation_ = isolation;
+            }
             EngineScriptApi script{};
             if (query && query(extensionContext, EngineScriptExtension, 1, sizeof(script), &script))
             {
@@ -199,7 +205,7 @@ uint32_t GameEditModule::Reload(const std::filesystem::path& module, const std::
         swap(projectData_, candidate->projectData_); swap(selection_, candidate->selection_); swap(batch_, candidate->batch_); swap(authoring_, candidate->authoring_);
         swap(viewportInput_, candidate->viewportInput_); swap(cursor_, candidate->cursor_); swap(camera_, candidate->camera_);
         swap(overlay_, candidate->overlay_); swap(audio_, candidate->audio_);
-        swap(pointLightV2_, candidate->pointLightV2_); swap(script_, candidate->script_);
+        swap(pointLightV2_, candidate->pointLightV2_); swap(materialIsolation_, candidate->materialIsolation_); swap(script_, candidate->script_);
         swap(graphTrace_, candidate->graphTrace_); swap(aiMachine_, candidate->aiMachine_);
         swap(assetImport_, candidate->assetImport_);
         swap(physics_, candidate->physics_); swap(physicsObject_, candidate->physicsObject_);
