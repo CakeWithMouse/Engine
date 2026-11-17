@@ -6,6 +6,7 @@
 #include "CameraGuideCard.h"
 #include "AiDiagnosticsPanel.h"
 #include "InfoButton.h"
+#include "PropertySection.h"
 
 #include <QApplication>
 #include <QLabel>
@@ -13,6 +14,9 @@
 #include <QPushButton>
 #include <QComboBox>
 #include <QDoubleSpinBox>
+#include <QToolButton>
+#include <QDir>
+#include <QImage>
 #include <iostream>
 #include <stdexcept>
 
@@ -293,6 +297,78 @@ inline void Run()
         Check(cellDetails != nullptr, "AiCellDetails widget exists");
         Check(!cellDetails->isVisible(), "AiCellDetails is hidden when cursor is not hovering");
         checks += 6;
+    }
+
+    // 8. Schema sections (PropertySection) must carry the same card chrome as CollapsibleCard
+    {
+        ObjectInspectorPanel probe;
+        probe.resize(320, 600);
+        EditorQtHost::Snapshot probeSnap;
+        probeSnap.scripts = true;
+        EditorQtHost::SceneObject probeObj;
+        probeObj.id = 7;
+        probeObj.name = "Section probe";
+        probeObj.type = "UiProbe";
+        probeObj.scriptAsset = "/Game/Scripts/Test.vscript";
+        probeObj.propertySchema = R"({"fields":[{"path":"/speed","type":"number","group":"Behavior/Movement"},{"path":"/weight","type":"number"}]})";
+        probeObj.projectData = R"({"speed":5,"weight":2})";
+        probeSnap.objects.push_back(probeObj);
+        probeSnap.selected = 7;
+        probe.Refresh(probeSnap, 7, true);
+        QApplication::processEvents();
+
+        QToolButton* sectionHeader = nullptr;
+        for (auto* tool : probe.findChildren<QToolButton*>())
+        {
+            const QString name = tool->objectName();
+            if (name.startsWith(QStringLiteral("Section.UiProbe/")) && name.count(QLatin1Char('/')) == 1)
+                sectionHeader = tool;
+        }
+        Check(sectionHeader != nullptr, "default-group schema section header exists");
+        auto* section = dynamic_cast<PropertySection*>(sectionHeader->parentWidget());
+        Check(section != nullptr, "section header parent is PropertySection");
+        Check(dynamic_cast<QFrame*>(section) != nullptr, "PropertySection is a QFrame so the QSS card box paints");
+        Check(section->property("collapsibleCard").toBool() == true, "PropertySection has collapsibleCard property");
+        Check(sectionHeader->maximumHeight() == InspectorCardStyle::kHeaderHeight, "section header height == 22");
+        auto* bodyLayout = section->body->layout();
+        Check(bodyLayout != nullptr && bodyLayout->contentsMargins() == InspectorCardStyle::CardMargins(), "section body margins == (6, 4, 6, 4)");
+        Check(bodyLayout != nullptr && bodyLayout->spacing() == InspectorCardStyle::kCardSpacing, "section body spacing == 4");
+        checks += 7;
+
+        auto* reference = probe.findChild<QWidget*>(QStringLiteral("GeneralCard"));
+        Check(reference != nullptr, "reference GeneralCard found");
+        auto* refHeader = reference->findChild<QPushButton*>(QStringLiteral("CardHeaderBtn"));
+        section->resize(260, 60);
+        reference->resize(260, 60);
+        if (section->layout()) section->layout()->activate();
+        if (reference->layout()) reference->layout()->activate();
+        Check(sectionHeader->height() == refHeader->height(), "section header height matches card header");
+        Check(sectionHeader->x() == refHeader->x() && sectionHeader->y() == refHeader->y(), "section header inset matches card header");
+        QImage sectionImg(260, 60, QImage::Format_ARGB32_Premultiplied);
+        sectionImg.fill(Qt::transparent);
+        section->render(&sectionImg);
+        QImage referenceImg(260, 60, QImage::Format_ARGB32_Premultiplied);
+        referenceImg.fill(Qt::transparent);
+        reference->render(&referenceImg);
+        const QList<QPoint> chromePoints = { QPoint(0, 30), QPoint(3, 30), QPoint(130, 0), QPoint(200, 10), QPoint(200, 21), QPoint(259, 30) };
+        for (const auto& p : chromePoints)
+        {
+            Check(sectionImg.pixelColor(p) == referenceImg.pixelColor(p), "section chrome pixel matches CollapsibleCard");
+            ++checks;
+        }
+        checks += 3;
+
+        auto* scrollContent = probe.findChild<QWidget*>(QStringLiteral("InspectorScrollContent"));
+        Check(scrollContent != nullptr, "inspector scroll content found");
+        scrollContent->resize(320, scrollContent->sizeHint().height());
+        if (scrollContent->layout()) scrollContent->layout()->activate();
+        QImage shot(scrollContent->size(), QImage::Format_ARGB32_Premultiplied);
+        shot.fill(Qt::transparent);
+        scrollContent->render(&shot);
+        const QString shotPath = QDir::tempPath() + QStringLiteral("/inspector-section-parity.png");
+        Check(shot.save(shotPath), "inspector parity screenshot saved");
+        std::cout << "Inspector parity screenshot: " << shotPath.toStdString() << std::endl;
+        ++checks;
     }
 
     std::cout << "InspectorCardStyle tests: " << checks << " checks passed" << std::endl;

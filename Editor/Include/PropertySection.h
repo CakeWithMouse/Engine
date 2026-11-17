@@ -1,18 +1,22 @@
 #pragma once
-#include <QWidget>
+#include <QFrame>
 #include <QToolButton>
 #include <QVBoxLayout>
 #include <QSettings>
 #include "EditorTheme.h"
 #include "IconProvider.h"
+#include "InspectorCardStyle.h"
 
-class PropertySection : public QWidget {
+// QFrame base: a QWidget subclass would not paint the QSS card box (border,
+// background, margin), leaving schema sections flat against card-styled rows.
+class PropertySection : public QFrame {
 public:
     QWidget* body = nullptr;
     QToolButton* header = nullptr;
 
-    PropertySection(const QString& title, const QString& key, QWidget* parent = nullptr) : QWidget(parent) {
+    PropertySection(const QString& title, const QString& key, QWidget* parent = nullptr) : QFrame(parent) {
         setObjectName(QStringLiteral("CollapsibleCard"));
+        InspectorCardStyle::ApplyCardStyle(this);
         auto* layout = new QVBoxLayout(this);
         layout->setContentsMargins(0, 0, 0, 0);
         layout->setSpacing(0);
@@ -23,7 +27,7 @@ public:
         header->setCheckable(true);
         header->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         header->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-        header->setFixedHeight(22);
+        header->setFixedHeight(InspectorCardStyle::kHeaderHeight);
         header->setCursor(Qt::PointingHandCursor);
 
         body = new QWidget(this);

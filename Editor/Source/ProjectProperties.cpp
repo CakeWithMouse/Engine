@@ -1,6 +1,7 @@
 #include "EditorLocale.h"
 #include "ObjectInspectorPanel.h"
 #include "PropertySection.h"
+#include "InspectorCardStyle.h"
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QFormLayout>
@@ -58,7 +59,7 @@ void ObjectInspectorPanel::RefreshProjectProperties(const EditorQtHost::Snapshot
                 if(!sections.contains(prefix)) {
                     auto* section=new PropertySection(part,QString::fromStdString(object.type)+"/"+prefix,properties_);
                     sections[prefix]=section;layout->addWidget(section);
-                    auto* nested=new QVBoxLayout(section->body);auto* form=new QFormLayout;form->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);nested->addLayout(form);forms[prefix]=form;
+                    auto* nested=new QVBoxLayout(section->body);nested->setContentsMargins(InspectorCardStyle::CardMargins());nested->setSpacing(InspectorCardStyle::kCardSpacing);auto* form=new QFormLayout;form->setContentsMargins(0,0,0,0);form->setSpacing(InspectorCardStyle::kRowSpacing);form->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);nested->addLayout(form);forms[prefix]=form;
                 }
                 layout=qobject_cast<QVBoxLayout*>(sections[prefix]->body->layout());
             }

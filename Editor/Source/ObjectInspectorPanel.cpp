@@ -85,6 +85,7 @@ void ObjectInspectorPanel::BuildUi()
     properties_ = new QWidget(content);
     propertiesLayout_ = new QVBoxLayout(properties_);
     propertiesLayout_->setContentsMargins(0,0,0,0);
+    propertiesLayout_->setSpacing(4);
     properties_->hide();
     BuildGeneralCard(inspectorLayout);
 
