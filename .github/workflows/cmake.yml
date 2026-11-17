@@ -40,7 +40,7 @@ jobs:
         with:
           version: '6.7.3'
           arch: 'win64_msvc2019_64'
-          modules: 'qtsvg'
+          # QtSvg is included in the base archives, not an additional aqt module.
           cache: true
       - run: cmake -S . -B build/cmake/windows -G "Visual Studio 17 2022" -A x64 -T ${{ matrix.toolset }} -DPAIN_BUILD_EDITOR=ON "-DCMAKE_PREFIX_PATH=$env:QT_ROOT_DIR"
       - run: cmake --build build/cmake/windows --config Debug --parallel 4
