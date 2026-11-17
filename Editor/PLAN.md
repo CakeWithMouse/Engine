@@ -22,7 +22,7 @@
 - [x] 3. DnD-инфраструктура + сценарии (пп. 54–58 «Решения»: Core MIME+матрица, CB источник/move/copy/import, viewport spawn/assign, hierarchy reparent world-transform один Undo; per-editor drop-таргеты скоуплены в задачи 4/7/8/9; живые жесты — «Не проверено в рантайме»)
 - [x] 4. Content Browser: контекстное меню по типам (п. 59 «Решения»: подменю «Создать» по категориям, без «Открыть в приложении» для папок, дубликат, скрытие неприменимого; material-instance → задача 7)
 - [x] 5. Общий UI графовых редакторов (пп. 60–61 «Решения»: Tabler outline иконки вместо эмодзи, перекраска по теме, «?» InfoButton с длинной справкой, копировать/вставить граф JSON через GraphClipboard, адаптивный тулбар «…»; Debug+Release build OK, тесты = эталон; GUI-сценарий области «графы» написан, живые шаги — «Не проверено в рантайме»)
-- [ ] 6. Превью-модуль
+- [x] 6. Превью-модуль (п. 62 «Решения»: Core IPreviewSource/TexturePreviewSource/PreviewImage aspect-fit+HighDPI, UI PreviewWidget realtime HWND с detach-on-hide и FPS-лимитом visible+focused, AssetThumbnailCache делегирует; PreviewTests 35; Debug build OK, тесты = эталон; статические 3D-миниатюры отложены — п. 14 ABI; GUI-сценарий области «превью» написан, живые шаги — «Не проверено в рантайме»)
 - [ ] 7. Редактор материалов (a–g)
 - [ ] 8. Visual Script
 - [ ] 9. Редактор UI (Hud.ui)
@@ -1290,6 +1290,18 @@
     - **Верификация (check.ps1 -AllowEngine Quick):** forbidden/layers/localization/line-counts OK; build OK; CoreTests **1171**, HostTests **165**, UiSmoke **467**, ContentBrowser icon/type **46/77**, AssetExtensions **66**, InfoButton **10**, HighDpiIcon **37**; единственный красный — pre-existing environmental `CrossTypeInfoButtonTests`. Не хуже базы. Лог: %TEMP%\pain-task5-copyF.log.
     - **Release среза (check.ps1 -AllowEngine Full, лог %TEMP%\pain-task5-releaseF.log):** EditorModule Debug **и Release** build OK (0 ошибок); layers/localization OK; CoreTests **1171** / HostTests **165** / UiSmoke **467** / ContentBrowser **46+77** / AssetExtensions **66** / InfoButton **10** / HighDpiIcon **37** / InspectorCardStyle **195** / WheelGuard **113** / AiDiagnosticsDock **98** / AssetPickerDialog **67** — все = эталон; единственный красный — pre-existing `CrossTypeInfoButtonTests` (прогон прервался на нём до движковых скриптов; движковые скрипты зелёные по п. 51). Release-требование среза выполнено.
     - **Не проверено в рантайме:** живое сворачивание тулбара в «…» при ресайзе, клик «Копировать/Вставить граф», перекраска иконок при смене темы — GUI-прогон области графов (сценарий ниже).
+62. **Задача 6 — превью-модуль (Core IPreviewSource + UI PreviewWidget), статический путь и realtime.** Аудит Б: превью разбросаны — `AssetThumbnailCache` (QCache текстур), файл-локальный `MaterialPreviewWidget` (HWND) в MaterialEditorWindow, `PreviewWidget` не было как общего модуля; миниатюры текстур растягивались без сохранения аспекта.
+    - **Core (новый `Editor/Core/Preview/`, только QtCore/QtGui):**
+      - `PreviewImage.h/.cpp` — чистая математика: `PhysicalSize(logical,dpr)` (HighDPI, кламп dpr>0), `AspectFitRect(source,target)` (aspect-fit центрирование), `FitCentered(src,targetPhysical)` (вписать с сохранением аспекта на квадратную плитку, прозрачные поля). Исправляет растяжение/обрезку миниатюр.
+      - `IPreviewSource.h` — интерфейс статического превью: `Cached(asset,mtime,size,dpr)` (синхронно из кэша) + `Request(...,receiver,onReady)` (асинхронно, QImage в поток UI). Realtime HWND — отдельная UI-забота (PreviewWidget), не реализует этот интерфейс.
+      - `TexturePreviewSource.h/.cpp` — реализация для текстур: `QCache<PreviewKey,QImage>` (ключ путь+mtime+size+dpr, лимит 256, QMutex), асинхронный декод через `QThreadPool`+`QImageReader` (scaledSize, aspect-fit), доставка через `QPointer`-guard в поток receiver. Инвалидация по mtime/размеру.
+    - **UI:** `AssetThumbnailCache` переписан как тонкий адаптер над `TexturePreviewSource` (публичный API сохранён: GetOrCreate/FindInCache/Insert/Clear/Count/CategoryIcon; QPixmap↔QImage, dpr). `PreviewWidget.h/.cpp` — общий realtime HWND-виджет (WA_NativeWindow+WA_PaintOnScreen, paintEngine=nullptr): attach/detach/resized/orbit колбэки; **attach на showEvent, detach на hideEvent** (скрытое превью не рендерит кадры движка), orbit-таймер с лимитом FPS (`SetMaxFps`, по умолчанию 60) **активен только при visible+focused+pending**, коалесцирует дельты мыши/колеса (0 кадров в простое). Мышь ЛКМ/ПКМ — орбита, колесо — зум.
+    - **Интеграция:** MaterialEditorWindow использует `PreviewWidget` вместо файл-локального `MaterialPreviewWidget` (objectName "MaterialPreview" сохранён; attach/resized/orbit/detach лямбды в поток движка через Engine(); Shutdown→hide→detach, guarded двойной detach безопасен FIFO-порядком). AssetPickerDialog получает aspect-correct миниатюры текстур через адаптер.
+    - **Тесты (Core, чистая логика):** `tests/core/PreviewTests.h` — **35 проверок** (PhysicalSize dpr/кламп; AspectFitRect квадрат/широкий/высокий/пустой; FitCentered прозрачные поля/центр/HighDPI; TexturePreviewSource кэш miss/hit/инвалидация mtime+size/Clear; асинхронный декод PNG→aspect-fit доставка). Зарегистрированы в CoreTests.cpp.
+    - **Статические 3D-миниатюры моделей/материалов — отложены (см. «Нужно в ABI» п. 14):** требуют offscreen render-to-memory ABI движка (рендер в текстуру+readback без swapchain/HWND). Это отдельная scoped-фича движка; по умолчанию отложена, не мокается. Пикер показывает реальные category-иконки (санкционированный fallback, не мок).
+    - **Верификация (check.ps1 -AllowEngine Quick, лог %TEMP%\pain-task6-uiB.log):** forbidden/layers/localization/line-counts OK; build OK; CoreTests **1206** (+35 Preview), HostTests **165**, AssetPickerDialog **67**, ContentBrowser **46/77**, UiSmoke **467**, InfoButton **10**, HighDpiIcon **37**, InspectorCardStyle **195**, WheelGuard **113**, AiDiagnosticsDock **98**; MaterialEditorWindow.cpp **1269** ≤ ratchet 1315. Единственный красный — pre-existing environmental `CrossTypeInfoButtonTests`. Не хуже базы.
+    - **Release среза (check.ps1 -AllowEngine Full, лог %TEMP%\pain-task6-release.log):** EditorModule Debug **и Release** build OK (Editor.dll x64/Debug и x64/Release, 0 ошибок); forbidden/layers/localization OK; CoreTests **1206** / HostTests **165** / AssetPickerDialog **67** / UiSmoke **467** / ContentBrowser **46+77** / InfoButton **10** / InspectorCardStyle **195** / WheelGuard **113** / AiDiagnosticsDock **98** — все = эталон; единственный красный — pre-existing environmental `CrossTypeInfoButtonTests` (прогон прервался на нём до движковых скриптов; движковые скрипты зелёные по п. 51). Release-требование среза выполнено.
+    - **Не проверено в рантайме:** живая орбита/зум превью материала, detach при скрытии вкладки, aspect-correct миниатюры текстур в пикере — GUI-прогон области превью (сценарий ниже).
 
 ### GUI-сценарий области «графы» (задачи 2/5, заранее написан для полного прогона)
 
@@ -1311,6 +1323,25 @@
 10. «Комментарий» (`<prefix>Comment`). Ожидание: рамка с подписью вокруг выделенных нод (без выделения — в центре вида), один Undo.
 
 **Автоматически верифицировано (эта среда):** Release EditorModule build OK; CoreTests 1171 / HostTests 165 / UiSmoke 467 / ContentBrowser 46+77 / AssetExtensions 66 / InfoButton 10 / HighDpiIcon 37 PASS; единственный красный — pre-existing environmental `CrossTypeInfoButtonTests`. Живые шаги 1–10 — «Не проверено в рантайме».
+
+### GUI-сценарий области «превью» (задача 6, заранее написан для полного прогона)
+
+> Область: превью-модуль (realtime HWND материала + статические миниатюры текстур). Прогон один раз
+> на завершённую область. Автоматическая часть — CoreTests PreviewTests (35) + UiTests AssetPickerDialog
+> (offscreen) + Release-сборка среза; живые интерактивные шаги ниже выполняются вручную один раз.
+
+1. Открыть редактор материала (.mat) → превью-сфера рендерится в окне (HWND attach), фон тёмный, объект по центру.
+2. ЛКМ-драг по превью → орбита камеры (yaw/pitch), плавно, без рывков; ПКМ-драг → тоже орбита.
+3. Колесо мыши → зум (приближение/отдаление), объект не обрезается краями виджета.
+4. Отпустить мышь / убрать фокус → orbit-таймер останавливается, кадры движка в простое не рендерятся (0 idle frames).
+5. Переключить вкладку/свернуть окно материала (превью скрыто) → detach, движок не рендерит скрытое превью; вернуть → re-attach, рендер возобновляется.
+6. Ресайз окна материала → превью ресайзится (resizeMaterialPreview), без растяжения/обрезки, HighDPI корректен.
+7. Сменить shape (Sphere/Cube/Plane) в комбобоксе → превью пересоздаётся с новой формой.
+8. Закрыть окно материала (Shutdown) → detach в потоке движка, превью освобождено, без краша/утечки.
+9. Открыть AssetPickerDialog (текстуры) → миниатюры aspect-correct (вписаны с сохранением пропорций, прозрачные поля на квадратной плитке, не растянуты); category-иконки для моделей/материалов (3D-миниатюры отложены, п. 14 ABI).
+10. Поиск в пикере → фильтрация без блокировки UI; 500 ресурсов открываются < 200 ms (AssetPickerDialogTests).
+
+**Автоматически верифицировано (эта среда):** Release EditorModule build OK; CoreTests 1206 (PreviewTests 35) / HostTests 165 / AssetPickerDialog 67 / UiSmoke 467 PASS; единственный красный — pre-existing environmental `CrossTypeInfoButtonTests`. Живые шаги 1–10 — «Не проверено в рантайме».
 
 ---
 
@@ -1441,7 +1472,16 @@
       `EngineResult (*renderThumbnail)(void* context, const char* assetPath, int width, int height, void* outBgraPixels, size_t rowPitch);`
     - **Где в коде:** В `EngineEditSessionApi` (`EditSessionApi.h:48-80`), реализация в `Game.cpp` / `Engine/Source/Runtime/GameEditModule.cpp`.
     - **Зачем:** В существующем C-ABI есть только функция `attachMaterialPreview(void* context, HWND targetWindow)` (живой интерактивный рендер в чужое окно Windows) и отсутствует возможность offscreen-рендеринга статичной миниатюры ресурса (модели или материала) в память фиксированного размера ($96\times 96$ / $128\times 128$). Без данной функции отображение честных превью 3D-моделей и материалов в сетке ресурсов невозможно без создания сотен нативных HWND или использования запрещённых правилом №2 протокола муляжей (фейковых рендереров).
-    - **Статус:** В соответствии с правилом протокола №1 (запрет правок Engine/Game/ABI) и правилом №2 («Муляжей нет») задача генерации превью для моделей и материалов помечена **БЛОКИРОВАНО** до архитектурного решения Юрия. В `AssetPickerDialog` для моделей и материалов отображаются качественные категориальные векторные иконки («Куб» и «Слайдеры») с фоном в токенах темы, готовые к бесшовной замене на растровые миниатюры после реализации функции в ABI.
+    - **Статус (обновлено под новое ТЗ, п. 62):** новое ТЗ разрешает правки Engine/Game отдельными `engine:`/`game:`-коммитами, поэтому прежняя формулировка «БЛОКИРОВАНО правилом №1» снята. Offscreen render-to-memory — самостоятельная scoped-фича движка (рендер в текстуру с собственным RTV вне swapchain/HWND + staging-readback в BGRA-буфер; существующий `SaveBackbufferToBmp` в Game.cpp пишет BMP-файл из backbuffer swapchain и для миниатюр не годится). По умолчанию **отложена** как выходящая за рамки среза превью-модуля (задача 6): реализован статический путь для текстур (`TexturePreviewSource`) и realtime HWND для материала (`PreviewWidget`), интерфейс `IPreviewSource` готов принять 3D-источник после появления ABI. В `AssetPickerDialog` для моделей/материалов отображаются реальные категориальные векторные иконки («Куб»/«Слайдеры») в токенах темы — санкционированный fallback (не муляж), готовые к бесшовной замене на растровые миниатюры. Решение об имплементации `renderThumbnail` — за Юрием (см. «Вопросы к Юрию»).
+
+---
+
+## Вопросы к Юрию
+
+> Автономный режим: вопросы не блокируют работу, фиксируются здесь с выбором по умолчанию.
+> Юрий может переопределить решение позже; до тех пор действует default.
+
+1. **Offscreen render-to-memory для 3D-миниатюр (`renderThumbnail`, п. 14 «Нужно в ABI»).** Новое ТЗ разрешает правки Engine/Game, но честные статические миниатюры моделей/материалов требуют новой scoped-фичи движка: рендер в текстуру с собственным RTV вне swapchain/HWND + staging-readback в BGRA-буфер фиксированного размера (существующий `SaveBackbufferToBmp` пишет BMP из backbuffer swapchain и не подходит). **Выбор по умолчанию: отложить** (выходит за рамки среза превью-модуля, задача 6). Реализованы статический путь текстур (`TexturePreviewSource`) и realtime HWND материала (`PreviewWidget`); `IPreviewSource` готов принять 3D-источник после появления ABI; в пикере — реальные category-иконки (санкционированный fallback, не муляж). Если Юрий скажет «делать» — отдельный `engine:`-коммит с расширением ABI (без слома существующих таблиц), затем UI-источник.
 
 ---
 
@@ -1509,6 +1549,7 @@
 - Поведение иконок без Qt6Svg в рантайме: векторные иконки в сборке без Qt6Svg отображаются как прозрачные пиксмапы (`RenderSvgPixmap`), текстовый фолбэк есть только у кнопок и заголовков карточек; полноценная работа интерфейса без Qt6Svg в рантайме не проверена.
 - Шаг 17.10.D в живом GUI: импорт реального FBX в сантиметрах с дефолтами диалога (размер в метрах, `Transform=1`, без двойного уменьшения), кнопка «Сбросить к умолчанию», визуальное состояние заблокированных пресетов с подсказкой, открытие «Настройки импорта…» существующей модели со значениями sidecar, подписи «Не инвертировать UV (сырой V)» и «Дополнительно» в RU/EN — проверено только юнит-тестами (`ImportSettingsDialogTests`, `ImportSettingsV2EditTests`, кейс 8 `ModelGeometryScaleTests`).
 - Область «графы» (задачи 2/5, живой GUI): вид тулбара графовых редакторов (Tabler-иконки вместо ↶/↷, перекраска при смене темы Dark/Light), попап «?» InfoButton с длинной справкой (позиционирование/Esc), клик «Копировать граф»/«Вставить граф» (JSON между окнами одной схемы, один Undo, Notice на чужой/пустой буфер), адаптивное сворачивание кнопок в меню «…» при сужении окна и возврат при расширении, открытие/сохранение `.graph.json` через FileService с логом и отклонением пути вне песочницы — сценарий заранее написан («GUI-сценарий области «графы»», шаги 1–10); автоматически верифицированы Debug+Release build и UiTests (offscreen), живые интерактивные шаги требуют ручного GUI.
+- Область «превью» (задача 6, живой GUI): realtime-превью материала (орбита ЛКМ/ПКМ, зум колесом, плавность без рывков), остановка orbit-таймера и 0 кадров движка в простое (убрать фокус/отпустить мышь), detach при скрытии вкладки/сворачивании окна и re-attach при возврате, ресайз превью без растяжения/обрезки и HighDPI, смена shape Sphere/Cube/Plane, корректный detach при закрытии окна (Shutdown, без краша/утечки); aspect-correct миниатюры текстур в AssetPickerDialog (вписаны с пропорциями, прозрачные поля, не растянуты) и category-иконки моделей/материалов (3D-миниатюры отложены, п. 14 ABI) — сценарий заранее написан («GUI-сценарий области «превью»», шаги 1–10); автоматически верифицированы Debug build, CoreTests PreviewTests (35) и UiTests AssetPickerDialog (offscreen), живые интерактивные шаги требуют ручного GUI.
 
 ## Интеграция main в editor-v2 — 31.10.2026
 
