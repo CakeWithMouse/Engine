@@ -73,6 +73,7 @@ private:
     void AddVariable();
     void RemoveVariable();
     QString PhysicalPath() const;
+    QString ProjectRoot() const;
 
     EditorQtHost* host_ = nullptr;
     QString script_;

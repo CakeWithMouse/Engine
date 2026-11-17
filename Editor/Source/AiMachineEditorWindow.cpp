@@ -3,12 +3,12 @@
 #include "EditorWindowSetup.h"
 #include "FsmGraphWidget.h"
 #include "Graph/GraphSchemaRegistry.h"
+#include "Graph/GraphFileIo.h"
 
 #include <QComboBox>
 #include <QDir>
 #include <QDockWidget>
 #include <QDoubleSpinBox>
-#include <QFile>
 #include <QFileInfo>
 #include <QFormLayout>
 #include <QHBoxLayout>
@@ -19,7 +19,6 @@
 #include <QPointer>
 #include <QPushButton>
 #include <QRegularExpression>
-#include <QSaveFile>
 #include <QStatusBar>
 #include <QTableWidget>
 #include <QTimer>
@@ -184,6 +183,11 @@ QString AiMachineEditorWindow::PhysicalPath() const
     return QDir(QString::fromUtf8(host_->host().contentRoot)).filePath(machine_.mid(6));
 }
 
+QString AiMachineEditorWindow::ProjectRoot() const
+{
+    return QFileInfo(QString::fromUtf8(host_->host().projectFile)).dir().absolutePath();
+}
+
 void AiMachineEditorWindow::LoadCatalog()
 {
     QPointer<AiMachineEditorWindow> self(this);
@@ -209,11 +213,12 @@ void AiMachineEditorWindow::LoadFile(const QString& catalog)
                               "в новой версии движка или обновите копию проекта.",
                               "The project's game module does not support AI machines from files. Update the project's Game.dll."));
     if (!schema_->LoadCatalog(catalog, &error)) return SetReadOnly(error);
-    QFile file(PhysicalPath());
     GraphDocument document;
-    if (!file.exists())
+    const QString contentRoot = QString::fromUtf8(host_->host().contentRoot);
+    if (!EditorCore::GraphFileIo::Exists(ProjectRoot(), contentRoot, PhysicalPath()))
         return SetReadOnly(Tr("Файл %1 не найден: его переименовали или удалили.", "%1 was not found: it was renamed or deleted.").arg(machine_));
-    if (!file.open(QIODevice::ReadOnly) || !document.ImportFromJson(QString::fromUtf8(file.readAll())))
+    QByteArray data;
+    if (!EditorCore::GraphFileIo::Read(ProjectRoot(), contentRoot, PhysicalPath(), data) || !document.ImportFromJson(QString::fromUtf8(data)))
         return SetReadOnly(Tr("Файл %1 не читается как граф.", "Cannot read %1 as a graph.").arg(machine_));
     if (document.FileFormat() != GraphDocument::Format::V1 || document.Schema() != schema_->Id())
     {
@@ -249,13 +254,14 @@ void AiMachineEditorWindow::SetReadOnly(const QString& reason)
 bool AiMachineEditorWindow::WriteFile()
 {
     if (!ready_ || readOnly_) return false;
-    QSaveFile file(PhysicalPath());
-    if (file.open(QIODevice::WriteOnly) && file.write(graph_->Document().ExportToJson().toUtf8()) >= 0 && file.commit())
+    QString error;
+    if (EditorCore::GraphFileIo::Write(ProjectRoot(), QString::fromUtf8(host_->host().contentRoot), PhysicalPath(),
+                                       graph_->Document().ExportToJson().toUtf8(), &error))
     {
         statusBar()->showMessage(hint_); // прежняя неудачная попытка больше не важна
         return true;
     }
-    statusBar()->showMessage(Tr("Не удалось записать %1: %2", "Cannot write %1: %2").arg(machine_, file.errorString()));
+    statusBar()->showMessage(Tr("Не удалось записать %1: %2", "Cannot write %1: %2").arg(machine_, error));
     return false;
 }
 

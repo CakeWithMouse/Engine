@@ -15,6 +15,7 @@
 #include "core/ScriptMessagesTests.h"
 #include "core/FsmGraphSchemaTests.h"
 #include "core/GraphToolsTests.h"
+#include "core/GraphFileIoTests.h"
 #include "../Core/SceneFile.h"
 #include "core/SceneFileTests.h"
 #include "../Core/Terminal.h"
@@ -294,6 +295,7 @@ void TestGraphCore()
     gChecks += RunScriptMessagesTests();
     gChecks += RunFsmGraphSchemaTests();
     gChecks += RunGraphToolsTests();
+    gChecks += RunGraphFileIoTests();
 }
 
 void TestSceneFile()

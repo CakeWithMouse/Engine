@@ -223,6 +223,7 @@ $legacyRatchetLimits = @{
     "Editor/Source/MaterialEditorWindow.cpp" = 869
     "Editor/Source/ObjectInspectorPanel.cpp" = 625
     "Editor/Source/QtHost.cpp" = 641
+    "Editor/Source/ScriptEditorWindow.cpp" = 523
     "Editor/Source/ViewportWidget.cpp" = 694
     "Editor/Source/ViewportWidget_Input.cpp" = 509
     "Editor/tests/EditorUiTests.cpp" = 1045

@@ -59,6 +59,7 @@ private:
     void RemoveVariable();
     void EditSettings();
     QString PhysicalPath() const;
+    QString ProjectRoot() const;
 
     EditorQtHost* host_ = nullptr;
     QString machine_;

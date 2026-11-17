@@ -4,11 +4,11 @@
 #include "ScriptGraphWidget.h"
 #include "ScriptMessages.h"
 #include "Graph/GraphSchemaRegistry.h"
+#include "Graph/GraphFileIo.h"
 
 #include <QComboBox>
 #include <QDir>
 #include <QDockWidget>
-#include <QFile>
 #include <QFileInfo>
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -19,7 +19,6 @@
 #include <QPointer>
 #include <QPushButton>
 #include <QRegularExpression>
-#include <QSaveFile>
 #include <QStatusBar>
 #include <QTableWidget>
 #include <QTimer>
@@ -191,6 +190,11 @@ QString ScriptEditorWindow::PhysicalPath() const
     return QDir(QString::fromUtf8(host_->host().contentRoot)).filePath(script_.mid(6)); // без "/Game/"
 }
 
+QString ScriptEditorWindow::ProjectRoot() const
+{
+    return QFileInfo(QString::fromUtf8(host_->host().projectFile)).dir().absolutePath();
+}
+
 void ScriptEditorWindow::LoadCatalog()
 {
     QPointer<ScriptEditorWindow> self(this);
@@ -217,12 +221,13 @@ void ScriptEditorWindow::LoadFile(const QString& catalog)
                               "The project's game module does not support visual scripts. Update the project's Game.dll."));
     if (!schema_->LoadCatalog(catalog, &error)) return SetReadOnly(error);
 
-    QFile file(PhysicalPath());
     GraphDocument document;
-    if (!file.exists())
+    const QString contentRoot = QString::fromUtf8(host_->host().contentRoot);
+    if (!EditorCore::GraphFileIo::Exists(ProjectRoot(), contentRoot, PhysicalPath()))
         return SetReadOnly(Tr("Файл %1 не найден: его переименовали или удалили. Назначьте объекту скрипт заново.",
                               "%1 was not found: it was renamed or deleted. Assign the script to the object again.").arg(script_));
-    if (!file.open(QIODevice::ReadOnly) || !document.ImportFromJson(QString::fromUtf8(file.readAll())))
+    QByteArray data;
+    if (!EditorCore::GraphFileIo::Read(ProjectRoot(), contentRoot, PhysicalPath(), data) || !document.ImportFromJson(QString::fromUtf8(data)))
         return SetReadOnly(Tr("Файл %1 не читается как граф.", "Cannot read %1 as a graph.").arg(script_));
     if (document.FileFormat() != GraphDocument::Format::V1 || document.Schema() != schema_->Id())
     {
@@ -261,9 +266,10 @@ void ScriptEditorWindow::SetReadOnly(const QString& reason)
 bool ScriptEditorWindow::WriteFile()
 {
     if (!ready_ || readOnly_) return false;
-    QSaveFile file(PhysicalPath());
-    if (file.open(QIODevice::WriteOnly) && file.write(graph_->Document().ExportToJson().toUtf8()) >= 0 && file.commit()) return true;
-    statusBar()->showMessage(Tr("Не удалось записать %1: %2", "Cannot write %1: %2").arg(script_, file.errorString()));
+    QString error;
+    if (EditorCore::GraphFileIo::Write(ProjectRoot(), QString::fromUtf8(host_->host().contentRoot), PhysicalPath(),
+                                       graph_->Document().ExportToJson().toUtf8(), &error)) return true;
+    statusBar()->showMessage(Tr("Не удалось записать %1: %2", "Cannot write %1: %2").arg(script_, error));
     return false;
 }
 

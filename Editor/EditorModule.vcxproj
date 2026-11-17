@@ -216,6 +216,7 @@
         <ClCompile Include="Core/Graph/GraphClipboard.cpp"/>
         <ClCompile Include="Core/Graph/GraphSchemaRegistry.cpp"/>
         <ClCompile Include="Core/Graph/GraphLayout.cpp"/>
+        <ClCompile Include="Core/Graph/GraphFileIo.cpp"/>
         <ClCompile Include="Core/MaterialGraphSchema.cpp"/>
         <ClCompile Include="Core/CodeGraphSchema.cpp"/>
         <ClCompile Include="Core/FsmGraphSchema.cpp"/>
@@ -295,6 +296,7 @@
         <ClInclude Include="Core/Graph/GraphClipboard.h"/>
         <ClInclude Include="Core/Graph/GraphSchemaRegistry.h"/>
         <ClInclude Include="Core/Graph/GraphLayout.h"/>
+        <ClInclude Include="Core/Graph/GraphFileIo.h"/>
         <ClInclude Include="Core/MaterialGraphSchema.h"/>
         <ClInclude Include="Core/CodeGraphSchema.h"/>
         <ClInclude Include="Core/FsmGraphSchema.h"/>
