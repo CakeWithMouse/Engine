@@ -97,6 +97,7 @@
         <ClCompile Include="../Core/MaterialGraphTransform.cpp"/>
         <ClCompile Include="../Core/CodeGraphSchema.cpp"/>
         <ClCompile Include="../Core/ScriptVariableDrag.cpp"/>
+        <ClCompile Include="../Core/UiWidgetDrag.cpp"/>
         <ClCompile Include="../Core/FsmGraphSchema.cpp"/>
         <ClCompile Include="../Core/ScriptMessages.cpp"/>
         <ClCompile Include="../Core/SceneFile.cpp"/>
@@ -168,6 +169,7 @@
         <ClInclude Include="../Core/MaterialGraphTransform.h"/>
         <ClInclude Include="../Core/CodeGraphSchema.h"/>
         <ClInclude Include="../Core/ScriptVariableDrag.h"/>
+        <ClInclude Include="../Core/UiWidgetDrag.h"/>
         <ClInclude Include="../Core/FsmGraphSchema.h"/>
         <ClInclude Include="../Core/ScriptMessages.h"/>
         <ClInclude Include="../Core/SceneFile.h"/>

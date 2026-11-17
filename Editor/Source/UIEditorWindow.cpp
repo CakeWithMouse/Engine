@@ -5,8 +5,11 @@
 #include "QtHost.h"
 #include "Graph/GraphFileIo.h"
 #include "IconProvider.h"
+#include "UiWidgetDrag.h"
+#include "DropRules.h"
 #include <Engine/UI/UIMarkup.h>
 #include <QTreeWidget>
+#include <QListWidget>
 #include <QAbstractItemView>
 #include <QSplitter>
 #include <QScrollArea>
@@ -18,6 +21,7 @@
 #include <QCheckBox>
 #include <QPushButton>
 #include <QLabel>
+#include <QFont>
 #include <QToolBar>
 #include <QAction>
 #include <QFileInfo>
@@ -27,6 +31,10 @@
 #include <QColorDialog>
 #include <QPainter>
 #include <QMouseEvent>
+#include <QWheelEvent>
+#include <QDragEnterEvent>
+#include <QDragMoveEvent>
+#include <QDropEvent>
 #include <QCloseEvent>
 #include <QSignalBlocker>
 #include <QStatusBar>
@@ -47,14 +55,30 @@ glm::vec4* Color(UIElement* e, int which) {
     }
     return nullptr;
 }
+QLabel* Section(QFormLayout* form, QWidget* props, const QString& text) {
+    auto* label=new QLabel(text,props);QFont font=label->font();font.setBold(true);label->setFont(font);form->addRow(label);return label;
 }
+}
+
+// Palette of engine widget types; dragging an item onto the canvas adds that widget at the
+// drop point (DropRules UiPalette -> UiCanvas, "UI.AddWidget"). Only engine-supported types.
+class UIPaletteList : public QListWidget {
+public:
+    using QListWidget::QListWidget;
+protected:
+    QMimeData* mimeData(const QList<QListWidgetItem*>& items) const override {
+        auto* mime=new QMimeData;
+        if(!items.isEmpty()){EditorCore::UiWidgetDrag::Payload payload;payload.type=items.first()->text();mime->setData(QLatin1String(EditorCore::UiWidgetDrag::kMimeType),EditorCore::UiWidgetDrag::Encode(payload));}
+        return mime;
+    }
+};
 
 // Preview consumes the engine's actual Layout/Build output and GDI font atlas.
 // Only the final quad compositing is done by Qt; no duplicate layout or widget renderer.
 class UICanvas : public QWidget {
 public:
     explicit UICanvas(UIEditorWindow* editor) : QWidget(editor), editor_(editor) {
-        setObjectName("UICanvas"); setMinimumSize(480,270); setMouseTracking(true);
+        setObjectName("UICanvas"); setMinimumSize(480,270); setMouseTracking(true); setAcceptDrops(true);
         Microsoft::WRL::ComPtr<ID3D11Device> device;
         Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;
         if(FAILED(D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_WARP,nullptr,0,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&context)) || !font_.Build(device.Get())) return;
@@ -73,13 +97,20 @@ public:
     }
     QSize resolution{1280,720};
     bool Ready() const { return !atlas_.isNull(); }
+    void SetGrid(bool on) { grid_=on; update(); }
     void Layout() { if(auto* root=editor_->Root())root->Layout({0,0,float(resolution.width()),float(resolution.height())}); }
 protected:
     void paintEvent(QPaintEvent*) override {
         QPainter p(this);p.fillRect(rect(),QColor("#242a32"));
-        scale_=std::min(double(width())/resolution.width(),double(height())/resolution.height());
+        scale_=std::min(double(width())/resolution.width(),double(height())/resolution.height())*zoom_;
         p.scale(scale_,scale_);p.fillRect(QRect(QPoint(),resolution),QColor("#3c4550"));
-        p.setClipRect(QRect(QPoint(),resolution)); Layout();
+        p.setClipRect(QRect(QPoint(),resolution));
+        if(grid_) {
+            p.setPen(QPen(QColor("#46505c"),1.0/scale_));
+            for(int x=40;x<resolution.width();x+=40)p.drawLine(x,0,x,resolution.height());
+            for(int y=40;y<resolution.height();y+=40)p.drawLine(0,y,resolution.width(),y);
+        }
+        Layout();
         auto* root=editor_->Root();if(!root)return;
         UIDrawList list;list.Font=&font_;list.ScreenWidth=float(resolution.width());list.ScreenHeight=float(resolution.height());root->Build(list);
         for(size_t i=0;i+5<list.Vertices.size();i+=6) {
@@ -125,9 +156,24 @@ protected:
         editor_->Changed();editor_->Select(e);
     }
     void mouseReleaseEvent(QMouseEvent*) override { drag_=false; }
+    void wheelEvent(QWheelEvent* event) override {
+        zoom_=std::clamp(zoom_*(event->angleDelta().y()>0?1.1:1.0/1.1),0.25,4.0);update();event->accept();
+    }
+    void dragEnterEvent(QDragEnterEvent* event) override {
+        if(EditorCore::UiWidgetDrag::HasMime(*event->mimeData()))event->acceptProposedAction();else event->ignore();
+    }
+    void dragMoveEvent(QDragMoveEvent* event) override {
+        if(EditorCore::UiWidgetDrag::HasMime(*event->mimeData()))event->acceptProposedAction();else event->ignore();
+    }
+    void dropEvent(QDropEvent* event) override {
+        const auto payload=EditorCore::UiWidgetDrag::FromMime(*event->mimeData());
+        const auto decision=EditorCore::DecideDrop(EditorCore::DragSource::UiPalette,EditorCore::DropTarget::UiCanvas,EditorCore::AssetKind::Unknown);
+        if(payload.type.isEmpty()||!decision.allowed){event->ignore();return;}
+        Layout();editor_->AddElementAt(payload.type,event->position()/scale_);event->acceptProposedAction();
+    }
 private:
     UIEditorWindow* editor_;FontAtlas font_;QImage atlas_;QHash<QRgb,QImage> tinted_;
-    double scale_=1;bool drag_=false;bool checkpointed_=false;QPointF start_;UIRect original_;
+    double scale_=1;double zoom_=1;bool grid_=true;bool drag_=false;bool checkpointed_=false;QPointF start_;UIRect original_;
 };
 
 UIEditorWindow::UIEditorWindow(EditorQtHost* host,const QString& file,QWidget* parent) : QMainWindow(nullptr, Qt::Window),host_(host),file_(file) {
@@ -145,15 +191,21 @@ UIEditorWindow::UIEditorWindow(EditorQtHost* host,const QString& file,QWidget* p
     saveAction_->setIcon(IconProvider::FileIcon());reloadAction_->setIcon(IconProvider::ResetIcon());
     undoAction_->setIcon(IconProvider::UndoIcon());redoAction_->setIcon(IconProvider::RedoIcon());deleteAction_->setIcon(IconProvider::TrashIcon());
     auto* size=new QComboBox(this);size->setObjectName("UIPreviewSize");size->addItems({"1280 × 720","1920 × 1080","800 × 600","720 × 1280"});tools->addWidget(size);
+    tools->addSeparator();
+    gridAction_=tools->addAction(Tr("Сетка", "Grid"),this,[this](bool on){if(canvas_)canvas_->SetGrid(on);});gridAction_->setCheckable(true);gridAction_->setChecked(true);gridAction_->setObjectName("UIGrid");
     auto* split=new QSplitter(this);setCentralWidget(split);
-    auto* hierarchy=new UIHierarchyTree(split);hierarchy->editor=this;tree_=hierarchy;tree_->setHeaderLabel(Tr("Иерархия", "Hierarchy"));tree_->setObjectName("UIHierarchy");
+    auto* left=new QWidget(split);auto* leftLayout=new QVBoxLayout(left);leftLayout->setContentsMargins(0,0,0,0);leftLayout->setSpacing(2);
+    auto* hierarchy=new UIHierarchyTree(left);hierarchy->editor=this;tree_=hierarchy;tree_->setHeaderLabel(Tr("Иерархия", "Hierarchy"));tree_->setObjectName("UIHierarchy");
     tree_->setDragEnabled(true);tree_->setAcceptDrops(true);tree_->setDropIndicatorShown(true);tree_->setDragDropMode(QAbstractItemView::InternalMove);tree_->setSelectionMode(QAbstractItemView::SingleSelection);
+    leftLayout->addWidget(tree_,1);
+    auto* palette=new UIPaletteList(left);palette->setObjectName("UIPalette");palette->addItems({"Panel","Label","Button","Bar","Group"});palette->setDragEnabled(true);palette->setDragDropMode(QAbstractItemView::DragOnly);palette->setMaximumHeight(150);palette->setToolTip(Tr("Перетащите тип на холст", "Drag a type onto the canvas"));leftLayout->addWidget(palette);
     canvas_=new UICanvas(this);split->addWidget(canvas_);
     auto* scroll=new QScrollArea(split);scroll->setWidgetResizable(true);auto* props=new QWidget(scroll);scroll->setWidget(props);auto* form=new QFormLayout(props);
     name_=new QLineEdit(props);name_->setObjectName("UIName");
     labelName_=new QLabel(Tr("Имя", "Name"),props);form->addRow(labelName_,name_);
     text_=new QLineEdit(props);text_->setObjectName("UIText");
     labelText_=new QLabel(Tr("Текст", "Text"),props);form->addRow(labelText_,text_);
+    sectionLayout_=Section(form,props,Tr("Макет", "Layout"));
     const QString labels[]={"X","Y",Tr("Ширина", "Width"),Tr("Высота", "Height")};
     for(int i=0;i<4;++i){
         rect_[i]=new QDoubleSpinBox(props);rect_[i]->setObjectName(QString("UIRect%1").arg(i));rect_[i]->setRange(i<2?-100000:0,100000);rect_[i]->setDecimals(2);rect_[i]->setKeyboardTracking(false);
@@ -162,6 +214,7 @@ UIEditorWindow::UIEditorWindow(EditorQtHost* host,const QString& file,QWidget* p
     }
     anchor_=new QComboBox(props);anchor_->setObjectName("UIAnchor");anchor_->addItems({"TopLeft","TopCenter","TopRight","CenterLeft","Center","CenterRight","BottomLeft","BottomCenter","BottomRight"});
     labelAnchor_=new QLabel(Tr("Привязка", "Anchor"),props);form->addRow(labelAnchor_,anchor_);
+    sectionAppearance_=Section(form,props,Tr("Вид", "Appearance"));
     visible_=new QCheckBox(props);visible_->setObjectName("UIVisible");
     labelVisible_=new QLabel(Tr("Видимость", "Visible"),props);form->addRow(labelVisible_,visible_);
     colorProperty_=new QComboBox(props);
@@ -210,6 +263,7 @@ void UIEditorWindow::RetranslateUi() {
     if (deleteAction_) deleteAction_->setText(Tr("Удалить", "Delete"));
     if (undoAction_) undoAction_->setText(Tr("Отменить", "Undo"));
     if (redoAction_) redoAction_->setText(Tr("Повторить", "Redo"));
+    if (gridAction_) gridAction_->setText(Tr("Сетка", "Grid"));
     if (tree_) tree_->setHeaderLabel(Tr("Иерархия", "Hierarchy"));
     if (labelName_) labelName_->setText(Tr("Имя", "Name"));
     if (labelText_) labelText_->setText(Tr("Текст", "Text"));
@@ -226,6 +280,9 @@ void UIEditorWindow::RetranslateUi() {
     if (labelBorderWidth_) labelBorderWidth_->setText(Tr("Толщина рамки", "Border Width"));
     if (labelAlignRight_) labelAlignRight_->setText(Tr("Выравнивание вправо", "Align Right"));
     if (labelFill_) labelFill_->setText(Tr("Заполнение", "Fill"));
+    if (sectionLayout_) sectionLayout_->setText(Tr("Макет", "Layout"));
+    if (sectionAppearance_) sectionAppearance_->setText(Tr("Вид", "Appearance"));
+    if (sectionBehavior_) sectionBehavior_->setText(Tr("Поведение", "Behavior"));
     const QString padNames[] = {Tr("Слева", "Left"), Tr("Сверху", "Top"), Tr("Справа", "Right"), Tr("Снизу", "Bottom")};
     for (int i = 0; i < 4; ++i) if (padding_[i]) padding_[i]->setToolTip(padNames[i]);
     if (hintLabel_) hintLabel_->setText(Tr("Размер 0 растягивается до края.\nДобавление — внутрь выбранной панели\nили группы. Кнопки получают логику в C++.", "Size 0 stretches to the edge.\nAdding creates elements inside selected panel\nor group. Buttons receive logic in C++."));
@@ -266,10 +323,12 @@ void UIEditorWindow::RebuildTree(){
     if(root_)add(root_.get(),nullptr);tree_->expandAll();refreshing_=false;
 }
 void UIEditorWindow::Select(UIElement* element){selected_=element;RefreshInspector();refreshing_=true;QTreeWidgetItemIterator it(tree_);while(*it){if((*it)->data(0,Qt::UserRole).value<quintptr>()==reinterpret_cast<quintptr>(element)){tree_->setCurrentItem(*it);break;}++it;}refreshing_=false;canvas_->update();}
-void UIEditorWindow::AddElement(const QString& type){
+void UIEditorWindow::AddElement(const QString& type){InsertNewElement(type,16,16);}
+void UIEditorWindow::AddElementAt(const QString& type,const QPointF& pos){InsertNewElement(type,float(pos.x()),float(pos.y()));}
+void UIEditorWindow::InsertNewElement(const QString& type,float x,float y){
     if(!root_)return;std::unique_ptr<UIElement> next;
     if(type=="Panel")next=std::make_unique<UIPanel>();else if(type=="Label"){auto p=std::make_unique<UILabel>();p->SetText(Tr("Текст", "Text").toUtf8().toStdString());next=std::move(p);}else if(type=="Button"){auto p=std::make_unique<UIButton>();p->SetText(Tr("Кнопка", "Button").toUtf8().toStdString());next=std::move(p);}else if(type=="Bar"){auto p=std::make_unique<UIBar>();p->Fill=0.5f;next=std::move(p);}else if(type=="Group")next=std::make_unique<UIElement>();else return;
-    int number=1;do{next->Name=type.toLower().toStdString()+std::to_string(number++);}while(root_->Find(next->Name));const bool box=type=="Panel"||type=="Group";next->Rect={UIAnchor::TopLeft,16,16,box?320.0f:200.0f,box?180.0f:36.0f};
+    int number=1;do{next->Name=type.toLower().toStdString()+std::to_string(number++);}while(root_->Find(next->Name));const bool box=type=="Panel"||type=="Group";next->Rect={UIAnchor::TopLeft,x,y,box?320.0f:200.0f,box?180.0f:36.0f};
     auto* parent=selected_?selected_:root_.get();while(parent!=root_.get()&&Type(parent)!="Panel"&&Type(parent)!="Group")parent=parent->GetParent();Checkpoint();selected_=parent->Add(std::move(next));Changed();RebuildTree();RefreshInspector();
 }
 void UIEditorWindow::DeleteSelected(){if(!selected_||selected_==root_.get())return;auto* parent=selected_->GetParent();Checkpoint();parent->RemoveChild(selected_);selected_=parent;Changed();RebuildTree();RefreshInspector();}

@@ -1,6 +1,7 @@
 #pragma once
 #include <QMainWindow>
 #include <QImage>
+#include <QPointF>
 #include <QTreeWidget>
 #include <Engine/UI/UIElement.h>
 #include <memory>
@@ -25,6 +26,7 @@ public:
     bool Reload();
     bool ConfirmClose();
     void AddElement(const QString& type);
+    void AddElementAt(const QString& type, const QPointF& pos);
     void DeleteSelected();
     void Select(UIElement* element);
     UIElement* Root() const { return root_.get(); }
@@ -43,6 +45,7 @@ private:
     void RefreshInspector();
     bool ApplyInspector();
     void BuildPropertyEditors(QFormLayout* form, QWidget* props);
+    void InsertNewElement(const QString& type, float x, float y);
     void PushUndo(const std::string& snapshot);
     void RestoreSnapshot(const std::string& text);
     void UpdateHistoryActions();
@@ -69,6 +72,7 @@ private:
     QAction* deleteAction_ = nullptr;
     QAction* undoAction_ = nullptr;
     QAction* redoAction_ = nullptr;
+    QAction* gridAction_ = nullptr;
     QLabel* labelName_ = nullptr;
     QLabel* labelText_ = nullptr;
     QLabel* labelRect_[4]{};
@@ -87,6 +91,9 @@ private:
     QLabel* labelBorderWidth_ = nullptr;
     QLabel* labelAlignRight_ = nullptr;
     QLabel* labelFill_ = nullptr;
+    QLabel* sectionLayout_ = nullptr;
+    QLabel* sectionAppearance_ = nullptr;
+    QLabel* sectionBehavior_ = nullptr;
     int langSubId_ = 0;
 };
 

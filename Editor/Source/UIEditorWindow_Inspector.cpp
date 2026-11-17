@@ -4,10 +4,17 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDoubleSpinBox>
+#include <QFont>
 #include <QFormLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
+
+namespace {
+QLabel* Section(QFormLayout* form, QWidget* props, const QString& text) {
+    auto* label = new QLabel(text, props); QFont font = label->font(); font.setBold(true); label->setFont(font); form->addRow(label); return label;
+}
+}
 
 // Property editors for the engine UI attributes the inspector previously left hidden:
 // padding, interactivity, border width, right alignment and bar fill. UIMarkup already
@@ -27,14 +34,16 @@ void UIEditorWindow::BuildPropertyEditors(QFormLayout* form, QWidget* props) {
     }
     labelPadding_ = new QLabel(Tr("Отступы", "Padding"), props); form->addRow(labelPadding_, padRow);
 
-    interactive_ = new QCheckBox(props); interactive_->setObjectName("UIInteractive");
-    labelInteractive_ = new QLabel(Tr("Интерактивность", "Interactive"), props); form->addRow(labelInteractive_, interactive_);
-    connect(interactive_, &QCheckBox::toggled, this, [this] { ApplyInspector(); });
-
     borderWidth_ = new QDoubleSpinBox(props); borderWidth_->setObjectName("UIBorderWidth");
     borderWidth_->setRange(0, 1000); borderWidth_->setDecimals(2); borderWidth_->setKeyboardTracking(false);
     labelBorderWidth_ = new QLabel(Tr("Толщина рамки", "Border Width"), props); form->addRow(labelBorderWidth_, borderWidth_);
     connect(borderWidth_, &QDoubleSpinBox::valueChanged, this, [this] { ApplyInspector(); });
+
+    sectionBehavior_ = Section(form, props, Tr("Поведение", "Behavior"));
+
+    interactive_ = new QCheckBox(props); interactive_->setObjectName("UIInteractive");
+    labelInteractive_ = new QLabel(Tr("Интерактивность", "Interactive"), props); form->addRow(labelInteractive_, interactive_);
+    connect(interactive_, &QCheckBox::toggled, this, [this] { ApplyInspector(); });
 
     alignRight_ = new QCheckBox(props); alignRight_->setObjectName("UIAlignRight");
     labelAlignRight_ = new QLabel(Tr("Выравнивание вправо", "Align Right"), props); form->addRow(labelAlignRight_, alignRight_);

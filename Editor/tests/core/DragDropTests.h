@@ -3,6 +3,7 @@
 #include "../../Core/AssetDrag.h"
 #include "../../Core/DropRules.h"
 #include "../../Core/AssetOps.h"
+#include "../../Core/UiWidgetDrag.h"
 
 #include <QMimeData>
 #include <QTemporaryDir>
@@ -121,6 +122,31 @@ inline int RunDragDropTests()
     CheckDragDrop(AssetOps::ConflictName(QStringLiteral("Models/Hero.glb"), 2) == QStringLiteral("Models/Hero_2.glb"), "ConflictName increments index");
     CheckDragDrop(AssetOps::ConflictName(QStringLiteral("Hero.glb"), 1) == QStringLiteral("Hero_1.glb"), "ConflictName without directory");
     CheckDragDrop(AssetOps::ConflictName(QStringLiteral("Models/Archive.tar.gz"), 1) == QStringLiteral("Models/Archive.tar_1.gz"), "ConflictName uses complete base name");
+
+    // --- UI widget palette drag payload ---
+    for (const char* type : {"Panel", "Label", "Button", "Bar", "Group"})
+    {
+        UiWidgetDrag::Payload widget;
+        widget.type = QLatin1String(type);
+        UiWidgetDrag::Payload out;
+        CheckDragDrop(UiWidgetDrag::Decode(UiWidgetDrag::Encode(widget), out), "UiWidgetDrag roundtrip decodes");
+        CheckDragDrop(out.type == QLatin1String(type), "UiWidgetDrag preserves type");
+    }
+    UiWidgetDrag::Payload badWidget;
+    CheckDragDrop(!UiWidgetDrag::Decode(QByteArray(), badWidget), "UiWidgetDrag empty rejected");
+    CheckDragDrop(!UiWidgetDrag::Decode(QByteArrayLiteral("not json"), badWidget), "UiWidgetDrag non-JSON rejected");
+    CheckDragDrop(!UiWidgetDrag::Decode(QByteArrayLiteral("[1,2]"), badWidget), "UiWidgetDrag non-object rejected");
+    CheckDragDrop(!UiWidgetDrag::Decode(QByteArrayLiteral("{\"type\":\"Image\"}"), badWidget), "UiWidgetDrag unknown type rejected");
+    CheckDragDrop(!UiWidgetDrag::Decode(QByteArrayLiteral("{\"type\":5}"), badWidget), "UiWidgetDrag non-string type rejected");
+    CheckDragDrop(!UiWidgetDrag::Decode(QByteArrayLiteral("{}"), badWidget), "UiWidgetDrag missing type rejected");
+    QMimeData widgetMime;
+    UiWidgetDrag::Payload button;
+    button.type = QStringLiteral("Button");
+    widgetMime.setData(QLatin1String(UiWidgetDrag::kMimeType), UiWidgetDrag::Encode(button));
+    CheckDragDrop(UiWidgetDrag::HasMime(widgetMime), "UiWidgetDrag HasMime detects own format");
+    CheckDragDrop(UiWidgetDrag::FromMime(widgetMime).type == QStringLiteral("Button"), "UiWidgetDrag FromMime decodes");
+    QMimeData emptyMime;
+    CheckDragDrop(UiWidgetDrag::FromMime(emptyMime).type.isEmpty(), "UiWidgetDrag FromMime empty without format");
 
     return gDragDropChecks;
 }
