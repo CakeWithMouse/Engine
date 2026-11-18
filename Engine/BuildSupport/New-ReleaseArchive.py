@@ -125,21 +125,24 @@ def stage(args):
         if item.is_file():
             copy_file(item, docs / relative)
     copy_tree(REPO / 'Agent/Tasks', package / 'Agent/Tasks')
-    for name in REPORTS:
+    reports = list(dict.fromkeys((*REPORTS, *args.report)))
+    for name in reports:
+        if Path(name).name != name:
+            raise RuntimeError(f'Invalid report directory: {name}')
         # Preserve complete evidence, including logs; no SDK or build binaries live here.
         shutil.copytree(REPO / 'Agent/Playtests' / name, package / 'Agent/Playtests' / name)
-    copy_file(REPO / 'Agent/Playtests' / REPORTS[1] / 'RepairCorridor-0.4.0-source.zip',
-              package / 'Sources/RepairCorridor-0.4.0-source.zip')
+    copy_file(args.source_archive, package / 'Sources' / args.source_archive.name)
     copy_file(REPO / 'Engine/Version.json', package / 'Engine/Version.json')
     (package / 'Documentation.html').write_text(
         '<!doctype html><html lang="ru"><meta charset="utf-8"><meta http-equiv="refresh" '
         'content="0;url=Engine/docs/index.html"><title>PainEngine documentation</title>'
         '<a href="Engine/docs/index.html">Открыть документацию 0.4.0</a></html>', encoding='utf-8')
-    (package / 'README.txt').write_text(f'''PainEngine {version} — Windows x64 Release
+    notes = f'RELEASE-{version}{"-" + args.revision if args.revision else ""}.md'
+    (package / 'README.txt').write_text(f'''PainEngine {version}{" " + args.revision if args.revision else ""} — Windows x64 Release
 
 Распакуйте архив целиком и запустите EngineLauncher.exe.
 Готовые примеры и учебные проекты доступны в лаунчере.
-Documentation.html открывает актуальную офлайн-справку; изменения — Engine/docs/RELEASE-0.4.0.md.
+Documentation.html открывает актуальную офлайн-справку; изменения — Engine/docs/{notes}.
 Runtime/SDK — CMake SDK. Для C++ нужны совместимые MSVC x64 tools и Windows SDK,
 а также CMake 3.24+ и Ninja в PATH. Готовые игры и проекты без C++ не требуют компилятора.
 AiTutorial и RepairCorridor находятся в Tutorials; OpenEditor.cmd открывает их редактор.
@@ -173,7 +176,7 @@ OpenSSL corresponding source: https://github.com/openssl/openssl/tree/openssl-3.
 ''', encoding='utf-8')
     revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO, text=True).strip()
     write_json(package / 'RELEASE-MANIFEST.json', {
-        'version': version, 'platform': 'Windows x64', 'configuration': 'Release',
+        'version': version, 'revision': args.revision, 'platform': 'Windows x64', 'configuration': 'Release',
         'packagingRevision': revision, 'buildSystem': 'CMake/Ninja + MSVC',
         'sdk': 'CMake', 'assimp': True, 'jolt': True, 'qt': qt_version,
         'supplementalMsbuildBinaries': ['Runtime/GameExecutable.exe', 'Runtime/EngineCommandlets.exe'],
@@ -182,6 +185,7 @@ OpenSSL corresponding source: https://github.com/openssl/openssl/tree/openssl-3.
         'editorSha256': digest(runtime / 'Editor.dll'),
         'sdkLibrarySha256': digest(runtime / 'SDK/lib/Engine.lib'),
         'd3dCompilerSha256': digest(compiler),
+        'sourceArchiveSha256': digest(args.source_archive), 'reports': reports,
     })
     print(package)
 
@@ -215,6 +219,9 @@ if __name__ == '__main__':
     parser.add_argument('--package', required=True, type=Path)
     parser.add_argument('--build', type=Path, default=REPO / 'build/cmake/editor-Release/bin/Release')
     parser.add_argument('--strategy', type=Path, default=REPO / 'Engine/build/playtests/strategy-040/fresh-unpack-msbuild')
+    parser.add_argument('--source-archive', type=Path, default=REPO / 'Agent/Playtests' / REPORTS[1] / 'RepairCorridor-0.4.0-source.zip')
+    parser.add_argument('--revision', default='')
+    parser.add_argument('--report', action='append', default=[])
     parser.add_argument('--d3dcompiler', type=Path, default=Path('C:/Program Files (x86)/Windows Kits/10/Redist/D3D/x64/d3dcompiler_47.dll'))
     parser.add_argument('--qt-licenses', type=Path, default=REPO / 'Engine/BuildSupport/ReleaseLicenses')
     parser.add_argument('--archive', type=Path)

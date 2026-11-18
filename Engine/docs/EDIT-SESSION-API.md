@@ -324,8 +324,12 @@ Play-копия и превью. Файл пишет только `saveMaterial`
 | `Engine.Scene.PhysicsObject` (v1) | Rigid body отдельного объекта: `read(context, objectId, EnginePhysicsObjectState*)` возвращает Ok либо NotFound, если физика объекта не настраивалась; `write` применяет блок к любому компоненту (только Edit; в Play/Pause мутации сцены уже ReadOnly). `available` — 1, когда движок собран с Jolt |
 
 Состояние объекта: `enabled` (0/1), `bodyType` (0 static / 1 dynamic / 2 kinematic),
-`shapeType` (0 box / 1 sphere / 2 capsule), `friction` и `restitution` (>= 0), `density` (> 0).
-Размеры формы выводятся из мирового масштаба объекта. Значения хранятся в компоненте
+`shapeType` (0 box / 1 sphere / 2 capsule / 3 mesh), `friction` и `restitution` (>= 0), `density` (> 0).
+Mesh доступен с 0.4.0 r2: точные треугольники для Static, выпуклая оболочка для
+Dynamic/Kinematic. Базовые C-таблицы и размер состояния прежние; старую игровую
+DLL нужно пересобрать новым SDK для поддержки значения 3. Примитивы используют
+масштаб компонента, Mesh — мировую геометрию; [ограничения и сохранение](PHYSICS.md).
+Значения хранятся в компоненте
 (`GameComponent::SetPhysicsEnabled` и т.д.) и сериализуются в блоке `physics` документа сцены
 (см. [SCENE-JSON](SCENE-JSON.md)). Динамические тела двигают transform компонента во время Play,
 статические и кинематические следуют за ним; режим Edit не симулирует.

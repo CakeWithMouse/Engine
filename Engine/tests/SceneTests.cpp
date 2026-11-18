@@ -1,6 +1,7 @@
 #include "SceneTestAccess.h"
 #include <Engine/Scene/Scene.h>
 #include <Engine/Scene/SceneDocument.h>
+#include <Engine/Runtime/SceneEditSession.h>
 #include <Engine/Components/ComponentType.h>
 #include <Engine/Components/GameComponents.h>
 #include "../ThirdParty/nlohmann/json.hpp"
@@ -213,4 +214,29 @@ void PhysicsObjectSceneTests()
     CHECK(std::abs(recreated->GetPhysicsRestitution() - 0.5f) < 1e-6f);
     const auto* untouched = restored.FindComponentByName("Plain");
     CHECK(untouched && !untouched->HasPhysicsSettings());
+
+    body.density = 500.0f;
+    body.shapeType = PhysicsShapeType::Mesh;
+    CHECK(scene.SetPhysicsBody(id, body) == SceneResult::Ok);
+    const auto meshText = SceneDocument::Serialize(SceneTestAccess::Snapshot(scene));
+    CHECK(nlohmann::json::parse(meshText)["objects"][0]["physics"]["shape"] == "mesh");
+    const auto meshSnapshot = SceneDocument::Parse(meshText);
+    Scene meshRestored;
+    SceneDocument::Restore(meshSnapshot, catalog, meshRestored);
+    CHECK(meshRestored.FindComponentByName("Crate")->GetPhysicsShapeType() == PhysicsShapeType::Mesh);
+
+    SceneEditSession session(catalog);
+    auto edit = session.GetApi();
+    auto physics = session.GetPhysicsObjectApi();
+    const EngineSceneTransform pose{{0,0,0},{0,0,0,1},{1,1,1}};
+    uint64_t objectId = 0;
+    CHECK(edit.scene.createObject(edit.scene.context, "Test.Body", "Mesh", &pose, &objectId) == EngineSceneOk);
+    EnginePhysicsObjectState state{1, EnginePhysicsBodyStatic, EnginePhysicsShapeMesh, .25f, .5f, 500};
+    CHECK(physics.write(physics.context, objectId, &state) == EngineSceneOk);
+    EnginePhysicsObjectState actual{};
+    CHECK(physics.read(physics.context, objectId, &actual) == EngineSceneOk);
+    CHECK(actual.shapeType == EnginePhysicsShapeMesh && actual.density == 500);
+    state.shapeType = 4;
+    CHECK(physics.write(physics.context, objectId, &state) == EngineSceneInvalidArgument);
+    CHECK(physics.read(physics.context, objectId, &actual) == EngineSceneOk && actual.shapeType == EnginePhysicsShapeMesh);
 }

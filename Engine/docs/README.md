@@ -2,6 +2,7 @@
 
 - [Релиз 0.4.0: изменения, совместимость и результаты проверки](RELEASE-0.4.0.md).
 - [CMake, компиляторы, переносимое ядро и SDK](CMAKE-BUILD.md).
+- [Физика Jolt, Mesh-коллайдеры и совместимость r2](PHYSICS.md).
 - [ИИ: C++ API и примеры](AI-CPP-GUIDE.md), [автоматы .fsm](AI-FSM.md),
   [диагностика во вьюпорте](reports/ai-diagnostics.html),
   [направляющие камеры](reports/camera-guides.html).

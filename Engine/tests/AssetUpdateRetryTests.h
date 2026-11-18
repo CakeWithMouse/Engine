@@ -53,6 +53,21 @@ inline void Run()
         const std::string bytes((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
         in.close();
         Check(bytes == "new-bytes-0123456789", "reimport survives a transient sharing violation");
+
+        // Windows ticks are coarse: separate rapid operations must still retain
+        // separate backups instead of overwriting an earlier operation's files.
+        const auto backups = root / ".painengine" / "AssetBackups";
+        const auto countBackups = [&] {
+            return static_cast<size_t>(std::distance(fs::directory_iterator(backups), fs::directory_iterator{}));
+        };
+        const auto originalBackups = countBackups();
+        std::string current = "/Game/tone.wav";
+        for (size_t i = 0; i < 32; ++i) {
+            const std::string next = i % 2 ? "/Game/tone.wav" : "/Game/tone-next.wav";
+            AssetUpdate::Run(content, 1, current, next, [](const std::string&, const std::string&) {});
+            current = next;
+        }
+        Check(countBackups() == originalBackups + 32, "rapid asset updates retain distinct backup directories");
         const auto staging = root / ".painengine" / "Staging";
         Check(!fs::exists(staging) || fs::is_empty(staging), "staging cleaned after retried reimport");
         fs::remove_all(root);

@@ -16,3 +16,6 @@ Agent/Playtests/2026-11-14-strategy-r5-main-integration/** -text
 Agent/Playtests/2026-11-18-0.4.0-release/** -text
 Agent/Playtests/2026-11-18-0.4.0-strategy/** -text
 Agent/Playtests/2026-11-18-0.4.0-package/** -text
+Agent/Playtests/2026-11-18-0.4.0-r2-release/** -text
+Agent/Playtests/2026-11-18-0.4.0-strategy-r2/** -text
+Agent/Playtests/2026-11-18-0.4.0-r2-package/** -text

@@ -262,4 +262,17 @@ page('audio', 4, 'AudioEngine: звук и музыка', '2D, 3D и поток�
  'PlayStream принимает физический путь и StreamOptions (loop, volume, framesPerBuffer), возвращает StreamHandle. StopStream останавливает выбранный поток, StopAll — все звуки этого AudioEngine. Публичного handle для остановки отдельного Play2D нет.',
  'WAV использует WavDecoder, прочие расширения — MediaFoundationDecoder. Поддержка конкретных MP3/FLAC/OGG зависит от Windows Media Foundation. Импорт в редакторе копирует ресурс, предпрослушивание доступно в Edit; автоматического звукового компонента сцены нет.'
 ], [['GetAudioEngine','Заимствованный указатель, возможен nullptr.',H.game],['LoadSound','Физический wide path → SoundId.'],['Play2D','SoundId, const PlayOptions& → bool.'],['Play3D','SoundId, const AudioEmitter3D&, const PlayOptions& → bool.'],['PlayStream','const std::wstring&, const StreamOptions& → StreamHandle.'],['StopStream','Остановка потока по StreamHandle.'],['SetListener','Копирует AudioListener3D; Game обновляет слушателя камерой.'],['StopAll','Остановка всех голосов и потоков.'],['Update','Обновление 3D и streaming, Game вызывает автоматически.']], {related:['game','vfs','assets']});
+page('physics', 1, 'Физика: тела и Mesh', 'Jolt, примитивы и Mesh-коллайдеры в 0.4.0 r2.', 'Physics/PhysicsWorld.h', [
+ 'Game владеет физическим миром. В Edit сохраняются настройки, в Play/Game создаются тела. Сборка должна включать Jolt. Компонент с Mesh должен иметь CPU-геометрию; отсутствие пригодной формы не создаёт тело.',
+ 'Static/Mesh использует точные двусторонние треугольники и сохраняет проёмы. Dynamic и Kinematic используют одну выпуклую оболочку: отверстия и вогнутости заполняются. Выпуклой декомпозиции нет.',
+ 'Mesh следует полной геометрии с отрицательным масштабом и родителями. Hull использует только вершины пригодных индексированных треугольников; неиспользуемые вершины не меняют массу. Масса динамического тела определяется объёмом оболочки и density.',
+ 'Форма создаётся из CPU-геометрии. Изменение меша и GPU-анимация не перестраивают её автоматически; отдельные инстансы не получают индивидуальные тела. Сцена сохраняет настройки, но не произвольные процедурные вершины.',
+ 'C++ PhysicsBodyDesc расширен: пересоберите игру SDK r2. PhysicsObject v1 принимает shapeType=3; C-структура не выросла. Старые runtime не понимают shape:mesh. Полное руководство и ограничения: PHYSICS.md.'
+], [
+ ['PhysicsShapeType','Box, Sphere, Capsule, Mesh.'],['PhysicsBodyDesc','Тело и заимствованные meshVertices/meshIndices в координатах тела.'],
+ ['CreateBody','Возвращает handle или 0, если форма не создана.'],['Raycast','Проверка реальной физической формы.'],
+ ['SetPhysicsShapeType','Выбор формы компонента.',H.component],['SetPhysicsBodyType','Static / Dynamic / Kinematic.',H.component],
+ ['SetPhysicsEnabled','Включение и пересоздание тела при симуляции.',H.component],['SetPhysicsDensity','Плотность движущегося тела.',H.component],
+ ['HasPhysicsBody','Есть ли созданное тело.',H.component],['AddPhysicsImpulse','Импульс динамическому телу.',H.component]
+], {related:['component','scene','mesh','compatibility']});
 export {pages};

@@ -35,8 +35,8 @@ struct PhysicsBodyDesc
     glm::vec3 halfExtents = glm::vec3(0.5f);
     float radius = 0.5f;
     float halfHeight = 0.5f;
-    // Mesh: render geometry in the body's local space (world scale already baked
-    // into the vertices by the caller). Non-owning; must outlive CreateBody.
+    // Mesh: indexed render triangles in body-local space, with the remaining
+    // render transform baked into the vertices. Non-owning; outlive CreateBody.
     const std::vector<glm::vec3>* meshVertices = nullptr;
     const std::vector<uint32_t>* meshIndices = nullptr;
     float friction = 0.5f;

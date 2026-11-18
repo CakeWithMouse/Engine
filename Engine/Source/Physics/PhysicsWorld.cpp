@@ -89,22 +89,22 @@ JPH::Ref<JPH::Shape> CreateMeshShape(const PhysicsBodyDesc& desc)
     if (!desc.meshVertices || desc.meshVertices->empty() ||
         !desc.meshIndices || desc.meshIndices->size() < 3)
         return {};
-    if (desc.type != PhysicsBodyType::Static)
-    {
-        JPH::Array<JPH::Vec3> hullPoints;
-        hullPoints.reserve(desc.meshVertices->size());
-        for (const glm::vec3& v : *desc.meshVertices)
-            hullPoints.emplace_back(v.x, v.y, v.z);
-        JPH::ConvexHullShapeSettings settings(hullPoints);
-        const JPH::ShapeSettings::ShapeResult result = settings.Create();
-        if (result.HasError()) return {};
-        return result.Get();
-    }
     const auto& source = *desc.meshVertices;
     JPH::VertexList vertices;
     vertices.reserve(source.size());
-    for (const glm::vec3& v : source)
-        vertices.emplace_back(v.x, v.y, v.z);
+    std::vector<uint32_t> remap(source.size(), UINT32_MAX);
+    const auto mapped = [&](uint32_t index) {
+        auto& result = remap[index];
+        if (result == UINT32_MAX) {
+            result = static_cast<uint32_t>(vertices.size());
+            const auto& p = source[index];
+            vertices.emplace_back(p.x, p.y, p.z);
+        }
+        return result;
+    };
+    const auto finite = [](const glm::vec3& p) {
+        return std::isfinite(p.x) && std::isfinite(p.y) && std::isfinite(p.z);
+    };
     // MeshShape collides single sided following the triangle winding, but render
     // meshes arrive in either winding (D3D assets are usually clockwise), so emit
     // every triangle in both windings: collision stays double sided and Jolt keeps
@@ -118,13 +118,28 @@ JPH::Ref<JPH::Shape> CreateMeshShape(const PhysicsBodyDesc& desc)
         const uint32_t i1 = (*desc.meshIndices)[i + 1];
         const uint32_t i2 = (*desc.meshIndices)[i + 2];
         if (i0 >= source.size() || i1 >= source.size() || i2 >= source.size()) continue;
+        if (!finite(source[i0]) || !finite(source[i1]) || !finite(source[i2])) continue;
         const JPH::Vec3 e1 = ToJolt(source[i1]) - ToJolt(source[i0]);
         const JPH::Vec3 e2 = ToJolt(source[i2]) - ToJolt(source[i0]);
-        if (e1.Cross(e2).LengthSq() < 1.0e-12f) continue;
-        triangles.emplace_back(i0, i1, i2, 0);
-        triangles.emplace_back(i0, i2, i1, 0);
+        const float areaSquared = e1.Cross(e2).LengthSq();
+        if (!std::isfinite(areaSquared) || areaSquared < 1.0e-12f) continue;
+        const auto a = mapped(i0), b = mapped(i1), c = mapped(i2);
+        triangles.emplace_back(a, b, c, 0);
+        if (desc.type == PhysicsBodyType::Static) triangles.emplace_back(a, c, b, 0);
     }
     if (triangles.empty()) return {};
+    if (desc.type != PhysicsBodyType::Static)
+    {
+        // Hulls use only vertices referenced by usable render triangles. Unused
+        // vertices must not change the collision volume or the body's mass.
+        JPH::Array<JPH::Vec3> hullPoints;
+        hullPoints.reserve(vertices.size());
+        for (const auto& v : vertices) hullPoints.emplace_back(v.x, v.y, v.z);
+        JPH::ConvexHullShapeSettings settings(hullPoints);
+        const auto result = settings.Create();
+        if (result.HasError()) return {};
+        return result.Get();
+    }
     JPH::MeshShapeSettings settings(std::move(vertices), std::move(triangles));
     const JPH::ShapeSettings::ShapeResult result = settings.Create();
     if (result.HasError()) return {};

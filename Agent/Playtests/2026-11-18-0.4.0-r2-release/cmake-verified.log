@@ -1,0 +1,95 @@
+**********************************************************************
+** Visual Studio 2022 Developer PowerShell v17.14.27
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+-- Configuring done (0.2s)
+-- Generating done (0.2s)
+-- Build files have been written to: E:/Engine/build/cmake/editor-Release
+[1/35] C:\WINDOWS\system32\cmd.exe /C "cd /D E:\Engine\build\cmake\editor-Release && E:\Engine\build\cmake\editor-Release\bin\Release\ComponentGenerator.exe E:/Engine/build/cmake/editor-Release/generated/RuntimeExample/roots.txt E:/Engine/build/cmake/editor-Release/generated/RuntimeExample RuntimeExample"
+ComponentGenerator: 2 component(s), RuntimeExample
+[2/33] Running utility command for RuntimeExampleContent
+[3/33] Running utility command for PongContent
+[4/33] Running utility command for SunGameContent
+[5/33] Running utility command for BasicExamplesContent
+[6/33] Running utility command for BattleContent
+[7/33] C:\WINDOWS\system32\cmd.exe /C "cd /D E:\Engine\build\cmake\editor-Release && E:\Engine\build\cmake\editor-Release\bin\Release\ComponentGenerator.exe E:/Engine/build/cmake/editor-Release/generated/BasicExamples/roots.txt E:/Engine/build/cmake/editor-Release/generated/BasicExamples BasicExamples"
+ComponentGenerator: 1 component(s), BasicExamples
+[8/32] Running utility command for EngineTestsContent
+[9/32] C:\WINDOWS\system32\cmd.exe /C "cd /D E:\Engine\build\cmake\editor-Release && E:\Engine\build\cmake\editor-Release\bin\Release\ComponentGenerator.exe E:/Engine/build/cmake/editor-Release/generated/Pong/roots.txt E:/Engine/build/cmake/editor-Release/generated/Pong Pong"
+ComponentGenerator: 0 component(s), Pong
+[10/31] C:\WINDOWS\system32\cmd.exe /C "cd /D E:\Engine\build\cmake\editor-Release && E:\Engine\build\cmake\editor-Release\bin\Release\ComponentGenerator.exe E:/Engine/build/cmake/editor-Release/generated/SunGame/roots.txt E:/Engine/build/cmake/editor-Release/generated/SunGame SunGame"
+ComponentGenerator: 0 component(s), SunGame
+[11/30] C:\WINDOWS\system32\cmd.exe /C "cd /D E:\Engine\build\cmake\editor-Release && E:\Engine\build\cmake\editor-Release\bin\Release\ComponentGenerator.exe E:/Engine/build/cmake/editor-Release/generated/Battle/roots.txt E:/Engine/build/cmake/editor-Release/generated/Battle Battle"
+ComponentGenerator: 0 component(s), Battle
+[12/29] Running utility command for EngineRuntimeContent
+[13/29] C:\WINDOWS\system32\cmd.exe /C "cd /D E:\Engine\build\cmake\editor-Release && E:\Engine\build\cmake\editor-Release\bin\Release\ComponentGenerator.exe E:/Engine/build/cmake/editor-Release/generated/Katamari/roots.txt E:/Engine/build/cmake/editor-Release/generated/Katamari Katamari"
+ComponentGenerator: 0 component(s), Katamari
+[14/28] Running utility command for KatamariContent
+[15/28] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Scene\AssetUpdate.cpp.obj
+E:\Engine\Engine\Source\Scene\AssetUpdate.cpp(1): warning C4005: NOMINMAX: изменение макроопределения
+E:\Engine\Engine\Source\Scene\AssetUpdate.cpp(1): note: "NOMINMAX" ранее объявлен в командной строке
+[16/28] Linking CXX static library lib\Release\Engine.lib
+[17/28] C:\WINDOWS\system32\cmd.exe /C "cd /D E:\Engine\build\cmake\editor-Release && E:\Engine\Engine\build\tools\python\cmake\data\bin\cmake.exe -DBINARY=E:/Engine/build/cmake/editor-Release -DDESTINATION=E:/Engine/build/cmake/editor-Release/bin/Release/Runtime/SDK -DCONFIGURATION=Release -P E:/Engine/cmake/PublishSdk.cmake"
+-- CMake SDK: E:/Engine/build/cmake/editor-Release/bin/Release/Runtime/SDK
+[18/28] Linking CXX executable bin\Release\BasicExamples\BasicExamples.exe
+[19/28] Linking CXX shared module bin\Release\Runtime\Templates\SceneProject\Game.dll
+[20/28] Linking CXX shared module bin\Release\Runtime\Projects\RuntimeExample\Game.dll
+[21/28] Linking CXX shared module bin\Release\Runtime\Editor.dll
+E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\Editor.dll 64 bit, release executable
+Adding in plugin type generic for module: Qt6Gui
+Adding Qt6Network for qtuiotouchplugin.dll from plugin type: generic
+Adding in plugin type iconengines for module: Qt6Gui
+Adding in plugin type imageformats for module: Qt6Gui
+Adding in plugin type networkinformation for module: Qt6Network
+Adding in plugin type platforminputcontexts for module: Qt6Gui
+Skipping plugin qtvirtualkeyboardplugin.dll due to disabled dependencies (Qt6Qml Qt6Quick).
+Adding in plugin type platforms for module: Qt6Gui
+Adding in plugin type styles for module: Qt6Widgets
+Adding in plugin type tls for module: Qt6Network
+Direct dependencies: Qt6Core Qt6Gui Qt6Svg Qt6Widgets
+All dependencies   : Qt6Core Qt6Gui Qt6Svg Qt6Widgets
+To be deployed     : Qt6Core Qt6Gui Qt6Network Qt6Svg Qt6Widgets
+Qt6Core.dll is up to date.
+Qt6Gui.dll is up to date.
+Qt6Network.dll is up to date.
+Qt6Svg.dll is up to date.
+Qt6Widgets.dll is up to date.
+d3dcompiler_47.dll is up to date.
+dxcompiler.dll is up to date.
+dxil.dll is up to date.
+vc_redist.x64.exe is up to date.
+qtuiotouchplugin.dll is up to date.
+qsvgicon.dll is up to date.
+qgif.dll is up to date.
+qicns.dll is up to date.
+qico.dll is up to date.
+qjpeg.dll is up to date.
+qsvg.dll is up to date.
+qtga.dll is up to date.
+qtiff.dll is up to date.
+qwbmp.dll is up to date.
+qwebp.dll is up to date.
+qnetworklistmanager.dll is up to date.
+qwindows.dll is up to date.
+qmodernwindowsstyle.dll is up to date.
+qcertonlybackend.dll is up to date.
+qopensslbackend.dll is up to date.
+qschannelbackend.dll is up to date.
+[22/28] Linking CXX executable bin\Release\Pong\Pong.exe
+[23/28] Linking CXX executable bin\Release\SunGame\SunGame.exe
+[24/28] Linking CXX executable bin\Release\Battle\Battle.exe
+[25/28] Linking CXX executable bin\Release\Katamari\Katamari.exe
+[26/28] Linking CXX executable bin\Release\Runtime\EngineRuntime.exe
+[27/28] Building CXX object CMakeFiles\EngineTests.dir\Engine\tests\EngineTests.cpp.obj
+[28/28] Linking CXX executable bin\Release\EngineTests.exe
+Test project E:/Engine/build/cmake/editor-Release
+    Start 1: PortableCore
+1/3 Test #1: PortableCore .....................   Passed    0.02 sec
+    Start 2: ComponentGeneratorPortable
+2/3 Test #2: ComponentGeneratorPortable .......   Passed    0.11 sec
+    Start 3: Engine
+3/3 Test #3: Engine ...........................   Passed   13.83 sec
+
+100% tests passed out of 3
+
+Total Test time (real) =  14.02 sec

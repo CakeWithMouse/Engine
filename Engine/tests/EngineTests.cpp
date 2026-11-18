@@ -2210,6 +2210,8 @@ void PrimitiveApiTests();
 void GameSettingsTests();
 void PhysicsWorldTests();
 void PhysicsMeshShapeTests();
+void PhysicsMeshComponentTests();
+void PhysicsMeshIndexedHullTests();
 
 void ScriptTests();
 void AiMachineExtensionTests();
@@ -2224,6 +2226,8 @@ int main()
         {"owned GameSettings and rendering dispatch", GameSettingsTests},
         {"physics world: gravity, stepping, impulses, raycasts", PhysicsWorldTests},
         {"physics world: complex mesh collision shapes", PhysicsMeshShapeTests},
+        {"physics mesh: signed component and parent transforms", PhysicsMeshComponentTests},
+        {"physics mesh: indexed moving hull geometry", PhysicsMeshIndexedHullTests},
         {"assigned primitives: GPU, materials and instances", AssignedPrimitiveRendering},
         {"trace scene geometry and filters", TraceSceneTests},
         {"trace screen coordinates and projection", TraceScreenTests},

@@ -363,7 +363,7 @@ inline void RunPhysicsColliderTests()
 
     // Must have items on startup without manual language switch
     Check(bodyCombo->count() >= 3, "PhysicsCombo0 has at least 3 items on startup");
-    Check(shapeCombo->count() >= 3, "PhysicsCombo1 has at least 3 items on startup");
+    Check(shapeCombo->count() == 4, "PhysicsCombo1 includes the Mesh shape on startup");
 
     // Provide snapshot with Mesh object with physics enabled
     EditorQtHost::Snapshot snap;
@@ -417,6 +417,20 @@ inline void RunPhysicsColliderTests()
     Check(shapeCombo->currentIndex() == 1, "Shape index preserved after RU language change");
     Check(bodyCombo->currentIndex() == 0, "Body type index preserved after RU language change");
     Check(shapeCombo->currentText() == QStringLiteral("Сфера"), "Shape text updated to RU Сфера");
+
+    shapeCombo->setCurrentIndex(3);
+    Check(emittedPhysics.shapeType == 3, "Mesh shape is emitted without clamping");
+    snap.objects[0].physics.shapeType = 3;
+    inspector.Refresh(snap, 42, true);
+    Check(shapeCombo->currentIndex() == 3, "Mesh survives engine snapshot refresh");
+    EditorLocale::Instance().SetLanguage(EditorLanguage::En);
+    QApplication::processEvents();
+    Check(shapeCombo->currentIndex() == 3 && shapeCombo->currentText() == QStringLiteral("Mesh (complex)"),
+          "Mesh survives EN retranslation");
+    EditorLocale::Instance().SetLanguage(EditorLanguage::Ru);
+    QApplication::processEvents();
+    Check(shapeCombo->currentIndex() == 3 && shapeCombo->currentText() == QStringLiteral("Меш (сложная)"),
+          "Mesh survives RU retranslation");
 }
 
 inline void Run()

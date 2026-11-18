@@ -1,5 +1,8 @@
 ﻿#include <Engine/Physics/PhysicsWorld.h>
 #include <cmath>
+#include <Engine/MainGame/BaseGameClass/Game.h>
+#include <Engine/Components/SpecificComponents/MeshComponent.h>
+#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 #include <limits>
 #include <stdexcept>
@@ -124,8 +127,7 @@ void PhysicsWorldTests()
     Require(!world.IsInitialized(), "world still initialized after shutdown");
 }
 
-// Complex (mesh) collision: exact concave shape for static/kinematic bodies, convex
-// hull for dynamic ones, all built from render-mesh vertex/index data.
+// Complex collision: exact static triangles, convex moving/kinematic hulls.
 void PhysicsMeshShapeTests()
 {
     PhysicsSettings settings;
@@ -205,4 +207,73 @@ void PhysicsMeshShapeTests()
     Require(world.CreateBody(invalidDesc) == 0, "mesh body without triangles must not be created");
 
     world.Shutdown();
+}
+
+void PhysicsMeshComponentTests()
+{
+    class CpuGame : public Game { public: using Game::TickPhysicsWorld; };
+    for (int scenario = 0; scenario < 3; ++scenario)
+    {
+        CpuGame game;
+        std::unique_ptr<GameComponent> parent = std::make_unique<GameComponent>();
+        auto* parentPtr = parent.get();
+        Require(game.GetScene().AddComponent("parent", parent).result == SceneResult::Ok, "parent registration");
+        std::unique_ptr<GameComponent> owner = std::make_unique<GameComponent>();
+        auto* body = owner.get();
+        MeshLodData mesh;
+        for (const auto& p : {glm::vec3(1,0,0), glm::vec3(2,0,0), glm::vec3(1,0,1)}) {
+            MeshVertex vertex; vertex.Position = {p.x,p.y,p.z,1}; mesh.Vertices.push_back(vertex);
+        }
+        mesh.Indices = {0,2,1};
+        body->SetPrimitive(std::move(mesh));
+        body->SetPosition({3,1,2});
+        body->SetScale({scenario ? -2.f : 2.f,1,1});
+        body->SetPhysicsBodyType(PhysicsBodyType::Static);
+        body->SetPhysicsShapeType(PhysicsShapeType::Mesh);
+        body->SetPhysicsEnabled(true);
+        Require(game.GetScene().AddComponent("mesh", owner).result == SceneResult::Ok, "mesh registration");
+        auto expected = glm::translate(glm::mat4(1), glm::vec3(3,1,2));
+        if (scenario == 2) {
+            parentPtr->SetScale({2,1,3}); parentPtr->SetRotation({0,40,0}); body->SetRotation({0,25,0});
+            Require(body->SetParent(parentPtr), "mesh parent assignment");
+            expected = glm::rotate(glm::mat4(1),glm::radians(40.f),glm::vec3(0,1,0)) *
+                glm::scale(glm::mat4(1),glm::vec3(2,1,3)) * expected *
+                glm::rotate(glm::mat4(1),glm::radians(25.f),glm::vec3(0,1,0));
+        }
+        expected = expected * glm::scale(glm::mat4(1),glm::vec3(scenario ? -2.f : 2.f,1,1));
+        const auto point = glm::vec3(expected * glm::vec4(4.f/3.f,0,1.f/3.f,1));
+        const Trace::Ray ray{point + glm::vec3(0,2,0), {0,-1,0}, 5};
+        Require(bool(game.GetScene().Raycast(ray)), "reference ray must hit the rendered triangle");
+        game.InitializeGameplay(); game.TickPhysicsWorld(0);
+        if (!game.GetPhysicsWorld()) throw TestSkipped("Jolt not available");
+        body->Tick(0);
+        Require(body->HasPhysicsBody(), "component mesh body missing");
+        PhysicsRaycastHit hit;
+        const bool found = game.GetPhysicsWorld()->Raycast(ray.origin,ray.direction,ray.maxDistance,hit);
+        std::cout << "Mesh transform scenario=" << scenario << " physicsHit=" << found << '\n';
+        Require(found && glm::length(hit.position-point)<.001f,
+                "mesh collision must match render geometry after signed/parent transforms");
+    }
+}
+
+void PhysicsMeshIndexedHullTests()
+{
+    PhysicsWorld world; PhysicsSettings settings; std::string error;
+    if (!world.Initialize(settings,error)) throw TestSkipped(error);
+    std::vector<glm::vec3> vertices = {{-.5f,-.5f,-.5f},{.5f,-.5f,-.5f},{.5f,.5f,-.5f},{-.5f,.5f,-.5f},
+        {-.5f,-.5f,.5f},{.5f,-.5f,.5f},{.5f,.5f,.5f},{-.5f,.5f,.5f},{100,100,100}};
+    std::vector<uint32_t> indices = {0,1,5,0,5,4,3,7,6,3,6,2,4,5,6,4,6,7,
+        0,3,2,0,2,1,1,2,6,1,6,5,0,4,7,0,7,3};
+    PhysicsBodyDesc desc; desc.shape=PhysicsShapeType::Mesh; desc.meshVertices=&vertices;
+    desc.meshIndices=&indices; desc.density=10; desc.position={0,30,0};
+    const auto body=world.CreateBody(desc);
+    Require(body!=0,"indexed hull missing");
+    world.AddImpulse(body,{100,0,0});
+    std::cout << "Indexed hull impulse speed=" << world.GetLinearVelocity(body).x << '\n';
+    Require(Near(world.GetLinearVelocity(body).x,10),"unused render vertices must not inflate moving mesh hull/mass");
+    indices={100,101,102};
+    Require(world.CreateBody(desc)==0,"moving mesh with no valid indexed triangles must be rejected");
+    indices={0,1,2};
+    for (auto& vertex : vertices) vertex.x=std::numeric_limits<float>::quiet_NaN();
+    Require(world.CreateBody(desc)==0,"non-finite mesh triangles must be rejected safely");
 }

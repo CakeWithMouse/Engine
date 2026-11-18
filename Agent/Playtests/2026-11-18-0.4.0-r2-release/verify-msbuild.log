@@ -1,0 +1,16 @@
+PASS CoreTests-build
+PASS HostTests-build
+PASS UiTests-build
+PASS editor-regression
+PASS engine-build
+PASS ai-build
+PASS engine-tests
+PASS ai-tests
+PASS editor-ui-build
+PASS commandlets-build
+PASS diagnostics-fixture-build
+PASS ai-diagnostics
+PASS camera-guides
+PASS diagnostics-api
+Verification complete
+PASS final-runtime-sdk

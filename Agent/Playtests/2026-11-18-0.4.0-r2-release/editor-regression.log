@@ -1,0 +1,4 @@
+PASS CoreTests
+PASS HostTests
+PASS UiTests
+Regression checks passed (Release). Logs: E:\Engine\Engine\build\editor-regression\Release-e21b9cfb6674401f84eb059141d93769

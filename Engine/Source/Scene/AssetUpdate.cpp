@@ -8,6 +8,7 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <atomic>
 #include <cctype>
 namespace fs=std::filesystem;
 using Json=nlohmann::json;
@@ -71,8 +72,14 @@ void AssetUpdate::Run(const fs::path& content,unsigned operation,const std::stri
     HANDLE lock=CreateFileW((work/"AssetUpdate.lock").c_str(),GENERIC_READ|GENERIC_WRITE,0,nullptr,OPEN_ALWAYS,FILE_ATTRIBUTE_NORMAL,nullptr);
     if(lock==INVALID_HANDLE_VALUE)throw std::runtime_error("Another asset update is in progress");
     struct Guard{HANDLE h;~Guard(){CloseHandle(h);}} guard{lock};
-    const auto backup=work/"AssetBackups"/(std::to_string(GetCurrentProcessId())+"-"+std::to_string(GetTickCount64()));
-    fs::create_directories(backup);
+    const auto backups=work/"AssetBackups";
+    fs::create_directories(backups);
+    static std::atomic<uint64_t> backupSequence{0};
+    fs::path backup;
+    do {
+        backup=backups/(std::to_string(GetCurrentProcessId())+"-"+std::to_string(GetTickCount64())+"-"+
+                        std::to_string(backupSequence.fetch_add(1)));
+    } while(!fs::create_directory(backup));
     auto target=file,targetRoot=sourceRoot;std::string before,after;fs::path imported,importRoot,staging;
     std::vector<std::pair<fs::path,fs::path>> changed;
     bool moved=false,installed=false;
