@@ -211,6 +211,7 @@ private:
     QMenu* langMenu_ = nullptr;
     QMenu* accentMenu_ = nullptr;
     QMenu* schemeMenu_ = nullptr;
+    QMenu* aiMenu_ = nullptr;
     QMenu* toolsMenu_ = nullptr;
     QMenu* uiSubMenu_ = nullptr;
     QAction* actCreateUI_ = nullptr;

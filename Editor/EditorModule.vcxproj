@@ -397,6 +397,8 @@
         <ClInclude Include="Include/FsmBlockListEditor.h"/>
         <ClInclude Include="Include/FsmGraphWidget.h"/>
         <ClInclude Include="Include/AiMachineEditorWindow.h"/>
+        <ClInclude Include="UI/AssetSlotWidget.h"/>
+        <ClInclude Include="UI/ScenePanelHelpers.h"/>
         <ClInclude Include="UI/ScriptCard.h"/>
         <ClInclude Include="UI/AiMachineCard.h"/>
         <ClInclude Include="UI/VariableValuesEditor.h"/>

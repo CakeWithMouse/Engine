@@ -277,22 +277,16 @@ bool ViewportWidget::HandleMouseMove(QMouseEvent* mouse)
 
     if (!looking_ && !draggingSelectedObject_ && hasCameraInfo_ && host_->PlayState() == EditorQtHost::Edit)
     {
-        uint64_t selId = 0;
-        EngineSceneTransform selTrans{};
-        if (SelectedTransform(selId, selTrans))
+        uint64_t selId = 0; EngineSceneTransform selTrans{}; float wp[3]{}; float wr[4]{};
+        if (SelectedWorldTransform(selId, selTrans, wp, wr))
         {
             GizmoMath::GizmoMode mode = (gizmoMode_ == EditorGizmoTranslate) ? GizmoMath::GizmoMode::Translate :
                                         (gizmoMode_ == EditorGizmoRotate) ? GizmoMath::GizmoMode::Rotate :
                                                                             GizmoMath::GizmoMode::Scale;
             auto handle = GizmoGeometry::PickHandle(
-                mode,
-                selTrans.position,
-                selTrans.rotation,
-                localOrientation_,
-                static_cast<float>(cameraPos.x()),
-                static_cast<float>(cameraPos.y()),
-                lastCameraInfo_,
-                10.0f
+                mode, wp, wr, localOrientation_,
+                static_cast<float>(cameraPos.x()), static_cast<float>(cameraPos.y()),
+                lastCameraInfo_, 10.0f
             );
 
             if (handle != hoveredHandle_)

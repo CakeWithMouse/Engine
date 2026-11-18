@@ -10,6 +10,7 @@
 #include "EditorSettings.h"
 #include "GizmoMath.h"
 #include "GizmoGeometry.h"
+#include <glm/mat4x4.hpp>
 
 class ViewportHeaderBar;
 class QDragEnterEvent;
@@ -85,6 +86,7 @@ private:
     uint32_t PhysH() const;
 
     bool SelectedTransform(uint64_t& id, EngineSceneTransform& transform);
+    bool SelectedWorldTransform(uint64_t& id, EngineSceneTransform& local, float worldPos[3], float worldRot[4], glm::mat4* parentWorldOut = nullptr) const;
     bool BeginGizmoDragGesture(const QPointF& pos, GizmoGeometry::Handle handle);
     void ApplyGizmoDragGesture(const QPointF& pos);
     void EndObjectDrag();
@@ -129,6 +131,9 @@ private:
     bool gizmoDragSession_ = false;
     uint64_t dragObjectId_ = 0;
     EngineSceneTransform dragStartTransform_{};
+    float dragStartWorldPos_[3]{};
+    float dragStartWorldRot_[4]{0, 0, 0, 1};
+    glm::mat4 dragParentWorld_{1.0f};
     QPointF dragStartPos_;
 
     float dragSensitivity_ = 0.002f;

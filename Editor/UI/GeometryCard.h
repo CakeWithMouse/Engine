@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AssetPathDisplay.h"
+#include "AssetSlotWidget.h"
 #include "CollapsibleCard.h"
 #include "EditorLocale.h"
 #include "EditorTheme.h"
@@ -69,8 +70,8 @@ public:
         modelAsset_->setStyleSheet(QString());
         modelAsset_->setToolTip(QString());
         chooseModel_->setEnabled(false);
-        chooseModel_->setToolTip(Tr("Замена геометрии примитива на модель заблокирована (требуется C-ABI)",
-                                   "Replacing primitive geometry with a model is blocked (requires C-ABI)"));
+        chooseModel_->setToolTip(Tr("Замена геометрии примитива на модель заблокирована [требуется C-ABI]",
+                                   "Replacing primitive geometry with a model is blocked [requires C-ABI]"));
     }
 
     void UpdateChooseModelButton(bool isModel, bool isPrimitive)
@@ -83,8 +84,8 @@ public:
         else if (isPrimitive)
         {
             chooseModel_->setEnabled(false);
-            chooseModel_->setToolTip(Tr("Замена геометрии примитива на модель заблокирована (требуется C-ABI)",
-                                       "Replacing primitive geometry with a model is blocked (requires C-ABI)"));
+            chooseModel_->setToolTip(Tr("Замена геометрии примитива на модель заблокирована [требуется C-ABI]",
+                                       "Replacing primitive geometry with a model is blocked [requires C-ABI]"));
         }
         else
         {
@@ -122,6 +123,7 @@ public:
         SetInfo(Tr("Геометрия", "Geometry"),
                 Tr("3D-модель объекта:\n• Форматы: .obj, .fbx, .glb\n• Перетаскивание ассета из браузера\n\nДля примитивов замена заблокирована.",
                    "3D object model:\n• Formats: .obj, .fbx, .glb\n• Drag-and-drop asset from browser\n\nReplacement is locked for primitives."));
+        if (modelSlot_) modelSlot_->RetranslateUi();
         if (labelModelTitle_) labelModelTitle_->setText(Tr("Модель [.obj / .fbx / .glb]", "Model [.obj / .fbx / .glb]"));
         if (modelAsset_)
         {
@@ -134,6 +136,8 @@ public:
     }
 
     std::function<void()> onChooseModel;
+    std::function<void(const QString&)> onModelDropped;
+    std::function<void()> onClearModel;
 
 private:
     void BuildCard()
@@ -148,14 +152,12 @@ private:
         labelModelTitle_->setObjectName(QStringLiteral("CardSectionLabel"));
         cl->addWidget(labelModelTitle_);
 
-        modelAsset_ = new QLineEdit(Content());
-        modelAsset_->setReadOnly(true);
+        modelSlot_ = new AssetSlotWidget(EditorCore::AssetKind::Model, Content());
+        modelAsset_ = modelSlot_->LineEdit();
         modelAsset_->setObjectName(QStringLiteral("ModelAsset"));
-        modelAsset_->setFixedHeight(InspectorCardStyle::kFieldHeight);
-        modelAsset_->setMinimumWidth(0);
-        modelAsset_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
-        modelAsset_->setPlaceholderText(Tr("нет модели", "none"));
-        cl->addWidget(modelAsset_);
+        modelSlot_->onAssetDropped = [this](const QString& path) { if (!isPrimitive_ && onModelDropped) onModelDropped(path); };
+        modelSlot_->onClearRequested = [this] { if (onClearModel) onClearModel(); };
+        cl->addWidget(modelSlot_);
 
         auto* btnRow = new QWidget(Content());
         auto* lBtns = new QHBoxLayout(btnRow);
@@ -173,6 +175,7 @@ private:
     }
 
     QLabel* labelModelTitle_ = nullptr;
+    AssetSlotWidget* modelSlot_ = nullptr;
     QLineEdit* modelAsset_ = nullptr;
     QPushButton* chooseModel_ = nullptr;
     QString cachedModelPath_;

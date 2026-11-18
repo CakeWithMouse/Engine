@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AssetPathDisplay.h"
+#include "AssetSlotWidget.h"
 #include "CollapsibleCard.h"
 #include "EditorLocale.h"
 #include "EditorTheme.h"
@@ -104,6 +105,7 @@ public:
         SetInfo(Tr("Материал", "Material"),
                 Tr("Материал объекта [.mat]:\n• Шейдер, слоты текстур и параметры\n• Публичные параметры редактируются ниже\n• Перетаскивание файла из браузера",
                    "Object material [.mat]:\n• Shader, texture slots, and parameters\n• Public parameters editable below\n• Drag-and-drop file from browser"));
+        if (materialSlot_) materialSlot_->RetranslateUi();
         if (labelMatTitle_) labelMatTitle_->setText(Tr("Слот материала [.mat]", "Material Slot [.mat]"));
         if (materialAsset_) materialAsset_->setPlaceholderText(Tr("по умолчанию", "default"));
         const bool hasMat = !rawMaterialPath_.isEmpty();
@@ -119,6 +121,7 @@ public:
     std::function<void(const QString&)> onEditMaterial;
     std::function<void()> onChooseMaterial;
     std::function<void()> onClearMaterial;
+    std::function<void(const QString&)> onMaterialDropped;
 
 private:
     void BuildCard()
@@ -133,14 +136,12 @@ private:
         labelMatTitle_->setObjectName(QStringLiteral("CardSectionLabel"));
         cl->addWidget(labelMatTitle_);
 
-        materialAsset_ = new QLineEdit(Content());
-        materialAsset_->setReadOnly(true);
+        materialSlot_ = new AssetSlotWidget(EditorCore::AssetKind::Material, Content());
+        materialAsset_ = materialSlot_->LineEdit();
         materialAsset_->setObjectName(QStringLiteral("MaterialAsset"));
-        materialAsset_->setFixedHeight(InspectorCardStyle::kFieldHeight);
-        materialAsset_->setMinimumWidth(0);
-        materialAsset_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
-        materialAsset_->setPlaceholderText(Tr("по умолчанию", "default"));
-        cl->addWidget(materialAsset_);
+        materialSlot_->onAssetDropped = [this](const QString& path) { if (onMaterialDropped) onMaterialDropped(path); };
+        materialSlot_->onClearRequested = [this] { if (onClearMaterial) onClearMaterial(); };
+        cl->addWidget(materialSlot_);
 
         materialActions_ = new QWidget(Content());
         auto* lMatBtns = new QHBoxLayout(materialActions_);
@@ -172,6 +173,7 @@ private:
         cl->addWidget(materialActions_);
     }
 
+    AssetSlotWidget* materialSlot_ = nullptr;
     QLineEdit* materialAsset_ = nullptr;
     QWidget* materialActions_ = nullptr;
     QPushButton* editMaterialButton_ = nullptr;

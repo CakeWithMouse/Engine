@@ -1,6 +1,8 @@
 #include "EditorTheme.h"
 #include "SceneObjectsPanel.h"
 #include "SceneOutlinerTree.h"
+#include "ScenePanelHelpers.h"
+#include "CommandRegistry.h"
 #include "EditorLocale.h"
 #include "IconProvider.h"
 
@@ -87,6 +89,20 @@ void SceneObjectsPanel::BuildUi()
     outlinerTree->onParentChanged = [this](uint64_t childId, uint64_t parentId) {
         emit SetParentRequested(childId, parentId);
     };
+    outlinerTree->onAssetDropped = [this](uint64_t targetId, EditorCore::AssetKind kind, const QString& path) {
+        if (kind == EditorCore::AssetKind::Model) {
+            if (targetId) CommandRegistry::Instance().Execute(QStringLiteral("Scene.ReplaceModel"), {{QStringLiteral("objectId"), QVariant::fromValue(targetId)}, {QStringLiteral("model"), path}});
+            else CommandRegistry::Instance().Execute(QStringLiteral("Scene.SpawnModel"), {{QStringLiteral("model"), path}});
+        } else if (kind == EditorCore::AssetKind::Material && targetId) {
+            CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignMaterial"), {{QStringLiteral("objectId"), QVariant::fromValue(targetId)}, {QStringLiteral("material"), path}});
+        } else if (kind == EditorCore::AssetKind::Script && targetId) {
+            CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignScript"), {{QStringLiteral("objectId"), QVariant::fromValue(targetId)}, {QStringLiteral("script"), path}});
+        } else if (kind == EditorCore::AssetKind::AiMachine && targetId) {
+            CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignAiMachine"), {{QStringLiteral("objectId"), QVariant::fromValue(targetId)}, {QStringLiteral("machine"), path}});
+        } else if (kind == EditorCore::AssetKind::Texture && targetId) {
+            CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignTexture"), {{QStringLiteral("objectId"), QVariant::fromValue(targetId)}, {QStringLiteral("texture"), path}});
+        }
+    };
     hierarchy_ = outlinerTree;
     hierarchy_->setObjectName(QStringLiteral("SceneHierarchy"));
     hierarchy_->setMinimumSize(80, 60);
@@ -146,31 +162,22 @@ void SceneObjectsPanel::BuildUi()
     mainLayout->addWidget(hierarchy_, 1);
 }
 
-static QString LocalizedTypeLabel(const QString& name, const QString& fallbackLabel)
-{
-    if (name == "Primitive.Cube") return Tr("Куб", "Cube");
-    if (name == "Primitive.Sphere") return Tr("Сфера", "Sphere");
-    if (name == "Primitive.Plane") return Tr("Плоскость", "Plane");
-    if (name == "Primitive.Cylinder") return Tr("Цилиндр", "Cylinder");
-    if (name == "Primitive.Cone") return Tr("Конус", "Cone");
-    if (name == "Primitive.Pyramid") return Tr("Пирамида", "Pyramid");
-    if (name == "Light.Point") return Tr("Точечный свет", "Point Light");
-    if (name == "Light.Directional") return Tr("Направленный свет", "Directional Light");
-    if (name == "Particle.Sparks") return Tr("Искры", "Sparks");
-    if (name == "Particle.Smoke") return Tr("Дым", "Smoke");
-    if (name == "Environment.Sky") return Tr("Базовое небо", "Basic Sky");
-    if (name == "Gameplay.Character") return Tr("Персонаж", "Character");
-    if (name == "Gameplay.Camera") return Tr("Камера Play", "Play Camera");
-    if (name == "Gameplay.PlaySettings") return Tr("Настройки Play", "Play Settings");
-    if (name == "Gameplay.Player") return Tr("Игрок", "Player");
-    return fallbackLabel;
-}
-
 void SceneObjectsPanel::RebuildAddMenu()
 {
     if (!addMenu_) return;
     qDeleteAll(addMenu_->findChildren<QMenu*>(QString(), Qt::FindDirectChildrenOnly));
     addMenu_->clear();
+
+    auto* actFolder = addMenu_->addAction(IconProvider::FolderIcon(), Tr("Папка", "Folder"), this, [this] {
+        emit AddPrimitiveRequested(QStringLiteral("Scene.Folder"), Tr("Папка", "Folder"), SpawnPosition());
+    });
+    actFolder->setObjectName(QStringLiteral("CreateObject.Scene.Folder"));
+
+    auto* actEmpty = addMenu_->addAction(IconProvider::GetIcon(QStringLiteral("circle-dotted")), Tr("Пустой объект", "Empty"), this, [this] {
+        emit AddPrimitiveRequested(QStringLiteral("Scene.Empty"), Tr("Пустой объект", "Empty"), SpawnPosition());
+    });
+    actEmpty->setObjectName(QStringLiteral("CreateObject.Scene.Empty"));
+    addMenu_->addSeparator();
 
     auto* menuPrimitives = addMenu_->addMenu(Tr("Примитивы", "Primitives"));
     auto* menuLights = addMenu_->addMenu(Tr("Свет", "Lights"));
@@ -182,8 +189,8 @@ void SceneObjectsPanel::RebuildAddMenu()
 
     for (const auto& type : types_) {
         const auto& name = type.second;
-        const auto label = LocalizedTypeLabel(name, type.first);
-        if (name == "Gameplay.PlaySettings") continue;
+        if (name == "Gameplay.PlaySettings" || name == "Scene.Folder" || name == "Scene.Empty") continue;
+        const auto label = EditorUI::LocalizedTypeLabel(name, type.first);
 
         QMenu* target = menuProject;
         if (name.startsWith("Primitive.")) target = menuPrimitives;
@@ -236,34 +243,16 @@ void SceneObjectsPanel::FilterHierarchy(const QString& query)
     }
 }
 
-void SceneObjectsPanel::SetEnabled(bool enabled)
-{
-    QWidget::setEnabled(enabled);
-}
-
+void SceneObjectsPanel::SetEnabled(bool enabled) { QWidget::setEnabled(enabled); }
 void SceneObjectsPanel::SetPrimitiveTypes(const QVector<std::pair<QString, QString>>& types)
 {
     if (types_ == types) return;
     types_ = types;
     RebuildAddMenu();
 }
+void SceneObjectsPanel::SetShowServiceObjects(bool visible) { showServiceObjects_ = visible; hierarchyKey_.clear(); }
 
-void SceneObjectsPanel::SetShowServiceObjects(bool visible)
-{
-    showServiceObjects_ = visible;
-    hierarchyKey_.clear();
-}
-
-std::array<double, 3> SceneObjectsPanel::SpawnPosition() const
-{
-    return {0.0, 0.0, 0.0};
-}
-
-static bool IsEnvironmentObject(const IEditorHost::SceneObject& object)
-{
-    return object.gameplayKind == 3 || object.type == "Gameplay.PlaySettings" ||
-           object.type == "Light.Directional" || object.type == "Environment.Sky";
-}
+std::array<double, 3> SceneObjectsPanel::SpawnPosition() const { return {0.0, 0.0, 0.0}; }
 
 void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
 {
@@ -288,6 +277,12 @@ void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
 
     if (key != hierarchyKey_)
     {
+        QSet<quint64> collapsedIds;
+        for (QTreeWidgetItemIterator it(hierarchy_); *it; ++it)
+            if (!(*it)->isExpanded())
+                if (quint64 cid = (*it)->data(0, Qt::UserRole).toULongLong())
+                    collapsedIds.insert(cid);
+
         hierarchy_->clear();
         std::map<quint64, QTreeWidgetItem*> items;
         std::vector<const IEditorHost::SceneObject*> normalObjects;
@@ -295,7 +290,7 @@ void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
 
         for (const auto& object : view.objects)
         {
-            if (IsEnvironmentObject(object))
+            if (EditorUI::IsEnvironmentObject(object.type, object.gameplayKind))
                 envObjects.push_back(&object);
             else
                 normalObjects.push_back(&object);
@@ -339,12 +334,7 @@ void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
                 QString::fromStdString(object->name),
                 QString::fromStdString(object->type)
             });
-            QIcon objIcon;
-            if (object->type.find("Light") != std::string::npos) objIcon = IconProvider::BulbIcon();
-            else if (object->type.find("Camera") != std::string::npos) objIcon = IconProvider::GetIcon(QStringLiteral("camera"));
-            else if (object->type.find("Particles") != std::string::npos) objIcon = IconProvider::GetIcon(QStringLiteral("particles"));
-            else objIcon = IconProvider::CubeIcon();
-            item->setIcon(0, objIcon);
+            item->setIcon(0, EditorUI::GetSceneObjectIcon(object->type));
             item->setFlags(item->flags() | Qt::ItemIsEditable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
             item->setData(0, Qt::UserRole, QVariant::fromValue<qulonglong>(object->id));
             items[object->id] = item;
@@ -360,6 +350,9 @@ void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
         }
 
         hierarchy_->expandAll();
+        for (QTreeWidgetItemIterator it(hierarchy_); *it; ++it)
+            if (collapsedIds.contains((*it)->data(0, Qt::UserRole).toULongLong()))
+                (*it)->setExpanded(false);
         hierarchyKey_ = key;
     }
 
@@ -391,10 +384,20 @@ void SceneObjectsPanel::ShowTreeContextMenu(const QPoint& pos)
     // 1. Создать внутри... / Add Child...
     if (selectedId) {
         auto* addChildMenu = menu.addMenu(Tr("Создать внутри…", "Add Child…"));
+        auto* actF = addChildMenu->addAction(IconProvider::FolderIcon(), Tr("Папка", "Folder"), this, [this, selectedId] {
+            emit AddChildPrimitiveRequested(selectedId, QStringLiteral("Scene.Folder"), Tr("Папка", "Folder"), SpawnPosition());
+        });
+        actF->setObjectName(QStringLiteral("CreateChildObject.Scene.Folder"));
+        auto* actE = addChildMenu->addAction(IconProvider::GetIcon(QStringLiteral("circle-dotted")), Tr("Пустой объект", "Empty"), this, [this, selectedId] {
+            emit AddChildPrimitiveRequested(selectedId, QStringLiteral("Scene.Empty"), Tr("Пустой объект", "Empty"), SpawnPosition());
+        });
+        actE->setObjectName(QStringLiteral("CreateChildObject.Scene.Empty"));
+        addChildMenu->addSeparator();
+
         for (const auto& type : types_) {
             const auto& name = type.second;
-            const auto label = LocalizedTypeLabel(name, type.first);
-            if (name == "Gameplay.PlaySettings") continue;
+            if (name == "Gameplay.PlaySettings" || name == "Scene.Folder" || name == "Scene.Empty") continue;
+            const auto label = EditorUI::LocalizedTypeLabel(name, type.first);
             auto* act = addChildMenu->addAction(label, this, [this, selectedId, name, label] {
                 emit AddChildPrimitiveRequested(selectedId, name, label, SpawnPosition());
             });

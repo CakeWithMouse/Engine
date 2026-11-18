@@ -6,6 +6,7 @@
 #include "FileService.h"
 #include "Logger.h"
 #include "CameraGuide.h"
+#include "EditorLocale.h"
 
 #include <QDir>
 #include <QFileInfo>
@@ -226,6 +227,56 @@ void EditorMainWindow::RegisterDragDropCommands()
         },
         canExecute
     });
+
+    CommandRegistry::Instance().RegisterCommand({
+        QStringLiteral("Scene.CreateFolder"),
+        Tr("Создать папку", "Create Folder"),
+        QStringLiteral("Ctrl+Shift+N"),
+        Tr("Создать объект-контейнер для группировки объектов сцены", "Create a container object to group scene objects"),
+        [this](const CommandContext& ctx) {
+            if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+                return false;
+            QString name = ctx.parameters.value(QStringLiteral("name")).toString();
+            if (name.isEmpty()) name = Tr("Папка", "Folder");
+            const uint64_t parentId = ctx.parameters.value(QStringLiteral("parentId"), 0).toULongLong();
+            EditorCommand c;
+            c.type = EditorCommand::CreateObject;
+            c.path = QStringLiteral("Scene.Folder");
+            c.name = name;
+            c.parentId = parentId;
+            c.transform.position[0] = ctx.parameters.value(QStringLiteral("x"), 0.0).toFloat();
+            c.transform.position[1] = ctx.parameters.value(QStringLiteral("y"), 0.0).toFloat();
+            c.transform.position[2] = ctx.parameters.value(QStringLiteral("z"), 0.0).toFloat();
+            host_->PostCommand(c);
+            return true;
+        },
+        canExecute
+    });
+
+    CommandRegistry::Instance().RegisterCommand({
+        QStringLiteral("Scene.CreateEmpty"),
+        Tr("Создать пустой объект", "Create Empty"),
+        QString(),
+        Tr("Создать пустой объект сцены [локатор/контейнер]", "Create an empty scene object [locator/container]"),
+        [this](const CommandContext& ctx) {
+            if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+                return false;
+            QString name = ctx.parameters.value(QStringLiteral("name")).toString();
+            if (name.isEmpty()) name = Tr("Пустой объект", "Empty");
+            const uint64_t parentId = ctx.parameters.value(QStringLiteral("parentId"), 0).toULongLong();
+            EditorCommand c;
+            c.type = EditorCommand::CreateObject;
+            c.path = QStringLiteral("Scene.Empty");
+            c.name = name;
+            c.parentId = parentId;
+            c.transform.position[0] = ctx.parameters.value(QStringLiteral("x"), 0.0).toFloat();
+            c.transform.position[1] = ctx.parameters.value(QStringLiteral("y"), 0.0).toFloat();
+            c.transform.position[2] = ctx.parameters.value(QStringLiteral("z"), 0.0).toFloat();
+            host_->PostCommand(c);
+            return true;
+        },
+        canExecute
+    });
 }
 
 void EditorMainWindow::UnregisterDragDropCommands()
@@ -235,4 +286,6 @@ void EditorMainWindow::UnregisterDragDropCommands()
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Scene.SpawnModel"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Scene.AssignTexture"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Scene.Reparent"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Scene.CreateFolder"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Scene.CreateEmpty"));
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AssetSlotWidget.h"
 #include "CollapsibleCard.h"
 #include "EditorLocale.h"
 #include "InspectorCardStyle.h"
@@ -30,12 +31,15 @@ public:
         label_->setObjectName(QStringLiteral("CardSectionLabel"));
         layout->addWidget(label_);
 
-        asset_ = new QLineEdit(Content());
+        scriptSlot_ = new AssetSlotWidget(EditorCore::AssetKind::Script, Content());
+        asset_ = scriptSlot_->LineEdit();
         asset_->setReadOnly(true);
         asset_->setObjectName(QStringLiteral("ScriptAsset"));
         asset_->setFixedHeight(InspectorCardStyle::kFieldHeight);
         asset_->setPlaceholderText(Tr("нет", "none"));
-        layout->addWidget(asset_);
+        scriptSlot_->onAssetDropped = [this](const QString& path) { if (onScriptDropped) onScriptDropped(path); };
+        scriptSlot_->onClearRequested = [this] { if (onClearScript) onClearScript(); };
+        layout->addWidget(scriptSlot_);
 
         auto* actions = new QWidget(Content());
         auto* row = new QHBoxLayout(actions);
@@ -71,7 +75,15 @@ public:
 
     void SetData(const QString& script, bool editable)
     {
-        asset_->setText(script);
+        if (scriptSlot_)
+        {
+            scriptSlot_->SetValue(script, script);
+            scriptSlot_->SetSlotEnabled(editable);
+        }
+        else
+        {
+            asset_->setText(script);
+        }
         open_->setText(script.isEmpty() ? Tr("Создать", "Create") : Tr("Открыть", "Open"));
         open_->setToolTip(script.isEmpty() ? Tr("Создать скрипт в Content/Scripts, назначить его объекту и открыть",
                                                 "Create a script in Content/Scripts, assign it to the object and open it")
@@ -87,6 +99,7 @@ public:
         SetInfo(Tr("Скрипт", "Script"),
                 Tr("Визуальный скрипт [.vscript]:\n• Граф логики и событий объекта\n• Публичные переменные настраиваются ниже\n• Перетаскивание скрипта из браузера",
                    "Visual logic script [.vscript]:\n• Object logic and event graph\n• Public variables configured below\n• Drag-and-drop script from browser"));
+        if (scriptSlot_) scriptSlot_->RetranslateUi();
         label_->setText(Tr("Визуальный скрипт [.vscript]", "Visual script [.vscript]"));
         asset_->setPlaceholderText(Tr("нет", "none"));
         choose_->setText(Tr("Выбрать…", "Browse…"));
@@ -98,6 +111,7 @@ public:
     std::function<void(const QString&)> onOpenScript; // пустой путь: создать
     std::function<void()> onChooseScript;
     std::function<void()> onClearScript;
+    std::function<void(const QString&)> onScriptDropped;
     // Новые значения переменных объекта (JSON-объект; пустая строка — все как в скрипте).
     std::function<void(const QString&)> onVariablesChanged;
     // Список переменных скрипта по /Game пути: [{"name","type","value"}].
@@ -118,6 +132,7 @@ private:
     QLabel* variablesLabel_ = nullptr;
     VariableValuesEditor* variablesBox_ = nullptr;
     QLabel* label_ = nullptr;
+    AssetSlotWidget* scriptSlot_ = nullptr;
     QLineEdit* asset_ = nullptr;
     QPushButton* open_ = nullptr;
     QPushButton* choose_ = nullptr;

@@ -267,10 +267,20 @@ void ViewportOverlayHelper::UpdateOverlays(
         GizmoMath::GizmoMode mode = (gizmoMode == 0) ? GizmoMath::GizmoMode::Translate :
                                     (gizmoMode == 1) ? GizmoMath::GizmoMode::Rotate :
                                                        GizmoMath::GizmoMode::Scale;
+        const auto worldM = CameraGuide::World(*selectedObj, snapshot);
+        float worldPos[3] = {worldM[3].x, worldM[3].y, worldM[3].z};
+        glm::mat3 rotM(
+            glm::length(glm::vec3(worldM[0])) > 1e-6f ? glm::normalize(glm::vec3(worldM[0])) : glm::vec3(1, 0, 0),
+            glm::length(glm::vec3(worldM[1])) > 1e-6f ? glm::normalize(glm::vec3(worldM[1])) : glm::vec3(0, 1, 0),
+            glm::length(glm::vec3(worldM[2])) > 1e-6f ? glm::normalize(glm::vec3(worldM[2])) : glm::vec3(0, 0, 1)
+        );
+        glm::quat worldRot = glm::quat_cast(rotM);
+        float worldRotArray[4] = {worldRot.x, worldRot.y, worldRot.z, worldRot.w};
+
         auto gizmoLines = GizmoGeometry::BuildGizmoLines(
             mode,
-            selectedObj->transform.position,
-            selectedObj->transform.rotation,
+            worldPos,
+            worldRotArray,
             localSpace,
             cam,
             hoveredHandle,
@@ -290,9 +300,11 @@ void ViewportOverlayHelper::UpdateOverlays(
                                     (gizmoMode == 1) ? GizmoMath::GizmoMode::Rotate :
                                                        GizmoMath::GizmoMode::Scale;
         const float camFwd[3] = {cam.viewMatrix[2], cam.viewMatrix[6], cam.viewMatrix[10]};
+        const auto worldM = CameraGuide::World(*selectedObj, snapshot);
+        float worldPos[3] = {worldM[3].x, worldM[3].y, worldM[3].z};
         triangles = GizmoTriangles::BuildGizmoTriangles(
             mode,
-            selectedObj->transform.position,
+            worldPos,
             cam.position,
             camFwd,
             cam.fov,

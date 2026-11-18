@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AssetSlotWidget.h"
 #include "CollapsibleCard.h"
 #include "EditorLocale.h"
 #include "InspectorCardStyle.h"
@@ -25,7 +26,9 @@ public:
         label_->setObjectName(QStringLiteral("CardSectionLabel"));
         layout->addWidget(label_);
 
-        machine_ = new QLineEdit(Content());
+        machineSlot_ = new AssetSlotWidget(EditorCore::AssetKind::AiMachine, Content());
+        machineSlot_->SetReadOnly(false);
+        machine_ = machineSlot_->LineEdit();
         machine_->setObjectName(QStringLiteral("AiMachine"));
         machine_->setFixedHeight(InspectorCardStyle::kFieldHeight);
         machine_->setMaxLength(4096);
@@ -33,7 +36,14 @@ public:
             const QString text = machine_->text().trimmed();
             if (text != shown_ && onSetMachine) onSetMachine(text);
         });
-        layout->addWidget(machine_);
+        machineSlot_->onAssetDropped = [this](const QString& path) {
+            if (onAiMachineDropped) onAiMachineDropped(path);
+            else if (onSetMachine) onSetMachine(path);
+        };
+        machineSlot_->onClearRequested = [this] {
+            if (onSetMachine) onSetMachine(QString());
+        };
+        layout->addWidget(machineSlot_);
 
         status_ = new QLabel(Content());
         status_->setObjectName(QStringLiteral("AiMachineStatus"));
@@ -87,6 +97,11 @@ public:
     {
         shown_ = machine;
         memoryShown_ = memory;
+        if (machineSlot_)
+        {
+            machineSlot_->SetValue(machine, machine);
+            machineSlot_->SetSlotEnabled(editable);
+        }
         if (!machine_->hasFocus()) machine_->setText(machine);
         machine_->setEnabled(editable);
         const bool file = IsFile(machine);
@@ -133,6 +148,7 @@ public:
         SetInfo(Tr("Автомат ИИ", "AI State Machine"),
                 Tr("Конечный автомат ИИ [.fsm]:\n• Иерархический граф состояний\n• Локальные переменные памяти ниже\n• Перетаскивание автомата из браузера",
                    "AI state machine [.fsm]:\n• Hierarchical state machine graph\n• Local memory variables below\n• Drag-and-drop machine from browser"));
+        if (machineSlot_) machineSlot_->RetranslateUi();
         label_->setText(Tr("Файл .fsm или имя автомата из C++", "A .fsm file or the name of a C++ machine"));
         machine_->setPlaceholderText(Tr("нет", "none"));
         choose_->setText(Tr("Выбрать…", "Browse…"));
@@ -145,6 +161,7 @@ public:
     std::function<void()> onCreate;
     std::function<void(const QString&)> onOpen;
     std::function<void()> onChoose;
+    std::function<void(const QString&)> onAiMachineDropped;
     std::function<void(const QString&)> onMemoryChanged; // JSON-объект; пустая строка — все как в файле
     std::function<QJsonArray(const QString&)> readVariables; // переменные файла по /Game пути: [{"name","type","value"}]
     std::function<bool(const QString&)> fileExists;
@@ -179,6 +196,7 @@ private:
     QLabel* problems_ = nullptr;
     QLabel* live_ = nullptr;
     QLabel* label_ = nullptr;
+    AssetSlotWidget* machineSlot_ = nullptr;
     QLineEdit* machine_ = nullptr;
     QLabel* status_ = nullptr;
     QPushButton* open_ = nullptr;

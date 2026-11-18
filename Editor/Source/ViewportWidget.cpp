@@ -7,6 +7,7 @@
 #include "ViewportHeaderBar.h"
 #include "CommandRegistry.h"
 #include "EditorLocale.h"
+#include "CameraGuide.h"
 
 #include <type_traits>
 #include <QPainter>
@@ -250,30 +251,66 @@ void ViewportWidget::RetranslateUi() { updateGizmoToolTip(); if (headerBar_) hea
 
 void ViewportWidget::updateGizmoToolTip()
 {
-    const QString modeStr = (gizmoMode_ == EditorGizmoTranslate ? QStringLiteral("Move (W/G)") :
-                            (gizmoMode_ == EditorGizmoRotate ? QStringLiteral("Rotate (E/R)") : QStringLiteral("Scale (R/S)")));
-    setToolTip(Tr("Режим трансформации: %1\nLMB — тянуть по осям, Shift — по Z\nЛКМ: выбор, ПКМ: вращение камеры, Колёсико: зум",
-                  "Gizmo mode: %1\nLMB — drag axes, Shift — along Z\nLMB: pick, RMB: camera look, Wheel: zoom").arg(modeStr));
+    setToolTip(QString());
 }
 
 bool ViewportWidget::SelectedTransform(uint64_t& id, EngineSceneTransform& transform)
 {
     id = 0;
     const auto view = host_->ReadSnapshot();
-    if (!view.selected)
-        return false;
-
-    auto found = std::find_if(
-        view.objects.begin(),
-        view.objects.end(),
-        [&](const auto& o) { return o.id == view.selected; }
-    );
-
-    if (found == view.objects.end())
-        return false;
-
+    if (!view.selected) return false;
+    auto found = std::find_if(view.objects.begin(), view.objects.end(), [&](const auto& o) { return o.id == view.selected; });
+    if (found == view.objects.end()) return false;
     id = found->id;
     transform = found->transform;
+    return true;
+}
+
+bool ViewportWidget::SelectedWorldTransform(uint64_t& id, EngineSceneTransform& local, float worldPos[3], float worldRot[4], glm::mat4* parentWorldOut) const
+{
+    id = 0;
+    if (!attached_ || !host_->HasScene()) return false;
+    const auto view = host_->ReadSnapshot();
+    const auto found = std::find_if(view.objects.begin(), view.objects.end(), [&](const auto& o) { return o.id == view.selected; });
+    if (found == view.objects.end()) return false;
+    id = found->id;
+    local = found->transform;
+
+    const glm::mat4 childWorld = CameraGuide::World(*found, view);
+    worldPos[0] = childWorld[3].x; worldPos[1] = childWorld[3].y; worldPos[2] = childWorld[3].z;
+
+    glm::mat3 rotM(
+        glm::length(glm::vec3(childWorld[0])) > 1e-6f ? glm::normalize(glm::vec3(childWorld[0])) : glm::vec3(1, 0, 0),
+        glm::length(glm::vec3(childWorld[1])) > 1e-6f ? glm::normalize(glm::vec3(childWorld[1])) : glm::vec3(0, 1, 0),
+        glm::length(glm::vec3(childWorld[2])) > 1e-6f ? glm::normalize(glm::vec3(childWorld[2])) : glm::vec3(0, 0, 1)
+    );
+    glm::quat wq = glm::quat_cast(rotM);
+    worldRot[0] = wq.x; worldRot[1] = wq.y; worldRot[2] = wq.z; worldRot[3] = wq.w;
+
+    if (parentWorldOut)
+    {
+        if (found->parent)
+        {
+            for (const auto& p : view.objects)
+            {
+                if (p.id == found->parent)
+                {
+                    glm::mat4 pw = CameraGuide::World(p, view);
+                    if (!found->inheritScale)
+                    {
+                        for (int i = 0; i < 3; ++i)
+                        {
+                            const float l = glm::length(glm::vec3(pw[i]));
+                            if (l > 1e-6f) pw[i] /= l;
+                        }
+                    }
+                    *parentWorldOut = pw;
+                    return true;
+                }
+            }
+        }
+        *parentWorldOut = glm::mat4(1.0f);
+    }
     return true;
 }
 
@@ -281,7 +318,7 @@ bool ViewportWidget::BeginGizmoDragGesture(const QPointF& logicalPos, GizmoGeome
 {
     if (draggingSelectedObject_) return true;
     if (!attached_ || !host_->HasScene() || host_->PlayState() != EditorQtHost::Edit) return false;
-    if (!SelectedTransform(dragObjectId_, dragStartTransform_)) return false;
+    if (!SelectedWorldTransform(dragObjectId_, dragStartTransform_, dragStartWorldPos_, dragStartWorldRot_, &dragParentWorld_)) return false;
 
     draggingSelectedObject_ = true;
     activeGizmoHandle_ = handle;
@@ -300,34 +337,34 @@ bool ViewportWidget::BeginGizmoDragGesture(const QPointF& logicalPos, GizmoGeome
         GizmoGeometry::ScreenToWorldRay(static_cast<float>(pos.x()), static_cast<float>(pos.y()), lastCameraInfo_, rayOrig, rayDir);
 
         float ax[3], ay[3], az[3];
-        GizmoGeometry::GetGizmoAxes(dragStartTransform_.rotation, localOrientation_, ax, ay, az);
+        GizmoGeometry::GetGizmoAxes(dragStartWorldRot_, localOrientation_, ax, ay, az);
 
         if (gizmoMode_ == EditorGizmoTranslate)
         {
             if (handle == GizmoGeometry::Handle::AxisX || handle == GizmoGeometry::Handle::AxisY || handle == GizmoGeometry::Handle::AxisZ)
             {
                 const float* a = (handle == GizmoGeometry::Handle::AxisX) ? ax : (handle == GizmoGeometry::Handle::AxisY ? ay : az);
-                GizmoGeometry::ClosestPointOnAxis(rayOrig, rayDir, dragStartTransform_.position, a, dragStartHitPoint_, &dragStartS_);
+                GizmoGeometry::ClosestPointOnAxis(rayOrig, rayDir, dragStartWorldPos_, a, dragStartHitPoint_, &dragStartS_);
             }
             else if (handle == GizmoGeometry::Handle::PlaneXY || handle == GizmoGeometry::Handle::PlaneXZ || handle == GizmoGeometry::Handle::PlaneYZ)
             {
                 const float* n = (handle == GizmoGeometry::Handle::PlaneXY) ? az : (handle == GizmoGeometry::Handle::PlaneXZ ? ay : ax);
-                GizmoGeometry::RayPlaneIntersection(rayOrig, rayDir, dragStartTransform_.position, n, dragStartHitPoint_);
+                GizmoGeometry::RayPlaneIntersection(rayOrig, rayDir, dragStartWorldPos_, n, dragStartHitPoint_);
             }
             else
             {
                 float camFwd[3] = {lastCameraInfo_.viewMatrix[2], lastCameraInfo_.viewMatrix[6], lastCameraInfo_.viewMatrix[10]};
-                GizmoGeometry::RayPlaneIntersection(rayOrig, rayDir, dragStartTransform_.position, camFwd, dragStartHitPoint_);
+                GizmoGeometry::RayPlaneIntersection(rayOrig, rayDir, dragStartWorldPos_, camFwd, dragStartHitPoint_);
             }
         }
         else if (gizmoMode_ == EditorGizmoRotate)
         {
             const float* n = (handle == GizmoGeometry::Handle::AxisX) ? ax : (handle == GizmoGeometry::Handle::AxisY ? ay : az);
-            if (GizmoGeometry::RayPlaneIntersection(rayOrig, rayDir, dragStartTransform_.position, n, dragStartHitPoint_))
+            if (GizmoGeometry::RayPlaneIntersection(rayOrig, rayDir, dragStartWorldPos_, n, dragStartHitPoint_))
             {
-                float vx = dragStartHitPoint_[0] - dragStartTransform_.position[0];
-                float vy = dragStartHitPoint_[1] - dragStartTransform_.position[1];
-                float vz = dragStartHitPoint_[2] - dragStartTransform_.position[2];
+                float vx = dragStartHitPoint_[0] - dragStartWorldPos_[0];
+                float vy = dragStartHitPoint_[1] - dragStartWorldPos_[1];
+                float vz = dragStartHitPoint_[2] - dragStartWorldPos_[2];
                 float len = std::sqrt(vx * vx + vy * vy + vz * vz);
                 if (len > 1e-4f) { dragStartRefVec_[0] = vx / len; dragStartRefVec_[1] = vy / len; dragStartRefVec_[2] = vz / len; }
                 else { dragStartRefVec_[0] = 1.0f; dragStartRefVec_[1] = 0.0f; dragStartRefVec_[2] = 0.0f; }
@@ -338,13 +375,13 @@ bool ViewportWidget::BeginGizmoDragGesture(const QPointF& logicalPos, GizmoGeome
             if (handle == GizmoGeometry::Handle::Center)
             {
                 float cs[2];
-                if (GizmoGeometry::ProjectPointToScreen(dragStartTransform_.position, lastCameraInfo_.viewMatrix, lastCameraInfo_.projMatrix, lastCameraInfo_.width, lastCameraInfo_.height, cs))
+                if (GizmoGeometry::ProjectPointToScreen(dragStartWorldPos_, lastCameraInfo_.viewMatrix, lastCameraInfo_.projMatrix, lastCameraInfo_.width, lastCameraInfo_.height, cs))
                     dragStartDist_ = std::hypot(static_cast<float>(pos.x()) - cs[0], static_cast<float>(pos.y()) - cs[1]);
             }
             else
             {
                 const float* a = (handle == GizmoGeometry::Handle::AxisX) ? ax : (handle == GizmoGeometry::Handle::AxisY ? ay : az);
-                GizmoGeometry::ClosestPointOnAxis(rayOrig, rayDir, dragStartTransform_.position, a, dragStartHitPoint_, &dragStartS_);
+                GizmoGeometry::ClosestPointOnAxis(rayOrig, rayDir, dragStartWorldPos_, a, dragStartHitPoint_, &dragStartS_);
             }
         }
     }
@@ -383,10 +420,11 @@ void ViewportWidget::ApplyGizmoDragGesture(const QPointF& logicalPos)
         return;
 
     float ax[3], ay[3], az[3];
-    GizmoGeometry::GetGizmoAxes(dragStartTransform_.rotation, localOrientation_, ax, ay, az);
+    GizmoGeometry::GetGizmoAxes(dragStartWorldRot_, localOrientation_, ax, ay, az);
 
     if (gizmoMode_ == EditorGizmoTranslate)
     {
+        float newWorldPos[3] = {dragStartWorldPos_[0], dragStartWorldPos_[1], dragStartWorldPos_[2]};
         if (activeGizmoHandle_ == GizmoGeometry::Handle::AxisX ||
             activeGizmoHandle_ == GizmoGeometry::Handle::AxisY ||
             activeGizmoHandle_ == GizmoGeometry::Handle::AxisZ)
@@ -394,15 +432,12 @@ void ViewportWidget::ApplyGizmoDragGesture(const QPointF& logicalPos)
             const float* a = (activeGizmoHandle_ == GizmoGeometry::Handle::AxisX) ? ax :
                              (activeGizmoHandle_ == GizmoGeometry::Handle::AxisY ? ay : az);
             float curPt[3]; float curS = 0.0f;
-            if (GizmoGeometry::ClosestPointOnAxis(rayOrig, rayDir, dragStartTransform_.position, a, curPt, &curS))
+            if (GizmoGeometry::ClosestPointOnAxis(rayOrig, rayDir, dragStartWorldPos_, a, curPt, &curS))
             {
                 float deltaS = curS - dragStartS_;
                 if (snapEnabled_ && moveSnapStep_ > 1e-4)
                     deltaS = static_cast<float>(std::round(deltaS / moveSnapStep_) * moveSnapStep_);
-
-                EngineSceneTransform t = dragStartTransform_;
-                for (int i = 0; i < 3; ++i) t.position[i] += deltaS * a[i];
-                PostSelectedTransform(t);
+                for (int i = 0; i < 3; ++i) newWorldPos[i] += deltaS * a[i];
             }
         }
         else if (activeGizmoHandle_ == GizmoGeometry::Handle::PlaneXY ||
@@ -416,7 +451,7 @@ void ViewportWidget::ApplyGizmoDragGesture(const QPointF& logicalPos)
             const float* a2 = (activeGizmoHandle_ == GizmoGeometry::Handle::PlaneXY) ? ay :
                               (activeGizmoHandle_ == GizmoGeometry::Handle::PlaneXZ ? az : az);
             float curPt[3];
-            if (GizmoGeometry::RayPlaneIntersection(rayOrig, rayDir, dragStartTransform_.position, n, curPt))
+            if (GizmoGeometry::RayPlaneIntersection(rayOrig, rayDir, dragStartWorldPos_, n, curPt))
             {
                 const float dx = curPt[0] - dragStartHitPoint_[0];
                 const float dy = curPt[1] - dragStartHitPoint_[1];
@@ -428,31 +463,37 @@ void ViewportWidget::ApplyGizmoDragGesture(const QPointF& logicalPos)
                     s1 = static_cast<float>(std::round(s1 / moveSnapStep_) * moveSnapStep_);
                     s2 = static_cast<float>(std::round(s2 / moveSnapStep_) * moveSnapStep_);
                 }
-                EngineSceneTransform t = dragStartTransform_;
-                for (int i = 0; i < 3; ++i) t.position[i] += s1 * a1[i] + s2 * a2[i];
-                PostSelectedTransform(t);
+                for (int i = 0; i < 3; ++i) newWorldPos[i] += s1 * a1[i] + s2 * a2[i];
             }
         }
         else // Center handle
         {
             float camFwd[3] = {lastCameraInfo_.viewMatrix[2], lastCameraInfo_.viewMatrix[6], lastCameraInfo_.viewMatrix[10]};
             float curPt[3];
-            if (GizmoGeometry::RayPlaneIntersection(rayOrig, rayDir, dragStartTransform_.position, camFwd, curPt))
+            if (GizmoGeometry::RayPlaneIntersection(rayOrig, rayDir, dragStartWorldPos_, camFwd, curPt))
             {
-                const double delta[3]={curPt[0]-dragStartHitPoint_[0],curPt[1]-dragStartHitPoint_[1],curPt[2]-dragStartHitPoint_[2]};
-                EngineSceneTransform t = GizmoMath::ApplyCenterTranslation(dragStartTransform_,delta,snapEnabled_,moveSnapStep_,localOrientation_);
-                PostSelectedTransform(t);
+                float delta[3] = {curPt[0] - dragStartHitPoint_[0], curPt[1] - dragStartHitPoint_[1], curPt[2] - dragStartHitPoint_[2]};
+                if (snapEnabled_ && moveSnapStep_ > 1e-4)
+                    for (int i = 0; i < 3; ++i) delta[i] = static_cast<float>(std::round(delta[i] / moveSnapStep_) * moveSnapStep_);
+                for (int i = 0; i < 3; ++i) newWorldPos[i] += delta[i];
             }
         }
+
+        glm::vec4 localPos4 = glm::inverse(dragParentWorld_) * glm::vec4(newWorldPos[0], newWorldPos[1], newWorldPos[2], 1.0f);
+        EngineSceneTransform t = dragStartTransform_;
+        t.position[0] = localPos4.x;
+        t.position[1] = localPos4.y;
+        t.position[2] = localPos4.z;
+        PostSelectedTransform(t);
     }
     else if (gizmoMode_ == EditorGizmoRotate)
     {
         const float* rotAxis = (activeGizmoHandle_ == GizmoGeometry::Handle::AxisX) ? ax :
                                (activeGizmoHandle_ == GizmoGeometry::Handle::AxisY ? ay : az);
         float curPt[3];
-        if (GizmoGeometry::RayPlaneIntersection(rayOrig, rayDir, dragStartTransform_.position, rotAxis, curPt))
+        if (GizmoGeometry::RayPlaneIntersection(rayOrig, rayDir, dragStartWorldPos_, rotAxis, curPt))
         {
-            float angle = GizmoGeometry::ComputeRingAngle(dragStartTransform_.position, rotAxis, dragStartRefVec_, curPt);
+            float angle = GizmoGeometry::ComputeRingAngle(dragStartWorldPos_, rotAxis, dragStartRefVec_, curPt);
             if (snapEnabled_ && rotateSnapStep_ > 1e-4)
             {
                 const double stepRad = rotateSnapStep_ * 3.14159265358979323846 / 180.0;
@@ -460,13 +501,23 @@ void ViewportWidget::ApplyGizmoDragGesture(const QPointF& logicalPos)
             }
             double deltaQ[4];
             GizmoMath::AxisAngleQuat(rotAxis[0], rotAxis[1], rotAxis[2], angle, deltaQ);
-            double startQ[4] = {dragStartTransform_.rotation[0], dragStartTransform_.rotation[1], dragStartTransform_.rotation[2], dragStartTransform_.rotation[3]};
-            double resQ[4];
-            GizmoMath::MulQuat(deltaQ, startQ, resQ);
-            GizmoMath::NormalizeQuat(resQ);
+            glm::quat deltaWorldQ(static_cast<float>(deltaQ[3]), static_cast<float>(deltaQ[0]), static_cast<float>(deltaQ[1]), static_cast<float>(deltaQ[2]));
+            glm::quat startWorldQ(dragStartWorldRot_[3], dragStartWorldRot_[0], dragStartWorldRot_[1], dragStartWorldRot_[2]);
+            glm::quat newWorldQ = glm::normalize(deltaWorldQ * startWorldQ);
+
+            glm::mat3 parentRotM(
+                glm::length(glm::vec3(dragParentWorld_[0])) > 1e-6f ? glm::normalize(glm::vec3(dragParentWorld_[0])) : glm::vec3(1, 0, 0),
+                glm::length(glm::vec3(dragParentWorld_[1])) > 1e-6f ? glm::normalize(glm::vec3(dragParentWorld_[1])) : glm::vec3(0, 1, 0),
+                glm::length(glm::vec3(dragParentWorld_[2])) > 1e-6f ? glm::normalize(glm::vec3(dragParentWorld_[2])) : glm::vec3(0, 0, 1)
+            );
+            glm::quat parentQ = glm::quat_cast(parentRotM);
+            glm::quat newLocalQ = glm::normalize(glm::inverse(parentQ) * newWorldQ);
 
             EngineSceneTransform t = dragStartTransform_;
-            for (int i = 0; i < 4; ++i) t.rotation[i] = static_cast<float>(resQ[i]);
+            t.rotation[0] = newLocalQ.x;
+            t.rotation[1] = newLocalQ.y;
+            t.rotation[2] = newLocalQ.z;
+            t.rotation[3] = newLocalQ.w;
             PostSelectedTransform(t);
         }
     }

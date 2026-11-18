@@ -274,7 +274,7 @@ void EditorMainWindow::BuildUi()
     BuildSceneMenu();
     BuildCodeTools();
     BuildToolsMenu();
-    for (auto* menu : { sceneMenu_, editMenu_, viewMenu_, playMenu_, projectMenu_, toolsMenu_ }) {
+    for (auto* menu : { sceneMenu_, editMenu_, viewMenu_, playMenu_, projectMenu_, aiMenu_, toolsMenu_ }) {
         if (menu) {
             auto* action = menu->menuAction();
             menuBar()->removeAction(action);
@@ -1616,7 +1616,7 @@ void EditorMainWindow::RetranslateUi()
     if (viewMenu_) viewMenu_->setTitle(Tr("Вид", "View"));
     if (playMenu_) playMenu_->setTitle(Tr("Запуск", "Play"));
     if (projectMenu_) projectMenu_->setTitle(Tr("Проект", "Project"));
-    if (toolsMenu_) toolsMenu_->setTitle(Tr("Инструменты", "Tools"));
+    if (aiMenu_) aiMenu_->setTitle(Tr("ИИ", "AI")); if (toolsMenu_) toolsMenu_->setTitle(Tr("Инструменты", "Tools"));
     if (uiSubMenu_) uiSubMenu_->setTitle(Tr("Интерфейс (UI)", "Interface (UI)"));
     if (schemeMenu_) schemeMenu_->setTitle(Tr("Схема управления", "Control Scheme"));
     if (resourcesSubMenu_) resourcesSubMenu_->setTitle(Tr("Ресурсы", "Assets"));

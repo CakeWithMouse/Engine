@@ -48,16 +48,8 @@ ObjectInspectorPanel::~ObjectInspectorPanel()
     if (themeSubId_) EditorTheme::Instance().UnsubscribeThemeChanged(themeSubId_);
 }
 
-void ObjectInspectorPanel::SetEnabled(bool enabled)
-{
-    setEnabled(enabled);
-}
-
-void ObjectInspectorPanel::SetMaterialsAvailable(bool available)
-{
-    if (cardMaterial_)
-        cardMaterial_->SetMaterialsAvailable(available);
-}
+void ObjectInspectorPanel::SetEnabled(bool enabled) { setEnabled(enabled); }
+void ObjectInspectorPanel::SetMaterialsAvailable(bool available) { if (cardMaterial_) cardMaterial_->SetMaterialsAvailable(available); }
 
 void ObjectInspectorPanel::BuildUi()
 {
@@ -109,14 +101,18 @@ void ObjectInspectorPanel::BuildUi()
         params[QStringLiteral("objectId")] = static_cast<qulonglong>(selectedId_);
         CommandRegistry::Instance().Execute(QStringLiteral("Scene.ReplaceModel"), params);
     };
+    cardGeometry_->onModelDropped = [this](const QString& path) {
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.ReplaceModel"), {{QStringLiteral("objectId"), QVariant::fromValue(selectedId_)}, {QStringLiteral("model"), path}});
+    };
 
     cardMaterial_ = new MaterialCard(this);
     cardMaterial_->setObjectName(QStringLiteral("MaterialCard"));
     cardMaterial_->onEditMaterial = [this](const QString& path) { emit EditMaterialRequested(path); };
-    cardMaterial_->onChooseMaterial = [this] {
-        CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignMaterial"));
-    };
+    cardMaterial_->onChooseMaterial = [this] { CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignMaterial")); };
     cardMaterial_->onClearMaterial = [this] { emit ClearMaterialRequested(); };
+    cardMaterial_->onMaterialDropped = [this](const QString& path) {
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignMaterial"), {{QStringLiteral("objectId"), QVariant::fromValue(selectedId_)}, {QStringLiteral("material"), path}});
+    };
 
     cardScript_ = new ScriptCard(this);
     cardScript_->setObjectName(QStringLiteral("ScriptCard"));
@@ -124,6 +120,9 @@ void ObjectInspectorPanel::BuildUi()
     cardScript_->onChooseScript = [this] { emit ChooseScriptRequested(); };
     cardScript_->onClearScript = [this] { emit ClearScriptRequested(); };
     cardScript_->onVariablesChanged = [this](const QString& json) { emit ScriptVariablesChanged(json); };
+    cardScript_->onScriptDropped = [this](const QString& path) {
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignScript"), {{QStringLiteral("objectId"), QVariant::fromValue(selectedId_)}, {QStringLiteral("script"), path}});
+    };
 
     // Автомат ИИ — свойства stateMachine и machineMemory «ИИ-персонажа», правятся как остальные свойства (Undo).
     cardAi_ = new AiMachineCard(this);
@@ -133,6 +132,9 @@ void ObjectInspectorPanel::BuildUi()
     cardAi_->onCreate = [this] { emit CreateAiMachineRequested(); };
     cardAi_->onOpen = [this](const QString& path) { emit OpenAiMachineRequested(path); };
     cardAi_->onChoose = [this] { emit ChooseAiMachineRequested(); };
+    cardAi_->onAiMachineDropped = [this](const QString& path) {
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignAiMachine"), {{QStringLiteral("objectId"), QVariant::fromValue(selectedId_)}, {QStringLiteral("machine"), path}});
+    };
     cardAi_->fileExists = [this](const QString& path) {
         const QString root = property("contentRoot").toString();
         return !root.isEmpty() && path.startsWith(QStringLiteral("/Game/")) && QFileInfo::exists(QDir(root).filePath(path.mid(6)));
@@ -603,23 +605,19 @@ void ObjectInspectorPanel::Refresh(
     refreshing_ = false;
 }
 
-void ObjectInspectorPanel::SetScriptVariablesReader(std::function<QJsonArray(const QString&)> reader)
-{
+void ObjectInspectorPanel::SetScriptVariablesReader(std::function<QJsonArray(const QString&)> reader) {
     if (cardAi_) cardAi_->readVariables = reader;
     if (cardScript_) cardScript_->readVariables = std::move(reader);
 }
 
-void ObjectInspectorPanel::SetAiMachineProblems(const QString& machine, const QStringList& lines)
-{
+void ObjectInspectorPanel::SetAiMachineProblems(const QString& machine, const QStringList& lines) {
     if (cardAi_) cardAi_->SetProblems(machine, lines);
 }
 
-void ObjectInspectorPanel::SetAiMachineLive(const QStringList& lines)
-{
+void ObjectInspectorPanel::SetAiMachineLive(const QStringList& lines) {
     if (cardAi_) cardAi_->SetLive(lines);
 }
 
-bool ObjectInspectorPanel::HasAiMachine(const std::string& propertySchema)
-{
+bool ObjectInspectorPanel::HasAiMachine(const std::string& propertySchema) {
     return propertySchema.find("\"/stateMachine\"") != std::string::npos && propertySchema.find("\"/machineMemory\"") != std::string::npos;
 }
