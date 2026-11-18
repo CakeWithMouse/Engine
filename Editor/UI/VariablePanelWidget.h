@@ -45,13 +45,13 @@ public:
             auto* help = new InfoButton(
                 Tr("Переменные скрипта", "Script Variables"),
                 Tr("Управление переменными:\n"
-                   "• Тип «число (float)» — число с плавающей точкой\n"
-                   "• Иконка глаза «Показ.» — публичная переменная (видна и редактируется в инспекторе объекта)\n"
+                   "• Тип float — число с плавающей точкой\n"
+                   "• Иконка глаза «Показ.» — публичная переменная, видна в инспекторе\n"
                    "• Перетащите имя переменной на холст для создания нод Get / Set\n"
                    "• Корзина в строке — быстрое удаление переменной",
                    "Variable management:\n"
-                   "• Type \"number (float)\" — floating point value\n"
-                   "• Eye icon \"Show\" — public variable (visible and editable in object inspector)\n"
+                   "• Type float — floating point value\n"
+                   "• Eye icon \"Show\" — public variable, visible in inspector\n"
                    "• Drag variable name onto canvas to create Get / Set nodes\n"
                    "• Trash icon in row — quick delete variable"),
                 headerWidget);
@@ -86,7 +86,7 @@ public:
         table_->setColumnCount(4);
         table_->setHorizontalHeaderLabels({nameColTitle_, Tr("Тип", "Type"), valColTitle_, Tr("Показ.", "Show")});
         if (auto* item = table_->horizontalHeaderItem(3))
-            item->setToolTip(Tr("Публичная (видна в инспекторе)", "Public (visible in inspector)"));
+            item->setToolTip(Tr("Публичная — видна в инспекторе", "Public — visible in inspector"));
         table_->verticalHeader()->hide();
         table_->setSelectionBehavior(QAbstractItemView::SelectRows);
         table_->horizontalHeader()->setMinimumSectionSize(40);

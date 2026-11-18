@@ -97,19 +97,19 @@ void AiMachineEditorWindow::BuildUi()
         Tr("Память и настройки ИИ", "AI Memory and Settings"),
         Tr("Память автомата:\n"
            "• Ключи памяти хранят состояние и цели персонажа\n"
-           "• Иконка глаза «Показ.» — публичный ключ (виден в инспекторе объекта)\n"
+           "• Иконка глаза «Показ.» — публичный ключ, виден в инспекторе\n"
            "• Корзина в строке — быстрое удаление ключа\n\n"
            "Настройки персонажа:\n"
-           "• «Цель восприятия» (тип Объект) — зрение персонажа записывает найденную цель\n"
-           "• «Где видели» (тип Вектор) — координаты последней точки видимости\n"
+           "• «Цель восприятия» — зрение персонажа записывает найденную цель\n"
+           "• «Где видели» — координаты последней точки видимости\n"
            "• «Интервал решений» — секунды между пересчётами логики автомата",
            "AI State Machine memory:\n"
            "• Memory keys store character state and targets\n"
-           "• Eye icon \"Show\" — public key (visible in object inspector)\n"
+           "• Eye icon \"Show\" — public key, visible in object inspector\n"
            "• Trash icon in row — quick delete key\n\n"
            "Character settings:\n"
-           "• \"Perceived target\" (Object type) — vision writes detected target here\n"
-           "• \"Last seen at\" (Vector type) — coordinates where target was last seen\n"
+           "• \"Perceived target\" — vision writes detected target here\n"
+           "• \"Last seen at\" — coordinates where target was last seen\n"
            "• \"Think interval\" — seconds between state machine decisions"),
         headerWidget);
     help->setObjectName(QStringLiteral("FsmMemoryHelp"));

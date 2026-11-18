@@ -98,7 +98,6 @@
         <ClCompile Include="../Core/CodeGraphSchema.cpp"/>
         <ClCompile Include="../Core/ScriptVariableDrag.cpp"/>
         <ClCompile Include="../Core/UiWidgetDrag.cpp"/>
-        <ClCompile Include="../../Engine/Source/UI/UIElement.cpp"/>
         <ClCompile Include="../Core/FsmGraphSchema.cpp"/>
         <ClCompile Include="../Core/ScriptMessages.cpp"/>
         <ClCompile Include="../Core/SceneFile.cpp"/>

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <Engine/UI/UIElement.h>
 #include <cstddef>
 #include <string>
 #include <vector>
@@ -10,15 +9,14 @@ namespace EditorCore
 namespace UiReparent
 {
 
-inline bool IsContainer(const UIElement* e)
+struct DefaultIsContainer
 {
-    if (!e) return false;
-    return !dynamic_cast<const UILabel*>(e) &&
-           !dynamic_cast<const UIButton*>(e) &&
-           !dynamic_cast<const UIBar*>(e);
-}
+    template <typename T>
+    constexpr bool operator()(const T*) const noexcept { return true; }
+};
 
-inline size_t IndexOfChild(const UIElement* child)
+template <typename TElement>
+inline size_t IndexOfChild(const TElement* child)
 {
     if (!child) return 0;
     const auto* parent = child->GetParent();
@@ -31,12 +29,13 @@ inline size_t IndexOfChild(const UIElement* child)
     return children.size();
 }
 
-inline bool CanReparent(const UIElement* element, const UIElement* newParent, const UIElement* root)
+template <typename TElement, typename IsContainerFn = DefaultIsContainer>
+inline bool CanReparent(const TElement* element, const TElement* newParent, const TElement* root, IsContainerFn isContainer = {})
 {
     if (!element || !newParent || !root) return false;
     if (element == root || element == newParent) return false;
     if (!element->GetParent()) return false;
-    if (!IsContainer(newParent)) return false;
+    if (!isContainer(newParent)) return false;
     for (const auto* p = newParent; p; p = p->GetParent())
     {
         if (p == element) return false;
@@ -44,9 +43,10 @@ inline bool CanReparent(const UIElement* element, const UIElement* newParent, co
     return true;
 }
 
-inline bool MoveElement(UIElement* element, UIElement* newParent, size_t index, UIElement* root)
+template <typename TElement, typename IsContainerFn = DefaultIsContainer>
+inline bool MoveElement(TElement* element, TElement* newParent, size_t index, TElement* root, IsContainerFn isContainer = {})
 {
-    if (!CanReparent(element, newParent, root)) return false;
+    if (!CanReparent(element, newParent, root, isContainer)) return false;
     auto* oldParent = element->GetParent();
     const size_t oldIndex = IndexOfChild(element);
     auto taken = oldParent->TakeChild(element);
@@ -59,7 +59,8 @@ inline bool MoveElement(UIElement* element, UIElement* newParent, size_t index, 
     return true;
 }
 
-inline size_t CountElements(const UIElement* root)
+template <typename TElement>
+inline size_t CountElements(const TElement* root)
 {
     if (!root) return 0;
     size_t count = 1;
@@ -70,11 +71,12 @@ inline size_t CountElements(const UIElement* root)
     return count;
 }
 
-inline bool ValidateTree(const UIElement* root)
+template <typename TElement>
+inline bool ValidateTree(const TElement* root)
 {
     if (!root) return false;
-    std::vector<const UIElement*> visited;
-    auto dfs = [&](auto self, const UIElement* node) -> bool {
+    std::vector<const TElement*> visited;
+    auto dfs = [&](auto self, const TElement* node) -> bool {
         for (const auto* v : visited)
         {
             if (v == node) return false;
@@ -93,17 +95,18 @@ inline bool ValidateTree(const UIElement* root)
 
 enum DropPosition { OnItem, AboveItem, BelowItem, OnViewport };
 
-inline void ResolveDropTarget(const UIElement* target, DropPosition pos, UIElement* root,
-                              UIElement*& outParent, size_t& outIndex)
+template <typename TElement, typename IsContainerFn = DefaultIsContainer>
+inline void ResolveDropTarget(const TElement* target, DropPosition pos, TElement* root,
+                              TElement*& outParent, size_t& outIndex, IsContainerFn isContainer = {})
 {
     if (!target || pos == OnViewport || target == root)
     {
         outParent = root;
         outIndex = (pos == AboveItem) ? 0 : (root ? root->GetChildren().size() : 0);
     }
-    else if (pos == OnItem && IsContainer(target))
+    else if (pos == OnItem && isContainer(target))
     {
-        outParent = const_cast<UIElement*>(target);
+        outParent = const_cast<TElement*>(target);
         outIndex = target->GetChildren().size();
     }
     else

@@ -252,9 +252,9 @@ inline void RunGizmoMathTests()
         double draggedWorld[3] = {worldPos[0] + 4.0, worldPos[1], worldPos[2]};
         double newLocal[3]{};
         WorldPosToLocalPos(draggedWorld, parentPos, parentRot, parentScale, true, newLocal);
-        // Under 90 deg Y rotation, world X corresponds to local -Z; scaled by parentScale[2] = 4.0, delta is -4.0 / 4.0 = -1.0
+        // Under 90 deg Y rotation, local +Z corresponds to world +X; scaled by parentScale[2] = 4.0, delta is +4.0 / 4.0 = +1.0
         CheckGizmo(std::fabs(newLocal[1] - localPos[1]) < 1e-5, "Child Y unchanged during pure X drag");
-        CheckGizmo(std::fabs(newLocal[2] - (localPos[2] - 1.0)) < 1e-5, "Child local Z correctly accounts for parent rotation and scale");
+        CheckGizmo(std::fabs(newLocal[2] - (localPos[2] + 1.0)) < 1e-5, "Child local Z correctly accounts for parent rotation and scale");
 
         // With inheritScale = false
         LocalPosToWorldPos(localPos, parentPos, parentRot, parentScale, false, worldPos);

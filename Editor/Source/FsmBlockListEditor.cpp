@@ -1,5 +1,6 @@
 #include "FsmBlockListEditor.h"
 #include "EditorLocale.h"
+#include "IconProvider.h"
 
 #include <QCheckBox>
 #include <QComboBox>

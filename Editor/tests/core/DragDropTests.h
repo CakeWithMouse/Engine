@@ -212,40 +212,87 @@ inline int RunDragDropTests()
 
     // --- UI hierarchy reparent validation and drop rules ---
     {
+        struct TestUIElement
+        {
+            std::string Name;
+            bool isContainer = true;
+            TestUIElement* parent = nullptr;
+            std::vector<std::unique_ptr<TestUIElement>> children;
+
+            TestUIElement* GetParent() const { return parent; }
+            const std::vector<std::unique_ptr<TestUIElement>>& GetChildren() const { return children; }
+
+            TestUIElement* Add(std::unique_ptr<TestUIElement> child)
+            {
+                child->parent = this;
+                children.push_back(std::move(child));
+                return children.back().get();
+            }
+
+            std::unique_ptr<TestUIElement> TakeChild(TestUIElement* child)
+            {
+                for (auto it = children.begin(); it != children.end(); ++it)
+                {
+                    if (it->get() == child)
+                    {
+                        auto taken = std::move(*it);
+                        children.erase(it);
+                        taken->parent = nullptr;
+                        return taken;
+                    }
+                }
+                return nullptr;
+            }
+
+            TestUIElement* InsertChild(size_t index, std::unique_ptr<TestUIElement> child)
+            {
+                if (index > children.size()) index = children.size();
+                child->parent = this;
+                auto* ptr = child.get();
+                children.insert(children.begin() + index, std::move(child));
+                return ptr;
+            }
+        };
+
+        const auto isContainer = [](const TestUIElement* e) { return e && e->isContainer; };
+
         using namespace EditorCore::UiReparent;
-        auto root = std::make_unique<UIPanel>();
+        auto root = std::make_unique<TestUIElement>();
         root->Name = "Root";
 
-        auto* panel1 = root->Add(std::make_unique<UIPanel>());
+        auto* panel1 = root->Add(std::make_unique<TestUIElement>());
         panel1->Name = "Panel1";
-        auto* panel2 = root->Add(std::make_unique<UIPanel>());
+        auto* panel2 = root->Add(std::make_unique<TestUIElement>());
         panel2->Name = "Panel2";
-        auto* button1 = panel1->Add(std::make_unique<UIButton>());
+        auto* button1 = panel1->Add(std::make_unique<TestUIElement>());
         button1->Name = "Button1";
-        auto* label1 = panel1->Add(std::make_unique<UILabel>());
+        button1->isContainer = false;
+        auto* label1 = panel1->Add(std::make_unique<TestUIElement>());
         label1->Name = "Label1";
-        auto* bar1 = panel2->Add(std::make_unique<UIBar>());
+        label1->isContainer = false;
+        auto* bar1 = panel2->Add(std::make_unique<TestUIElement>());
         bar1->Name = "Bar1";
+        bar1->isContainer = false;
 
-        CheckDragDrop(IsContainer(root.get()), "Root is container");
-        CheckDragDrop(IsContainer(panel1), "Panel is container");
-        CheckDragDrop(!IsContainer(button1), "Button is non-container");
-        CheckDragDrop(!IsContainer(label1), "Label is non-container");
-        CheckDragDrop(!IsContainer(bar1), "Bar is non-container");
+        CheckDragDrop(isContainer(root.get()), "Root is container");
+        CheckDragDrop(isContainer(panel1), "Panel is container");
+        CheckDragDrop(!isContainer(button1), "Button is non-container");
+        CheckDragDrop(!isContainer(label1), "Label is non-container");
+        CheckDragDrop(!isContainer(bar1), "Bar is non-container");
 
         const size_t initialCount = CountElements(root.get());
         CheckDragDrop(initialCount == 6, "Initial UI element count is 6");
         CheckDragDrop(ValidateTree(root.get()), "Initial UI tree is valid");
 
         // CanReparent validation:
-        CheckDragDrop(!CanReparent(root.get(), panel1, root.get()), "Cannot reparent root");
-        CheckDragDrop(!CanReparent(panel1, panel1, root.get()), "Cannot reparent into itself");
-        CheckDragDrop(!CanReparent(panel1, button1, root.get()), "Cannot reparent into non-container");
-        CheckDragDrop(!CanReparent(panel1, label1, root.get()), "Cannot reparent into own descendant");
-        CheckDragDrop(CanReparent(button1, panel2, root.get()), "Can reparent leaf into another panel");
+        CheckDragDrop(!CanReparent(root.get(), panel1, root.get(), isContainer), "Cannot reparent root");
+        CheckDragDrop(!CanReparent(panel1, panel1, root.get(), isContainer), "Cannot reparent into itself");
+        CheckDragDrop(!CanReparent(panel1, button1, root.get(), isContainer), "Cannot reparent into non-container");
+        CheckDragDrop(!CanReparent(panel1, label1, root.get(), isContainer), "Cannot reparent into own descendant");
+        CheckDragDrop(CanReparent(button1, panel2, root.get(), isContainer), "Can reparent leaf into another panel");
 
         // MoveElement: move button1 from panel1 to panel2
-        CheckDragDrop(MoveElement(button1, panel2, 0, root.get()), "Move button1 to panel2");
+        CheckDragDrop(MoveElement(button1, panel2, 0, root.get(), isContainer), "Move button1 to panel2");
         CheckDragDrop(button1->GetParent() == panel2, "button1 parent updated to panel2");
         CheckDragDrop(IndexOfChild(button1) == 0, "button1 is at index 0 of panel2");
         CheckDragDrop(CountElements(root.get()) == initialCount, "Element count preserved after move");
@@ -253,36 +300,36 @@ inline int RunDragDropTests()
 
         // ResolveDropTarget rules:
         // Dropping onto container -> becomes child at the end
-        UIElement* targetParent = nullptr;
+        TestUIElement* targetParent = nullptr;
         size_t targetIndex = 0;
-        ResolveDropTarget(panel1, DropPosition::OnItem, root.get(), targetParent, targetIndex);
+        ResolveDropTarget(panel1, DropPosition::OnItem, root.get(), targetParent, targetIndex, isContainer);
         CheckDragDrop(targetParent == panel1, "Drop on container targets container as parent");
         CheckDragDrop(targetIndex == panel1->GetChildren().size(), "Drop on container targets end of children");
 
         // Dropping onto non-container -> becomes sibling after target
-        ResolveDropTarget(label1, DropPosition::OnItem, root.get(), targetParent, targetIndex);
+        ResolveDropTarget(label1, DropPosition::OnItem, root.get(), targetParent, targetIndex, isContainer);
         CheckDragDrop(targetParent == panel1, "Drop on non-container targets its parent");
         CheckDragDrop(targetIndex == IndexOfChild(label1) + 1, "Drop on non-container targets index after it");
 
         // Dropping Above non-container -> sibling before target
-        ResolveDropTarget(label1, DropPosition::AboveItem, root.get(), targetParent, targetIndex);
+        ResolveDropTarget(label1, DropPosition::AboveItem, root.get(), targetParent, targetIndex, isContainer);
         CheckDragDrop(targetParent == panel1, "Drop Above targets parent");
         CheckDragDrop(targetIndex == IndexOfChild(label1), "Drop Above targets index of item");
 
         // Dropping on viewport -> child of root
-        ResolveDropTarget(nullptr, DropPosition::OnViewport, root.get(), targetParent, targetIndex);
+        ResolveDropTarget<TestUIElement>(nullptr, DropPosition::OnViewport, root.get(), targetParent, targetIndex, isContainer);
         CheckDragDrop(targetParent == root.get(), "Drop on viewport targets root");
         CheckDragDrop(targetIndex == root->GetChildren().size(), "Drop on viewport targets end of root");
 
-        // Stress test: 100 random moves across tree
+        // Stress test: 200 random moves across tree
         // Verify: element count NEVER changes, tree NEVER has cycles or duplicates
         uint32_t rng = 0x98765432u;
         const auto nextRand = [&rng]() { rng = rng * 1664525u + 1013904223u; return rng; };
         int appliedMoves = 0;
         for (int step = 0; step < 200; ++step)
         {
-            std::vector<UIElement*> all;
-            auto collect = [&](auto self, UIElement* node) -> void {
+            std::vector<TestUIElement*> all;
+            auto collect = [&](auto self, TestUIElement* node) -> void {
                 all.push_back(node);
                 for (const auto& c : node->GetChildren()) self(self, c.get());
             };
@@ -290,16 +337,16 @@ inline int RunDragDropTests()
 
             const size_t elemIdx = 1 + (nextRand() % (all.size() - 1)); // skip root
             const size_t targetIdx = nextRand() % all.size();
-            UIElement* elem = all[elemIdx];
-            UIElement* target = all[targetIdx];
+            TestUIElement* elem = all[elemIdx];
+            TestUIElement* target = all[targetIdx];
 
-            UIElement* p = nullptr;
+            TestUIElement* p = nullptr;
             size_t idx = 0;
             const DropPosition dpos = static_cast<DropPosition>(nextRand() % 4);
-            ResolveDropTarget(target, dpos, root.get(), p, idx);
-            if (p && CanReparent(elem, p, root.get()))
+            ResolveDropTarget(target, dpos, root.get(), p, idx, isContainer);
+            if (p && CanReparent(elem, p, root.get(), isContainer))
             {
-                const bool ok = MoveElement(elem, p, idx, root.get());
+                const bool ok = MoveElement(elem, p, idx, root.get(), isContainer);
                 CheckDragDrop(ok, "Valid MoveElement must succeed");
                 ++appliedMoves;
             }

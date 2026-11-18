@@ -12,6 +12,12 @@ namespace {
 UIElement* ElementOf(QTreeWidgetItem* item) {
     return item ? reinterpret_cast<UIElement*>(item->data(0, Qt::UserRole).value<quintptr>()) : nullptr;
 }
+bool IsContainer(const UIElement* e) {
+    if (!e) return false;
+    return !dynamic_cast<const UILabel*>(e) &&
+           !dynamic_cast<const UIButton*>(e) &&
+           !dynamic_cast<const UIBar*>(e);
+}
 }
 
 void UIHierarchyTree::keyPressEvent(QKeyEvent* event) {
@@ -42,7 +48,7 @@ void UIHierarchyTree::dropEvent(QDropEvent* event) {
         const auto decision = EditorCore::DecideDrop(EditorCore::DragSource::UiPalette, EditorCore::DropTarget::Hierarchy, EditorCore::AssetKind::Unknown);
         if (payload.type.isEmpty() || !decision.allowed) { event->ignore(); return; }
         auto* parent = ElementOf(itemAt(event->position().toPoint()));
-        while (parent && !EditorCore::UiReparent::IsContainer(parent)) parent = parent->GetParent();
+        while (parent && !IsContainer(parent)) parent = parent->GetParent();
         if (!parent) parent = editor->Root();
         if (!parent) { event->ignore(); return; }
         editor->AddElementTo(payload.type, parent);
@@ -60,7 +66,7 @@ void UIHierarchyTree::dropEvent(QDropEvent* event) {
 
     UIElement* newParent = nullptr;
     size_t index = 0;
-    EditorCore::UiReparent::ResolveDropTarget(target, dropPos, editor->Root(), newParent, index);
+    EditorCore::UiReparent::ResolveDropTarget(target, dropPos, editor->Root(), newParent, index, IsContainer);
     if (newParent) {
         editor->MoveElement(element, newParent, index);
     }
@@ -69,9 +75,9 @@ void UIHierarchyTree::dropEvent(QDropEvent* event) {
 }
 
 void UIEditorWindow::MoveElement(UIElement* element, UIElement* newParent, size_t index) {
-    if (!EditorCore::UiReparent::CanReparent(element, newParent, root_.get())) return;
+    if (!EditorCore::UiReparent::CanReparent(element, newParent, root_.get(), IsContainer)) return;
     Checkpoint();
-    if (!EditorCore::UiReparent::MoveElement(element, newParent, index, root_.get())) return;
+    if (!EditorCore::UiReparent::MoveElement(element, newParent, index, root_.get(), IsContainer)) return;
     selected_ = element;
     Changed();
     RebuildTree();

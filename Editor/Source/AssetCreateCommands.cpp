@@ -76,7 +76,7 @@ void EditorMainWindow::UnregisterAssetCreateCommands()
 bool EditorMainWindow::CreateCppClass(const QString& directory, const QString& name)
 {
     const QString projectRoot = QFileInfo(ProjectPath()).dir().absolutePath();
-    const QString contentRoot = ContentPath();
+    const QString contentRoot = host_ ? QString::fromUtf8(host_->host().contentRoot) : QString();
 
     QString target = directory;
     if (target.isEmpty())
