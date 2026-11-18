@@ -109,6 +109,12 @@ def stage(args):
         copy_tree(strategy_source / name, strategy / name)
     manifest = json.loads((strategy / 'Project.json').read_text(encoding='utf-8-sig'))
     copy_file(strategy_source / manifest['module'], strategy / manifest['module'])
+    for name in ('CMakeLists.txt', 'ProjectTypes.tsv'):
+        if (strategy_source / name).is_file():
+            copy_file(strategy_source / name, strategy / name)
+    catalog = Path(manifest['module']).parent / 'ProjectTypes.tsv'
+    if (strategy_source / catalog).is_file():
+        copy_file(strategy_source / catalog, strategy / catalog)
     for sample in (tutorial, strategy):
         (sample / 'OpenEditor.cmd').write_text(
             '@echo off\r\n"%~dp0..\\..\\Runtime\\EngineRuntime.exe" --project "%~dp0Project.json" --mode editor\r\n',
