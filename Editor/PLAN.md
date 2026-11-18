@@ -20,8 +20,9 @@
 - [x] 5. Вьюпорт, меню «Инструменты»: объединить «Навигация» и «Диагностика» в один пункт; в подменю «ИИ» добавить «Создать автомат ИИ…» (Assets.CreateAiMachine)
 - [x] 6. Point Light: чекбокс «Отбрасывает тени» в инспекторе (проверить схему света/ABI, аддитивно при необходимости, проверить причину сброса теней)
 - [x] 7. Visual Script и FSM: единая схема панелей (общая верхняя строка, заголовки и кнопки панелей, единый размер иконок/кнопок, симметричный padding, колонка «Показ.», «?» справка, отступы 8-12px, диалог состояния FSM Tabler plus/trash/arrow-up/down)
+- [x] 8. Редактор UI (Hud.ui): убрать анимацию дерева иерархии, Delete удаляет выделенный элемент (Undo), reparent контейнер/не-контейнер без потери элементов + Core-автотест
 - [x] 9. Контент-браузер: «Создать» -> «C++ класс…» (Assets.CreateCppClass, диалог имени, шаблон .h/.cpp через FileService)
-- [ ] Финал: одна проверка (Debug, check -Quick, grep слоёв, wc -l), визуальный просмотр, отчёт
+- [x] Финал: полная верификация (Debug сборка, check.ps1 -Quick, слои Core/UI/Host, wc -l, запретные зоны)
 
 ### Решения (Итерация 4)
 1. **1 (fix(editor)):** Гизмо у ребёнка не таскается. Причина: в `ViewportWidget_Input.cpp:186` в `HandleMousePress` хит-тест вызывался с локальным трансформа `SelectedTransform(selId, selTrans)`, тогда как при наведении мыши (`HandleMouseMove:280`) и отрисовке гизмо (`ViewportOverlayHelper.cpp:270`) использовалась мировая позиция `SelectedWorldTransform`. При клике хит-тест в локальных координатах не находил гизмо, жест драга не начинался, и клик уходил в выбор объекта через `PickObject`, сбрасывая подсветку стрелки. Дополнительно в `ViewportWidget.cpp:529,:550` при масштабировании использовалась локальная позиция вместо `dragStartWorldPos_`. Исправление: `HandleMousePress` переведён на `SelectedWorldTransform` с мировыми `wp` и `wr`; в Scale задействован `dragStartWorldPos_`. В Core `GizmoMath.h` добавлены функции `WorldPosToLocalPos` и `LocalPosToWorldPos` с учётом поворота, смещения и масштаба родителя (`inheritScale`), покрыты Core-автотестом в `GizmoMathTests.h` (roundtrip, смещение дочернего объекта по мировой оси).
@@ -41,6 +42,19 @@
 8. **8 (fix(editor)):** Исправление UI-редактора: анимация дерева, удаление клавишей Delete, reparent контейнер/не-контейнер и Core-автотест. Причина: 1) в `UIEditorWindow.cpp` было включено `tree_->setAnimated(true)`, вызывавшее лаги и подергивания дерева; 2) на `deleteAction_` не был назначен shortcut `QKeySequence::Delete`, а `UIHierarchyTree` и `UICanvas` не перехватывали клавишу Delete в `keyPressEvent`; 3) при DnD в иерархии Qt'шный `InternalMove` без `setDropAction(Qt::IgnoreAction)` удалял строки виджета независимо от движка, а правила сброса на не-контейнер не гарантировали корректный родительский контейнер и позицию сиблинга. Исправление: в `UIEditorWindow.cpp` отключена анимация дерева `tree_->setAnimated(false)`, на `deleteAction_` установлен шорткат Delete (`Qt::WindowShortcut`); в `UICanvas.h` и `UIHierarchyTree` добавлена обработка `Qt::Key_Delete` / `Backspace` с вызовом `DeleteSelected()` (с одним шагом Undo через `Checkpoint()`); в `Editor/Core/UiReparent.h` вынесена чистая логика правил перемещения `CanReparent`, `MoveElement`, `ResolveDropTarget` (бросок на контейнер -> ребёнок, бросок на не-контейнер -> сиблинг после/до цели, бросок на вьюпорт/корень -> ребёнок корня) с предотвращением циклов и гарантией уникальности; в `dropEvent` установлен `event->setDropAction(Qt::IgnoreAction); event->accept()`; в `Editor/tests/core/DragDropTests.h` добавлен комплексный Core-автотест на 200 случайных шагов перемещения, проверяющий сохранение числа элементов и отсутствие циклов и дубликатов.
 
 9. **9 (feat(editor)):** Создание C++ класса из контент-браузера через FileService. В `CommandRegistry` зарегистрирована команда `Assets.CreateCppClass` с поддержкой интерактивного ввода имени (`QInputDialog::getText`, `MyClass`) и программных параметров (`directory`, `name`); валидация C++ идентификатора регулярным выражением `^[A-Za-z_][A-Za-z0-9_]*$`; безопасная атомарная генерация пары файлов `.h` (заголовок `#pragma once`, конструктор, виртуальный деструктор) и `.cpp` (подключение заголовка, пустой конструктор) через `FileService::WriteFileAtomic` с логированием в `Logger::Instance()` и песочницей проекта; в контекстное меню контент-браузера `FileBrowserContextMenu.cpp` добавлено подменю «Код» с действием «C++ класс…» (`AssetsCreateCppClass`). `AssetCreateCommands.cpp` 168 строк (<= 500).
+
+10. **Финал (Итерация 4):**
+- Сборка: Editor Debug Build — 0 ошибок, 0 новых warnings.
+- Тесты:
+  * `CoreTests.exe`: 2827 checks passed (100% PASS).
+  * `HostTests.exe`: 165 checks passed (100% PASS).
+  * `UiTests.exe`: UiSmokeTests 477 checks passed, ContentBrowser 77 checks passed (`check.ps1: SUCCESS`).
+- Архитектурные слои:
+  * grep запрещённых UI-типов в `Editor/Core/`: 0 совпадений.
+  * grep include `Host/` или `UI/` в `Editor/Core/`: 0 совпадений.
+- Запретные зоны:
+  * `git diff --stat origin/feature/editor-graphs-ux-overhaul -- Engine/ Game/ build.ps1`: чисто (0 изменений).
+- Лимиты строк: все файлы соблюдены (`UiReparent.h` 121, `AssetCreateCommands.cpp` 168, `AiMachineEditorWindow.cpp` 406 <= 420, `FsmBlockListEditor.cpp` 358 <= 380).
 
 ---
 
