@@ -51,6 +51,9 @@ public:
         SetShadowSettings(false, 10.0f);
         GetPlayer()->SetCameraMode(CameraMode::Orbital);
         GetPlayer()->SetOrbitTarget({0.0f, 0.0f, 0.0f});
+        // Player's default minimum (5) exceeds the initial radius and snapped the camera away
+        // on the first wheel tick; allow 0.2x..10x of the initial distance instead.
+        GetPlayer()->SetMinMaximalOrbitRadius(2.4f * 0.2f, 2.4f * 10.0f);
         GetPlayer()->SetOrbitRadius(2.4f);
         GetPlayer()->SetRotate(-2.3f, 0.35f);
     }
