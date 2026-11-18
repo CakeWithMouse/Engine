@@ -85,6 +85,8 @@ namespace
         if (name == QLatin1String("volume")) return EditorIcons::TABLER_VOLUME;
         if (name == QLatin1String("robot")) return EditorIcons::TABLER_ROBOT;
         if (name == QLatin1String("box")) return EditorIcons::TABLER_BOX;
+        if (name == QLatin1String("check")) return EditorIcons::TABLER_CHECK;
+        if (name == QLatin1String("x")) return EditorIcons::TABLER_X;
         return nullptr;
     }
 

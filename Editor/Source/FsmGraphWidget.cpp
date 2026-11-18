@@ -1,6 +1,7 @@
 #include "FsmGraphWidget.h"
 #include "EditorLocale.h"
 #include "FsmBlockListEditor.h"
+#include "IconProvider.h"
 
 #include <QComboBox>
 #include <QDialog>
@@ -228,7 +229,10 @@ void FsmGraphWidget::EditNode(int nodeId)
     dialog.setWindowTitle(Tr("Состояние «%1»", "State \"%1\"").arg(schema_.NodeName(*node)));
     dialog.resize(520, 560);
     auto* layout = new QVBoxLayout(&dialog);
+    layout->setContentsMargins(12, 12, 12, 12);
+    layout->setSpacing(8);
     auto* form = new QFormLayout;
+    form->setSpacing(6);
     auto* name = new QLineEdit(schema_.NodeName(*node), &dialog);
     name->setObjectName(QStringLiteral("FsmStateName"));
     form->addRow(Tr("Имя", "Name"), name);
@@ -257,16 +261,19 @@ void FsmGraphWidget::EditNode(int nodeId)
     enter->SetBlocks(node->properties.value(QStringLiteral("enterIf")).toList());
     auto* services = new FsmBlockListEditor(schema_, QStringLiteral("service"), QStringLiteral("FsmServices"), tabs);
     services->SetBlocks(node->properties.value(QStringLiteral("services")).toList());
-    tabs->addTab(tasks, Tr("Задачи", "Tasks"));
-    tabs->addTab(enter, Tr("Условия входа", "Enter conditions"));
-    tabs->addTab(services, Tr("Службы", "Services"));
+    tabs->addTab(tasks, IconProvider::PlayIcon(), Tr("Задачи", "Tasks"));
+    tabs->addTab(enter, IconProvider::GetIcon(QStringLiteral("check")), Tr("Условия входа", "Enter conditions"));
+    tabs->addTab(services, IconProvider::GetIcon(QStringLiteral("refresh")), Tr("Службы", "Services"));
     layout->addWidget(tabs, 1);
     auto* note = new QLabel(Tr("Состояние завершается с первой завершившейся задачей (успех — если без провала).",
                                "A state completes with its first finished task (success unless one failed)."), &dialog);
+    note->setObjectName(QStringLiteral("CardSectionLabel"));
     note->setWordWrap(true);
     layout->addWidget(note);
 
     auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
+    buttons->button(QDialogButtonBox::Ok)->setIcon(IconProvider::GetIcon(QStringLiteral("check")));
+    buttons->button(QDialogButtonBox::Cancel)->setIcon(IconProvider::GetIcon(QStringLiteral("x")));
     layout->addWidget(buttons);
     connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
     connect(buttons, &QDialogButtonBox::accepted, &dialog, [&] {
@@ -312,7 +319,10 @@ void FsmGraphWidget::EditLink(const GraphConnectionData& link)
     dialog.setWindowTitle(Tr("Переход: %1 → %2", "Transition: %1 → %2").arg(schema_.NodeTitle(*from), schema_.NodeTitle(*to)));
     dialog.resize(480, 460);
     auto* layout = new QVBoxLayout(&dialog);
+    layout->setContentsMargins(12, 12, 12, 12);
+    layout->setSpacing(8);
     auto* form = new QFormLayout;
+    form->setSpacing(6);
     auto* trigger = new QComboBox(&dialog);
     trigger->setObjectName(QStringLiteral("FsmLinkTrigger"));
     for (const QString& code : FsmGraphSchema::Triggers()) trigger->addItem(FsmGraphSchema::TriggerLabel(code), code);
@@ -345,6 +355,8 @@ void FsmGraphWidget::EditLink(const GraphConnectionData& link)
     connect(trigger, &QComboBox::currentIndexChanged, &dialog, updateEvent);
     updateEvent();
     auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
+    buttons->button(QDialogButtonBox::Ok)->setIcon(IconProvider::GetIcon(QStringLiteral("check")));
+    buttons->button(QDialogButtonBox::Cancel)->setIcon(IconProvider::GetIcon(QStringLiteral("x")));
     layout->addWidget(buttons);
     connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
     connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);

@@ -71,6 +71,7 @@ private:
     QDoubleSpinBox* thinkInterval_ = nullptr;
     QListWidget* problemList_ = nullptr;
     QLabel* banner_ = nullptr;
+    QWidget* memoryPanel_ = nullptr;
     QTimer* saveTimer_ = nullptr;
     QHash<int, QString> problems_, warnings_;
     QString status_, hint_;

@@ -1,14 +1,15 @@
 #include "AiMachineEditorWindow.h"
+#include "CommandRegistry.h"
 #include "EditorLocale.h"
 #include "EditorWindowSetup.h"
 #include "FsmGraphWidget.h"
 #include "Graph/GraphSchemaRegistry.h"
 #include "Graph/GraphFileIo.h"
 #include "VariablePanelWidget.h"
+#include "IconProvider.h"
 
 #include <QComboBox>
 #include <QDir>
-#include <QDockWidget>
 #include <QDoubleSpinBox>
 #include <QFileInfo>
 #include <QFormLayout>
@@ -65,45 +66,55 @@ void AiMachineEditorWindow::BuildUi()
     graph_ = new FsmGraphWidget(*schema_, central);
     graph_->setEnabled(false);
     layout->addWidget(graph_, 1);
-    problemList_ = new QListWidget(central);
+
+    auto* console = new QWidget(central);
+    auto* consoleLayout = new QVBoxLayout(console);
+    consoleLayout->setContentsMargins(0, 0, 0, 0);
+    consoleLayout->setSpacing(0);
+    consoleLayout->addWidget(EditorWindowSetup::MakePanelHeader(Tr("Консоль", "Console"), console));
+    problemList_ = new QListWidget(console);
     problemList_->setObjectName(QStringLiteral("FsmProblems"));
     problemList_->setMaximumHeight(140);
     problemList_->setToolTip(Tr("Ошибки автомата по проверке движком; щелчок показывает ноду", "Machine problems from the engine's check; click to show the node"));
     connect(problemList_, &QListWidget::itemClicked, this, [this](QListWidgetItem* item) {
         if (const int node = item->data(Qt::UserRole).toInt()) graph_->FocusNode(node);
     });
-    layout->addWidget(problemList_);
+    consoleLayout->addWidget(problemList_);
+    layout->addWidget(console);
     setCentralWidget(central);
 
-    auto* dock = new QDockWidget(Tr("Память и настройки", "Memory and settings"), this);
-    dock->setObjectName(QStringLiteral("FsmMemoryDock"));
-    dock->setFeatures(QDockWidget::NoDockWidgetFeatures);
-    auto* panel = new QWidget(dock);
-    auto* panelLayout = new QVBoxLayout(panel);
-    panelLayout->addWidget(new QLabel(Tr("Память (ключи, которыми пользуются блоки):", "Memory (keys the blocks use):"), panel));
-    variables_ = new QTableWidget(panel);
+    memoryPanel_ = new QWidget(central);
+    auto* panelLayout = new QVBoxLayout(memoryPanel_);
+    panelLayout->setContentsMargins(0, 0, 0, 0);
+    panelLayout->setSpacing(4);
+    panelLayout->addWidget(EditorWindowSetup::MakePanelHeader(Tr("Память и настройки", "Memory and settings"), memoryPanel_));
+    auto* memoryLabel = new QLabel(Tr("Память (ключи блоков)", "Memory (block keys)"), memoryPanel_);
+    memoryLabel->setObjectName(QStringLiteral("CardSectionLabel"));
+    panelLayout->addWidget(memoryLabel);
+    variables_ = new QTableWidget(memoryPanel_);
     variables_->setObjectName(QStringLiteral("FsmVariables"));
     variablesPanel_ = new VariablePanelWidget(variables_, QStringLiteral("Fsm"),
         FsmGraphSchema::VariableTypes(), Tr("Ключ", "Key"), Tr("Начальное", "Initial"),
-        [](const QString& t) { return FsmGraphSchema::TypeLabel(t); }, QString(), panel);
+        [](const QString& t) { return FsmGraphSchema::TypeLabel(t); }, QString(), memoryPanel_);
     variablesPanel_->onVariablesChanged = [this](const QJsonArray& list, const QHash<QString, QString>& renames) {
         if (!ready_ || readOnly_) return;
         graph_->SetVariables(list, renames);
     };
-    for (auto* button : variablesPanel_->ToolbarButtons())
-        graph_->AddToolbarWidget(button);
     panelLayout->addWidget(variablesPanel_, 1);
 
-    panelLayout->addWidget(new QLabel(Tr("Настройки персонажа:", "Character settings:"), panel));
+    auto* settingsLabel = new QLabel(Tr("Настройки персонажа", "Character settings"), memoryPanel_);
+    settingsLabel->setObjectName(QStringLiteral("CardSectionLabel"));
+    panelLayout->addWidget(settingsLabel);
     auto* settings = new QFormLayout;
-    targetKey_ = new QComboBox(panel);
+    settings->setSpacing(4);
+    targetKey_ = new QComboBox(memoryPanel_);
     targetKey_->setObjectName(QStringLiteral("FsmTargetKey"));
     targetKey_->setToolTip(Tr("Ключ типа «Объект»: восприятие пишет сюда лучшую видимую цель (нужно зрение у персонажа).",
                               "An Object key: perception writes the best visible target here (the character needs sight)."));
-    lastSeenKey_ = new QComboBox(panel);
+    lastSeenKey_ = new QComboBox(memoryPanel_);
     lastSeenKey_->setObjectName(QStringLiteral("FsmLastSeenKey"));
     lastSeenKey_->setToolTip(Tr("Ключ типа «Вектор»: где цель видели последний раз.", "A Vector key: where the target was last seen."));
-    thinkInterval_ = new QDoubleSpinBox(panel);
+    thinkInterval_ = new QDoubleSpinBox(memoryPanel_);
     thinkInterval_->setObjectName(QStringLiteral("FsmThinkInterval"));
     thinkInterval_->setRange(-0.01, 60);
     thinkInterval_->setDecimals(2);
@@ -111,16 +122,46 @@ void AiMachineEditorWindow::BuildUi()
     thinkInterval_->setSpecialValueText(Tr("как у персонажа", "the character's"));
     thinkInterval_->setToolTip(Tr("Секунды между решениями; 0 — каждый кадр.", "Seconds between thinks; 0 — every frame."));
     thinkInterval_->setKeyboardTracking(false);
-    settings->addRow(Tr("Цель восприятия", "Perceived target"), targetKey_);
-    settings->addRow(Tr("Где видели", "Last seen at"), lastSeenKey_);
-    settings->addRow(Tr("Интервал решений, с", "Think interval, s"), thinkInterval_);
+    auto iconLabel = [memoryPanel_](const QString& icon, const QString& text) {
+        auto* row = new QWidget(memoryPanel_);
+        auto* box = new QHBoxLayout(row);
+        box->setContentsMargins(0, 0, 0, 0);
+        box->setSpacing(6);
+        auto* pic = new QLabel(row);
+        pic->setPixmap(IconProvider::GetIcon(icon).pixmap(14, 14));
+        box->addWidget(pic);
+        box->addWidget(new QLabel(text, row));
+        return row;
+    };
+    settings->addRow(iconLabel(QStringLiteral("focus-2"), Tr("Цель восприятия", "Perceived target")), targetKey_);
+    settings->addRow(iconLabel(QStringLiteral("eye"), Tr("Где видели", "Last seen at")), lastSeenKey_);
+    settings->addRow(iconLabel(QStringLiteral("refresh"), Tr("Интервал решений, с", "Think interval, s")), thinkInterval_);
     panelLayout->addLayout(settings);
     connect(targetKey_, &QComboBox::activated, this, [this] { EditSettings(); });
     connect(lastSeenKey_, &QComboBox::activated, this, [this] { EditSettings(); });
     connect(thinkInterval_, &QDoubleSpinBox::valueChanged, this, [this] { EditSettings(); });
-    dock->setWidget(panel);
-    addDockWidget(Qt::LeftDockWidgetArea, dock);
-    dock->setEnabled(false);
+    memoryPanel_->setEnabled(false);
+    graph_->EmbedSidePanel(memoryPanel_);
+
+    auto* save = new QPushButton(IconProvider::SaveIcon(), QString(), central);
+    save->setObjectName(QStringLiteral("FsmSave"));
+    save->setFixedSize(34, 26);
+    save->setIconSize(QSize(16, 16));
+    save->setToolTip(Tr("Сохранить: записать файл и проверить движком сразу", "Save: write the file and check with the engine now"));
+    connect(save, &QPushButton::clicked, this, [this] { SaveNow(); });
+    graph_->PrependToolbarWidget(save);
+    for (auto* button : variablesPanel_->ToolbarButtons())
+        graph_->AddToolbarWidget(button);
+    auto* newMachine = new QPushButton(IconProvider::RobotIcon(), QString(), central);
+    newMachine->setObjectName(QStringLiteral("FsmNewMachine"));
+    newMachine->setFixedSize(34, 26);
+    newMachine->setIconSize(QSize(16, 16));
+    newMachine->setToolTip(Tr("Новый автомат: создать .fsm в той же папке", "New machine: create a .fsm in the same folder"));
+    connect(newMachine, &QPushButton::clicked, this, [this] {
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.CreateAiMachine"),
+            {{QStringLiteral("directory"), QFileInfo(PhysicalPath()).absolutePath()}});
+    });
+    graph_->AddToolbarWidget(newMachine);
 
     saveTimer_ = new QTimer(this);
     saveTimer_->setSingleShot(true);
@@ -188,7 +229,7 @@ void AiMachineEditorWindow::LoadFile(const QString& catalog)
         return SetReadOnly(Tr("Файл записан более новой версией редактора: он открыт только для чтения.",
                               "The file was written by a newer editor: it is open read-only."));
     graph_->setEnabled(true);
-    findChild<QDockWidget*>(QStringLiteral("FsmMemoryDock"))->setEnabled(true);
+    memoryPanel_->setEnabled(true);
     hint_ = Tr("Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
                "Edits are saved at once; Play reads the file when it starts. Double-click — state or transition properties.");
     statusBar()->showMessage(hint_);
@@ -202,6 +243,7 @@ void AiMachineEditorWindow::SetReadOnly(const QString& reason)
     banner_->setText(reason);
     banner_->show();
     graph_->setEnabled(false);
+    memoryPanel_->setEnabled(false);
     statusBar()->showMessage(Tr("Только для чтения", "Read-only"));
 }
 
@@ -288,7 +330,11 @@ void AiMachineEditorWindow::ShowProblems()
     graph_->SetNodeWarnings(warnings_);
     graph_->SetNodeProblems(onNodes);
     if (problemList_->count() == 0)
-        (new QListWidgetItem(Tr("Ошибок нет: автомат запустится в Play", "No problems: the machine will run in Play"), problemList_))->setFlags(Qt::NoItemFlags);
+    {
+        auto* item = new QListWidgetItem(Tr("Нет сообщений", "No messages"), problemList_);
+        item->setFlags(Qt::NoItemFlags);
+        item->setForeground(QColor(0x80, 0x80, 0x80));
+    }
 }
 
 void AiMachineEditorWindow::RefreshPanels()
