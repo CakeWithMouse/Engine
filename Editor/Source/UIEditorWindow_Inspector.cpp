@@ -41,10 +41,13 @@ void UIEditorWindow::BuildInspector(QWidget* props, QScrollArea* scroll) {
 
     // Card 1: General
     cardGeneral_ = new CollapsibleCard(Tr("Общие", "General"), props);
-    auto* formGeneral = new QFormLayout(cardGeneral_->Content());
-    formGeneral->setContentsMargins(6, 4, 6, 4);
+    // Content() already owns a QVBoxLayout; a second top-level layout on the same
+    // widget is rejected by Qt and leaves every field unmanaged (zero-height card).
+    auto* formGeneral = new QFormLayout;
+    formGeneral->setContentsMargins(0, 0, 0, 0);
     formGeneral->setSpacing(4);
     formGeneral->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
+    cardGeneral_->ContentLayout()->addLayout(formGeneral);
     name_ = new QLineEdit(cardGeneral_->Content());
     name_->setObjectName("UIName");
     labelName_ = new QLabel(Tr("Имя", "Name"), cardGeneral_->Content());
@@ -57,10 +60,11 @@ void UIEditorWindow::BuildInspector(QWidget* props, QScrollArea* scroll) {
 
     // Card 2: Layout
     cardLayout_ = new CollapsibleCard(Tr("Макет", "Layout"), props);
-    auto* formLayout = new QFormLayout(cardLayout_->Content());
-    formLayout->setContentsMargins(6, 4, 6, 4);
+    auto* formLayout = new QFormLayout;
+    formLayout->setContentsMargins(0, 0, 0, 0);
     formLayout->setSpacing(4);
     formLayout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
+    cardLayout_->ContentLayout()->addLayout(formLayout);
     const QString labels[] = {"X", "Y", Tr("Ширина", "Width"), Tr("Высота", "Height")};
     for (int i = 0; i < 4; ++i) {
         rect_[i] = new QDoubleSpinBox(cardLayout_->Content());
@@ -106,10 +110,11 @@ void UIEditorWindow::BuildInspector(QWidget* props, QScrollArea* scroll) {
 
     // Card 3: Appearance
     cardAppearance_ = new CollapsibleCard(Tr("Вид", "Appearance"), props);
-    auto* formAppearance = new QFormLayout(cardAppearance_->Content());
-    formAppearance->setContentsMargins(6, 4, 6, 4);
+    auto* formAppearance = new QFormLayout;
+    formAppearance->setContentsMargins(0, 0, 0, 0);
     formAppearance->setSpacing(4);
     formAppearance->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
+    cardAppearance_->ContentLayout()->addLayout(formAppearance);
     visible_ = new QCheckBox(cardAppearance_->Content());
     visible_->setObjectName("UIVisible");
     labelVisible_ = new QLabel(Tr("Видимость", "Visible"), cardAppearance_->Content());
@@ -138,10 +143,11 @@ void UIEditorWindow::BuildInspector(QWidget* props, QScrollArea* scroll) {
 
     // Card 4: Behavior
     cardBehavior_ = new CollapsibleCard(Tr("Поведение", "Behavior"), props);
-    auto* formBehavior = new QFormLayout(cardBehavior_->Content());
-    formBehavior->setContentsMargins(6, 4, 6, 4);
+    auto* formBehavior = new QFormLayout;
+    formBehavior->setContentsMargins(0, 0, 0, 0);
     formBehavior->setSpacing(4);
     formBehavior->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
+    cardBehavior_->ContentLayout()->addLayout(formBehavior);
     interactive_ = new QCheckBox(cardBehavior_->Content());
     interactive_->setObjectName("UIInteractive");
     labelInteractive_ = new QLabel(Tr("Интерактивность", "Interactive"), cardBehavior_->Content());

@@ -16,7 +16,7 @@
 - [x] А1. Reparent иерархии без дублей: Qt не двигает строки, единственный источник — сцена (Scene.Reparent), запрет циклов, один Undo, Core-автотест
 - [x] А2. Папка: в инспекторе только Общие+Трансформация (без Скрипт/Физика/АИ/компонентов); у Empty скрипт остаётся
 - [x] А3. Инспектор: двойной отступ между карточками Трансформация/Скрипт; заголовок «Параметры» обрезан
-- [ ] А4. UI-редактор: правая панель (секции нулевой высоты) — layout fix
+- [x] А4. UI-редактор: правая панель (секции нулевой высоты) — layout fix
 - [ ] А5. Меню «ИИ» → подменю внутри «Инструменты», отдельную вкладку убрать
 - [ ] А6. InfoButton: clamp попапа в экран, непустой текст, ~360px, скролл; кнопка в тулбар графа
 - [ ] Контрольная точка А (Debug + check -Quick + слои + wc + визуальный просмотр)
@@ -36,6 +36,8 @@
     - А2: `ObjectInspectorPanel.cpp` — флаг `isFolder` (type == "Scene.Folder"); для папки скрыты Физика (`showPhysics`), Геометрия/Материал (`showGeometry/showMaterial`), секция свойств (`showProperties`), Скрипт (`showScript`), Автомат ИИ (`aiMachine`). Остаются Общие + Трансформация. У Empty скрипт сохранён. Причина появления карточек у папки: `showScript = view.scripts || hasSavedScript` (наличие скриптов в проекте), `aiMachine` по propertySchema, `showProperties` по отрицанию меш/свет/частицы.
     - А3 (двойной отступ): между TransformCard и ScriptCard в layout стоит контейнер `properties_`; у пустого объекта он видим, но пуст (секций схемы нет) — нулевая высота + два spacing по 4px давали двойной зазор. Правка: `properties_->setVisible(showProperties && propertiesLayout_->count() > 0)`. Единообразно для всех типов.
     - А3 (обрезанный «Параметры»): заголовок секции схемы — `QToolButton` (`PropertySection.h`); селектор `QToolButton[objectName^="Section."]` в QSS ненадёжен (оператор `^=`), кнопка наследовала generic `QToolButton { padding: 4px 8px; border: 1px }` — при фиксированной высоте 22px текст обрезался сверху. Правка: свойство `cardHeader=true` + селектор `QToolButton[cardHeader="true"]` (padding 0 8px, border none, height 22) в EditorStyles.cpp — тот же стиль, что у `CardHeaderBtn`. Тип виджета не менялся, тесты-локаторы по objectName не затронуты.
+
+3. **А4 (fix(editor)):** Правая панель UI-редактора, секции нулевой высоты. Причина: `UIEditorWindow_Inspector.cpp` создавал `new QFormLayout(card->Content())`, но `Content()` уже владеет `QVBoxLayout` из конструктора `CollapsibleCard` (CollapsibleCard.h:53-56) — Qt отклоняет второй top-level layout («Attempting to set QLayout which already has a layout»), форма не устанавливалась, все поля оставались без управления layout и секции имели нулевую высоту. Правка: все 4 формы (Общие/Макет/Вид/Поведение) создаются без родителя и добавляются через `card->ContentLayout()->addLayout(form)`; margins формы 0 (отступы уже у ContentLayout = CardMargins 6,4,6,4), spacing 4, ExpandingFieldsGrow. Секции развёрнуты по умолчанию (CollapsibleCard expanded=true). QScrollArea widgetResizable уже был (BuildInspector).
 
 ### Вопросы к Юрию (Итерация 3)
 *(заполняются по мере необходимости, с решением по умолчанию)*
