@@ -1,0 +1,154 @@
+{
+  "status": "passed",
+  "version": "0.4.0",
+  "scope": "staged distribution + SDK + export",
+  "checks": [
+    {
+      "status": "passed",
+      "log": "files-validation.json",
+      "name": "files-and-dependencies"
+    },
+    {
+      "status": "passed",
+      "log": "game-BasicExamples.log",
+      "name": "game-BasicExamples",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "game-Pong.log",
+      "name": "game-Pong",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "game-SunGame.log",
+      "name": "game-SunGame",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "game-Battle.log",
+      "name": "game-Battle",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "game-Katamari.log",
+      "name": "game-Katamari",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "game-RuntimeExample.log",
+      "name": "game-RuntimeExample",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "editor-BasicExamples.log",
+      "name": "editor-BasicExamples",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "editor-Pong.log",
+      "name": "editor-Pong",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "editor-SunGame.log",
+      "name": "editor-SunGame",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "editor-Battle.log",
+      "name": "editor-Battle",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "editor-RuntimeExample.log",
+      "name": "editor-RuntimeExample",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "sample-AiTutorial-game.log",
+      "name": "sample-AiTutorial-game",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "sample-AiTutorial-editor.log",
+      "name": "sample-AiTutorial-editor",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "sample-RepairCorridor-game.log",
+      "name": "sample-RepairCorridor-game",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "sample-RepairCorridor-editor.log",
+      "name": "sample-RepairCorridor-editor",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "create-project.log",
+      "name": "create-project",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "project-game.log",
+      "name": "project-game",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "project-editor.log",
+      "name": "project-editor",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "cpp-enable.log",
+      "name": "cpp-enable",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "cpp-runtime.log",
+      "name": "cpp-runtime",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "cpp-export.log",
+      "name": "cpp-export",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "exported-exe.log",
+      "name": "exported-exe",
+      "exitCode": 0
+    },
+    {
+      "status": "passed",
+      "log": "commandlet-play.log",
+      "name": "commandlet-play",
+      "exitCode": 0
+    }
+  ],
+  "limitations": [
+    "Manual panel interactions remained partial in the earlier playtest; see release notes.",
+    "Linux, macOS and clang-cl were not tested for this archive."
+  ]
+}

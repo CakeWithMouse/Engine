@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "baseline": "PainEngine-0.4.0-r2-win64",
+  "checks": {
+    "peFiles": 182,
+    "sdkLibrariesAndHeaders": 366
+  },
+  "engineSourceBase": "62b4eb49",
+  "note": "Same verified r2 binaries and SDK; r3 changes documentation and packaging only."
+}

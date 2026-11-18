@@ -43,14 +43,15 @@ AiTutorial и RepairCorridor находятся в Tutorials. OpenEditor.cmd р�
 распакованного комплекта:
 
 ```powershell
+$ErrorActionPreference = 'Stop'
 $Runtime = Join-Path (Get-Location) 'Runtime'
 $Archive = Join-Path (Get-Location) 'Sources/RepairCorridor-0.4.0-r2-source.zip'
 $ProjectRoot = Join-Path $env:LOCALAPPDATA 'PainEngine/Projects/RepairCorridor-r3-copy'
 if (Test-Path -LiteralPath $ProjectRoot) { throw 'Выберите новую папку проекта' }
 Expand-Archive -LiteralPath $Archive -DestinationPath $ProjectRoot
 & (Join-Path $ProjectRoot 'Build.ps1') -Runtime $Runtime
-if ($LASTEXITCODE -ne 0) { throw 'Пересборка проекта не прошла' }
 & (Join-Path $Runtime 'EngineRuntime.exe') --project (Join-Path $ProjectRoot 'Project.json') --mode game --frames 60
+if ($LASTEXITCODE -ne 0) { throw 'Запуск проекта не прошёл' }
 ```
 
 Для экспорта используйте «Сцена → Собрать EXE…» в редакторе. Пакет содержит

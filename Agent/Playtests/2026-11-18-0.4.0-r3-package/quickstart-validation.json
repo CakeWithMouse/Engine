@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "source": "Sources/RepairCorridor-0.4.0-r2-source.zip",
+  "steps": [
+    "fresh unpack in Unicode path",
+    "CMake build with packaged SDK",
+    "validated and activated DLL",
+    "Runtime60",
+    "EngineStopped"
+  ],
+  "moduleSha256": "380f2860aba7ee111c2a61ee605615fb1827ccdcf511a67117e0b40da9845b91",
+  "exitCode": 0
+}

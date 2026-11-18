@@ -19,8 +19,23 @@ Runtime/Editor/CMake SDK, игры и готовая стратегия беру
 Регрессия неизменённого движка унаследована от r2: Engine86/86 на двух
 сборках, AI58/58, CTest3/3, внешний SDK2/2, Core/Host/Ui и native UI/API.
 Это исторические результаты, они не засчитываются как новый запуск тестов.
-Состав Runtime/SDK и бинарники новой поставки сверяются с SHA256 r2.
-Результаты новых проверок папки и распаковки добавляются после их выполнения.
+Все 182 PE-файла и 366 библиотек/заголовков SDK совпали по SHA256 с r2:
+[binary-reuse.json](binary-reuse.json).
+
+Новый полный прогон готовой папки: **24/24 passed**. Проверены 16 HTML и
+145 локальных ссылок, 182 PE x64; отсутствующих ссылок/DLL нет.
+[VALIDATION.json](VALIDATION.json), [files-validation.json](files-validation.json),
+[журнал](validation.log).
+
+Инструкция пересборки стратегии повторена на новой распаковке в Unicode-пути:
+CMake Build, validated/activated DLL, GameUpdates=60, EngineStopped, exit0.
+[Команды](verify-quickstart.ps1), [лог](quickstart-final.log),
+[результат](quickstart-validation.json).
+Первый вариант инструкции ошибочно проверял LASTEXITCODE после PowerShell
+Build.ps1: нативный код вспомогательной команды оставался ненулевым при
+успешной сборке. Пример исправлен: ошибки скрипта завершают выполнение через
+ErrorActionPreference=Stop, exit code проверяется у запуска EXE. Первый лог
+[сохранён](quickstart-initial.log); движок не менялся.
 
 Проверка выполняется `Engine/BuildSupport/Test-ReleasePackage.ps1` с отдельным
 EngineStore и PATH без DLL рабочего Runtime. Полный прогон проверяет игры,
