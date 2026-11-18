@@ -177,11 +177,11 @@ void EditorMainWindow::BuildToolsMenu()
 
     toolsMenu_ = menuBar()->addMenu(Tr("Инструменты", "Tools"));
     aiMenu_ = toolsMenu_->addMenu(Tr("ИИ", "AI"));
-    aiMenu_->addAction(Tr("Навигация", "Navigation"), this, [] {
-        CommandRegistry::Instance().Execute(QStringLiteral("View.ToggleAiDiagnostics"));
-    });
-    aiMenu_->addAction(Tr("Диагностика", "Diagnostics"), this, [] {
+    aiMenu_->addAction(Tr("Навигация и диагностика", "Navigation and Diagnostics"), this, [] {
         CommandRegistry::Instance().Execute(QStringLiteral("Tools.ToggleAiDiagnostics"));
+    });
+    aiMenu_->addAction(Tr("Создать автомат ИИ…", "Create AI Machine…"), this, [] {
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.CreateAiMachine"));
     });
     aiMenu_->addAction(Tr("Открыть редактор автомата ИИ…", "Open AI Machine Editor…"), this, [this] {
         AssetPickerDialog picker(EditorCore::AssetKind::AiMachine, QString::fromUtf8(host_->host().contentRoot), QString(), this);
