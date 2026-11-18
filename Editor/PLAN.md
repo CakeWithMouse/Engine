@@ -19,7 +19,7 @@
 - [x] А4. UI-редактор: правая панель (секции нулевой высоты) — layout fix
 - [x] А5. Меню «ИИ» → подменю внутри «Инструменты», отдельную вкладку убрать
 - [x] А6. InfoButton: clamp попапа в экран, непустой текст, ~360px, скролл; кнопка в тулбар графа
-- [ ] Контрольная точка А (Debug + check -Quick + слои + wc + визуальный просмотр)
+- [x] Контрольная точка А (Debug + check -Quick + слои + wc + визуальный просмотр)
 - [ ] Б1. Visual Script: общая верхняя панель, таблица переменных, Int/Float, консоль с плейсхолдером
 - [ ] Б2. FSM: общая верхняя панель, панель памяти, «Новый автомат», консоль, диалог состояния
 - [ ] Б3. UI-редактор: палитра с заголовком, DnD в иерархию, кнопки добавления убрать из тулбара, сетка/магнит+snap, заголовки панелей
@@ -43,11 +43,27 @@
 
 5. **А6 (fix(editor)):** InfoButton. (1) Попап: причина пустого/обрезанного текста — word-wrap `QLabel::sizeHint` не учитывает ограничение ширины 360px, `adjustSize` давал неверную высоту. Правка (`InfoButton.h ShowPopup`): высота текста считается через `heightForWidth(contentW - scrollBarExtent)`, длинный текст скроллится (`QScrollArea#InfoPopupScroll`, widgetResizable, без горизонтального скролла), высота ограничена доступной высотой экрана кнопки; пустой текст заменяется fallback «Описание отсутствует.»; позиционирование — существующая чистая `CalculatePopupGeometry` (clamp в availableGeometry экрана кнопки, тесты InfoButtonTests не менялись). (2) Кнопка в тулбаре графа: перенесена сразу за кнопками действий (до stretch, GraphEditorWidget.cpp BuildToolbar), размер 34x26 = размер соседних QToolButton (16px иконка + padding 4/8 + border 1), `SetToolbarStyle(true)`.
 
+### Контрольная точка А — результаты (18.11.2026)
+- check.ps1 -Quick на чистом дереве (временный визуальный harness удалён): запретные зоны OK, слои OK, локализация OK, размеры файлов OK; Debug-сборка EditorModule OK.
+- Сырые хвосты:
+  - `EditorModule.vcxproj -> ...\Game\build\x64\Debug\Runtime\Editor.dll` · `OK: Build succeeded.`
+  - `CoreTests: 2196 checks passed.` · `OK: CoreTests passed.`
+  - `HostTests: 165 checks passed.` · `OK: HostTests passed.`
+  - `CrossTypeInfoButtonTests failed: GeometryCard InfoPopupWindow is strictly within screen bounds` · `UiTests finished with 1 failed suite(s).` — известный красный (baseline), игнорируется по договорённости.
+- Визуально подтверждено (QWidget::grab временного harness, удалён после просмотра; grabs: %TEMP%/iter3-grabs):
+  - А2: A_folder.png — у папки только «Общие»+«Трансформация»; A_empty.png — у Empty «Скрипт» сохранён.
+  - А3: A_props_section.png — заголовок «Параметры» не обрезан, одинарные зазоры между карточками; A_cube_params.png — публичные параметры Speed/Tint в карточке материала.
+  - А4: A_ui_window.png / A_ui_panel.png — правые секции развёрнуты, поля видимы.
+  - А6: A_graph_toolbar.png — «?» 34x26 сразу за кнопками действий; A_info_popup.png — попап 360px, перенос, скролл, clamp в свой экран (мульти-монитор: 2537,0 360x849 внутри 1920,0 1920x1040).
+- А5: проверено по коду (HudTools.cpp, MainWindow.cpp), визуально не подтверждено (MainWindow вне link-set UiTests).
+- Замечание: QT_QPA_PLATFORM=offscreen вешает QApplication в этой сборке Qt6 — UiTests и harness запускались без offscreen, как baseline check.ps1.
+
 ### Вопросы к Юрию (Итерация 3)
 *(заполняются по мере необходимости, с решением по умолчанию)*
 
 ### Не проверено в рантайме (Итерация 3)
 - А1: живой drag&drop в иерархии (drop на объект, между строк, в корень, на потомка) — логика покрыта Core-тестом и чтением кода, GUI-жест не выполнялся.
+- А5: меню «Инструменты» → «ИИ» визуально не подтверждено (только код).
 
 ---
 
