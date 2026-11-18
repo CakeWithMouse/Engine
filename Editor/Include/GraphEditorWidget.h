@@ -19,6 +19,7 @@ class QGraphicsPathItem;
 class QGraphicsScene;
 class QGraphicsView;
 class QHBoxLayout;
+class QMenu;
 class QPainter;
 class QToolButton;
 
@@ -142,6 +143,8 @@ protected:
     virtual void EditLink(const EditorCore::GraphConnectionData& link);
     // Отмена или повтор заменили граф; before — граф до замены.
     virtual void OnRestored(const EditorCore::GraphDocument& before) {}
+    // Дополнительные пункты контекстного меню ноды (например, «Сделать параметром» у материала).
+    virtual void ExtendNodeMenu(QMenu&, int) {}
 
     // Кнопка на панели после стандартных (+ Нода, отмена, повтор, «Показать всё»).
     void AddToolbarWidget(QWidget* widget);

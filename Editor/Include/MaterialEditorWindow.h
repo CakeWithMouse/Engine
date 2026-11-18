@@ -24,6 +24,7 @@ class QToolButton;
 class MaterialGraphWidget;
 class PreviewWidget;
 class MaterialSourceEditor;
+class CollapsibleCard;
 
 // Состояние материала в том виде, в каком его вернул readMaterial (копия для потока UI).
 struct MaterialEditorState
@@ -159,7 +160,6 @@ private:
     QTabWidget* sourceTabs_ = nullptr;
     QAction* graphAction_ = nullptr;
     QToolButton* templates_ = nullptr;
-    QAction* exposeAction_ = nullptr;
     QTimer* graphApply_ = nullptr;
 
     EditorQtHost* host_ = nullptr;
@@ -180,6 +180,9 @@ private:
     QCheckBox* unlit_ = nullptr;
     QCheckBox* twoSided_ = nullptr;
     QCheckBox* castShadows_ = nullptr;
-    QWidget* parameters_ = nullptr;
-    QFormLayout* parameterForm_ = nullptr;
+    CollapsibleCard* renderCard_ = nullptr;
+    CollapsibleCard* texturesCard_ = nullptr;
+    CollapsibleCard* paramsCard_ = nullptr;
+    QFormLayout* texturesForm_ = nullptr;
+    QFormLayout* paramsForm_ = nullptr;
 };

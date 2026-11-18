@@ -139,6 +139,7 @@ UIEditorWindow::UIEditorWindow(EditorQtHost* host, const QString& file, QWidget*
     tools->addWidget(helpBtn_);
 
     auto* split = new QSplitter(this);
+    split->setHandleWidth(3);
     setCentralWidget(split);
 
     auto* left = new QWidget(split);

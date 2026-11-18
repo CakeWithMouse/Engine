@@ -1,7 +1,9 @@
 #include "MaterialGraphWidget.h"
 #include "EditorLocale.h"
 #include "HlslGraphCompiler.h"
+#include "IconProvider.h"
 #include "MaterialGraphSchema.h"
+#include "MaterialGraphTransform.h"
 #include "MaterialTextureTools.h"
 
 #include <QClipboard>
@@ -322,6 +324,14 @@ void MaterialGraphWidget::OnRestored(const GraphDocument& before)
         const QString now = node.properties.value(QStringLiteral("texture")).toString();
         if (IsTextureType(node.type) && was != now && textureRestored) textureRestored(NodeName(node), now);
     }
+}
+
+void MaterialGraphWidget::ExtendNodeMenu(QMenu& menu, int nodeId)
+{
+    if (!exposeRequested || !EditorCore::MaterialGraphTransform::CanExpose(Model(), {nodeId})) return;
+    menu.addSeparator();
+    menu.addAction(IconProvider::VariableIcon(), Tr("Сделать параметром", "Make parameter"), this,
+                   [this] { exposeRequested(); });
 }
 
 void MaterialGraphWidget::EditNode(int nodeId)

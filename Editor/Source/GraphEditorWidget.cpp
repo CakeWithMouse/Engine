@@ -1319,6 +1319,7 @@ void GraphEditorWidget::ShowNodeMenu(const QPoint& screenPos, int nodeId)
     menu.addAction(Tr("Копировать\tCtrl+C", "Copy\tCtrl+C"), this, [this, chosen] { CopyNodes(chosen); })->setEnabled(!onlyFixed);
     menu.addAction(Tr("Дублировать\tCtrl+D", "Duplicate\tCtrl+D"), this, [this, chosen] { DuplicateNodes(chosen); })->setEnabled(!onlyFixed);
     menu.addAction(Tr("Удалить\tDel", "Delete\tDel"), this, [this, chosen] { RemoveNodes(chosen); })->setEnabled(!onlyFixed);
+    ExtendNodeMenu(menu, nodeId);
     menu.exec(screenPos);
 }
 

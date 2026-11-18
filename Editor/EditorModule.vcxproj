@@ -306,6 +306,7 @@
 
     <ItemGroup>
         <ClInclude Include="Core/IUserPrompt.h"/>
+        <ClInclude Include="Core/MaterialEvents.h"/>
         <ClInclude Include="Core/EditorLocale.h"/>
         <ClInclude Include="Core/SettingsService.h"/>
         <ClInclude Include="Core/GizmoMath.h"/>

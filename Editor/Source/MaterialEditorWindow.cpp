@@ -4,8 +4,11 @@
 #include "HlslGraphCompiler.h"
 #include "HlslToGraph.h"
 #include "Graph/GraphFileIo.h"
+#include "CollapsibleCard.h"
 #include "EditorTheme.h"
 #include "EditorWindowSetup.h"
+#include "InfoButton.h"
+#include "MaterialEvents.h"
 #include "PreviewWidget.h"
 #include "IconProvider.h"
 
@@ -43,6 +46,7 @@
 #include <QTimer>
 #include <QToolBar>
 #include <QToolButton>
+#include <QVBoxLayout>
 #include <QVBoxLayout>
 #include <QWheelEvent>
 #include <algorithm>
@@ -343,39 +347,68 @@ void MaterialEditorWindow::BuildUi()
     graphAction_->setEnabled(false); // до загрузки HLSL
     BuildGraphTools(tools);
 
+    auto* help = new InfoButton(this);
+    help->setObjectName(QStringLiteral("MaterialHelpButton"));
+    help->SetToolbarStyle(true);
+    help->SetInfoText(
+        Tr("Редактор материала", "Material Editor"),
+        Tr("• Превью: ЛКМ/ПКМ — вращение, колесо — приближение (0.2x..10x от исходного расстояния)\n• Нодовый граф: ПКМ по ноде Constant — «Сделать параметром» (правка без перекомпиляции)\n• Глаз в «Параметрах»: показывать параметр в инспекторе объекта (появляется сразу)\n• Шаблоны: Simple, ORM и базовые эффекты; «Откатить» возвращает файлы до сохранения",
+           "• Preview: LMB/RMB — orbit, wheel — zoom (0.2x..10x of the initial distance)\n• Node graph: RMB a Constant node — Make parameter (editable without recompiling)\n• Eye in Parameters: show the parameter in the object inspector (appears at once)\n• Templates: Simple, ORM and base effects; Revert restores files until saved"),
+        QString());
+    tools->addWidget(help);
+
     preview_ = new PreviewWidget(this);
     preview_->setObjectName(QStringLiteral("MaterialPreview"));
 
     auto* settings = new QWidget(this);
-    auto* settingsForm = new QFormLayout(settings);
-    blend_ = new QComboBox(settings);
+    auto* settingsLayout = new QVBoxLayout(settings);
+    settingsLayout->setContentsMargins(4, 4, 4, 4);
+    settingsLayout->setSpacing(6);
+    renderCard_ = new CollapsibleCard(Tr("Рендер", "Rendering"), settings);
+    renderCard_->setObjectName(QStringLiteral("MaterialRenderCard"));
+    auto* settingsForm = new QFormLayout;
+    settingsForm->setContentsMargins(0, 0, 0, 0);
+    settingsForm->setSpacing(4);
+    settingsForm->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
+    renderCard_->ContentLayout()->addLayout(settingsForm);
+    blend_ = new QComboBox(renderCard_->Content());
     blend_->setObjectName(QStringLiteral("MaterialBlend"));
     blend_->addItems({QStringLiteral("Непрозрачный"), QStringLiteral("С вырезом (masked)"),
                       QStringLiteral("Полупрозрачный"), QStringLiteral("Аддитивный")});
-    alphaClip_ = new QDoubleSpinBox(settings);
+    alphaClip_ = new QDoubleSpinBox(renderCard_->Content());
     alphaClip_->setObjectName(QStringLiteral("MaterialAlphaClip"));
     alphaClip_->setRange(0.0, 1.0);
     alphaClip_->setSingleStep(0.05);
     alphaClip_->setDecimals(3);
-    unlit_ = new QCheckBox(QStringLiteral("Без освещения"), settings);
+    unlit_ = new QCheckBox(QStringLiteral("Без освещения"), renderCard_->Content());
     unlit_->setObjectName(QStringLiteral("MaterialUnlit"));
-    twoSided_ = new QCheckBox(QStringLiteral("Двусторонний"), settings);
+    twoSided_ = new QCheckBox(QStringLiteral("Двусторонний"), renderCard_->Content());
     twoSided_->setObjectName(QStringLiteral("MaterialTwoSided"));
-    castShadows_ = new QCheckBox(QStringLiteral("Отбрасывает тени"), settings);
+    castShadows_ = new QCheckBox(QStringLiteral("Отбрасывает тени"), renderCard_->Content());
     castShadows_->setObjectName(QStringLiteral("MaterialCastShadows"));
-    auto* renderTitle = new QLabel(Tr("Рендер", "Rendering"), settings);
-    renderTitle->setStyleSheet(QStringLiteral("font-weight: bold;"));
-    settingsForm->addRow(renderTitle);
     settingsForm->addRow(QStringLiteral("Смешивание"), blend_);
     settingsForm->addRow(QStringLiteral("Порог альфы"), alphaClip_);
     settingsForm->addRow(unlit_);
     settingsForm->addRow(twoSided_);
     settingsForm->addRow(castShadows_);
+    settingsLayout->addWidget(renderCard_);
 
-    parameters_ = new QWidget(settings);
-    parameterForm_ = new QFormLayout(parameters_);
-    parameterForm_->setContentsMargins(0, 0, 0, 0);
-    settingsForm->addRow(parameters_);
+    texturesCard_ = new CollapsibleCard(Tr("Текстуры", "Textures"), settings);
+    texturesCard_->setObjectName(QStringLiteral("MaterialTexturesCard"));
+    texturesForm_ = new QFormLayout;
+    texturesForm_->setContentsMargins(0, 0, 0, 0);
+    texturesForm_->setSpacing(4);
+    texturesCard_->ContentLayout()->addLayout(texturesForm_);
+    settingsLayout->addWidget(texturesCard_);
+
+    paramsCard_ = new CollapsibleCard(Tr("Параметры", "Parameters"), settings);
+    paramsCard_->setObjectName(QStringLiteral("MaterialParamsCard"));
+    paramsForm_ = new QFormLayout;
+    paramsForm_->setContentsMargins(0, 0, 0, 0);
+    paramsForm_->setSpacing(4);
+    paramsCard_->ContentLayout()->addLayout(paramsForm_);
+    settingsLayout->addWidget(paramsCard_);
+    settingsLayout->addStretch(1);
 
     auto* scroll = new QScrollArea(this);
     scroll->setWidgetResizable(true);
@@ -388,7 +421,7 @@ void MaterialEditorWindow::BuildUi()
     errors_->setObjectName(QStringLiteral("MaterialErrors"));
 
     auto* left = new QSplitter(Qt::Vertical, this);
-    left->setHandleWidth(6);
+    left->setHandleWidth(3);
     left->setChildrenCollapsible(false);
     left->addWidget(preview_);
     left->addWidget(scroll);
@@ -421,16 +454,17 @@ void MaterialEditorWindow::BuildUi()
     graph_->parameterEdited = [this](const QString& name, const std::array<float, 4>& value) { SetParameterByName(name, value); };
     graph_->textureRequested = [this](const QString& name) { PickTexture(name); };
     graph_->textureRestored = [this](const QString& name, const QString& gamePath) { AssignTexture(name, gamePath); };
+    graph_->exposeRequested = [this] { ExposeSelectedAsParameter(); };
 
     auto* right = new QSplitter(Qt::Vertical, this);
-    right->setHandleWidth(6);
+    right->setHandleWidth(3);
     right->setChildrenCollapsible(false);
     right->addWidget(sourceTabs_);
     right->addWidget(errors_);
     right->setStretchFactor(0, 4);
     right->setStretchFactor(1, 1);
     auto* main = new QSplitter(Qt::Horizontal, this);
-    main->setHandleWidth(6);
+    main->setHandleWidth(3);
     main->setChildrenCollapsible(false);
     main->addWidget(left);
     main->addWidget(right);
@@ -581,7 +615,6 @@ void MaterialEditorWindow::LoadShaderText()
     sourceLoaded_ = !shaderFile_.isEmpty() && EditorCore::GraphFileIo::Read(ProjectRoot(), ContentRoot(), shaderFile_, data);
     graphAction_->setEnabled(sourceLoaded_);
     if (templates_) templates_->setEnabled(sourceLoaded_);
-    if (exposeAction_) exposeAction_->setEnabled(sourceLoaded_);
     if (!sourceLoaded_)
     {
         source_->setPlainText({});
@@ -801,19 +834,13 @@ void MaterialEditorWindow::RebuildSettings()
     }
     alphaClip_->setEnabled(state_.render.blend == EngineMaterialMasked);
 
-    while (parameterForm_->rowCount()) parameterForm_->removeRow(0);
-
-    auto addGroup = [this](const QString& title) {
-        auto* label = new QLabel(title, parameters_);
-        label->setStyleSheet(QStringLiteral("font-weight: bold; padding-top: 4px;"));
-        parameterForm_->addRow(label);
-    };
-    if (!state_.textures.isEmpty()) addGroup(Tr("Текстуры", "Textures"));
+    while (texturesForm_->rowCount()) texturesForm_->removeRow(0);
+    while (paramsForm_->rowCount()) paramsForm_->removeRow(0);
 
     for (const auto& texture : state_.textures)
     {
         const QString name = texture.name;
-        auto* row = new MaterialTextureSlot(name, texture.path, PhysicalPath(texture.path), parameters_);
+        auto* row = new MaterialTextureSlot(name, texture.path, PhysicalPath(texture.path), texturesCard_->Content());
         // Диалоги открываются из очереди: ответ движка может пересоздать эту строку под ними.
         row->choose = [this, name] { QTimer::singleShot(0, this, [this, name] { PickTexture(name); }); };
         row->remove = [this, name] { QTimer::singleShot(0, this, [this, name] { RequestRemoveTexture(name); }); };
@@ -822,30 +849,30 @@ void MaterialEditorWindow::RebuildSettings()
         // У материала из графа HLSL правит граф: слоты добавляются и удаляются нодами.
         if (auto* remove = row->findChild<QPushButton*>(QStringLiteral("MaterialTextureRemove_%1").arg(name)))
             remove->setVisible(!graphMode_);
-        parameterForm_->addRow(name, row);
+        texturesForm_->addRow(name, row);
     }
 
     if (!graphMode_)
     {
-        auto* add = new QPushButton(QStringLiteral("Добавить текстуру…"), parameters_);
+        auto* add = new QPushButton(QStringLiteral("Добавить текстуру…"), texturesCard_->Content());
         add->setObjectName(QStringLiteral("MaterialAddTextureButton"));
         add->setEnabled(!source_->isReadOnly());
         connect(add, &QPushButton::clicked, this, [this] { QTimer::singleShot(0, this, [this] { RequestAddTexture(); }); });
-        parameterForm_->addRow(add);
+        texturesForm_->addRow(add);
     }
-
-    if (!state_.parameters.isEmpty()) addGroup(Tr("Параметры", "Parameters"));
+    texturesCard_->setVisible(!state_.textures.isEmpty() || !graphMode_);
 
     for (int index = 0; index < state_.parameters.size(); ++index)
     {
-        auto* row = new QWidget(parameters_);
+        auto* row = new QWidget(paramsCard_->Content());
         auto* layout = new QHBoxLayout(row);
         layout->setContentsMargins(0, 0, 0, 0);
         BuildParameterRow(row, layout, index);
-        parameterForm_->addRow(state_.parameters[index].name, row);
+        paramsForm_->addRow(state_.parameters[index].name, row);
     }
+    paramsCard_->setVisible(!state_.parameters.isEmpty());
 
-    parameters_->parentWidget()->setEnabled(true);
+    renderCard_->parentWidget()->setEnabled(true);
 }
 
 void MaterialEditorWindow::ShowErrors()
@@ -1169,6 +1196,7 @@ bool MaterialEditorWindow::Save(std::function<void(bool)> completion)
         setEnabled(true);
         if (saved) {
             SavePublicParams();
+            EditorCore::MaterialEvents::Instance().NotifyChanged(material_);
             graphBackup_.active = false; // граф и HLSL на диске теперь сохранённые
         }
         UpdateTitle();

@@ -21,6 +21,8 @@ public:
     std::function<void(const QString& textureName)> textureRequested;
     // Отмена вернула ноде другую текстуру (/Game путь, пустой — без текстуры): её надо вернуть и материалу.
     std::function<void(const QString& textureName, const QString& gamePath)> textureRestored;
+    // ПКМ по ноде Constant: «Сделать параметром» (окно решает, как применить и записать).
+    std::function<void()> exposeRequested;
 
     // SetModel начинает историю заново: это загрузка, а не правка.
     void SetModel(const EditorCore::GraphDocument& model) { SetDocument(model); }
@@ -62,6 +64,7 @@ protected:
     QString EditActionText(const EditorCore::GraphNodeData& node) const override;
     QString RenameTitle() const override;
     void OnRestored(const EditorCore::GraphDocument& before) override;
+    void ExtendNodeMenu(QMenu& menu, int nodeId) override;
 
 private:
     void BuildMaterialToolbar();

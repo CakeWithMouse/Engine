@@ -6,6 +6,7 @@
 #include "EditorLocale.h"
 #include "EditorTheme.h"
 #include "InspectorCardStyle.h"
+#include "MaterialEvents.h"
 
 #include <QDir>
 #include <QFileInfo>
@@ -32,6 +33,20 @@ public:
         : CollapsibleCard(Tr("Материал", "Material"), parent, true)
     {
         BuildCard();
+        // Редактор материала изменил .mat (публичный флаг, значения): обновляемся без перевыбора объекта.
+        eventsSub_ = EditorCore::MaterialEvents::Instance().Subscribe([this](const QString& material) {
+            if (material == rawMaterialPath_ && cachedMaterialExists_ && !cachedPhysicalPath_.isEmpty())
+                RebuildPublicParams(cachedPhysicalPath_);
+        });
+    }
+
+    ~MaterialCard() override
+    {
+        if (eventsSub_ > 0)
+        {
+            EditorCore::MaterialEvents::Instance().Unsubscribe(eventsSub_);
+            eventsSub_ = 0;
+        }
     }
 
     void SetMaterialsAvailable(bool available)
@@ -65,6 +80,7 @@ public:
             }
             if (!cachedMaterialExists_)
             {
+                cachedPhysicalPath_.clear();
                 materialAsset_->setStyleSheet(QStringLiteral("color: %1;").arg(EditorTheme::Instance().AccentColor().name()));
                 materialAsset_->setToolTip(Tr("Файл материала не найден на диске", "Material file not found on disk"));
                 editMaterialButton_->setEnabled(false);
@@ -76,12 +92,14 @@ public:
                 materialAsset_->setStyleSheet(QString());
                 editMaterialButton_->setEnabled(true);
                 editMaterialButton_->setToolTip(QString());
-                RebuildPublicParams(QDir(contentRoot).filePath(rel));
+                cachedPhysicalPath_ = QDir(contentRoot).filePath(rel);
+                RebuildPublicParams(cachedPhysicalPath_);
             }
         }
         else
         {
             cachedMaterialPath_.clear();
+            cachedPhysicalPath_.clear();
             cachedMaterialExists_ = true;
             materialAsset_->setStyleSheet(QString());
             editMaterialButton_->setEnabled(!hasPointLight);
@@ -108,6 +126,7 @@ public:
         editMaterialButton_->setEnabled(true);
         clearMaterialButton_->setEnabled(false);
         cachedMaterialPath_.clear();
+        cachedPhysicalPath_.clear();
         cachedMaterialExists_ = true;
         materialAsset_->setStyleSheet(QString());
         ClearParams();
@@ -366,6 +385,8 @@ private:
     QWidget* paramsContainer_ = nullptr;
     QVBoxLayout* paramsRowsLayout_ = nullptr;
     QString cachedMaterialPath_;
+    QString cachedPhysicalPath_;
     QString rawMaterialPath_;
     bool cachedMaterialExists_ = true;
+    int eventsSub_ = 0;
 };

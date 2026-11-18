@@ -6,6 +6,7 @@
 #include "EditorLocale.h"
 #include "EditorTheme.h"
 #include "IconProvider.h"
+#include "MaterialEvents.h"
 
 #include <QMenu>
 #include <QMessageBox>
@@ -56,13 +57,6 @@ void MaterialEditorWindow::BuildGraphTools(QToolBar* tools)
     menu->addAction(Tr("Scrolling Energy — бегущая текстура", "Scrolling Energy — scrolling energy"), this, [this, apply] { apply(5); });
     templates_->setMenu(menu);
     tools->addWidget(templates_);
-
-    exposeAction_ = tools->addAction(IconProvider::VariableIcon(), QString(), this,
-                                     [this] { ExposeSelectedAsParameter(); });
-    exposeAction_->setObjectName(QStringLiteral("MaterialExposeParam"));
-    exposeAction_->setToolTip(Tr("Превратить выбранную ноду Constant в параметр материала без перекомпиляции",
-                                 "Turn the selected Constant node into a parameter without recompiling"));
-    exposeAction_->setEnabled(false); // до загрузки HLSL
 }
 
 void MaterialEditorWindow::ApplyTemplate(int kind)
@@ -155,8 +149,10 @@ void MaterialEditorWindow::SetParamPublic(const QString& name, bool isPublic)
     hasExplicitPublicParams_ = true;
     if (isPublic) publicParams_.insert(name);
     else publicParams_.remove(name);
-    edited_ = true;
-    UpdateTitle();
+    // Флаг — метаданные редактора, не состояние шейдера: пишется сразу, чтобы параметр
+    // появился в инспекторе объекта без перевыбора; «Откатить» его не возвращает.
+    SavePublicParams();
+    EditorCore::MaterialEvents::Instance().NotifyChanged(material_);
 }
 
 void MaterialEditorWindow::BuildParameterRow(QWidget* row, QHBoxLayout* layout, int index)
@@ -168,13 +164,10 @@ void MaterialEditorWindow::BuildParameterRow(QWidget* row, QHBoxLayout* layout, 
     eyeBtn->setFixedSize(24, 22);
     eyeBtn->setCheckable(true);
     eyeBtn->setChecked(isPublic);
-    eyeBtn->setToolTip(isPublic ? Tr("Параметр публичный: виден в инспекторе", "Public parameter: visible in inspector")
-                                : Tr("Параметр приватный: скрыт из инспектора", "Private parameter: hidden in inspector"));
+    eyeBtn->setToolTip(Tr("Показывать в инспекторе объекта", "Show in the object inspector"));
     connect(eyeBtn, &QPushButton::clicked, this, [this, eyeBtn, name = parameter.name](bool checked) {
         SetParamPublic(name, checked);
         eyeBtn->setIcon(IconProvider::EyeIcon(checked));
-        eyeBtn->setToolTip(checked ? Tr("Параметр публичный: виден в инспекторе", "Public parameter: visible in inspector")
-                                   : Tr("Параметр приватный: скрыт из инспектора", "Private parameter: hidden in inspector"));
     });
     layout->addWidget(eyeBtn);
 
