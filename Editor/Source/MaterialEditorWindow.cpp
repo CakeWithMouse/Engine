@@ -580,6 +580,20 @@ void MaterialEditorWindow::Apply(const MaterialEditorState& state, bool valid, b
     {
         const bool first = !loaded_;
         const QVector<MaterialEditorState::Texture> previous = state_.textures;
+        // Удалённые параметры убираем из publicParams_ и уведомляем инспектор
+        if (!first && loaded_)
+        {
+            QSet<QString> currentNames;
+            for (const auto& p : state.parameters) currentNames.insert(p.name);
+            bool paramsChanged = false;
+            for (auto it = publicParams_.begin(); it != publicParams_.end(); )
+            {
+                if (!currentNames.contains(*it)) { it = publicParams_.erase(it); paramsChanged = true; }
+                else ++it;
+            }
+            if (paramsChanged && !material_.isEmpty())
+                EditorCore::MaterialEvents::Instance().NotifyChanged(material_);
+        }
         state_ = state;
         loaded_ = true;
         if (!state_.modified) edited_ = false;

@@ -135,6 +135,11 @@ void MaterialEditorWindow::SavePublicParams()
     file.close();
     if (!doc.isObject()) return;
     QJsonObject obj = doc.object();
+    // Убираем publicParams_, которых нет в текущих параметрах шейдера
+    QSet<QString> validNames;
+    for (const auto& p : state_.parameters) validNames.insert(p.name);
+    for (auto it = publicParams_.begin(); it != publicParams_.end(); )
+        it = validNames.contains(*it) ? ++it : publicParams_.erase(it);
     QJsonArray arr;
     for (const QString& name : publicParams_)
         arr.append(name);

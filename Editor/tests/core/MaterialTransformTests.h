@@ -3,6 +3,7 @@
 #include "../../Core/MaterialGraphTransform.h"
 #include "../../Core/HlslGraphCompiler.h"
 
+#include <QSet>
 #include <QString>
 #include <cstdio>
 #include <cstdlib>
@@ -109,6 +110,53 @@ void TestExposeIgnoresNonConstants()
     CheckTransform(FindTransformNode(result, QStringLiteral("ScalarParam")) == nullptr, "Non-constant selection creates no param");
 }
 
+// Симулирует логику Apply(): если параметр удалён из графа,
+// его имя должно пропасть из publicParams_.
+void TestPublicParamFilterOnDelete()
+{
+    // Собираем граф с двумя параметрами: ScalarParam "Speed" и ColorParam "Tint"
+    EditorCore::MaterialGraphModel model;
+    const int master = model.AddNode(QStringLiteral("MaterialOutput"), QStringLiteral("Material Output"), QPointF(600, 180));
+    const int speedId = model.AddNode(QStringLiteral("ScalarParam"), QStringLiteral("Speed"),    QPointF(100, 100),
+                                      {{QStringLiteral("name"), QStringLiteral("Speed")}});
+    const int tintId  = model.AddNode(QStringLiteral("ColorParam"),  QStringLiteral("Tint"),     QPointF(100, 260),
+                                      {{QStringLiteral("name"), QStringLiteral("Tint")},
+                                       {QStringLiteral("color"), QColor(255, 255, 255)}});
+    model.AddConnection(speedId, QStringLiteral("Value"), master, QStringLiteral("Specular"));
+    model.AddConnection(tintId,  QStringLiteral("RGB"),   master, QStringLiteral("Albedo"));
+
+    // Компилируем — оба параметра присутствуют
+    const auto compiled = EditorCore::HlslGraphCompiler::Compile(model);
+    CheckTransform(compiled.problems.isEmpty(), "Two-param graph compiles without problems");
+    CheckTransform(compiled.hlsl.contains(QStringLiteral("Speed")), "HLSL contains Speed before delete");
+    CheckTransform(compiled.hlsl.contains(QStringLiteral("Tint")),  "HLSL contains Tint before delete");
+
+    // Удаляем узел "Speed" из модели
+    EditorCore::MaterialGraphModel reduced = model;
+    reduced.RemoveNode(speedId);
+    const auto compiledReduced = EditorCore::HlslGraphCompiler::Compile(reduced);
+    CheckTransform(compiledReduced.problems.isEmpty(), "Reduced graph compiles without problems");
+    CheckTransform(!compiledReduced.hlsl.contains(QStringLiteral("Speed")), "HLSL no longer contains Speed after delete");
+    CheckTransform(compiledReduced.hlsl.contains(QStringLiteral("Tint")),   "HLSL still contains Tint after delete");
+
+    // Симулируем фильтрацию publicParams_: было {"Speed","Tint"}, новые параметры только {"Tint"}
+    QSet<QString> publicParams = {QStringLiteral("Speed"), QStringLiteral("Tint")};
+    // Текущие имена параметров — из нод типа *Param в актуальной модели
+    QSet<QString> currentNames;
+    for (const auto& n : reduced.Nodes())
+    {
+        if (n.type.endsWith(QStringLiteral("Param")))
+            currentNames.insert(n.properties.value(QStringLiteral("name")).toString());
+    }
+    for (auto it = publicParams.begin(); it != publicParams.end(); )
+    {
+        if (!currentNames.contains(*it)) it = publicParams.erase(it);
+        else ++it;
+    }
+    CheckTransform(!publicParams.contains(QStringLiteral("Speed")), "publicParams filter removes deleted Speed");
+    CheckTransform(publicParams.contains(QStringLiteral("Tint")),   "publicParams filter keeps existing Tint");
+}
+
 } // namespace
 
 inline int RunMaterialTransformTests()
@@ -118,6 +166,7 @@ inline int RunMaterialTransformTests()
     TestExposePreservesValueAndLinks();
     TestExposeUniqueNames();
     TestExposeIgnoresNonConstants();
+    TestPublicParamFilterOnDelete();
     std::printf("MaterialTransform tests: %d checks passed\n", gMaterialTransformChecks);
     return gMaterialTransformChecks;
 }
