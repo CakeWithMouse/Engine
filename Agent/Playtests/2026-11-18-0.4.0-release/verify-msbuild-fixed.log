@@ -1,0 +1,32 @@
+PASS CoreTests-build
+PASS HostTests-build
+PASS UiTests-build
+PASS editor-regression
+PASS engine-build
+PASS ai-build
+PASS engine-tests
+PASS ai-tests
+PASS editor-ui-build
+PASS commandlets-build
+PASS diagnostics-fixture-build
+PASS ai-diagnostics
+[Info] SettingsService: Set 'view/cameraFull'
+[Info] SettingsService: Set 'view/cameraXray'
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=0 | snapObjs=21 | lines=138 (grid=138, gizmo=0, dir=0) | bbs=13 | tris=0
+[Info] SettingsService: Set 'view/cameraDepth'
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=0 | snapObjs=21 | lines=138 (grid=138, gizmo=0, dir=0) | bbs=13 | tris=0
+[ResizeDiag] ViewportResize executed: total=1 size=1040x864
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=21 | lines=183 (grid=140, gizmo=3, dir=0) | bbs=13 | tris=36
+[Info] Overlay: entered, pipelineReady=1, lineCount=183, billboardCount=13, backbuffer 1040x864
+[Info] Frame 121: AntialiasingMode = 1 (FXAA), bb = 1040x864
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=21 | lines=183 (grid=140, gizmo=3, dir=0) | bbs=13 | tris=36
+[Info] SettingsService: Set 'view/cameras'
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=21 | lines=143 (grid=140, gizmo=3, dir=0) | bbs=13 | tris=36
+[Info] Overlay: entered, pipelineReady=1, lineCount=143, billboardCount=13, backbuffer 1040x864
+[Info] Frame 241: AntialiasingMode = 1 (FXAA), bb = 1040x864
+[Info] SettingsService: Set 'view/cameras'
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=21 | lines=183 (grid=140, gizmo=3, dir=0) | bbs=13 | tris=36
+[Info] SettingsService: Set 'view/cameraXray'
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=21 | lines=183 (grid=140, gizmo=3, dir=0) | bbs=13 | tris=36
+[Info] Overlay: entered, pipelineReady=1, lineCount=183, billboardCount=13, backbuffer 1040x864
+[Info] Frame 361: AntialiasingMode = 1 (FXAA), bb = 1040x864

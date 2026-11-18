@@ -1,0 +1,4 @@
+exit=0
+source=E:\Engine\Engine\build\playtests\strategy-040\Ремонтный коридор Ёж upgrade-full\Project.json
+destination=E:\Engine\Engine\build\playtests\strategy-040\Экспорт-стратегии-Ёж
+runtime=E:\Engine\Game\build\x64\Release\Runtime

@@ -128,9 +128,8 @@ inline void RunCameraGuideChecks(EditorQtHost &host,
   settle();
   capture("02-camera-orthographic");
   Ui([](auto *w) {
-    Check(w->template findChild<QLabel *>("CameraGuideSummary")
-              ->text()
-              .contains("8.00"),
+    const auto *frame = w->template findChild<QLabel *>("CameraGuideFrame");
+    Check(frame && frame->text().contains("8.00"),
           "orthographic dimensions visible");
   });
   std::printf("Camera guides: UI and scene property checks passed\n");

@@ -39,16 +39,16 @@ namespace
             return static_cast<uint32_t>(EditorIcons::IconId::SunSky);
         }
 
-        if (CameraGuide::IsCamera(obj) && obj.gameplayKind != 2)
-        {
-            outColor = TintFromColor(pal.iconCamera);
-            return static_cast<uint32_t>(EditorIcons::IconId::Camera);
-        }
-
         if (obj.gameplayKind == 2 || obj.type == "Gameplay.Camera" || obj.type == "GameCamera")
         {
             outColor = TintFromColor(pal.iconGameCamera);
             return static_cast<uint32_t>(EditorIcons::IconId::GameCamera);
+        }
+
+        if (CameraGuide::IsCamera(obj))
+        {
+            outColor = TintFromColor(pal.iconCamera);
+            return static_cast<uint32_t>(EditorIcons::IconId::Camera);
         }
 
         if (obj.type.rfind("Particle.", 0) == 0 || obj.type == "Particles" || obj.name.find("Particle") != std::string::npos)

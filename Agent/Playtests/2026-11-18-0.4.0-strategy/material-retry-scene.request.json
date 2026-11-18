@@ -1,0 +1,59 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\strategy-040\\Ремонтный коридор Ёж upgrade-full\\Project.json",
+  "steps": [
+    {
+      "action": "new"
+    },
+    {
+      "path": "/Game/Models/auto-multiple/auto-multiple.fbx",
+      "action": "model",
+      "name": "Multi"
+    },
+    {
+      "path": "/materialSlots/1",
+      "target": "Multi",
+      "action": "property",
+      "value": "/Game/Models/auto-multiple/Materials/Material_0.mat"
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "action": "redo"
+    },
+    {
+      "path": "/materialSlots/1",
+      "target": "Multi",
+      "action": "property",
+      "value": "/Game/../outside.mat"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\strategy-040\\material-slots-msbuild-retry/Slots.scene.json",
+      "action": "save"
+    },
+    {
+      "target": "Multi",
+      "action": "duplicate"
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "action": "new"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\strategy-040\\material-slots-msbuild-retry/Slots.scene.json",
+      "action": "load"
+    },
+    {
+      "path": "/Game/Models/auto-multiple/Materials/Material_0.mat",
+      "target": "Multi",
+      "action": "material"
+    },
+    {
+      "path": "",
+      "target": "Multi",
+      "action": "material"
+    }
+  ]
+}

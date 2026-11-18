@@ -1,0 +1,4 @@
+exit=0
+source=E:\Engine\Engine\build\playtests\strategy-040\RepairCorridor-full-r5-source\Project.json
+destination=E:\Engine\Engine\build\playtests\strategy-040\Коридор CMake Ёж
+runtime=E:\Engine\build\cmake\editor-Release\bin\Release\Runtime

@@ -1,0 +1,316 @@
+-- The CXX compiler identification is MSVC 19.40.33821.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.40.33807/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - not found
+-- Found Threads: TRUE
+-- Configuring done (3.3s)
+-- Generating done (0.0s)
+-- Build files have been written to: E:/Engine/Engine/build/playtests/release-040/consumer
+[1/2] Building CXX object CMakeFiles\SdkConsumer.dir\Main.cpp.obj
+Примечание: включение файла:  E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\Engine/Resources/Paths.h
+Примечание: включение файла:   C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\filesystem
+Примечание: включение файла:    C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\yvals_core.h
+Примечание: включение файла:     C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vcruntime.h
+Примечание: включение файла:      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\sal.h
+Примечание: включение файла:       C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\concurrencysal.h
+Примечание: включение файла:      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vadefs.h
+Примечание: включение файла:     C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xkeycheck.h
+Примечание: включение файла:    C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\algorithm
+Примечание: включение файла:     C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\__msvc_minmax.hpp
+Примечание: включение файла:      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\cstdint
+Примечание: включение файла:       C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\stdint.h
+Примечание: включение файла:     C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xmemory
+Примечание: включение файла:      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\cstdlib
+Примечание: включение файла:       C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\math.h
+Примечание: включение файла:        C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_math.h
+Примечание: включение файла:         C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt.h
+Примечание: включение файла:       C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\stdlib.h
+Примечание: включение файла:        C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_malloc.h
+Примечание: включение файла:        C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_search.h
+Примечание: включение файла:         C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\stddef.h
+Примечание: включение файла:        C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wstdlib.h
+Примечание: включение файла:        C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\limits.h
+Примечание: включение файла:      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\limits
+Примечание: включение файла:       C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\cfloat
+Примечание: включение файла:        C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\float.h
+Примечание: включение файла:       C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\climits
+Примечание: включение файла:       C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\cwchar
+Примечание: включение файла:        C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\cstdio
+Примечание: включение файла:         C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\stdio.h
+Примечание: включение файла:          C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wstdio.h
+Примечание: включение файла:           C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_stdio_config.h
+Примечание: включение файла:        C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\wchar.h
+Примечание: включение файла:         C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_memcpy_s.h
+Примечание: включение файла:          C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\errno.h
+Примечание: включение файла:          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vcruntime_string.h
+Примечание: включение файла:         C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wconio.h
+Примечание: включение файла:         C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wctype.h
+Примечание: включение файла:         C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wdirect.h
+Примечание: включение файла:         C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wio.h
+Примечание: включение файла:          C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_share.h
+Примечание: включение файла:         C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wprocess.h
+Примечание: включение файла:         C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wstring.h
+Примечание: включение файла:         C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wtime.h
+Примечание: включение файла:         C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\sys/stat.h
+Примечание: включение файла:          C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\sys/types.h
+Примечание: включение файла:         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\intrin.h
+Примечание: включение файла:          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\intrin0.inl.h
+Примечание: включение файла:          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\setjmp.h
+Примечание: включение файла:          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\immintrin.h
+Примечание: включение файла:           C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\wmmintrin.h
+Примечание: включение файла:            C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\nmmintrin.h
+Примечание: включение файла:             C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\smmintrin.h
+Примечание: включение файла:              C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\tmmintrin.h
+Примечание: включение файла:               C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\pmmintrin.h
+Примечание: включение файла:                C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\emmintrin.h
+Примечание: включение файла:                 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xmmintrin.h
+Примечание: включение файла:                  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\mmintrin.h
+Примечание: включение файла:                  C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\malloc.h
+Примечание: включение файла:           C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\zmmintrin.h
+Примечание: включение файла:          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\ammintrin.h
+Примечание: включение файла:       C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xtr1common
+Примечание: включение файла:       C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\intrin0.h
+Примечание: включение файла:      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\new
+Примечание: включение файла:       C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\exception
+Примечание: включение файла:        C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\yvals.h
+Примечание: включение файла:         C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\crtdbg.h
+Примечание: включение файла:          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vcruntime_new_debug.h
+Примечание: включение файла:           C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vcruntime_new.h
+Примечание: включение файла:         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\crtdefs.h
+Примечание: включение файла:         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\use_ansi.h
+Примечание: включение файла:        C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\type_traits
+Примечание: включение файла:         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\cstddef
+Примечание: включение файла:        C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vcruntime_exception.h
+Примечание: включение файла:         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\eh.h
+Примечание: включение файла:          C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_terminate.h
+Примечание: включение файла:      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xatomic.h
+Примечание: включение файла:      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xutility
+Примечание: включение файла:       C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\__msvc_iter_core.hpp
+Примечание: включение файла:        C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\utility
+Примечание: включение файла:         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\initializer_list
+Примечание: включение файла:       C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\cstring
+Примечание: включение файла:        C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\string.h
+Примечание: включение файла:         C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_memory.h
+Примечание: включение файла:    C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\chrono
+Примечание: включение файла:     C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\__msvc_chrono.hpp
+Примечание: включение файла:      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\ctime
+Примечание: включение файла:       C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\time.h
+Примечание: включение файла:      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\ratio
+Примечание: включение файла:      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xtimec.h
+Примечание: включение файла:     C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\system_error
+Примечание: включение файла:      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\__msvc_system_error_abi.hpp
+Примечание: включение файла:      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\cerrno
+Примечание: включение файла:      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\stdexcept
+Примечание: включение файла:       C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xstring
+Примечание: включение файла:        C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\__msvc_sanitizer_annotate_container.hpp
+Примечание: включение файла:        C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\iosfwd
+Примечание: включение файла:        C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xpolymorphic_allocator.h
+Примечание: включение файла:         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\tuple
+Примечание: включение файла:      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xcall_once.h
+Примечание: включение файла:      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xerrc.h
+Примечание: включение файла:      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\atomic
+Примечание: включение файла:       C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xthreads.h
+Примечание: включение файла:     C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xfilesystem_abi.h
+Примечание: включение файла:    C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\iomanip
+Примечание: включение файла:     C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\istream
+Примечание: включение файла:      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\ostream
+Примечание: включение файла:       C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\ios
+Примечание: включение файла:        C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xlocnum
+Примечание: включение файла:         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\cmath
+Примечание: включение файла:         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\iterator
+Примечание: включение файла:         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\streambuf
+Примечание: включение файла:          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xiosbase
+Примечание: включение файла:           C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\share.h
+Примечание: включение файла:           C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xlocale
+Примечание: включение файла:            C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\memory
+Примечание: включение файла:             C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\typeinfo
+Примечание: включение файла:              C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vcruntime_typeinfo.h
+Примечание: включение файла:            C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xfacet
+Примечание: включение файла:            C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xlocinfo
+Примечание: включение файла:             C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\__msvc_xlocinfo_types.hpp
+Примечание: включение файла:             C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\cctype
+Примечание: включение файла:              C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\ctype.h
+Примечание: включение файла:             C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\clocale
+Примечание: включение файла:              C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\locale.h
+Примечание: включение файла:     C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xlocmon
+Примечание: включение файла:     C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xloctime
+Примечание: включение файла:    C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\locale
+Примечание: включение файла:     C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xlocbuf
+Примечание: включение файла:     C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xlocmes
+Примечание: включение файла:    C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector
+Примечание: включение файла:     C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\__msvc_bit_utils.hpp
+Примечание: включение файла:  E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\Engine/Scene/Trace.h
+Примечание: включение файла:   C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\optional
+Примечание: включение файла:    C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xsmf_control.h
+Примечание: включение файла:   E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm/glm.hpp
+Примечание: включение файла:    E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail/_fixes.hpp
+Примечание: включение файла:    E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail/setup.hpp
+Примечание: включение файла:     C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\cassert
+Примечание: включение файла:      C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\assert.h
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\../simd/platform.h
+Примечание: включение файла:    C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\cassert
+Примечание: включение файла:     C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\assert.h
+Примечание: включение файла:    E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\fwd.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail/qualifier.hpp
+Примечание: включение файла:      E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\setup.hpp
+Примечание: включение файла:    E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\vec2.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_bool2.hpp
+Примечание: включение файла:      E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\ext\../detail/type_vec2.hpp
+Примечание: включение файла:       E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\type_vec2.inl
+Примечание: включение файла:        E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\./compute_vector_relational.hpp
+Примечание: включение файла:         E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\setup.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_bool2_precision.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_float2.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_float2_precision.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_double2.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_double2_precision.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_int2.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_int2_precision.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_uint2.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_uint2_precision.hpp
+Примечание: включение файла:    E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\vec3.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_bool3.hpp
+Примечание: включение файла:      E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\ext\../detail/type_vec3.hpp
+Примечание: включение файла:       E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\type_vec3.inl
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_bool3_precision.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_float3.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_float3_precision.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_double3.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_double3_precision.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_int3.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_int3_precision.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_uint3.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_uint3_precision.hpp
+Примечание: включение файла:    E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\vec4.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_bool4.hpp
+Примечание: включение файла:      E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\ext\../detail/type_vec4.hpp
+Примечание: включение файла:       E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\type_vec4.inl
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_bool4_precision.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_float4.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_float4_precision.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_double4.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_double4_precision.hpp
+Примечание: включение файла:      E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\ext\../detail/setup.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_int4.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_int4_precision.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_uint4.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/vector_uint4_precision.hpp
+Примечание: включение файла:    E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\mat2x2.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_double2x2.hpp
+Примечание: включение файла:      E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\ext\../detail/type_mat2x2.hpp
+Примечание: включение файла:       E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\type_mat2x2.inl
+Примечание: включение файла:        E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\../matrix.hpp
+Примечание: включение файла:         E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail/setup.hpp
+Примечание: включение файла:         E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\mat2x3.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_double2x3.hpp
+Примечание: включение файла:           E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\ext\../detail/type_mat2x3.hpp
+Примечание: включение файла:            E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\type_mat2x3.inl
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_double2x3_precision.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_float2x3.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_float2x3_precision.hpp
+Примечание: включение файла:         E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\mat2x4.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_double2x4.hpp
+Примечание: включение файла:           E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\ext\../detail/type_mat2x4.hpp
+Примечание: включение файла:            E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\type_mat2x4.inl
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_double2x4_precision.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_float2x4.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_float2x4_precision.hpp
+Примечание: включение файла:         E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\mat3x2.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_double3x2.hpp
+Примечание: включение файла:           E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\ext\../detail/type_mat3x2.hpp
+Примечание: включение файла:            E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\type_mat3x2.inl
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_double3x2_precision.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_float3x2.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_float3x2_precision.hpp
+Примечание: включение файла:         E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\mat3x3.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_double3x3.hpp
+Примечание: включение файла:           E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\ext\../detail/type_mat3x3.hpp
+Примечание: включение файла:            E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\type_mat3x3.inl
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_double3x3_precision.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_float3x3.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_float3x3_precision.hpp
+Примечание: включение файла:         E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\mat3x4.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_double3x4.hpp
+Примечание: включение файла:           E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\ext\../detail/type_mat3x4.hpp
+Примечание: включение файла:            E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\type_mat3x4.inl
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_double3x4_precision.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_float3x4.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_float3x4_precision.hpp
+Примечание: включение файла:         E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\mat4x2.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_double4x2.hpp
+Примечание: включение файла:           E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\ext\../detail/type_mat4x2.hpp
+Примечание: включение файла:            E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\type_mat4x2.inl
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_double4x2_precision.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_float4x2.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_float4x2_precision.hpp
+Примечание: включение файла:         E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\mat4x3.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_double4x3.hpp
+Примечание: включение файла:           E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\ext\../detail/type_mat4x3.hpp
+Примечание: включение файла:            E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\type_mat4x3.inl
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_double4x3_precision.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_float4x3.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_float4x3_precision.hpp
+Примечание: включение файла:         E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\mat4x4.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_double4x4.hpp
+Примечание: включение файла:           E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\ext\../detail/type_mat4x4.hpp
+Примечание: включение файла:            E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\type_mat4x4.inl
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_double4x4_precision.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_float4x4.hpp
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_float4x4_precision.hpp
+Примечание: включение файла:         E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail/func_matrix.inl
+Примечание: включение файла:          E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\../geometric.hpp
+Примечание: включение файла:           E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail/func_geometric.inl
+Примечание: включение файла:            E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\../exponential.hpp
+Примечание: включение файла:             E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail/type_vec1.hpp
+Примечание: включение файла:              E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\type_vec1.inl
+Примечание: включение файла:             E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail/func_exponential.inl
+Примечание: включение файла:              E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\../vector_relational.hpp
+Примечание: включение файла:               E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail/setup.hpp
+Примечание: включение файла:               E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail/func_vector_relational.inl
+Примечание: включение файла:              E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\_vectorize.hpp
+Примечание: включение файла:              C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\cassert
+Примечание: включение файла:               C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\assert.h
+Примечание: включение файла:            E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\../common.hpp
+Примечание: включение файла:             E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail/_fixes.hpp
+Примечание: включение файла:             E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail/func_common.inl
+Примечание: включение файла:              E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\compute_common.hpp
+Примечание: включение файла:               E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\setup.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_double2x2_precision.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_float2x2.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\./ext/matrix_float2x2_precision.hpp
+Примечание: включение файла:    E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\trigonometric.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail/setup.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail/func_trigonometric.inl
+Примечание: включение файла:    E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\packing.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail/func_packing.inl
+Примечание: включение файла:      E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\type_half.hpp
+Примечание: включение файла:       E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\setup.hpp
+Примечание: включение файла:       E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail\type_half.inl
+Примечание: включение файла:    E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\integer.hpp
+Примечание: включение файла:     E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\glm\detail/func_integer.inl
+Примечание: включение файла:   C:\Program Files (x86)\Windows Kits\10\\include\10.0.26100.0\\um\DirectXMath.h
+Примечание: включение файла:    C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\math.h
+Примечание: включение файла:    C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\assert.h
+Примечание: включение файла:    C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\um\DirectXMathConvert.inl
+Примечание: включение файла:    C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\um\DirectXMathVector.inl
+Примечание: включение файла:    C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\um\DirectXMathMatrix.inl
+Примечание: включение файла:    C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\um\DirectXMathMisc.inl
+Примечание: включение файла:  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\iostream
+[2/2] Linking CXX executable SdkConsumer.exe
+Test project E:/Engine/Engine/build/playtests/release-040/consumer
+    Start 1: InstalledCore
+1/2 Test #1: InstalledCore ....................   Passed    0.05 sec
+    Start 2: InstalledGenerator
+2/2 Test #2: InstalledGenerator ...............   Passed    0.21 sec
+
+100% tests passed out of 2
+
+Total Test time (real) =   0.30 sec

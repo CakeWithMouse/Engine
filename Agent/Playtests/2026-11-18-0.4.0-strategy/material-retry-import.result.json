@@ -1,0 +1,14 @@
+{
+    "asset": "/Game/Models/auto-multiple/auto-multiple.fbx",
+    "clips": 0,
+    "indices": 6,
+    "material": "",
+    "materialSlots": {
+        "0": "/Game/Models/auto-multiple/Materials/Material_0.mat",
+        "1": "/Game/Models/auto-multiple/Materials/Material_1.mat"
+    },
+    "meshes": 2,
+    "ok": true,
+    "placed": true,
+    "type": "Engine.Model"
+}

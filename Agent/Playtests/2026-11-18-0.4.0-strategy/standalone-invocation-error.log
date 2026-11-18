@@ -1,0 +1,4 @@
+Initial invocation error (preserved from console output; corrected run is in standalone-msbuild.stdout.log):
+LaunchError: Unknown launch option
+
+Cause: Start-Process argument list failed to quote a project path containing spaces and Cyrillic characters. Repeated with ProcessStartInfo.ArgumentList and verified exit 0, GameUpdates=60, EngineStopped.

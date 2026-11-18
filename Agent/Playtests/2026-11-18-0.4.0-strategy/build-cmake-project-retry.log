@@ -1,0 +1,36 @@
+Using CMake / C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\cl.exe
+-- The CXX compiler identification is MSVC 19.44.35223.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - failed
+-- Check for working CXX compiler: C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe
+-- Check for working CXX compiler: C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - broken
+-- Configuring incomplete, errors occurred!
+CMake Error at E:/Engine/Engine/build/tools/python/cmake/data/share/cmake-4.4/Modules/CMakeTestCXXCompiler.cmake:71 (message):
+  The C++ compiler
+
+    "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe"
+
+  is not able to compile a simple test program.
+
+  It fails with the following output:
+
+    Change Dir: 'E:/Engine/Engine/build/playtests/strategy-040/Коридор CMake Ёж/Intermediate/CMake/Release/2821B44D8F3D95A2/CMakeFiles/CMakeScratch/TryCompile-c2gato'
+    
+    Run Build Command(s): E:\Engine\Engine\build\tools\python\bin\ninja.exe -v cmTC_0c5bd
+    [1/2] "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\cl.exe"  /nologo /TP -D_MBCS  /DWIN32 /D_WINDOWS /EHsc  /Zi /Ob0 /Od /RTC1 -MDd /showIncludes /FoCMakeFiles\cmTC_0c5bd.dir\testCXXCompiler.cxx.obj /FdCMakeFiles\cmTC_0c5bd.dir\ /FS -c "E:\Engine\Engine\build\playtests\strategy-040\Коридор CMake Ёж\Intermediate\CMake\Release\2821B44D8F3D95A2\CMakeFiles\CMakeScratch\TryCompile-c2gato\testCXXCompiler.cxx"
+    FAILED: [code=2] CMakeFiles/cmTC_0c5bd.dir/testCXXCompiler.cxx.obj 
+    "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\cl.exe"  /nologo /TP -D_MBCS  /DWIN32 /D_WINDOWS /EHsc  /Zi /Ob0 /Od /RTC1 -MDd /showIncludes /FoCMakeFiles\cmTC_0c5bd.dir\testCXXCompiler.cxx.obj /FdCMakeFiles\cmTC_0c5bd.dir\ /FS -c "E:\Engine\Engine\build\playtests\strategy-040\Коридор CMake Ёж\Intermediate\CMake\Release\2821B44D8F3D95A2\CMakeFiles\CMakeScratch\TryCompile-c2gato\testCXXCompiler.cxx"
+    E:\Engine\Engine\build\playtests\strategy-040\Коридор CMake Ёж\Intermediate\CMake\Release\2821B44D8F3D95A2\CMakeFiles\CMakeScratch\TryCompile-c2gato\testCXXCompiler.cxx: fatal error C1902: Несоответствие диспетчера базы данных программы; проверьте установленную копию
+    ninja: build stopped: subcommand failed.
+    
+    
+
+
+
+  CMake will not be able to correctly generate this project.
+Call Stack (most recent call first):
+  CMakeLists.txt:2 (project)
+
+
+
+Full build log: E:\Engine\Engine\build\playtests\strategy-040\Коридор CMake Ёж\Binaries\Release\976eb3ed64e549b8b5d2c3f5ff16adb4\build.log

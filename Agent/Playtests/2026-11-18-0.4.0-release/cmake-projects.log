@@ -1,0 +1,980 @@
+Using CMake / C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.40.33807/bin/Hostx64/x64/cl.exe
+-- The CXX compiler identification is MSVC 19.40.33821.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.40.33807/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - not found
+-- Found Threads: TRUE
+-- Configuring done (1.8s)
+-- Generating done (0.0s)
+-- Build files have been written to: E:/Engine/build/cmake/editor-Release/sdk-checks/a7a401f31db8449c970cc71c941a6f33/CMake проект 日本語/Intermediate/CMake/Release/A82A1EEE672D77FA
+CMake Warning in E:/Engine/build/cmake/editor-Release/sdk-checks/a7a401f31db8449c970cc71c941a6f33/CMake проект 日本語/Intermediate/CMake/Release/A82A1EEE672D77FA/CMakeFiles/CMakeScratch/TryCompile-ytdwlf/CMakeLists.txt:
+  The object file directory
+
+    E:/Engine/build/cmake/editor-Release/sdk-checks/a7a401f31db8449c970cc71c941a6f33/CMake проект 日本語/Intermediate/CMake/Release/A82A1EEE672D77FA/CMakeFiles/CMakeScratch/TryCompile-ytdwlf/CMakeFiles/cmTC_0818c.dir/./
+
+  has 224 characters.  The maximum full path to an object file is 250
+  characters (see CMAKE_OBJECT_PATH_MAX).  Object file
+
+    CMakeCXXCompilerABI.cpp.obj
+
+  cannot be safely placed under this directory.  The build may not work
+  correctly.
+
+
+CMake Warning in E:/Engine/build/cmake/editor-Release/sdk-checks/a7a401f31db8449c970cc71c941a6f33/CMake проект 日本語/Intermediate/CMake/Release/A82A1EEE672D77FA/CMakeFiles/CMakeScratch/TryCompile-jjdfra/CMakeLists.txt:
+  The object file directory
+
+    E:/Engine/build/cmake/editor-Release/sdk-checks/a7a401f31db8449c970cc71c941a6f33/CMake проект 日本語/Intermediate/CMake/Release/A82A1EEE672D77FA/CMakeFiles/CMakeScratch/TryCompile-jjdfra/CMakeFiles/cmTC_42348.dir/./
+
+  has 224 characters.  The maximum full path to an object file is 250
+  characters (see CMAKE_OBJECT_PATH_MAX).  Object file
+
+    CheckFunctionExists.cxx.obj
+
+  cannot be safely placed under this directory.  The build may not work
+  correctly.
+
+
+CMake Warning in E:/Engine/build/cmake/editor-Release/sdk-checks/a7a401f31db8449c970cc71c941a6f33/CMake проект 日本語/Intermediate/CMake/Release/A82A1EEE672D77FA/CMakeFiles/CMakeScratch/TryCompile-0h2ke8/CMakeLists.txt:
+  The object file directory
+
+    E:/Engine/build/cmake/editor-Release/sdk-checks/a7a401f31db8449c970cc71c941a6f33/CMake проект 日本語/Intermediate/CMake/Release/A82A1EEE672D77FA/CMakeFiles/CMakeScratch/TryCompile-0h2ke8/CMakeFiles/cmTC_b1f92.dir/./
+
+  has 224 characters.  The maximum full path to an object file is 250
+  characters (see CMAKE_OBJECT_PATH_MAX).  Object file
+
+    CheckFunctionExists.cxx.obj
+
+  cannot be safely placed under this directory.  The build may not work
+  correctly.
+
+
+[0/2] Re-checking globbed directories...
+[1/2] Cleaning all built files...
+Cleaning... 0 files.
+[0/2] Re-checking globbed directories...
+[1/8] C:\WINDOWS\system32\cmd.exe /C "cd /D "E:\Engine\build\cmake\editor-Release\sdk-checks\a7a401f31db8449c970cc71c941a6f33\CMake проект 日本語\Intermediate\CMake\Release\A82A1EEE672D77FA" && E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\bin\ComponentGenerator.exe "E:/Engine/build/cmake/editor-Release/sdk-checks/a7a401f31db8449c970cc71c941a6f33/CMake проект 日本語/Intermediate/CMake/Release/A82A1EEE672D77FA/generated/Game/roots.txt" "E:/Engine/build/cmake/editor-Release/sdk-checks/a7a401f31db8449c970cc71c941a6f33/CMake проект 日本語/Intermediate/CMake/Release/A82A1EEE672D77FA/generated/Game" Project"
+ComponentGenerator: 3 component(s), Project
+[2/8] Building CXX object CMakeFiles\Game.dir\Source\ProjectComponent.cpp.obj
+FAILED: [code=2] CMakeFiles/Game.dir/Source/ProjectComponent.cpp.obj 
+"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\bin\Hostx64\x64\cl.exe"  /nologo /TP -DENGINE_ENABLE_ASSIMP -DENGINE_ENABLE_JOLT -DGame_EXPORTS -DNOMINMAX -DUNICODE -DWIN32_LEAN_AND_MEAN -D_UNICODE -I"E:\Engine\build\cmake\editor-Release\sdk-checks\a7a401f31db8449c970cc71c941a6f33\CMake проект 日本語\Intermediate\CMake\Release\A82A1EEE672D77FA\generated\Game" -external:IE:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include -external:W0 /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD /utf-8 /permissive- /EHsc /showIncludes /FoCMakeFiles\Game.dir\Source\ProjectComponent.cpp.obj /FdCMakeFiles\Game.dir\ /FS -c "E:\Engine\build\cmake\editor-Release\sdk-checks\a7a401f31db8449c970cc71c941a6f33\CMake проект 日本語\Source\ProjectComponent.cpp"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\yvals_core.h(912): error C2338: static_assert failed: 'error STL1001: Unexpected compiler version, expected MSVC 19.44 or newer.'
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2801: "std::_Conditionally_enabled_hash<_Kty,_Enabled>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2300): note: при компиляции шаблона класса "std::_Conditionally_enabled_hash"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2333: std::_Conditionally_enabled_hash<_Kty,_Enabled>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2332): error C2801: "std::hash<float>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2332): error C2333: std::hash<float>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2341): error C2801: "std::hash<double>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2341): error C2333: std::hash<double>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2350): error C2801: "std::hash<long double>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2350): error C2333: std::hash<long double>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2359): error C2801: "std::hash<std::nullptr_t>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2359): error C2333: std::hash<std::nullptr_t>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(2303): error C2801: "std::_Vbase_compare_three_way<_Ret>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(2303): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(2302): note: при компиляции шаблона класса "std::_Vbase_compare_three_way"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(2303): error C2333: std::_Vbase_compare_three_way<_Ret>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(3621): error C2801: "std::hash<std::vector<bool,_Alloc>>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(3621): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(3617): note: при компиляции частичной специализации шаблона класса "std::hash<std::vector<bool,_Alloc>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(3621): error C2333: std::hash<std::vector<bool,_Alloc>>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3897): error C2801: "std::hash<std::shared_ptr<_Ty>>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3897): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3893): note: при компиляции частичной специализации шаблона класса "std::hash<std::shared_ptr<_Ty>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3897): error C2333: std::hash<std::shared_ptr<_Ty>>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\thread(340): error C2801: "std::hash<std::thread::id>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\thread(340): error C2333: std::hash<std::thread::id>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2801: "std::_Conditionally_enabled_hash<_Kty,true>::operator ()" не должен быть статическим членом
+        with
+        [
+            _Kty=Keys
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): note: контекст создания экземпляра шаблона (сначала самый старый)
+E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\Engine/InputDevice/InputDevice.h(88): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::unordered_set<Keys,std::hash<Keys>,std::equal_to<Keys>,std::allocator<Keys>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_set(59): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Hash<std::_Uset_traits<_Kty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>>"
+        with
+        [
+            _Kty=Keys,
+            _Hasher=std::hash<Keys>,
+            _Keyeq=std::equal_to<Keys>,
+            _Alloc=std::allocator<Keys>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xhash(330): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uset_traits<_Kty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>"
+        with
+        [
+            _Kty=Keys,
+            _Hasher=std::hash<Keys>,
+            _Keyeq=std::equal_to<Keys>,
+            _Alloc=std::allocator<Keys>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_set(28): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uhash_compare<_Kty,_Hasher,_Keyeq>"
+        with
+        [
+            _Kty=Keys,
+            _Hasher=std::hash<Keys>,
+            _Keyeq=std::equal_to<Keys>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на шаблон переменной "const bool is_empty_v<std::hash<enum Keys> >"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::hash<Keys>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2320): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Conditionally_enabled_hash<_Kty,true>"
+        with
+        [
+            _Kty=Keys
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2333: std::_Conditionally_enabled_hash<_Kty,true>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+        with
+        [
+            _Kty=Keys
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2801: "std::_Conditionally_enabled_hash<_Kty,true>::operator ()" не должен быть статическим членом
+        with
+        [
+            _Kty=GameComponent *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): note: контекст создания экземпляра шаблона (сначала самый старый)
+E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\Engine/MainGame/BaseGameClass/Game.h(688): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::unordered_set<GameComponent *,std::hash<GameComponent *>,std::equal_to<GameComponent *>,std::allocator<GameComponent *>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_set(59): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Hash<std::_Uset_traits<_Kty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>>"
+        with
+        [
+            _Kty=GameComponent *,
+            _Hasher=std::hash<GameComponent *>,
+            _Keyeq=std::equal_to<GameComponent *>,
+            _Alloc=std::allocator<GameComponent *>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xhash(330): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uset_traits<_Kty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>"
+        with
+        [
+            _Kty=GameComponent *,
+            _Hasher=std::hash<GameComponent *>,
+            _Keyeq=std::equal_to<GameComponent *>,
+            _Alloc=std::allocator<GameComponent *>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_set(28): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uhash_compare<_Kty,_Hasher,_Keyeq>"
+        with
+        [
+            _Kty=GameComponent *,
+            _Hasher=std::hash<GameComponent *>,
+            _Keyeq=std::equal_to<GameComponent *>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на шаблон переменной "const bool is_empty_v<std::hash<GameComponent *> >"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::hash<GameComponent *>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2320): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Conditionally_enabled_hash<_Kty,true>"
+        with
+        [
+            _Kty=GameComponent *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2333: std::_Conditionally_enabled_hash<_Kty,true>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+        with
+        [
+            _Kty=GameComponent *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2801: "std::_Conditionally_enabled_hash<_Kty,true>::operator ()" не должен быть статическим членом
+        with
+        [
+            _Kty=uint32_t
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): note: контекст создания экземпляра шаблона (сначала самый старый)
+E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\Engine/MainGame/BaseGameClass/Game.h(754): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::unordered_map<uint32_t,Game::RawOverlayIcon,std::hash<uint32_t>,std::equal_to<uint32_t>,std::allocator<std::pair<const uint32_t,Game::RawOverlayIcon>>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_map(61): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Hash<std::_Umap_traits<_Kty,_Ty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>>"
+        with
+        [
+            _Kty=uint32_t,
+            _Ty=Game::RawOverlayIcon,
+            _Hasher=std::hash<uint32_t>,
+            _Keyeq=std::equal_to<uint32_t>,
+            _Alloc=std::allocator<std::pair<const uint32_t,Game::RawOverlayIcon>>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xhash(330): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Umap_traits<_Kty,_Ty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>"
+        with
+        [
+            _Kty=uint32_t,
+            _Ty=Game::RawOverlayIcon,
+            _Hasher=std::hash<uint32_t>,
+            _Keyeq=std::equal_to<uint32_t>,
+            _Alloc=std::allocator<std::pair<const uint32_t,Game::RawOverlayIcon>>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_map(29): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uhash_compare<_Kty,_Hasher,_Keyeq>"
+        with
+        [
+            _Kty=uint32_t,
+            _Hasher=std::hash<uint32_t>,
+            _Keyeq=std::equal_to<uint32_t>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на шаблон переменной "const bool is_empty_v<std::hash<unsigned int> >"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::hash<uint32_t>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2320): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Conditionally_enabled_hash<_Kty,true>"
+        with
+        [
+            _Kty=uint32_t
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2333: std::_Conditionally_enabled_hash<_Kty,true>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+        with
+        [
+            _Kty=uint32_t
+        ]
+[3/8] Building CXX object CMakeFiles\Game.dir\Source\RotatingCube.cpp.obj
+FAILED: [code=2] CMakeFiles/Game.dir/Source/RotatingCube.cpp.obj 
+"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\bin\Hostx64\x64\cl.exe"  /nologo /TP -DENGINE_ENABLE_ASSIMP -DENGINE_ENABLE_JOLT -DGame_EXPORTS -DNOMINMAX -DUNICODE -DWIN32_LEAN_AND_MEAN -D_UNICODE -I"E:\Engine\build\cmake\editor-Release\sdk-checks\a7a401f31db8449c970cc71c941a6f33\CMake проект 日本語\Intermediate\CMake\Release\A82A1EEE672D77FA\generated\Game" -external:IE:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include -external:W0 /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD /utf-8 /permissive- /EHsc /showIncludes /FoCMakeFiles\Game.dir\Source\RotatingCube.cpp.obj /FdCMakeFiles\Game.dir\ /FS -c "E:\Engine\build\cmake\editor-Release\sdk-checks\a7a401f31db8449c970cc71c941a6f33\CMake проект 日本語\Source\RotatingCube.cpp"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\yvals_core.h(912): error C2338: static_assert failed: 'error STL1001: Unexpected compiler version, expected MSVC 19.44 or newer.'
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2801: "std::_Conditionally_enabled_hash<_Kty,_Enabled>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2300): note: при компиляции шаблона класса "std::_Conditionally_enabled_hash"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2333: std::_Conditionally_enabled_hash<_Kty,_Enabled>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2332): error C2801: "std::hash<float>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2332): error C2333: std::hash<float>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2341): error C2801: "std::hash<double>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2341): error C2333: std::hash<double>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2350): error C2801: "std::hash<long double>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2350): error C2333: std::hash<long double>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2359): error C2801: "std::hash<std::nullptr_t>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2359): error C2333: std::hash<std::nullptr_t>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\system_error(446): error C2801: "std::hash<std::error_code>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\system_error(446): error C2333: std::hash<std::error_code>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\system_error(456): error C2801: "std::hash<std::error_condition>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\system_error(456): error C2333: std::hash<std::error_condition>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3897): error C2801: "std::hash<std::shared_ptr<_Ty>>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3897): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3893): note: при компиляции частичной специализации шаблона класса "std::hash<std::shared_ptr<_Ty>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3897): error C2333: std::hash<std::shared_ptr<_Ty>>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(2303): error C2801: "std::_Vbase_compare_three_way<_Ret>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(2303): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(2302): note: при компиляции шаблона класса "std::_Vbase_compare_three_way"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(2303): error C2333: std::_Vbase_compare_three_way<_Ret>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(3621): error C2801: "std::hash<std::vector<bool,_Alloc>>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(3621): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(3617): note: при компиляции частичной специализации шаблона класса "std::hash<std::vector<bool,_Alloc>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(3621): error C2333: std::hash<std::vector<bool,_Alloc>>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\thread(340): error C2801: "std::hash<std::thread::id>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\thread(340): error C2333: std::hash<std::thread::id>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2801: "std::_Conditionally_enabled_hash<_Kty,true>::operator ()" не должен быть статическим членом
+        with
+        [
+            _Kty=Keys
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): note: контекст создания экземпляра шаблона (сначала самый старый)
+E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\Engine/InputDevice/InputDevice.h(88): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::unordered_set<Keys,std::hash<Keys>,std::equal_to<Keys>,std::allocator<Keys>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_set(59): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Hash<std::_Uset_traits<_Kty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>>"
+        with
+        [
+            _Kty=Keys,
+            _Hasher=std::hash<Keys>,
+            _Keyeq=std::equal_to<Keys>,
+            _Alloc=std::allocator<Keys>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xhash(330): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uset_traits<_Kty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>"
+        with
+        [
+            _Kty=Keys,
+            _Hasher=std::hash<Keys>,
+            _Keyeq=std::equal_to<Keys>,
+            _Alloc=std::allocator<Keys>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_set(28): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uhash_compare<_Kty,_Hasher,_Keyeq>"
+        with
+        [
+            _Kty=Keys,
+            _Hasher=std::hash<Keys>,
+            _Keyeq=std::equal_to<Keys>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на шаблон переменной "const bool is_empty_v<std::hash<enum Keys> >"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::hash<Keys>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2320): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Conditionally_enabled_hash<_Kty,true>"
+        with
+        [
+            _Kty=Keys
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2333: std::_Conditionally_enabled_hash<_Kty,true>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+        with
+        [
+            _Kty=Keys
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2801: "std::_Conditionally_enabled_hash<_Kty,true>::operator ()" не должен быть статическим членом
+        with
+        [
+            _Kty=GameComponent *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): note: контекст создания экземпляра шаблона (сначала самый старый)
+E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\Engine/MainGame/BaseGameClass/Game.h(688): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::unordered_set<GameComponent *,std::hash<GameComponent *>,std::equal_to<GameComponent *>,std::allocator<GameComponent *>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_set(59): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Hash<std::_Uset_traits<_Kty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>>"
+        with
+        [
+            _Kty=GameComponent *,
+            _Hasher=std::hash<GameComponent *>,
+            _Keyeq=std::equal_to<GameComponent *>,
+            _Alloc=std::allocator<GameComponent *>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xhash(330): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uset_traits<_Kty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>"
+        with
+        [
+            _Kty=GameComponent *,
+            _Hasher=std::hash<GameComponent *>,
+            _Keyeq=std::equal_to<GameComponent *>,
+            _Alloc=std::allocator<GameComponent *>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_set(28): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uhash_compare<_Kty,_Hasher,_Keyeq>"
+        with
+        [
+            _Kty=GameComponent *,
+            _Hasher=std::hash<GameComponent *>,
+            _Keyeq=std::equal_to<GameComponent *>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на шаблон переменной "const bool is_empty_v<std::hash<GameComponent *> >"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::hash<GameComponent *>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2320): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Conditionally_enabled_hash<_Kty,true>"
+        with
+        [
+            _Kty=GameComponent *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2333: std::_Conditionally_enabled_hash<_Kty,true>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+        with
+        [
+            _Kty=GameComponent *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2801: "std::_Conditionally_enabled_hash<_Kty,true>::operator ()" не должен быть статическим членом
+        with
+        [
+            _Kty=uint32_t
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): note: контекст создания экземпляра шаблона (сначала самый старый)
+E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\Engine/MainGame/BaseGameClass/Game.h(754): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::unordered_map<uint32_t,Game::RawOverlayIcon,std::hash<uint32_t>,std::equal_to<uint32_t>,std::allocator<std::pair<const uint32_t,Game::RawOverlayIcon>>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_map(61): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Hash<std::_Umap_traits<_Kty,_Ty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>>"
+        with
+        [
+            _Kty=uint32_t,
+            _Ty=Game::RawOverlayIcon,
+            _Hasher=std::hash<uint32_t>,
+            _Keyeq=std::equal_to<uint32_t>,
+            _Alloc=std::allocator<std::pair<const uint32_t,Game::RawOverlayIcon>>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xhash(330): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Umap_traits<_Kty,_Ty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>"
+        with
+        [
+            _Kty=uint32_t,
+            _Ty=Game::RawOverlayIcon,
+            _Hasher=std::hash<uint32_t>,
+            _Keyeq=std::equal_to<uint32_t>,
+            _Alloc=std::allocator<std::pair<const uint32_t,Game::RawOverlayIcon>>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_map(29): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uhash_compare<_Kty,_Hasher,_Keyeq>"
+        with
+        [
+            _Kty=uint32_t,
+            _Hasher=std::hash<uint32_t>,
+            _Keyeq=std::equal_to<uint32_t>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на шаблон переменной "const bool is_empty_v<std::hash<unsigned int> >"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::hash<uint32_t>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2320): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Conditionally_enabled_hash<_Kty,true>"
+        with
+        [
+            _Kty=uint32_t
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2333: std::_Conditionally_enabled_hash<_Kty,true>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+        with
+        [
+            _Kty=uint32_t
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(348): error C2801: "std::filesystem::_Is_slash_oper::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(348): error C2333: std::filesystem::_Is_slash_oper::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(862): error C2737: "_Root_dir_end": необходимо инициализировать объект const
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): error C3536: _Root_dir_end: не может использоваться до инициализации
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): error C2440: инициализация: невозможно преобразовать "initializer list" в "std::reverse_iterator<const wchar_t *>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): note: "std::reverse_iterator<const wchar_t *>::reverse_iterator": ни одна перегруженная функция не может преобразовать все типы аргументов
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(1734): note: может быть "std::reverse_iterator<const wchar_t *>::reverse_iterator(_BidIt) noexcept"
+        with
+        [
+            _BidIt=const wchar_t *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): note: "std::reverse_iterator<const wchar_t *>::reverse_iterator(_BidIt) noexcept": невозможно преобразовать аргумент 1 из "int" в "_BidIt"
+        with
+        [
+            _BidIt=const wchar_t *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): note: Для преобразования из целого типа в указатель требуется reinterpret_cast, приведение в стиле С или приведение в стиле функции в круглых скобках
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(1742): note: или       "std::reverse_iterator<const wchar_t *>::reverse_iterator(const std::reverse_iterator<_Other> &) noexcept(<expr>)"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): note: при попытке сопоставить список аргументов "(int)"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(1053): error C2737: "_My_slash": необходимо инициализировать объект const
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(1054): error C2737: "_Other_slash": необходимо инициализировать объект const
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(1385): error C2737: "_Is_slash_needed": необходимо инициализировать объект const
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(4424): error C2801: "std::hash<std::filesystem::path>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(4424): error C2333: std::hash<std::filesystem::path>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+[4/8] Building CXX object CMakeFiles\Game.dir\generated\Game\GeneratedComponents.cpp.obj
+FAILED: [code=2] CMakeFiles/Game.dir/generated/Game/GeneratedComponents.cpp.obj 
+"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\bin\Hostx64\x64\cl.exe"  /nologo /TP -DENGINE_ENABLE_ASSIMP -DENGINE_ENABLE_JOLT -DGame_EXPORTS -DNOMINMAX -DUNICODE -DWIN32_LEAN_AND_MEAN -D_UNICODE -I"E:\Engine\build\cmake\editor-Release\sdk-checks\a7a401f31db8449c970cc71c941a6f33\CMake проект 日本語\Intermediate\CMake\Release\A82A1EEE672D77FA\generated\Game" -external:IE:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include -external:W0 /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD /utf-8 /permissive- /EHsc /showIncludes /FoCMakeFiles\Game.dir\generated\Game\GeneratedComponents.cpp.obj /FdCMakeFiles\Game.dir\ /FS -c "E:\Engine\build\cmake\editor-Release\sdk-checks\a7a401f31db8449c970cc71c941a6f33\CMake проект 日本語\Intermediate\CMake\Release\A82A1EEE672D77FA\generated\Game\GeneratedComponents.cpp"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\yvals_core.h(912): error C2338: static_assert failed: 'error STL1001: Unexpected compiler version, expected MSVC 19.44 or newer.'
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2801: "std::_Conditionally_enabled_hash<_Kty,_Enabled>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2300): note: при компиляции шаблона класса "std::_Conditionally_enabled_hash"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2333: std::_Conditionally_enabled_hash<_Kty,_Enabled>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2332): error C2801: "std::hash<float>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2332): error C2333: std::hash<float>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2341): error C2801: "std::hash<double>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2341): error C2333: std::hash<double>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2350): error C2801: "std::hash<long double>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2350): error C2333: std::hash<long double>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2359): error C2801: "std::hash<std::nullptr_t>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2359): error C2333: std::hash<std::nullptr_t>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(2303): error C2801: "std::_Vbase_compare_three_way<_Ret>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(2303): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(2302): note: при компиляции шаблона класса "std::_Vbase_compare_three_way"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(2303): error C2333: std::_Vbase_compare_three_way<_Ret>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(3621): error C2801: "std::hash<std::vector<bool,_Alloc>>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(3621): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(3617): note: при компиляции частичной специализации шаблона класса "std::hash<std::vector<bool,_Alloc>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(3621): error C2333: std::hash<std::vector<bool,_Alloc>>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3897): error C2801: "std::hash<std::shared_ptr<_Ty>>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3897): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3893): note: при компиляции частичной специализации шаблона класса "std::hash<std::shared_ptr<_Ty>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3897): error C2333: std::hash<std::shared_ptr<_Ty>>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\thread(340): error C2801: "std::hash<std::thread::id>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\thread(340): error C2333: std::hash<std::thread::id>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2801: "std::_Conditionally_enabled_hash<_Kty,true>::operator ()" не должен быть статическим членом
+        with
+        [
+            _Kty=Keys
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): note: контекст создания экземпляра шаблона (сначала самый старый)
+E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\Engine/InputDevice/InputDevice.h(88): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::unordered_set<Keys,std::hash<Keys>,std::equal_to<Keys>,std::allocator<Keys>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_set(59): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Hash<std::_Uset_traits<_Kty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>>"
+        with
+        [
+            _Kty=Keys,
+            _Hasher=std::hash<Keys>,
+            _Keyeq=std::equal_to<Keys>,
+            _Alloc=std::allocator<Keys>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xhash(330): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uset_traits<_Kty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>"
+        with
+        [
+            _Kty=Keys,
+            _Hasher=std::hash<Keys>,
+            _Keyeq=std::equal_to<Keys>,
+            _Alloc=std::allocator<Keys>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_set(28): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uhash_compare<_Kty,_Hasher,_Keyeq>"
+        with
+        [
+            _Kty=Keys,
+            _Hasher=std::hash<Keys>,
+            _Keyeq=std::equal_to<Keys>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на шаблон переменной "const bool is_empty_v<std::hash<enum Keys> >"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::hash<Keys>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2320): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Conditionally_enabled_hash<_Kty,true>"
+        with
+        [
+            _Kty=Keys
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2333: std::_Conditionally_enabled_hash<_Kty,true>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+        with
+        [
+            _Kty=Keys
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2801: "std::_Conditionally_enabled_hash<_Kty,true>::operator ()" не должен быть статическим членом
+        with
+        [
+            _Kty=GameComponent *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): note: контекст создания экземпляра шаблона (сначала самый старый)
+E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\Engine/MainGame/BaseGameClass/Game.h(688): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::unordered_set<GameComponent *,std::hash<GameComponent *>,std::equal_to<GameComponent *>,std::allocator<GameComponent *>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_set(59): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Hash<std::_Uset_traits<_Kty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>>"
+        with
+        [
+            _Kty=GameComponent *,
+            _Hasher=std::hash<GameComponent *>,
+            _Keyeq=std::equal_to<GameComponent *>,
+            _Alloc=std::allocator<GameComponent *>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xhash(330): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uset_traits<_Kty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>"
+        with
+        [
+            _Kty=GameComponent *,
+            _Hasher=std::hash<GameComponent *>,
+            _Keyeq=std::equal_to<GameComponent *>,
+            _Alloc=std::allocator<GameComponent *>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_set(28): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uhash_compare<_Kty,_Hasher,_Keyeq>"
+        with
+        [
+            _Kty=GameComponent *,
+            _Hasher=std::hash<GameComponent *>,
+            _Keyeq=std::equal_to<GameComponent *>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на шаблон переменной "const bool is_empty_v<std::hash<GameComponent *> >"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::hash<GameComponent *>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2320): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Conditionally_enabled_hash<_Kty,true>"
+        with
+        [
+            _Kty=GameComponent *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2333: std::_Conditionally_enabled_hash<_Kty,true>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+        with
+        [
+            _Kty=GameComponent *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2801: "std::_Conditionally_enabled_hash<_Kty,true>::operator ()" не должен быть статическим членом
+        with
+        [
+            _Kty=uint32_t
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): note: контекст создания экземпляра шаблона (сначала самый старый)
+E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\Engine/MainGame/BaseGameClass/Game.h(754): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::unordered_map<uint32_t,Game::RawOverlayIcon,std::hash<uint32_t>,std::equal_to<uint32_t>,std::allocator<std::pair<const uint32_t,Game::RawOverlayIcon>>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_map(61): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Hash<std::_Umap_traits<_Kty,_Ty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>>"
+        with
+        [
+            _Kty=uint32_t,
+            _Ty=Game::RawOverlayIcon,
+            _Hasher=std::hash<uint32_t>,
+            _Keyeq=std::equal_to<uint32_t>,
+            _Alloc=std::allocator<std::pair<const uint32_t,Game::RawOverlayIcon>>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xhash(330): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Umap_traits<_Kty,_Ty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>"
+        with
+        [
+            _Kty=uint32_t,
+            _Ty=Game::RawOverlayIcon,
+            _Hasher=std::hash<uint32_t>,
+            _Keyeq=std::equal_to<uint32_t>,
+            _Alloc=std::allocator<std::pair<const uint32_t,Game::RawOverlayIcon>>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_map(29): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uhash_compare<_Kty,_Hasher,_Keyeq>"
+        with
+        [
+            _Kty=uint32_t,
+            _Hasher=std::hash<uint32_t>,
+            _Keyeq=std::equal_to<uint32_t>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на шаблон переменной "const bool is_empty_v<std::hash<unsigned int> >"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::hash<uint32_t>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2320): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Conditionally_enabled_hash<_Kty,true>"
+        with
+        [
+            _Kty=uint32_t
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2333: std::_Conditionally_enabled_hash<_Kty,true>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+        with
+        [
+            _Kty=uint32_t
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\system_error(446): error C2801: "std::hash<std::error_code>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\system_error(446): error C2333: std::hash<std::error_code>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\system_error(456): error C2801: "std::hash<std::error_condition>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\system_error(456): error C2333: std::hash<std::error_condition>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(348): error C2801: "std::filesystem::_Is_slash_oper::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(348): error C2333: std::filesystem::_Is_slash_oper::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(862): error C2737: "_Root_dir_end": необходимо инициализировать объект const
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): error C3536: _Root_dir_end: не может использоваться до инициализации
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): error C2440: инициализация: невозможно преобразовать "initializer list" в "std::reverse_iterator<const wchar_t *>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): note: "std::reverse_iterator<const wchar_t *>::reverse_iterator": ни одна перегруженная функция не может преобразовать все типы аргументов
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(1734): note: может быть "std::reverse_iterator<const wchar_t *>::reverse_iterator(_BidIt) noexcept"
+        with
+        [
+            _BidIt=const wchar_t *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): note: "std::reverse_iterator<const wchar_t *>::reverse_iterator(_BidIt) noexcept": невозможно преобразовать аргумент 1 из "int" в "_BidIt"
+        with
+        [
+            _BidIt=const wchar_t *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): note: Для преобразования из целого типа в указатель требуется reinterpret_cast, приведение в стиле С или приведение в стиле функции в круглых скобках
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(1742): note: или       "std::reverse_iterator<const wchar_t *>::reverse_iterator(const std::reverse_iterator<_Other> &) noexcept(<expr>)"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): note: при попытке сопоставить список аргументов "(int)"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(1053): error C2737: "_My_slash": необходимо инициализировать объект const
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(1054): error C2737: "_Other_slash": необходимо инициализировать объект const
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(1385): error C2737: "_Is_slash_needed": необходимо инициализировать объект const
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(4424): error C2801: "std::hash<std::filesystem::path>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(4424): error C2333: std::hash<std::filesystem::path>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+[5/8] Building CXX object CMakeFiles\Game.dir\Source\ProjectGame.cpp.obj
+FAILED: [code=2] CMakeFiles/Game.dir/Source/ProjectGame.cpp.obj 
+"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\bin\Hostx64\x64\cl.exe"  /nologo /TP -DENGINE_ENABLE_ASSIMP -DENGINE_ENABLE_JOLT -DGame_EXPORTS -DNOMINMAX -DUNICODE -DWIN32_LEAN_AND_MEAN -D_UNICODE -I"E:\Engine\build\cmake\editor-Release\sdk-checks\a7a401f31db8449c970cc71c941a6f33\CMake проект 日本語\Intermediate\CMake\Release\A82A1EEE672D77FA\generated\Game" -external:IE:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include -external:W0 /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD /utf-8 /permissive- /EHsc /showIncludes /FoCMakeFiles\Game.dir\Source\ProjectGame.cpp.obj /FdCMakeFiles\Game.dir\ /FS -c "E:\Engine\build\cmake\editor-Release\sdk-checks\a7a401f31db8449c970cc71c941a6f33\CMake проект 日本語\Source\ProjectGame.cpp"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\yvals_core.h(912): error C2338: static_assert failed: 'error STL1001: Unexpected compiler version, expected MSVC 19.44 or newer.'
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2801: "std::_Conditionally_enabled_hash<_Kty,_Enabled>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2300): note: при компиляции шаблона класса "std::_Conditionally_enabled_hash"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2333: std::_Conditionally_enabled_hash<_Kty,_Enabled>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2332): error C2801: "std::hash<float>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2332): error C2333: std::hash<float>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2341): error C2801: "std::hash<double>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2341): error C2333: std::hash<double>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2350): error C2801: "std::hash<long double>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2350): error C2333: std::hash<long double>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2359): error C2801: "std::hash<std::nullptr_t>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2359): error C2333: std::hash<std::nullptr_t>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3897): error C2801: "std::hash<std::shared_ptr<_Ty>>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3897): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3893): note: при компиляции частичной специализации шаблона класса "std::hash<std::shared_ptr<_Ty>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3897): error C2333: std::hash<std::shared_ptr<_Ty>>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(2303): error C2801: "std::_Vbase_compare_three_way<_Ret>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(2303): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(2302): note: при компиляции шаблона класса "std::_Vbase_compare_three_way"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(2303): error C2333: std::_Vbase_compare_three_way<_Ret>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(3621): error C2801: "std::hash<std::vector<bool,_Alloc>>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(3621): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(3617): note: при компиляции частичной специализации шаблона класса "std::hash<std::vector<bool,_Alloc>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(3621): error C2333: std::hash<std::vector<bool,_Alloc>>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\thread(340): error C2801: "std::hash<std::thread::id>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\thread(340): error C2333: std::hash<std::thread::id>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2801: "std::_Conditionally_enabled_hash<_Kty,true>::operator ()" не должен быть статическим членом
+        with
+        [
+            _Kty=Keys
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): note: контекст создания экземпляра шаблона (сначала самый старый)
+E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\Engine/InputDevice/InputDevice.h(88): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::unordered_set<Keys,std::hash<Keys>,std::equal_to<Keys>,std::allocator<Keys>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_set(59): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Hash<std::_Uset_traits<_Kty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>>"
+        with
+        [
+            _Kty=Keys,
+            _Hasher=std::hash<Keys>,
+            _Keyeq=std::equal_to<Keys>,
+            _Alloc=std::allocator<Keys>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xhash(330): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uset_traits<_Kty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>"
+        with
+        [
+            _Kty=Keys,
+            _Hasher=std::hash<Keys>,
+            _Keyeq=std::equal_to<Keys>,
+            _Alloc=std::allocator<Keys>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_set(28): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uhash_compare<_Kty,_Hasher,_Keyeq>"
+        with
+        [
+            _Kty=Keys,
+            _Hasher=std::hash<Keys>,
+            _Keyeq=std::equal_to<Keys>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на шаблон переменной "const bool is_empty_v<std::hash<enum Keys> >"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::hash<Keys>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2320): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Conditionally_enabled_hash<_Kty,true>"
+        with
+        [
+            _Kty=Keys
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2333: std::_Conditionally_enabled_hash<_Kty,true>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+        with
+        [
+            _Kty=Keys
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2801: "std::_Conditionally_enabled_hash<_Kty,true>::operator ()" не должен быть статическим членом
+        with
+        [
+            _Kty=GameComponent *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): note: контекст создания экземпляра шаблона (сначала самый старый)
+E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\Engine/MainGame/BaseGameClass/Game.h(688): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::unordered_set<GameComponent *,std::hash<GameComponent *>,std::equal_to<GameComponent *>,std::allocator<GameComponent *>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_set(59): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Hash<std::_Uset_traits<_Kty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>>"
+        with
+        [
+            _Kty=GameComponent *,
+            _Hasher=std::hash<GameComponent *>,
+            _Keyeq=std::equal_to<GameComponent *>,
+            _Alloc=std::allocator<GameComponent *>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xhash(330): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uset_traits<_Kty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>"
+        with
+        [
+            _Kty=GameComponent *,
+            _Hasher=std::hash<GameComponent *>,
+            _Keyeq=std::equal_to<GameComponent *>,
+            _Alloc=std::allocator<GameComponent *>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_set(28): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uhash_compare<_Kty,_Hasher,_Keyeq>"
+        with
+        [
+            _Kty=GameComponent *,
+            _Hasher=std::hash<GameComponent *>,
+            _Keyeq=std::equal_to<GameComponent *>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на шаблон переменной "const bool is_empty_v<std::hash<GameComponent *> >"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::hash<GameComponent *>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2320): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Conditionally_enabled_hash<_Kty,true>"
+        with
+        [
+            _Kty=GameComponent *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2333: std::_Conditionally_enabled_hash<_Kty,true>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+        with
+        [
+            _Kty=GameComponent *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2801: "std::_Conditionally_enabled_hash<_Kty,true>::operator ()" не должен быть статическим членом
+        with
+        [
+            _Kty=uint32_t
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): note: контекст создания экземпляра шаблона (сначала самый старый)
+E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\Engine/MainGame/BaseGameClass/Game.h(754): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::unordered_map<uint32_t,Game::RawOverlayIcon,std::hash<uint32_t>,std::equal_to<uint32_t>,std::allocator<std::pair<const uint32_t,Game::RawOverlayIcon>>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_map(61): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Hash<std::_Umap_traits<_Kty,_Ty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>>"
+        with
+        [
+            _Kty=uint32_t,
+            _Ty=Game::RawOverlayIcon,
+            _Hasher=std::hash<uint32_t>,
+            _Keyeq=std::equal_to<uint32_t>,
+            _Alloc=std::allocator<std::pair<const uint32_t,Game::RawOverlayIcon>>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xhash(330): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Umap_traits<_Kty,_Ty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>"
+        with
+        [
+            _Kty=uint32_t,
+            _Ty=Game::RawOverlayIcon,
+            _Hasher=std::hash<uint32_t>,
+            _Keyeq=std::equal_to<uint32_t>,
+            _Alloc=std::allocator<std::pair<const uint32_t,Game::RawOverlayIcon>>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_map(29): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uhash_compare<_Kty,_Hasher,_Keyeq>"
+        with
+        [
+            _Kty=uint32_t,
+            _Hasher=std::hash<uint32_t>,
+            _Keyeq=std::equal_to<uint32_t>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на шаблон переменной "const bool is_empty_v<std::hash<unsigned int> >"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::hash<uint32_t>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2320): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Conditionally_enabled_hash<_Kty,true>"
+        with
+        [
+            _Kty=uint32_t
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2333: std::_Conditionally_enabled_hash<_Kty,true>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+        with
+        [
+            _Kty=uint32_t
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\system_error(446): error C2801: "std::hash<std::error_code>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\system_error(446): error C2333: std::hash<std::error_code>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\system_error(456): error C2801: "std::hash<std::error_condition>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\system_error(456): error C2333: std::hash<std::error_condition>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(348): error C2801: "std::filesystem::_Is_slash_oper::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(348): error C2333: std::filesystem::_Is_slash_oper::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(862): error C2737: "_Root_dir_end": необходимо инициализировать объект const
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): error C3536: _Root_dir_end: не может использоваться до инициализации
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): error C2440: инициализация: невозможно преобразовать "initializer list" в "std::reverse_iterator<const wchar_t *>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): note: "std::reverse_iterator<const wchar_t *>::reverse_iterator": ни одна перегруженная функция не может преобразовать все типы аргументов
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(1734): note: может быть "std::reverse_iterator<const wchar_t *>::reverse_iterator(_BidIt) noexcept"
+        with
+        [
+            _BidIt=const wchar_t *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): note: "std::reverse_iterator<const wchar_t *>::reverse_iterator(_BidIt) noexcept": невозможно преобразовать аргумент 1 из "int" в "_BidIt"
+        with
+        [
+            _BidIt=const wchar_t *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): note: Для преобразования из целого типа в указатель требуется reinterpret_cast, приведение в стиле С или приведение в стиле функции в круглых скобках
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(1742): note: или       "std::reverse_iterator<const wchar_t *>::reverse_iterator(const std::reverse_iterator<_Other> &) noexcept(<expr>)"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): note: при попытке сопоставить список аргументов "(int)"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(1053): error C2737: "_My_slash": необходимо инициализировать объект const
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(1054): error C2737: "_Other_slash": необходимо инициализировать объект const
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(1385): error C2737: "_Is_slash_needed": необходимо инициализировать объект const
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(4424): error C2801: "std::hash<std::filesystem::path>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(4424): error C2333: std::hash<std::filesystem::path>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+[6/8] Building CXX object CMakeFiles\Game.dir\Source\Module.cpp.obj
+FAILED: [code=2] CMakeFiles/Game.dir/Source/Module.cpp.obj 
+"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\bin\Hostx64\x64\cl.exe"  /nologo /TP -DENGINE_ENABLE_ASSIMP -DENGINE_ENABLE_JOLT -DGame_EXPORTS -DNOMINMAX -DUNICODE -DWIN32_LEAN_AND_MEAN -D_UNICODE -I"E:\Engine\build\cmake\editor-Release\sdk-checks\a7a401f31db8449c970cc71c941a6f33\CMake проект 日本語\Intermediate\CMake\Release\A82A1EEE672D77FA\generated\Game" -external:IE:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include -external:W0 /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD /utf-8 /permissive- /EHsc /showIncludes /FoCMakeFiles\Game.dir\Source\Module.cpp.obj /FdCMakeFiles\Game.dir\ /FS -c "E:\Engine\build\cmake\editor-Release\sdk-checks\a7a401f31db8449c970cc71c941a6f33\CMake проект 日本語\Source\Module.cpp"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\yvals_core.h(912): error C2338: static_assert failed: 'error STL1001: Unexpected compiler version, expected MSVC 19.44 or newer.'
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2801: "std::_Conditionally_enabled_hash<_Kty,_Enabled>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2300): note: при компиляции шаблона класса "std::_Conditionally_enabled_hash"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2333: std::_Conditionally_enabled_hash<_Kty,_Enabled>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2332): error C2801: "std::hash<float>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2332): error C2333: std::hash<float>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2341): error C2801: "std::hash<double>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2341): error C2333: std::hash<double>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2350): error C2801: "std::hash<long double>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2350): error C2333: std::hash<long double>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2359): error C2801: "std::hash<std::nullptr_t>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2359): error C2333: std::hash<std::nullptr_t>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(2303): error C2801: "std::_Vbase_compare_three_way<_Ret>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(2303): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(2302): note: при компиляции шаблона класса "std::_Vbase_compare_three_way"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(2303): error C2333: std::_Vbase_compare_three_way<_Ret>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(3621): error C2801: "std::hash<std::vector<bool,_Alloc>>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(3621): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(3617): note: при компиляции частичной специализации шаблона класса "std::hash<std::vector<bool,_Alloc>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\vector(3621): error C2333: std::hash<std::vector<bool,_Alloc>>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3897): error C2801: "std::hash<std::shared_ptr<_Ty>>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3897): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3893): note: при компиляции частичной специализации шаблона класса "std::hash<std::shared_ptr<_Ty>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\memory(3897): error C2333: std::hash<std::shared_ptr<_Ty>>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\thread(340): error C2801: "std::hash<std::thread::id>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\thread(340): error C2333: std::hash<std::thread::id>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2801: "std::_Conditionally_enabled_hash<_Kty,true>::operator ()" не должен быть статическим членом
+        with
+        [
+            _Kty=Keys
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): note: контекст создания экземпляра шаблона (сначала самый старый)
+E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\Engine/InputDevice/InputDevice.h(88): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::unordered_set<Keys,std::hash<Keys>,std::equal_to<Keys>,std::allocator<Keys>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_set(59): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Hash<std::_Uset_traits<_Kty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>>"
+        with
+        [
+            _Kty=Keys,
+            _Hasher=std::hash<Keys>,
+            _Keyeq=std::equal_to<Keys>,
+            _Alloc=std::allocator<Keys>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xhash(330): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uset_traits<_Kty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>"
+        with
+        [
+            _Kty=Keys,
+            _Hasher=std::hash<Keys>,
+            _Keyeq=std::equal_to<Keys>,
+            _Alloc=std::allocator<Keys>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_set(28): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uhash_compare<_Kty,_Hasher,_Keyeq>"
+        with
+        [
+            _Kty=Keys,
+            _Hasher=std::hash<Keys>,
+            _Keyeq=std::equal_to<Keys>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на шаблон переменной "const bool is_empty_v<std::hash<enum Keys> >"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::hash<Keys>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2320): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Conditionally_enabled_hash<_Kty,true>"
+        with
+        [
+            _Kty=Keys
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2333: std::_Conditionally_enabled_hash<_Kty,true>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+        with
+        [
+            _Kty=Keys
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2801: "std::_Conditionally_enabled_hash<_Kty,true>::operator ()" не должен быть статическим членом
+        with
+        [
+            _Kty=GameComponent *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): note: контекст создания экземпляра шаблона (сначала самый старый)
+E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\Engine/MainGame/BaseGameClass/Game.h(688): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::unordered_set<GameComponent *,std::hash<GameComponent *>,std::equal_to<GameComponent *>,std::allocator<GameComponent *>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_set(59): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Hash<std::_Uset_traits<_Kty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>>"
+        with
+        [
+            _Kty=GameComponent *,
+            _Hasher=std::hash<GameComponent *>,
+            _Keyeq=std::equal_to<GameComponent *>,
+            _Alloc=std::allocator<GameComponent *>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xhash(330): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uset_traits<_Kty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>"
+        with
+        [
+            _Kty=GameComponent *,
+            _Hasher=std::hash<GameComponent *>,
+            _Keyeq=std::equal_to<GameComponent *>,
+            _Alloc=std::allocator<GameComponent *>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_set(28): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uhash_compare<_Kty,_Hasher,_Keyeq>"
+        with
+        [
+            _Kty=GameComponent *,
+            _Hasher=std::hash<GameComponent *>,
+            _Keyeq=std::equal_to<GameComponent *>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на шаблон переменной "const bool is_empty_v<std::hash<GameComponent *> >"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::hash<GameComponent *>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2320): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Conditionally_enabled_hash<_Kty,true>"
+        with
+        [
+            _Kty=GameComponent *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2333: std::_Conditionally_enabled_hash<_Kty,true>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+        with
+        [
+            _Kty=GameComponent *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2801: "std::_Conditionally_enabled_hash<_Kty,true>::operator ()" не должен быть статическим членом
+        with
+        [
+            _Kty=uint32_t
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): note: контекст создания экземпляра шаблона (сначала самый старый)
+E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include\Engine/MainGame/BaseGameClass/Game.h(754): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::unordered_map<uint32_t,Game::RawOverlayIcon,std::hash<uint32_t>,std::equal_to<uint32_t>,std::allocator<std::pair<const uint32_t,Game::RawOverlayIcon>>>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_map(61): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Hash<std::_Umap_traits<_Kty,_Ty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>>"
+        with
+        [
+            _Kty=uint32_t,
+            _Ty=Game::RawOverlayIcon,
+            _Hasher=std::hash<uint32_t>,
+            _Keyeq=std::equal_to<uint32_t>,
+            _Alloc=std::allocator<std::pair<const uint32_t,Game::RawOverlayIcon>>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xhash(330): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Umap_traits<_Kty,_Ty,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>"
+        with
+        [
+            _Kty=uint32_t,
+            _Ty=Game::RawOverlayIcon,
+            _Hasher=std::hash<uint32_t>,
+            _Keyeq=std::equal_to<uint32_t>,
+            _Alloc=std::allocator<std::pair<const uint32_t,Game::RawOverlayIcon>>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\unordered_map(29): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Uhash_compare<_Kty,_Hasher,_Keyeq>"
+        with
+        [
+            _Kty=uint32_t,
+            _Hasher=std::hash<uint32_t>,
+            _Keyeq=std::equal_to<uint32_t>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на шаблон переменной "const bool is_empty_v<std::hash<unsigned int> >"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xmemory(1521): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::hash<uint32_t>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2320): note: выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Conditionally_enabled_hash<_Kty,true>"
+        with
+        [
+            _Kty=uint32_t
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(2304): error C2333: std::_Conditionally_enabled_hash<_Kty,true>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+        with
+        [
+            _Kty=uint32_t
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\system_error(446): error C2801: "std::hash<std::error_code>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\system_error(446): error C2333: std::hash<std::error_code>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\system_error(456): error C2801: "std::hash<std::error_condition>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\system_error(456): error C2333: std::hash<std::error_condition>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(348): error C2801: "std::filesystem::_Is_slash_oper::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(348): error C2333: std::filesystem::_Is_slash_oper::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(862): error C2737: "_Root_dir_end": необходимо инициализировать объект const
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): error C3536: _Root_dir_end: не может использоваться до инициализации
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): error C2440: инициализация: невозможно преобразовать "initializer list" в "std::reverse_iterator<const wchar_t *>"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): note: "std::reverse_iterator<const wchar_t *>::reverse_iterator": ни одна перегруженная функция не может преобразовать все типы аргументов
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(1734): note: может быть "std::reverse_iterator<const wchar_t *>::reverse_iterator(_BidIt) noexcept"
+        with
+        [
+            _BidIt=const wchar_t *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): note: "std::reverse_iterator<const wchar_t *>::reverse_iterator(_BidIt) noexcept": невозможно преобразовать аргумент 1 из "int" в "_BidIt"
+        with
+        [
+            _BidIt=const wchar_t *
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): note: Для преобразования из целого типа в указатель требуется reinterpret_cast, приведение в стиле С или приведение в стиле функции в круглых скобках
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(1742): note: или       "std::reverse_iterator<const wchar_t *>::reverse_iterator(const std::reverse_iterator<_Other> &) noexcept(<expr>)"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(868): note: при попытке сопоставить список аргументов "(int)"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(1053): error C2737: "_My_slash": необходимо инициализировать объект const
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(1054): error C2737: "_Other_slash": необходимо инициализировать объект const
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(1385): error C2737: "_Is_slash_needed": необходимо инициализировать объект const
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(4424): error C2801: "std::hash<std::filesystem::path>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(4424): error C2333: std::hash<std::filesystem::path>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1684): error C2801: "std::_Variant_hash_visitor::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1710): error C2801: "std::hash<std::monostate>::operator ()" не должен быть статическим членом
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\variant(1710): error C2333: std::hash<std::monostate>::operator (): ошибка в объявлении функции; пропуск основного текста функции
+ninja: build stopped: subcommand failed.
+
+Full build log: E:\Engine\build\cmake\editor-Release\sdk-checks\a7a401f31db8449c970cc71c941a6f33\CMake проект 日本語\Binaries\Release\f593d1b5d37b4607a4022be3c8ac3c5a\build.log
+Project build failed; previous module preserved
+At E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\ProjectTools.ps1:340 char:25
++ ... exitCode) { throw 'Project build failed; previous module preserved' } ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Project build f...odule preserved:String) [], RuntimeException
+    + FullyQualifiedErrorId : Project build failed; previous module preserved
+ 

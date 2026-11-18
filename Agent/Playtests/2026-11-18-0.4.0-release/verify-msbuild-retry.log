@@ -1,0 +1,5 @@
+PASS CoreTests-build
+PASS HostTests-build
+PASS UiTests-build
+PASS CoreTests
+PASS HostTests

@@ -1,0 +1,9 @@
+{
+  "sourceArchive": "E:\\Engine\\Agent\\Playtests\\2026-11-14-2026.11.11.0-strategy-r5\\strategy\\RepairCorridor-r5-source.zip",
+  "sourceSha256": "8AF67B7BD0B20F24830436187B5786C66B5AA8EAC498075626E6344AD85A7C03",
+  "projectPath": "E:\\Engine\\Engine\\build\\playtests\\strategy-040\\RepairCorridor",
+  "projectJson": true,
+  "scene": true,
+  "gameSln": true,
+  "moduleRegistered": true
+}

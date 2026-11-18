@@ -1,0 +1,12 @@
+{
+  "path": "E:\\Engine\\build\\cmake\\editor-Release\\bin\\Release\\Runtime",
+  "exeSha256": "58FFC0E6E1E70D3FC0B643079352B91851DF08FC78268D45ABB3799295E29B20",
+  "libSha256": "B794573162A49D4A05EE99E5F32CF38EE50461AA3632058231A5540F8762BBEF",
+  "sdkVersion": "0.4.0",
+  "buildSystem": "cmake",
+  "configuration": "Release",
+  "platform": "x64",
+  "compilerId": "MSVC",
+  "compiler": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.40.33807/bin/Hostx64/x64/cl.exe",
+  "compilerFlags": "/DWIN32 /D_WINDOWS /EHsc"
+}

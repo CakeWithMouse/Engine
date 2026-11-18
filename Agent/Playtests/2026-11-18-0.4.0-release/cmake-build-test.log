@@ -1,0 +1,526 @@
+**********************************************************************
+** Visual Studio 2022 Developer PowerShell v17.14.27
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+-- The CXX compiler identification is MSVC 19.40.33821.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.40.33807/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - not found
+-- Found Threads: TRUE
+-- Performing Test HAVE_STDATOMIC
+-- Performing Test HAVE_STDATOMIC - Success
+-- Found WrapAtomic: TRUE
+-- Configuring done (8.5s)
+-- Generating done (0.3s)
+-- Build files have been written to: E:/Engine/build/cmake/editor-Release
+[1/287] Building CXX object CMakeFiles\EngineCore.dir\Engine\Source\Resources\HostVfsProxy.cpp.obj
+[2/287] Building CXX object CMakeFiles\EngineCore.dir\Engine\Source\Scene\Trace.cpp.obj
+[3/287] Building CXX object CMakeFiles\EngineCore.dir\Engine\Source\Resources\LocalVfs.cpp.obj
+[4/287] Building CXX object CMakeFiles\EngineCore.dir\Engine\Source\Resources\Paths.cpp.obj
+[5/287] Building CXX object CMakeFiles\EngineCore.dir\Engine\Source\Resources\VfsRead.cpp.obj
+[6/287] Building CXX object CMakeFiles\EngineCore.dir\Engine\Source\Resources\VirtualFileSystem.cpp.obj
+[7/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Physics\PhysicsWorld.cpp.obj
+[8/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Components\SpecificComponents\RigidBodyComponent.cpp.obj
+[9/287] Building CXX object CMakeFiles\EngineCore.dir\Engine\Source\Script\ScriptCatalog.cpp.obj
+[10/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Components\ComponentTrace.cpp.obj
+E:\Engine\Engine\Source\Components\ComponentTrace.cpp(1): warning C4005: NOMINMAX: изменение макроопределения
+E:\Engine\Engine\Source\Components\ComponentTrace.cpp(1): note: "NOMINMAX" ранее объявлен в командной строке
+[11/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Base\Base.cpp.obj
+[12/287] Building CXX object CMakeFiles\EngineCore.dir\Engine\Source\Script\ScriptProgram.cpp.obj
+[13/287] Linking CXX static library lib\Release\EngineCore.lib
+[14/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Components\Light\DirectionalLightComponent.cpp.obj
+[15/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Scene\Scene.cpp.obj
+[16/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\MainGame\GameTrace.cpp.obj
+E:\Engine\Engine\Source\MainGame\GameTrace.cpp(1): warning C4005: NOMINMAX: изменение макроопределения
+E:\Engine\Engine\Source\MainGame\GameTrace.cpp(1): note: "NOMINMAX" ранее объявлен в командной строке
+[17/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Scene\SceneCommands.cpp.obj
+[18/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Components\StandardSky.cpp.obj
+[19/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\MainGame\RenderDiagnostics.cpp.obj
+[20/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\MainGame\SaveState.cpp.obj
+[21/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\MainGame\SaveGame.cpp.obj
+[22/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Scene\BlendImport.cpp.obj
+E:\Engine\Engine\Source\Scene\BlendImport.cpp(1): warning C4005: NOMINMAX: изменение макроопределения
+E:\Engine\Engine\Source\Scene\BlendImport.cpp(1): note: "NOMINMAX" ранее объявлен в командной строке
+[23/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Scene\ModelImportSettings.cpp.obj
+[24/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Runtime\SceneEditAssets.cpp.obj
+[25/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Scene\ModelImport.cpp.obj
+[26/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Scene\SceneDocument.cpp.obj
+E:\Engine\Engine\Source\Scene\SceneDocument.cpp(2): warning C4005: NOMINMAX: изменение макроопределения
+E:\Engine\Engine\Source\Scene\SceneDocument.cpp(2): note: "NOMINMAX" ранее объявлен в командной строке
+[27/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Scene\SceneAssets.cpp.obj
+[28/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Runtime\SceneEditAudio.cpp.obj
+[29/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Runtime\SceneEditScripts.cpp.obj
+[30/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Runtime\SceneEditMaterials.cpp.obj
+[31/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Runtime\SceneEditAi.cpp.obj
+[32/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Runtime\SceneEditBatch.cpp.obj
+[33/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Runtime\GameEditModule.cpp.obj
+E:\Engine\Engine\Source\Runtime\GameEditModule.cpp(1): warning C4005: WIN32_LEAN_AND_MEAN: изменение макроопределения
+E:\Engine\Engine\Source\Runtime\GameEditModule.cpp(1): note: "WIN32_LEAN_AND_MEAN" ранее объявлен в командной строке
+[34/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Runtime\SceneEditSession.cpp.obj
+[35/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Runtime\SceneEditAiDiagnostics.cpp.obj
+[36/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Base\Config\BaseResources.cpp.obj
+[37/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Base\Config\BaseGameConfig.cpp.obj
+[38/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Scene\AssetUpdate.cpp.obj
+E:\Engine\Engine\Source\Scene\AssetUpdate.cpp(1): warning C4005: NOMINMAX: изменение макроопределения
+E:\Engine\Engine\Source\Scene\AssetUpdate.cpp(1): note: "NOMINMAX" ранее объявлен в командной строке
+[39/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Components\SpecificComponents\CubeComponent.cpp.obj
+[40/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Components\Light\CubeMap.cpp.obj
+[41/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Runtime\SceneAuthoring.cpp.obj
+[42/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Components\GameComponents.cpp.obj
+[43/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Components\SpecificComponents\MeshComponent.cpp.obj
+[44/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Components\SpecificComponents\InstancedMeshComponent.cpp.obj
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xutility(388): warning C4244: аргумент: преобразование "_Ty" в "float", возможна потеря данных
+        with
+        [
+            _Ty=int
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xutility(388): note: контекст создания экземпляра шаблона (сначала самый старый)
+E:\Engine\Engine\Source\Components\SpecificComponents\InstancedMeshComponent.cpp(44): note: выполняется компиляция ссылки на экземпляр шаблон функции "DirectX::XMFLOAT4 &std::vector<DirectX::XMFLOAT4,std::allocator<DirectX::XMFLOAT4>>::emplace_back<int,int,int,int>(int &&,int &&,int &&,int &&)"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(858): note: выполняется компиляция ссылки на экземпляр шаблон функции "_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_one_at_back<int,int,int,int>(int &&,int &&,int &&,int &&)"
+        with
+        [
+            _Ty=DirectX::XMFLOAT4
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(776): note: выполняется компиляция ссылки на экземпляр шаблон функции "_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_back_with_unused_capacity<int,int,int,int>(int &&,int &&,int &&,int &&)"
+        with
+        [
+            _Ty=DirectX::XMFLOAT4
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(791): note: выполняется компиляция ссылки на экземпляр шаблон функции "void std::_Construct_in_place<DirectX::XMFLOAT4,_Ty,_Ty,_Ty,_Ty>(DirectX::XMFLOAT4 &,_Ty &&,_Ty &&,_Ty &&,_Ty &&) noexcept"
+        with
+        [
+            _Ty=int
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xmemory(700): warning C4244: аргумент: преобразование "_Ty" в "float", возможна потеря данных
+        with
+        [
+            _Ty=int
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xmemory(700): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(779): note: выполняется компиляция ссылки на экземпляр шаблон функции "DirectX::XMFLOAT4 *std::vector<DirectX::XMFLOAT4,std::allocator<DirectX::XMFLOAT4>>::_Emplace_reallocate<_Ty,_Ty,_Ty,_Ty>(DirectX::XMFLOAT4 *const ,_Ty &&,_Ty &&,_Ty &&,_Ty &&)"
+        with
+        [
+            _Ty=int
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(830): note: выполняется компиляция ссылки на экземпляр шаблон функции "void std::_Default_allocator_traits<_Alloc>::construct<_Ty,int,int,int,int>(_Alloc &,_Objty *const ,int &&,int &&,int &&,int &&)"
+        with
+        [
+            _Alloc=std::allocator<DirectX::XMFLOAT4>,
+            _Ty=DirectX::XMFLOAT4,
+            _Objty=DirectX::XMFLOAT4
+        ]
+[45/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Components\SpecificComponents\InstancedMeshImpostor.cpp.obj
+[46/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Components\SpecificComponents\InstancedMeshSkinned.cpp.obj
+[47/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Components\SpecificComponents\InstancedMeshShadows.cpp.obj
+[48/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\InputDevice\Delegates.cpp.obj
+[49/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Components\SpecificComponents\ParticleSystemComponent.cpp.obj
+[50/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Components\SpecificComponents\SphereComponent.cpp.obj
+[51/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Components\SpecificComponents\TriangleComponent.cpp.obj
+[52/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\InputDevice\InputActions.cpp.obj
+[53/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Display\Display.cpp.obj
+[54/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\InputDevice\InputDevice.cpp.obj
+[55/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Components\SpecificComponents\UIComponent.cpp.obj
+[56/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\AI\Debugger.cpp.obj
+[57/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\AI\Blackboard.cpp.obj
+[58/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\AI\AiCharacter.cpp.obj
+[59/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\AI\Controller.cpp.obj
+[60/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Components\Character.cpp.obj
+[61/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\AI\Group.cpp.obj
+[62/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\AI\MachineInstance.cpp.obj
+[63/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\AI\Navigation.cpp.obj
+[64/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\AI\StateMachine.cpp.obj
+[65/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\AI\Query.cpp.obj
+[66/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\AI\MachineBlocks.cpp.obj
+[67/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\AI\Tasks.cpp.obj
+[68/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\MainGame\GameSession.cpp.obj
+[69/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\AI\MachineFile.cpp.obj
+[70/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\MainGame\Player.cpp.obj
+[71/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\MainGame\CharacterController.cpp.obj
+[72/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Render\MeshData.cpp.obj
+[73/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Render\ImpostorAtlas.cpp.obj
+[74/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\AI\World.cpp.obj
+[75/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Render\Material.cpp.obj
+[76/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Render\MeshPrimitives.cpp.obj
+[77/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Render\MeshSimplifier.cpp.obj
+[78/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Render\MeshValidation.cpp.obj
+[79/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Sound\AudioEngine.cpp.obj
+[80/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Sound\AudioStream.cpp.obj
+[81/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Sound\DecoderFactory.cpp.obj
+[82/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Sound\VoicePool.cpp.obj
+[83/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Sound\MediaFoundationDecoder.cpp.obj
+[84/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Render\MaterialAsset.cpp.obj
+[85/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\MainGame\BaseGameClass\Game.cpp.obj
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xutility(4672): warning C4244: =: преобразование "const wchar_t" в "char", возможна потеря данных
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xutility(4672): note: контекст создания экземпляра шаблона (сначала самый старый)
+E:\Engine\Engine\Source\MainGame\BaseGameClass\Game.cpp(729): note: выполняется компиляция ссылки на экземпляр шаблон функции "std::basic_string<char,std::char_traits<char>,std::allocator<char>> &std::basic_string<char,std::char_traits<char>,std::allocator<char>>::assign<std::_String_const_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(const _Iter,const _Iter)"
+        with
+        [
+            _Elem=wchar_t,
+            _Iter=std::_String_const_iterator<std::_String_val<std::_Simple_types<wchar_t>>>
+        ]
+E:\Engine\Engine\Source\MainGame\BaseGameClass\Game.cpp(729): note: см. первую ссылку на "std::basic_string<char,std::char_traits<char>,std::allocator<char>>::assign" в "Game::CreateDeviceAndSwapChain"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xstring(3466): note: выполняется компиляция ссылки на экземпляр шаблон функции "std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<const wchar_t*,0>(_Iter,_Iter,const _Alloc &)"
+        with
+        [
+            _Iter=const wchar_t *,
+            _Alloc=std::allocator<char>
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xstring(2603): note: выполняется компиляция ссылки на экземпляр шаблон функции "void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_iter<const wchar_t*,const wchar_t*,_Size_type>(_Iter,const _Sent,_Size)"
+        with
+        [
+            _Size_type=unsigned __int64,
+            _Iter=const wchar_t *,
+            _Sent=const wchar_t *,
+            _Size=unsigned __int64
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xstring(2759): note: выполняется компиляция ссылки на экземпляр шаблон функции "_OutIt *std::_Copy_n_unchecked4<const wchar_t*,_Size,char*>(_InIt,_SizeTy,_OutIt)"
+        with
+        [
+            _OutIt=char *,
+            _Size=unsigned __int64,
+            _InIt=const wchar_t *,
+            _SizeTy=unsigned __int64
+        ]
+[86/287] Building CXX object CMakeFiles\Engine.dir\Engine\ThirdParty\meshoptimizer\src\allocator.cpp.obj
+[87/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Sound\WavDecoder.cpp.obj
+[88/287] Building CXX object CMakeFiles\Engine.dir\Engine\ThirdParty\meshoptimizer\src\indexgenerator.cpp.obj
+[89/287] Building CXX object CMakeFiles\Engine.dir\Engine\ThirdParty\meshoptimizer\src\spatialorder.cpp.obj
+[90/287] Building CXX object CMakeFiles\Engine.dir\Engine\ThirdParty\meshoptimizer\src\simplifier.cpp.obj
+[91/287] Building CXX object CMakeFiles\Engine.dir\Engine\ThirdParty\meshoptimizer\src\vcacheoptimizer.cpp.obj
+[92/287] Building CXX object CMakeFiles\Engine.dir\Engine\ThirdParty\meshoptimizer\src\vfetchoptimizer.cpp.obj
+[93/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Script\ScriptInstance.cpp.obj
+[94/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\UI\FontAtlas.cpp.obj
+E:\Engine\Engine\Source\UI\FontAtlas.cpp(2): warning C4005: NOMINMAX: изменение макроопределения
+E:\Engine\Engine\Source\UI\FontAtlas.cpp(2): note: "NOMINMAX" ранее объявлен в командной строке
+[95/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\UI\UIElement.cpp.obj
+E:\Engine\Engine\Source\UI\UIElement.cpp(2): warning C4005: NOMINMAX: изменение макроопределения
+E:\Engine\Engine\Source\UI\UIElement.cpp(2): note: "NOMINMAX" ранее объявлен в командной строке
+[96/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Render\SkeletalAnimation.cpp.obj
+[97/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\UI\UIMarkup.cpp.obj
+[98/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Render\TextureLoader.cpp.obj
+[99/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Render\ShaderCompiler.cpp.obj
+[100/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Render\SkeletalBaker.cpp.obj
+[101/287] Running utility command for RuntimeExampleContent
+[102/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Runtime\VfsService.cpp.obj
+E:\Engine\Engine\Source\Runtime\VfsService.cpp(11): warning C4005: WIN32_LEAN_AND_MEAN: изменение макроопределения
+E:\Engine\Engine\Source\Runtime\VfsService.cpp(11): note: "WIN32_LEAN_AND_MEAN" ранее объявлен в командной строке
+[103/287] Running utility command for EngineRuntimeContent
+[104/287] Running utility command for BasicExamplesContent
+[105/287] Running utility command for PongContent
+[106/287] Running utility command for SunGameContent
+[107/287] Running utility command for BattleContent
+[108/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Render\SkeletalLoaderAssimp.cpp.obj
+[109/287] Running utility command for EngineTestsContent
+[110/287] Building CXX object CMakeFiles\BadVersion.dir\Engine\tests\runtime\Fixture.cpp.obj
+[111/287] Running utility command for KatamariContent
+[112/287] Building CXX object CMakeFiles\MissingExport.dir\Engine\tests\runtime\Fixture.cpp.obj
+[113/287] Building CXX object CMakeFiles\WrongKind.dir\Engine\tests\runtime\Fixture.cpp.obj
+[114/287] Building CXX object CMakeFiles\FailGameStart.dir\Engine\tests\runtime\Fixture.cpp.obj
+[115/287] Building CXX object CMakeFiles\FailEditorStart.dir\Engine\tests\runtime\Fixture.cpp.obj
+[116/287] Building CXX object CMakeFiles\RequestExit.dir\Engine\tests\runtime\Fixture.cpp.obj
+[117/287] Building CXX object CMakeFiles\FailUpdate.dir\Engine\tests\runtime\Fixture.cpp.obj
+[118/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Components\SpecificComponents\FBXComponent.cpp.obj
+[119/287] Building CXX object CMakeFiles\Engine.dir\Engine\Source\Components\SpecificComponents\SkeletalMeshComponent.cpp.obj
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xutility(388): warning C4244: аргумент: преобразование "_Ty" в "float", возможна потеря данных
+        with
+        [
+            _Ty=int
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xutility(388): note: контекст создания экземпляра шаблона (сначала самый старый)
+E:\Engine\Engine\Source\Components\SpecificComponents\SkeletalMeshComponent.cpp(204): note: выполняется компиляция ссылки на экземпляр шаблон функции "DirectX::XMFLOAT4 &std::vector<DirectX::XMFLOAT4,std::allocator<DirectX::XMFLOAT4>>::emplace_back<int,int,int,int>(int &&,int &&,int &&,int &&)"
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(858): note: выполняется компиляция ссылки на экземпляр шаблон функции "_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_one_at_back<int,int,int,int>(int &&,int &&,int &&,int &&)"
+        with
+        [
+            _Ty=DirectX::XMFLOAT4
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(776): note: выполняется компиляция ссылки на экземпляр шаблон функции "_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_back_with_unused_capacity<int,int,int,int>(int &&,int &&,int &&,int &&)"
+        with
+        [
+            _Ty=DirectX::XMFLOAT4
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(791): note: выполняется компиляция ссылки на экземпляр шаблон функции "void std::_Construct_in_place<DirectX::XMFLOAT4,_Ty,_Ty,_Ty,_Ty>(DirectX::XMFLOAT4 &,_Ty &&,_Ty &&,_Ty &&,_Ty &&) noexcept"
+        with
+        [
+            _Ty=int
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xmemory(700): warning C4244: аргумент: преобразование "_Ty" в "float", возможна потеря данных
+        with
+        [
+            _Ty=int
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xmemory(700): note: контекст создания экземпляра шаблона (сначала самый старый)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(779): note: выполняется компиляция ссылки на экземпляр шаблон функции "DirectX::XMFLOAT4 *std::vector<DirectX::XMFLOAT4,std::allocator<DirectX::XMFLOAT4>>::_Emplace_reallocate<_Ty,_Ty,_Ty,_Ty>(DirectX::XMFLOAT4 *const ,_Ty &&,_Ty &&,_Ty &&,_Ty &&)"
+        with
+        [
+            _Ty=int
+        ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(830): note: выполняется компиляция ссылки на экземпляр шаблон функции "void std::_Default_allocator_traits<_Alloc>::construct<_Ty,int,int,int,int>(_Alloc &,_Objty *const ,int &&,int &&,int &&,int &&)"
+        with
+        [
+            _Alloc=std::allocator<DirectX::XMFLOAT4>,
+            _Ty=DirectX::XMFLOAT4,
+            _Objty=DirectX::XMFLOAT4
+        ]
+[120/287] Building CXX object CMakeFiles\ComponentGenerator.dir\Engine\Tools\ComponentGenerator\ComponentGenerator.cpp.obj
+[121/287] Linking CXX executable bin\Release\ComponentGenerator.exe
+[122/287] Linking CXX static library lib\Release\Engine.lib
+[123/287] C:\WINDOWS\system32\cmd.exe /C "cd /D E:\Engine\build\cmake\editor-Release && E:\Engine\build\cmake\editor-Release\bin\Release\ComponentGenerator.exe E:/Engine/build/cmake/editor-Release/generated/RuntimeExample/roots.txt E:/Engine/build/cmake/editor-Release/generated/RuntimeExample RuntimeExample"
+ComponentGenerator: 2 component(s), RuntimeExample
+[124/287] Building CXX object CMakeFiles\EngineTests.dir\Engine\tests\PhysicsTests.cpp.obj
+[125/287] Building CXX object CMakeFiles\PortableCoreTests.dir\Engine\tests\portable\CoreTests.cpp.obj
+[126/287] Building CXX object CMakeFiles\SceneProject.dir\Game\SceneProject\Source\Module.cpp.obj
+[127/287] Building CXX object CMakeFiles\EngineTests.dir\Engine\tests\SoundDecoderTests.cpp.obj
+[128/287] Building CXX object CMakeFiles\RuntimeExample.dir\generated\RuntimeExample\GeneratedComponents.cpp.obj
+[129/287] C:\WINDOWS\system32\cmd.exe /C "cd /D E:\Engine\build\cmake\editor-Release && E:\Engine\build\cmake\editor-Release\bin\Release\ComponentGenerator.exe E:/Engine/build/cmake/editor-Release/generated/BasicExamples/roots.txt E:/Engine/build/cmake/editor-Release/generated/BasicExamples BasicExamples"
+ComponentGenerator: 1 component(s), BasicExamples
+[130/287] C:\WINDOWS\system32\cmd.exe /C "cd /D E:\Engine\build\cmake\editor-Release && E:\Engine\build\cmake\editor-Release\bin\Release\ComponentGenerator.exe E:/Engine/build/cmake/editor-Release/generated/Pong/roots.txt E:/Engine/build/cmake/editor-Release/generated/Pong Pong"
+ComponentGenerator: 0 component(s), Pong
+[131/287] C:\WINDOWS\system32\cmd.exe /C "cd /D E:\Engine\build\cmake\editor-Release && E:\Engine\build\cmake\editor-Release\bin\Release\ComponentGenerator.exe E:/Engine/build/cmake/editor-Release/generated/SunGame/roots.txt E:/Engine/build/cmake/editor-Release/generated/SunGame SunGame"
+ComponentGenerator: 0 component(s), SunGame
+[132/287] C:\WINDOWS\system32\cmd.exe /C "cd /D E:\Engine\build\cmake\editor-Release && E:\Engine\build\cmake\editor-Release\bin\Release\ComponentGenerator.exe E:/Engine/build/cmake/editor-Release/generated/Battle/roots.txt E:/Engine/build/cmake/editor-Release/generated/Battle Battle"
+ComponentGenerator: 0 component(s), Battle
+[133/287] C:\WINDOWS\system32\cmd.exe /C "cd /D E:\Engine\build\cmake\editor-Release && E:\Engine\build\cmake\editor-Release\bin\Release\ComponentGenerator.exe E:/Engine/build/cmake/editor-Release/generated/Katamari/roots.txt E:/Engine/build/cmake/editor-Release/generated/Katamari Katamari"
+ComponentGenerator: 0 component(s), Katamari
+[134/287] Linking CXX shared module bin\Release\Runtime\Templates\SceneProject\Game.dll
+[135/287] Building CXX object CMakeFiles\RuntimeExample.dir\Game\RuntimeExample\Source\Module.cpp.obj
+[136/287] Automatic MOC for target Editor
+[137/287] Building CXX object CMakeFiles\BasicExamples.dir\Game\BasicExamples\Source\TrianglesScene.cpp.obj
+[138/287] Building CXX object CMakeFiles\BasicExamples.dir\Game\BasicExamples\Source\Main.cpp.obj
+[139/287] Linking CXX shared module bin\Release\Runtime\Projects\RuntimeExample\Game.dll
+[140/287] Building CXX object CMakeFiles\BasicExamples.dir\Game\BasicExamples\Source\CubeScene.cpp.obj
+[141/287] Building CXX object CMakeFiles\Editor.dir\cmake_pch.cxx.obj
+[142/287] Building CXX object CMakeFiles\BasicExamples.dir\Game\Common\OrderedSceneGame.cpp.obj
+[143/287] Building CXX object CMakeFiles\BasicExamples.dir\generated\BasicExamples\GeneratedComponents.cpp.obj
+[144/287] Building CXX object CMakeFiles\BasicExamples.dir\Game\BasicExamples\Source\ScriptsScene.cpp.obj
+[145/287] Building CXX object CMakeFiles\BasicExamples.dir\Game\BasicExamples\Source\MaterialsScene.cpp.obj
+[146/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\Module.cpp.obj
+[147/287] Building CXX object CMakeFiles\Editor.dir\Editor_autogen\mocs_compilation.cpp.obj
+[148/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\PhysicsTools.cpp.obj
+E:\Engine\Editor\Source\PhysicsTools.cpp(2): warning C4005: NOMINMAX: изменение макроопределения
+E:\Engine\Editor\Source\PhysicsTools.cpp(2): note: "NOMINMAX" ранее объявлен в командной строке
+[149/287] Building CXX object CMakeFiles\Editor.dir\Editor\Host\ViewportCommandHandler.cpp.obj
+[150/287] Building CXX object CMakeFiles\Editor.dir\Editor\Host\EditorHistory.cpp.obj
+[151/287] Building CXX object CMakeFiles\Editor.dir\Editor\Host\AssetCommandHandler.cpp.obj
+E:\Engine\Editor\Host\AssetCommandHandler.cpp(4): warning C4005: WIN32_LEAN_AND_MEAN: изменение макроопределения
+E:\Engine\Editor\Host\AssetCommandHandler.cpp(4): note: "WIN32_LEAN_AND_MEAN" ранее объявлен в командной строке
+[152/287] Building CXX object CMakeFiles\Editor.dir\Editor\UI\EditorTheme.cpp.obj
+[153/287] Building CXX object CMakeFiles\Editor.dir\Editor\UI\EditorStyles.cpp.obj
+[154/287] Building CXX object CMakeFiles\Editor.dir\Editor\UI\DockLayoutManager.cpp.obj
+[155/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\QtHost.cpp.obj
+[156/287] Building CXX object CMakeFiles\Editor.dir\Editor\UI\MainToolBar.cpp.obj
+[157/287] Building CXX object CMakeFiles\Editor.dir\Editor\Host\SceneCommandHandler.cpp.obj
+[158/287] Building CXX object CMakeFiles\Editor.dir\Editor\UI\IconProvider.cpp.obj
+[159/287] Building CXX object CMakeFiles\Editor.dir\Editor\UI\ModelImportEditFlow.cpp.obj
+[160/287] Building CXX object CMakeFiles\Editor.dir\Editor\UI\EditorApp.cpp.obj
+E:\Engine\Editor\UI\EditorApp.cpp(25): warning C4005: WIN32_LEAN_AND_MEAN: изменение макроопределения
+E:\Engine\Editor\UI\EditorApp.cpp(25): note: "WIN32_LEAN_AND_MEAN" ранее объявлен в командной строке
+[161/287] Building CXX object CMakeFiles\Editor.dir\Editor\UI\AssetPickerDialog.cpp.obj
+[162/287] Building CXX object CMakeFiles\Editor.dir\Editor\UI\AssetThumbnailCache.cpp.obj
+[163/287] Building CXX object CMakeFiles\Editor.dir\Editor\UI\PlaySettingsDialog.cpp.obj
+[164/287] Building CXX object CMakeFiles\Editor.dir\Editor\UI\ImportSettingsDialog.cpp.obj
+[165/287] Building CXX object CMakeFiles\Editor.dir\Editor\UI\ExternalGameRunner.cpp.obj
+[166/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\AssetDeleteCommand.cpp.obj
+[167/287] C:\WINDOWS\system32\cmd.exe /C "cd /D E:\Engine\build\cmake\editor-Release && E:\Engine\Engine\build\tools\python\cmake\data\bin\cmake.exe -DBINARY=E:/Engine/build/cmake/editor-Release -DDESTINATION=E:/Engine/build/cmake/editor-Release/bin/Release/Runtime/SDK -DCONFIGURATION=Release -P E:/Engine/cmake/PublishSdk.cmake"
+-- CMake SDK: E:/Engine/build/cmake/editor-Release/bin/Release/Runtime/SDK
+[168/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\AssetTools.cpp.obj
+[169/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\ImportCommands.cpp.obj
+[170/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\ViewportWidget_Input.cpp.obj
+[171/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\ViewportWidget.cpp.obj
+[172/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\FileBrowser.cpp.obj
+[173/287] Building CXX object CMakeFiles\Editor.dir\Editor\UI\ViewportOverlayHelper.cpp.obj
+[174/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\ObjectInspectorLight.cpp.obj
+[175/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\SceneObjectsPanel.cpp.obj
+[176/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\MaterialTextureTools.cpp.obj
+[177/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\ObjectInspectorPanel.cpp.obj
+[178/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\ProjectProperties.cpp.obj
+[179/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\MaterialEditorWindow.cpp.obj
+[180/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\ScriptGraphWidget.cpp.obj
+[181/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\MaterialGraphWidget.cpp.obj
+[182/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\ScriptEditorWindow.cpp.obj
+[183/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\FsmGraphWidget.cpp.obj
+[184/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\Logger.cpp.obj
+[185/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\GraphEditorWidget.cpp.obj
+[186/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\MainWindow.cpp.obj
+[187/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\CommandRegistry.cpp.obj
+[188/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\AiMachineEditorWindow.cpp.obj
+[189/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\GizmoMath.cpp.obj
+[190/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\FileService.cpp.obj
+[191/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\EditorLocale.cpp.obj
+[192/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\ViewportOverlay.cpp.obj
+[193/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\FsmBlockListEditor.cpp.obj
+[194/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\GizmoGeometry.cpp.obj
+[195/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\GizmoTriangles.cpp.obj
+[196/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\EditorSettings.cpp.obj
+[197/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\SettingsService.cpp.obj
+[198/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\AssetOps.cpp.obj
+[199/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\Graph\GraphHistory.cpp.obj
+[200/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\MaterialGraphModel.cpp.obj
+[201/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\Graph\GraphSchema.cpp.obj
+[202/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\Graph\GraphClipboard.cpp.obj
+[203/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\Graph\GraphSchemaRegistry.cpp.obj
+[204/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\Graph\GraphDocument.cpp.obj
+[205/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\ScriptMessages.cpp.obj
+[206/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\MaterialGraphSchema.cpp.obj
+[207/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\SceneFile.cpp.obj
+[208/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\Graph\GraphLayout.cpp.obj
+[209/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\ModelImportSidecarTransaction.cpp.obj
+[210/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\ModelImportSidecar.cpp.obj
+[211/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\ImportSettings.cpp.obj
+[212/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\CodeGraphSchema.cpp.obj
+[213/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\FsmGraphSchema.cpp.obj
+[214/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\Terminal.cpp.obj
+[215/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\ImportMigration.cpp.obj
+[216/287] Building CXX object CMakeFiles\Editor.dir\Editor\Core\HlslGraphCompiler.cpp.obj
+[217/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\CodeTools.cpp.obj
+[218/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\UIEditorWindow.cpp.obj
+E:\Engine\Editor\Source\UIEditorWindow.cpp(1): warning C4005: NOMINMAX: изменение макроопределения
+E:\Engine\Editor\Source\UIEditorWindow.cpp(1): note: "NOMINMAX" ранее объявлен в командной строке
+[219/287] Building CXX object CMakeFiles\Editor.dir\Editor\Source\HudTools.cpp.obj
+E:\Engine\Editor\Source\HudTools.cpp(5): warning C4005: NOMINMAX: изменение макроопределения
+E:\Engine\Editor\Source\HudTools.cpp(5): note: "NOMINMAX" ранее объявлен в командной строке
+[220/287] Building CXX object CMakeFiles\EngineRuntime.dir\Game\Common\OrderedSceneGame.cpp.obj
+[221/287] Building CXX object CMakeFiles\EngineRuntime.dir\Game\Common\PreviewScenes.cpp.obj
+[222/287] Building CXX object CMakeFiles\EngineRuntime.dir\Engine\Runtime\Project.cpp.obj
+E:\Engine\Engine\Runtime\Project.cpp(1): warning C4005: NOMINMAX: изменение макроопределения
+E:\Engine\Engine\Runtime\Project.cpp(1): note: "NOMINMAX" ранее объявлен в командной строке
+[223/287] Building CXX object CMakeFiles\EngineRuntime.dir\Game\BasicExamples\Source\TrianglesScene.cpp.obj
+[224/287] Building CXX object CMakeFiles\EngineRuntime.dir\Game\Pong\Source\PongGame.cpp.obj
+[225/287] Building CXX object CMakeFiles\EngineRuntime.dir\Game\Pong\Source\Ball.cpp.obj
+[226/287] Building CXX object CMakeFiles\EngineRuntime.dir\Game\Pong\Source\PongScene.cpp.obj
+[227/287] Building CXX object CMakeFiles\EngineRuntime.dir\Game\Pong\Source\Rocket.cpp.obj
+[228/287] Building CXX object CMakeFiles\EngineRuntime.dir\Engine\Runtime\Main.cpp.obj
+E:\Engine\Engine\Runtime\Main.cpp(1): warning C4005: NOMINMAX: изменение макроопределения
+E:\Engine\Engine\Runtime\Main.cpp(1): note: "NOMINMAX" ранее объявлен в командной строке
+[229/287] Building CXX object CMakeFiles\EngineRuntime.dir\Game\Pong\Source\Wall.cpp.obj
+[230/287] Building CXX object CMakeFiles\EngineRuntime.dir\Game\Battle\Source\BattleBench.cpp.obj
+[231/287] Building CXX object CMakeFiles\EngineRuntime.dir\Game\SunGame\Source\SunGame.cpp.obj
+[232/287] Building CXX object CMakeFiles\Pong.dir\Game\Pong\Source\Ball.cpp.obj
+[233/287] Building CXX object CMakeFiles\Pong.dir\Game\Pong\Source\PongGame.cpp.obj
+[234/287] Building CXX object CMakeFiles\Pong.dir\Game\Pong\Source\Main.cpp.obj
+[235/287] Building CXX object CMakeFiles\EngineRuntime.dir\Game\Battle\Source\BattleGame.cpp.obj
+[236/287] Building CXX object CMakeFiles\Pong.dir\Game\Pong\Source\PongScene.cpp.obj
+[237/287] Building CXX object CMakeFiles\EngineRuntime.dir\Game\Battle\Source\BattleAi.cpp.obj
+[238/287] Building CXX object CMakeFiles\Pong.dir\Game\Pong\Source\Rocket.cpp.obj
+[239/287] Building CXX object CMakeFiles\Pong.dir\Game\Pong\Source\Wall.cpp.obj
+[240/287] Building CXX object CMakeFiles\Pong.dir\generated\Pong\GeneratedComponents.cpp.obj
+[241/287] Linking CXX shared module bin\Release\Runtime\Editor.dll
+E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\Editor.dll 64 bit, release executable
+Adding in plugin type generic for module: Qt6Gui
+Adding Qt6Network for qtuiotouchplugin.dll from plugin type: generic
+Adding in plugin type iconengines for module: Qt6Gui
+Adding in plugin type imageformats for module: Qt6Gui
+Adding in plugin type networkinformation for module: Qt6Network
+Adding in plugin type platforminputcontexts for module: Qt6Gui
+Skipping plugin qtvirtualkeyboardplugin.dll due to disabled dependencies (Qt6Qml Qt6Quick).
+Adding in plugin type platforms for module: Qt6Gui
+Adding in plugin type styles for module: Qt6Widgets
+Adding in plugin type tls for module: Qt6Network
+Direct dependencies: Qt6Core Qt6Gui Qt6Svg Qt6Widgets
+All dependencies   : Qt6Core Qt6Gui Qt6Svg Qt6Widgets
+To be deployed     : Qt6Core Qt6Gui Qt6Network Qt6Svg Qt6Widgets
+Updating Qt6Core.dll.
+Updating Qt6Gui.dll.
+Updating Qt6Network.dll.
+Updating Qt6Svg.dll.
+Updating Qt6Widgets.dll.
+Updating d3dcompiler_47.dll.
+Updating dxcompiler.dll.
+Updating dxil.dll.
+Updating vc_redist.x64.exe.
+Creating directory E:/Engine/build/cmake/editor-Release/bin/Release/Runtime/generic.
+Updating qtuiotouchplugin.dll.
+Creating directory E:/Engine/build/cmake/editor-Release/bin/Release/Runtime/iconengines.
+Updating qsvgicon.dll.
+Creating directory E:/Engine/build/cmake/editor-Release/bin/Release/Runtime/imageformats.
+Updating qgif.dll.
+Updating qicns.dll.
+Updating qico.dll.
+Updating qjpeg.dll.
+Updating qsvg.dll.
+Updating qtga.dll.
+Updating qtiff.dll.
+Updating qwbmp.dll.
+Updating qwebp.dll.
+Creating directory E:/Engine/build/cmake/editor-Release/bin/Release/Runtime/networkinformation.
+Updating qnetworklistmanager.dll.
+Creating directory E:/Engine/build/cmake/editor-Release/bin/Release/Runtime/platforms.
+Updating qwindows.dll.
+Creating directory E:/Engine/build/cmake/editor-Release/bin/Release/Runtime/styles.
+Updating qmodernwindowsstyle.dll.
+Creating directory E:/Engine/build/cmake/editor-Release/bin/Release/Runtime/tls.
+Updating qcertonlybackend.dll.
+Updating qopensslbackend.dll.
+Updating qschannelbackend.dll.
+[242/287] Building CXX object CMakeFiles\SunGame.dir\generated\SunGame\GeneratedComponents.cpp.obj
+[243/287] Building CXX object CMakeFiles\SunGame.dir\Game\SunGame\Source\Main.cpp.obj
+[244/287] Building CXX object CMakeFiles\SunGame.dir\Game\SunGame\Source\SunGame.cpp.obj
+[245/287] Linking CXX executable bin\Release\Runtime\EngineRuntime.exe
+[246/287] Building CXX object CMakeFiles\Battle.dir\Game\Battle\Source\BattleBench.cpp.obj
+[247/287] Building CXX object CMakeFiles\Battle.dir\Game\Battle\Source\Main.cpp.obj
+[248/287] Building CXX object CMakeFiles\Battle.dir\generated\Battle\GeneratedComponents.cpp.obj
+[249/287] Building CXX object CMakeFiles\Katamari.dir\Game\Katamari\Source\KatamariGame.cpp.obj
+[250/287] Building CXX object CMakeFiles\Katamari.dir\Game\Katamari\Source\FBXComponentWithCollision.cpp.obj
+[251/287] Building CXX object CMakeFiles\Battle.dir\Game\Battle\Source\BattleGame.cpp.obj
+[252/287] Building CXX object CMakeFiles\Katamari.dir\Game\Katamari\Source\KatamatiSphereComponent.cpp.obj
+[253/287] Building RC object CMakeFiles\EngineLauncher.dir\Game\Launcher\Source\Launcher.rc.res
+[254/287] Building CXX object CMakeFiles\Katamari.dir\generated\Katamari\GeneratedComponents.cpp.obj
+[255/287] Building CXX object CMakeFiles\Battle.dir\Game\Battle\Source\BattleAi.cpp.obj
+[256/287] Building CXX object CMakeFiles\Katamari.dir\Game\Katamari\Source\Main.cpp.obj
+[257/287] Building CXX object CMakeFiles\EngineTests.dir\Engine\tests\GameSettingsTests.cpp.obj
+[258/287] Building CXX object CMakeFiles\EngineLauncher.dir\Engine\Runtime\Project.cpp.obj
+E:\Engine\Engine\Runtime\Project.cpp(1): warning C4005: NOMINMAX: изменение макроопределения
+E:\Engine\Engine\Runtime\Project.cpp(1): note: "NOMINMAX" ранее объявлен в командной строке
+[259/287] Building CXX object CMakeFiles\EngineTests.dir\Engine\tests\PrimitiveApiTests.cpp.obj
+[260/287] Building CXX object CMakeFiles\EngineTests.dir\Engine\tests\SceneTests.cpp.obj
+[261/287] Building CXX object CMakeFiles\EngineTests.dir\Engine\examples\TraceExamples.cpp.obj
+[262/287] Building CXX object CMakeFiles\EngineLauncher.dir\Game\Launcher\Source\Main.cpp.obj
+E:\Engine\Game\Launcher\Source\Main.cpp(1): warning C4005: NOMINMAX: изменение макроопределения
+E:\Engine\Game\Launcher\Source\Main.cpp(1): note: "NOMINMAX" ранее объявлен в командной строке
+[263/287] Building CXX object CMakeFiles\EngineTests.dir\Engine\tests\TraceTests.cpp.obj
+E:\Engine\Engine\tests\TraceTests.cpp(2): warning C4005: NOMINMAX: изменение макроопределения
+E:\Engine\Engine\tests\TraceTests.cpp(2): note: "NOMINMAX" ранее объявлен в командной строке
+[264/287] Building CXX object CMakeFiles\EngineTests.dir\Engine\tests\EngineTests.cpp.obj
+[265/287] Building CXX object CMakeFiles\EngineTests.dir\Engine\tests\SceneBatchTests.cpp.obj
+[266/287] Building CXX object CMakeFiles\EngineTests.dir\Engine\tests\VfsLifecycleTests.cpp.obj
+[267/287] Building CXX object CMakeFiles\EngineTests.dir\Engine\tests\VfsServiceTests.cpp.obj
+[268/287] Linking CXX shared module bin\Release\RuntimeFixtures\BadVersion.dll
+[269/287] Linking CXX shared module bin\Release\RuntimeFixtures\WrongKind.dll
+[270/287] Building CXX object CMakeFiles\EngineTests.dir\Engine\tests\VfsServiceReadTests.cpp.obj
+[271/287] Linking CXX shared module bin\Release\RuntimeFixtures\MissingExport.dll
+[272/287] Linking CXX shared module bin\Release\RuntimeFixtures\FailGameStart.dll
+[273/287] Building CXX object CMakeFiles\EngineTests.dir\Engine\tests\VfsProxyLifecycleTests.cpp.obj
+[274/287] Linking CXX shared module bin\Release\RuntimeFixtures\FailEditorStart.dll
+[275/287] Linking CXX shared module bin\Release\RuntimeFixtures\RequestExit.dll
+[276/287] Linking CXX shared module bin\Release\RuntimeFixtures\FailUpdate.dll
+[277/287] Linking CXX executable bin\Release\PortableCoreTests.exe
+[278/287] Building CXX object CMakeFiles\EngineTests.dir\Engine\tests\AiMachineExtensionTests.cpp.obj
+[279/287] Linking CXX executable bin\Release\BasicExamples\BasicExamples.exe
+[280/287] Linking CXX executable bin\Release\Pong\Pong.exe
+[281/287] Linking CXX executable bin\Release\SunGame\SunGame.exe
+[282/287] Linking CXX executable bin\Release\EngineLauncher.exe
+[283/287] Building CXX object CMakeFiles\EngineTests.dir\Engine\tests\AuthoringTests.cpp.obj
+E:\Engine\Engine\tests\AuthoringTests.cpp(3): warning C4005: NOMINMAX: изменение макроопределения
+E:\Engine\Engine\tests\AuthoringTests.cpp(3): note: "NOMINMAX" ранее объявлен в командной строке
+[284/287] Building CXX object CMakeFiles\EngineTests.dir\Engine\tests\ScriptTests.cpp.obj
+[285/287] Linking CXX executable bin\Release\Battle\Battle.exe
+[286/287] Linking CXX executable bin\Release\Katamari\Katamari.exe
+[287/287] Linking CXX executable bin\Release\EngineTests.exe
+Test project E:/Engine/build/cmake/editor-Release
+    Start 1: PortableCore
+1/3 Test #1: PortableCore .....................   Passed    0.12 sec
+    Start 2: ComponentGeneratorPortable
+2/3 Test #2: ComponentGeneratorPortable .......   Passed    0.23 sec
+    Start 3: Engine
+3/3 Test #3: Engine ...........................   Passed   22.79 sec
+
+100% tests passed out of 3
+
+Total Test time (real) =  23.25 sec

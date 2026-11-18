@@ -1,0 +1,126 @@
+Using CMake / C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\cl.exe
+-- The CXX compiler identification is MSVC 19.44.35223.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - not found
+-- Found Threads: TRUE
+-- Configuring done (1.9s)
+-- Generating done (0.0s)
+-- Build files have been written to: E:/Engine/build/cmake/editor-Release/sdk-checks/2dd176a74c3449fa95c236e14dae4e9b/CMake проект 日本語/Intermediate/CMake/Release/00576254EDFDF89D
+CMake Warning in E:/Engine/build/cmake/editor-Release/sdk-checks/2dd176a74c3449fa95c236e14dae4e9b/CMake проект 日本語/Intermediate/CMake/Release/00576254EDFDF89D/CMakeFiles/CMakeScratch/TryCompile-ekwoga/CMakeLists.txt:
+  The object file directory
+
+    E:/Engine/build/cmake/editor-Release/sdk-checks/2dd176a74c3449fa95c236e14dae4e9b/CMake проект 日本語/Intermediate/CMake/Release/00576254EDFDF89D/CMakeFiles/CMakeScratch/TryCompile-ekwoga/CMakeFiles/cmTC_42325.dir/./
+
+  has 224 characters.  The maximum full path to an object file is 250
+  characters (see CMAKE_OBJECT_PATH_MAX).  Object file
+
+    CMakeCXXCompilerABI.cpp.obj
+
+  cannot be safely placed under this directory.  The build may not work
+  correctly.
+
+
+CMake Warning in E:/Engine/build/cmake/editor-Release/sdk-checks/2dd176a74c3449fa95c236e14dae4e9b/CMake проект 日本語/Intermediate/CMake/Release/00576254EDFDF89D/CMakeFiles/CMakeScratch/TryCompile-z9qqgl/CMakeLists.txt:
+  The object file directory
+
+    E:/Engine/build/cmake/editor-Release/sdk-checks/2dd176a74c3449fa95c236e14dae4e9b/CMake проект 日本語/Intermediate/CMake/Release/00576254EDFDF89D/CMakeFiles/CMakeScratch/TryCompile-z9qqgl/CMakeFiles/cmTC_8cc6b.dir/./
+
+  has 224 characters.  The maximum full path to an object file is 250
+  characters (see CMAKE_OBJECT_PATH_MAX).  Object file
+
+    CheckFunctionExists.cxx.obj
+
+  cannot be safely placed under this directory.  The build may not work
+  correctly.
+
+
+CMake Warning in E:/Engine/build/cmake/editor-Release/sdk-checks/2dd176a74c3449fa95c236e14dae4e9b/CMake проект 日本語/Intermediate/CMake/Release/00576254EDFDF89D/CMakeFiles/CMakeScratch/TryCompile-uadpsa/CMakeLists.txt:
+  The object file directory
+
+    E:/Engine/build/cmake/editor-Release/sdk-checks/2dd176a74c3449fa95c236e14dae4e9b/CMake проект 日本語/Intermediate/CMake/Release/00576254EDFDF89D/CMakeFiles/CMakeScratch/TryCompile-uadpsa/CMakeFiles/cmTC_228f0.dir/./
+
+  has 224 characters.  The maximum full path to an object file is 250
+  characters (see CMAKE_OBJECT_PATH_MAX).  Object file
+
+    CheckFunctionExists.cxx.obj
+
+  cannot be safely placed under this directory.  The build may not work
+  correctly.
+
+
+[0/2] Re-checking globbed directories...
+[1/2] Cleaning all built files...
+Cleaning... 0 files.
+[0/2] Re-checking globbed directories...
+[1/8] C:\WINDOWS\system32\cmd.exe /C "cd /D "E:\Engine\build\cmake\editor-Release\sdk-checks\2dd176a74c3449fa95c236e14dae4e9b\CMake проект 日本語\Intermediate\CMake\Release\00576254EDFDF89D" && E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\bin\ComponentGenerator.exe "E:/Engine/build/cmake/editor-Release/sdk-checks/2dd176a74c3449fa95c236e14dae4e9b/CMake проект 日本語/Intermediate/CMake/Release/00576254EDFDF89D/generated/Game/roots.txt" "E:/Engine/build/cmake/editor-Release/sdk-checks/2dd176a74c3449fa95c236e14dae4e9b/CMake проект 日本語/Intermediate/CMake/Release/00576254EDFDF89D/generated/Game" Project"
+ComponentGenerator: 3 component(s), Project
+[2/8] Building CXX object CMakeFiles\Game.dir\Source\ProjectComponent.cpp.obj
+[3/8] Building CXX object CMakeFiles\Game.dir\Source\RotatingCube.cpp.obj
+[4/8] Building CXX object CMakeFiles\Game.dir\Source\ProjectGame.cpp.obj
+[5/8] Building CXX object CMakeFiles\Game.dir\generated\Game\GeneratedComponents.cpp.obj
+[6/8] Building CXX object CMakeFiles\Game.dir\Source\Module.cpp.obj
+[7/8] Linking CXX shared module "E:\Engine\build\cmake\editor-Release\sdk-checks\2dd176a74c3449fa95c236e14dae4e9b\CMake проект 日本語\Binaries\Release\8bf1614f829e425eb406f8a354c15f3f\Game.dll"
+
+Full build log: E:\Engine\build\cmake\editor-Release\sdk-checks\2dd176a74c3449fa95c236e14dae4e9b\CMake проект 日本語\Binaries\Release\8bf1614f829e425eb406f8a354c15f3f\build.log
+Build validated and activated. Use Hot Reload in the editor, or reopen the project.
+Using CMake / C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\cl.exe
+Project is already up to date
+Using CMake / C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\cl.exe
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: E:/Engine/build/cmake/editor-Release/sdk-checks/2dd176a74c3449fa95c236e14dae4e9b/CMake проект 日本語/Intermediate/CMake/Release/00576254EDFDF89D
+[0/2] Re-checking globbed directories...
+[1/2] Cleaning all built files...
+Cleaning... 8 files.
+[0/2] Re-checking globbed directories...
+[1/9] C:\WINDOWS\system32\cmd.exe /C "cd /D "E:\Engine\build\cmake\editor-Release\sdk-checks\2dd176a74c3449fa95c236e14dae4e9b\CMake проект 日本語\Intermediate\CMake\Release\00576254EDFDF89D" && E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\bin\ComponentGenerator.exe "E:/Engine/build/cmake/editor-Release/sdk-checks/2dd176a74c3449fa95c236e14dae4e9b/CMake проект 日本語/Intermediate/CMake/Release/00576254EDFDF89D/generated/Game/roots.txt" "E:/Engine/build/cmake/editor-Release/sdk-checks/2dd176a74c3449fa95c236e14dae4e9b/CMake проект 日本語/Intermediate/CMake/Release/00576254EDFDF89D/generated/Game" Project"
+ComponentGenerator: 4 component(s), Project
+[2/9] Building CXX object CMakeFiles\Game.dir\Source\ProjectComponent.cpp.obj
+[3/9] Building CXX object CMakeFiles\Game.dir\Source\PortableObject.cpp.obj
+[4/9] Building CXX object CMakeFiles\Game.dir\Source\RotatingCube.cpp.obj
+[5/9] Building CXX object CMakeFiles\Game.dir\Source\ProjectGame.cpp.obj
+[6/9] Building CXX object CMakeFiles\Game.dir\generated\Game\GeneratedComponents.cpp.obj
+[7/9] Building CXX object CMakeFiles\Game.dir\Source\Module.cpp.obj
+[8/9] Linking CXX shared module "E:\Engine\build\cmake\editor-Release\sdk-checks\2dd176a74c3449fa95c236e14dae4e9b\CMake проект 日本語\Binaries\Release\e07789b069134cdc8b35e217f78e9b7e\Game.dll"
+
+Full build log: E:\Engine\build\cmake\editor-Release\sdk-checks\2dd176a74c3449fa95c236e14dae4e9b\CMake проект 日本語\Binaries\Release\e07789b069134cdc8b35e217f78e9b7e\build.log
+Build validated and activated. Use Hot Reload in the editor, or reopen the project.
+Using CMake / C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\cl.exe
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: E:/Engine/build/cmake/editor-Release/sdk-checks/2dd176a74c3449fa95c236e14dae4e9b/CMake проект 日本語/Intermediate/CMake/Release/00576254EDFDF89D
+[0/2] Re-checking globbed directories...
+[1/2] Cleaning all built files...
+Cleaning... 9 files.
+[0/2] Re-checking globbed directories...
+[1/9] C:\WINDOWS\system32\cmd.exe /C "cd /D "E:\Engine\build\cmake\editor-Release\sdk-checks\2dd176a74c3449fa95c236e14dae4e9b\CMake проект 日本語\Intermediate\CMake\Release\00576254EDFDF89D" && E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\bin\ComponentGenerator.exe "E:/Engine/build/cmake/editor-Release/sdk-checks/2dd176a74c3449fa95c236e14dae4e9b/CMake проект 日本語/Intermediate/CMake/Release/00576254EDFDF89D/generated/Game/roots.txt" "E:/Engine/build/cmake/editor-Release/sdk-checks/2dd176a74c3449fa95c236e14dae4e9b/CMake проект 日本語/Intermediate/CMake/Release/00576254EDFDF89D/generated/Game" Project"
+ComponentGenerator: 4 component(s), Project
+[2/9] Building CXX object CMakeFiles\Game.dir\Source\ProjectComponent.cpp.obj
+FAILED: [code=2] CMakeFiles/Game.dir/Source/ProjectComponent.cpp.obj 
+"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\cl.exe"  /nologo /TP -DENGINE_ENABLE_ASSIMP -DENGINE_ENABLE_JOLT -DGame_EXPORTS -DNOMINMAX -DUNICODE -DWIN32_LEAN_AND_MEAN -D_UNICODE -I"E:\Engine\build\cmake\editor-Release\sdk-checks\2dd176a74c3449fa95c236e14dae4e9b\CMake проект 日本語\Intermediate\CMake\Release\00576254EDFDF89D\generated\Game" -external:IE:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\include -external:W0 /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD /utf-8 /permissive- /EHsc /showIncludes /FoCMakeFiles\Game.dir\Source\ProjectComponent.cpp.obj /FdCMakeFiles\Game.dir\ /FS -c "E:\Engine\build\cmake\editor-Release\sdk-checks\2dd176a74c3449fa95c236e14dae4e9b\CMake проект 日本語\Source\ProjectComponent.cpp"
+E:\Engine\build\cmake\editor-Release\sdk-checks\2dd176a74c3449fa95c236e14dae4e9b\CMake проект 日本語\Source\ProjectComponent.cpp(5): fatal error C1189: #error:  Expected_CMake_failure
+[3/9] Building CXX object CMakeFiles\Game.dir\Source\PortableObject.cpp.obj
+[4/9] Building CXX object CMakeFiles\Game.dir\Source\RotatingCube.cpp.obj
+[5/9] Building CXX object CMakeFiles\Game.dir\Source\ProjectGame.cpp.obj
+[6/9] Building CXX object CMakeFiles\Game.dir\generated\Game\GeneratedComponents.cpp.obj
+[7/9] Building CXX object CMakeFiles\Game.dir\Source\Module.cpp.obj
+ninja: build stopped: subcommand failed.
+
+Full build log: E:\Engine\build\cmake\editor-Release\sdk-checks\2dd176a74c3449fa95c236e14dae4e9b\CMake проект 日本語\Binaries\Release\a60a51f848d84ece93bae10b36214817\build.log
+Project build failed; previous module preserved
+At E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\ProjectTools.ps1:340 char:25
++ ... exitCode) { throw 'Project build failed; previous module preserved' } ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Project build f...odule preserved:String) [], RuntimeException
+    + FullyQualifiedErrorId : Project build failed; previous module preserved
+ 
+CMake SDK workflow passed (create, enable, startup, no-op, add class, failure preservation): E:\Engine\build\cmake\editor-Release\sdk-checks\2dd176a74c3449fa95c236e14dae4e9b\CMake проект 日本語

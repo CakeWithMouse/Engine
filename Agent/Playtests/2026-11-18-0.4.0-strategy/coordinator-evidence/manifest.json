@@ -1,0 +1,104 @@
+[
+  {
+    "source": "E:\\Engine\\Engine\\build\\playtests\\release-040\\engine-tests.log",
+    "file": "engine-tests.log",
+    "sha256": "18EC756413DC7BB88A52733B387405067AD85DEF7A81342B8B622DF02AB66E0F",
+    "provenance": "external release coordinator; not strategy developer execution"
+  },
+  {
+    "source": "E:\\Engine\\Engine\\build\\playtests\\release-040\\engine-tests.exit",
+    "file": "engine-tests.exit",
+    "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+    "provenance": "external release coordinator; not strategy developer execution"
+  },
+  {
+    "source": "E:\\Engine\\Engine\\build\\playtests\\release-040\\ai-tests.log",
+    "file": "ai-tests.log",
+    "sha256": "BD5849287D45477514F6C17F071BA1751DE57E1D0A83B70F10AFAB8BC25CA013",
+    "provenance": "external release coordinator; not strategy developer execution"
+  },
+  {
+    "source": "E:\\Engine\\Engine\\build\\playtests\\release-040\\ai-tests.exit",
+    "file": "ai-tests.exit",
+    "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+    "provenance": "external release coordinator; not strategy developer execution"
+  },
+  {
+    "source": "E:\\Engine\\Engine\\build\\playtests\\release-040\\camera-guides-fixed.log",
+    "file": "camera-guides-fixed.log",
+    "sha256": "90835830D3BFCADF33803B8C3CE6EAD90B3136457200864EFA198D566E7EE568",
+    "provenance": "external release coordinator; not strategy developer execution"
+  },
+  {
+    "source": "E:\\Engine\\Engine\\build\\playtests\\release-040\\camera-guides-fixed.exit",
+    "file": "camera-guides-fixed.exit",
+    "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+    "provenance": "external release coordinator; not strategy developer execution"
+  },
+  {
+    "source": "E:\\Engine\\Engine\\build\\playtests\\release-040\\ai-diagnostics.log",
+    "file": "ai-diagnostics.log",
+    "sha256": "FFBFA36F85304CF9B700DA93F641071E5B8ED86126025032F18682F504B397AF",
+    "provenance": "external release coordinator; not strategy developer execution"
+  },
+  {
+    "source": "E:\\Engine\\Engine\\build\\playtests\\release-040\\ai-diagnostics.exit",
+    "file": "ai-diagnostics.exit",
+    "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+    "provenance": "external release coordinator; not strategy developer execution"
+  },
+  {
+    "source": "E:\\Engine\\Engine\\build\\playtests\\release-040\\diagnostics-api.log",
+    "file": "diagnostics-api.log",
+    "sha256": "1A711EB1798E3225FABED53F639C4E72885646229318C7BF62822DDC50C10C4F",
+    "provenance": "external release coordinator; not strategy developer execution"
+  },
+  {
+    "source": "E:\\Engine\\Engine\\build\\playtests\\release-040\\diagnostics-api.exit",
+    "file": "diagnostics-api.exit",
+    "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+    "provenance": "external release coordinator; not strategy developer execution"
+  },
+  {
+    "source": "E:\\Engine\\Engine\\build\\playtests\\release-040\\editor-regression.log",
+    "file": "editor-regression.log",
+    "sha256": "C6DADB3A8D659EBD0992AC6A8C9EEFBC8EBBC1C4DAAF9BDCFAF34D4C5112803C",
+    "provenance": "external release coordinator; not strategy developer execution"
+  },
+  {
+    "source": "E:\\Engine\\Engine\\build\\playtests\\release-040\\editor-regression.exit",
+    "file": "editor-regression.exit",
+    "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+    "provenance": "external release coordinator; not strategy developer execution"
+  },
+  {
+    "source": "E:\\Engine\\Engine\\build\\playtests\\release-040\\cmake-projects-fixed.log",
+    "file": "cmake-projects-fixed.log",
+    "sha256": "B282C6CED0B0BE4D828F9F9B689086B3371C3ED2FFCA423B1DC75A963BE7CC5E",
+    "provenance": "external release coordinator; not strategy developer execution"
+  },
+  {
+    "source": "E:\\Engine\\Engine\\build\\playtests\\release-040\\runtime-hashes.json",
+    "file": "runtime-hashes.json",
+    "sha256": "D207D26DC17AC55137D0787B834BE25EB479513F643982B55053BC9664B087B2",
+    "provenance": "external release coordinator; not strategy developer execution"
+  },
+  {
+    "file": "CoreTests.log",
+    "sha256": "806D35A52CA65B338DC62E4BCC408E4EB9C66B6AE13346A5DDED909FD632F027",
+    "source": "E:\\Engine\\Engine\\build\\editor-regression\\Release-5cd5349534f34803bc40348a5b74a2be\\CoreTests.log",
+    "provenance": "external release coordinator; not strategy developer execution"
+  },
+  {
+    "file": "HostTests.log",
+    "sha256": "1D1BAEB49C483516C2E71A0315B6D7B34A17FA53F538564087A9E94CD0D3C8F1",
+    "source": "E:\\Engine\\Engine\\build\\editor-regression\\Release-5cd5349534f34803bc40348a5b74a2be\\HostTests.log",
+    "provenance": "external release coordinator; not strategy developer execution"
+  },
+  {
+    "file": "UiTests.log",
+    "sha256": "861917EF912602D9DD8E8B5271CD2713E8C0CAC2A1D2F895F64A69762E4E8CAE",
+    "source": "E:\\Engine\\Engine\\build\\editor-regression\\Release-5cd5349534f34803bc40348a5b74a2be\\UiTests.log",
+    "provenance": "external release coordinator; not strategy developer execution"
+  }
+]

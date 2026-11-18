@@ -1,0 +1,13 @@
+{
+  "oldProject": "E:\\Engine\\Engine\\build\\playtests\\strategy-r5\\fresh-final-sdk020b\\RepairCorridor",
+  "fullCopy": "E:\\Engine\\Engine\\build\\playtests\\strategy-040\\RepairCorridor-full-r5-source",
+  "oldDllSha256": "429907B74F35D505E1C0FADB4042E1BF5432D95D3DF5E1F4B9BB618F165D4B8B",
+  "sourceArchiveFilesMatched": 14,
+  "sourceMismatch": [
+    "Project.code.json",
+    "Project.json",
+    "Project.json.before-build",
+    "ProjectTypes.tsv"
+  ],
+  "copyEngineLock": "2026.11.11.0"
+}

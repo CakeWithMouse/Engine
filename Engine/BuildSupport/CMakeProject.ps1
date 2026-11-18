@@ -10,6 +10,11 @@ function Get-ProjectCMakeTools($SdkInfo, [string]$Toolset, [string]$ExactVersion
     foreach ($tool in @($cmake,$ninja)) { if (!(Test-Path -LiteralPath $tool)) { throw 'CMake and Ninja are required. Install the CMake tools component or add them to PATH.' } }
     $compiler = $SdkInfo.cmake.compiler
     $flags = $SdkInfo.cmake.compilerFlags
+    # MSVC's compiler, STL headers and libraries must come from one toolchain.
+    # The SDK producer's absolute cl.exe path can still exist alongside a newer
+    # installation selected above; pairing the old compiler with new headers
+    # fails even though the SDK libraries have a compatible C++ ABI.
+    if ($SdkInfo.cmake.compilerId -eq 'MSVC') { $compiler = Join-Path $native.bin 'cl.exe' }
     if (!(Test-Path -LiteralPath $compiler)) {
         $flags = ''
         if ($SdkInfo.cmake.compilerId -eq 'MSVC') { $compiler = Join-Path $native.bin 'cl.exe' }

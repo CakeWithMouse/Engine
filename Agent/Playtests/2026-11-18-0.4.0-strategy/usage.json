@@ -1,0 +1,11 @@
+{
+  "windowDurationMins": 10080,
+  "resetAt": 1795354343,
+  "checkpoints": [
+    {"label": "r5-to-0.4.0-start", "usedPercent": 49, "source": "coordinator confirmation and get_usage_limits", "dateUtc": "2026-11-18"},
+    {"label": "pre-runtime-preparation", "usedPercent": 49, "source": "get_usage_limits", "dateUtc": "2026-11-18T05:54:49Z"},
+    {"label": "release-testing-complete", "usedPercent": 52, "source": "get_usage_limits", "dateUtc": "2026-11-18"}
+  ],
+  "observedIncreasePercentagePoints": 3,
+  "note": "Shared account metric; it may be rounded. No reset credits used. Increase is total observed over this phase."
+}

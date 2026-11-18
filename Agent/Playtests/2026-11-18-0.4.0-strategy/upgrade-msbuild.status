@@ -1,0 +1,7 @@
+{
+  "exit": 1,
+  "destinationExists": false,
+  "project": false,
+  "stdout": "E:\\Engine\\Agent\\Playtests\\2026-11-18-0.4.0-strategy\\upgrade-msbuild.stdout.log",
+  "stderr": "E:\\Engine\\Agent\\Playtests\\2026-11-18-0.4.0-strategy\\upgrade-msbuild.stderr.log"
+}

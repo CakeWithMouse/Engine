@@ -1,0 +1,9 @@
+# Feedback по PainEngine 0.4.0 — Repair Corridor
+
+- **Проектная миграция:** штатный `--upgrade-project` работает на полной старой копии и записывает lock 0.4.0, сохраняя исходник. Source-only archive без `Game.dll` ожидаемо не может быть upgrade input; команду и это ограничение стоит держать рядом с процедурой релизной миграции.
+- **CMake проектная сборка:** package/runtime 0.4.0 собрал существующий C++ game module на Unicode пути с пробелами и кириллицей. В sandbox try-compile упал C1902 (PDB lock), elevated повтор прошёл без изменения исходников. Для будущего тестера полезна краткая подсказка, что такой отказ окружения повторяется только в ограниченном sandbox.
+- **Экспорт:** Unicode destination и запуск экспортированного `Game.exe --frames 60` прошли; bundle содержит runtime, Game DLL и project manifest.
+- **Материальные слоты:** API тест для двухматериального FBX прошёл полный набор операций. Fixture не самодостаточна: нужен `maps/цвет.bmp`; описание fixture уже это говорит, но для standalone commandlet runner стоит автоматически создавать/copy этот dependency.
+- **Gameplay:** обновлённый Runtime выполняет тот же Repair Corridor сценарий: группа выбирается, делает приказ, открывает физический проход, прибывает без пересечения барьера. Старый сценарий без атаки проигрывает охраннику; это ожидаемый игровой исход, не регрессия выпуска.
+- **UI evidence:** координаторские native tests подтверждают AI diagnostics dock/camera, asset picker, wheel guard, material rows, inspector/HiDPI/light regressions. Для личной ручной сессии CUA не нашёл окно Editor в inventory после подтверждённого создания Win32 окна. Не трактовать этот tooling limitation как ошибку Editor.
+- **Границы:** Linux/macOS build, Windows CI, LLD, multi-monitor/DPI 150–200%, визуальная изоляция рендеринга обоих material parts, отдельная caster сцена для light shadow retention не покрыты личным прогоном.

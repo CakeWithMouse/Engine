@@ -1,0 +1,9 @@
+{
+  "result": "ProjectTools build validated and activated",
+  "buildId": "fb1a9e1e6b00451694a3d697a6ffcd2d",
+  "module": "Binaries/Release/fb1a9e1e6b00451694a3d697a6ffcd2d/Game.dll",
+  "moduleExists": true,
+  "moduleSha256": "5CD4FAC0BF38B697140857D6CBB1358891AE5F833936DB2E4CED034321EE70AA",
+  "sdkVersion": "0.4.0",
+  "engineLibSha256": "1D586BE7E2D3BD8DFA11B76B852CA01310546AF6D0CE872899838E1C84224FE8"
+}

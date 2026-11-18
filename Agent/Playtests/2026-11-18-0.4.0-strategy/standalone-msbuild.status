@@ -1,0 +1,4 @@
+exit=0
+exe=E:\Engine\Game\build\x64\Release\Runtime\EngineRuntime.exe
+project=E:\Engine\Engine\build\playtests\strategy-040\Ремонтный коридор Ёж upgrade-full\Project.json
+store=E:\Engine\Engine\build\playtests\strategy-040\EngineStore-msbuild
