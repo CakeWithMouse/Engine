@@ -239,7 +239,7 @@ private:
         auto updateColor = [compCount](QPushButton* btn, const std::array<float, 4>& v) {
             auto ch = [](float x) { return std::clamp(x, 0.0f, 1.0f); };
             const QColor c = QColor::fromRgbF(ch(v[0]), ch(v[1]), ch(v[2]), compCount == 4 ? ch(v[3]) : 1.0f);
-            btn->setStyleSheet(QStringLiteral("background-color: %1;").arg(c.name()));
+            btn->setStyleSheet(QStringLiteral("#%1 { background-color: %2; }").arg(btn->objectName(), c.name()));
         };
         if (compCount >= 3)
         {
@@ -269,7 +269,7 @@ private:
                 for (size_t i = 0; i < spins.size(); ++i) curr[i] = static_cast<float>(spins[i]->value());
                 auto ch = [](float x) { return std::clamp(x, 0.0f, 1.0f); };
                 const QColor initial = QColor::fromRgbF(ch(curr[0]), ch(curr[1]), ch(curr[2]), compCount == 4 ? ch(curr[3]) : 1.0f);
-                QColorDialog::ColorDialogOptions opts;
+                QColorDialog::ColorDialogOptions opts = QColorDialog::DontUseNativeDialog;
                 if (compCount == 4) opts |= QColorDialog::ShowAlphaChannel;
                 const QColor picked = QColorDialog::getColor(initial, colorBtn, key, opts);
                 if (!picked.isValid()) return;

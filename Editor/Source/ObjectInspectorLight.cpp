@@ -73,7 +73,7 @@ void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
         if (refreshing_ || selectedId_ == 0) return;
         const QColor cur = QColor::fromRgbF(lightValues_[0]->value(), lightValues_[1]->value(), lightValues_[2]->value());
         if (selectedType_ == "Light.Directional") {
-            const auto chosen = QColorDialog::getColor(cur, this, Tr("Цвет света", "Light Color"));
+            const auto chosen = QColorDialog::getColor(cur, lightColor_, Tr("Цвет света", "Light Color"), QColorDialog::DontUseNativeDialog);
             if (chosen.isValid()) {
                 const float c[3] = {static_cast<float>(chosen.redF()), static_cast<float>(chosen.greenF()), static_cast<float>(chosen.blueF())};
                 UpdateLightColorButton(c); for (int i = 0; i < 3; ++i) lightValues_[i]->setValue(c[i]);
@@ -131,7 +131,7 @@ void ObjectInspectorPanel::UpdateLightColorButton(const float color[3])
 {
     const QColor backgroundColor = QColor::fromRgbF(color[0], color[1], color[2]);
     const double luminance = color[0] * 0.299 + color[1] * 0.587 + color[2] * 0.114;
-    lightColor_->setStyleSheet(QStringLiteral("background-color: %1; color: %2;")
+    lightColor_->setStyleSheet(QStringLiteral("#LightColor { background-color: %1; color: %2; }")
                                .arg(backgroundColor.name())
                                .arg(luminance > 0.5 ? QStringLiteral("black") : QStringLiteral("white")));
 }

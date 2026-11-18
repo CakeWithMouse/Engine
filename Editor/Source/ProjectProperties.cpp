@@ -75,14 +75,14 @@ void ObjectInspectorPanel::RefreshProjectProperties(const EditorQtHost::Snapshot
             } else if(type=="color") {
                 auto* button=new QPushButton(properties_);widget=button;
                 connect(button,&QPushButton::clicked,this,[this,button,path] {
-                    const auto color=QColorDialog::getColor(button->property("color").value<QColor>(),this,Tr("Цвет света", "Light Color"));
+                    const auto color=QColorDialog::getColor(button->property("color").value<QColor>(),button,Tr("Цвет света", "Light Color"),QColorDialog::DontUseNativeDialog);
                     if(color.isValid())SubmitProperty(path,QJsonArray{color.redF(),color.greenF(),color.blueF()});
                 });
                 propertyRefresh_.push_back([button,path](const auto& data) {
                     const auto rgb=Read(data,path).toArray();if(rgb.size()!=3)return;
                     const auto color=QColor::fromRgbF(rgb[0].toDouble(),rgb[1].toDouble(),rgb[2].toDouble());
                     button->setProperty("color",color);button->setText(color.name());
-                    button->setStyleSheet(QString("background-color:%1;color:%2").arg(color.name(),color.lightnessF()>0.5?"black":"white"));
+                    button->setStyleSheet(QString("#%1 { background-color:%2; color:%3; }").arg(button->objectName(),color.name(),color.lightnessF()>0.5?"black":"white"));
                 });
             } else if(type=="bool") {
                 auto* check=new QCheckBox(properties_);widget=check;
