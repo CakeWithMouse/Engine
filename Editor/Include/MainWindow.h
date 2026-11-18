@@ -88,6 +88,8 @@ public:
     QString CreateAiMachine(const QString& directory, const QString& name = {});
     // Окно автомата ИИ: /Game путь или файл в Content.
     void OpenAiMachineEditor(const QString& path);
+    // Создать пару .h/.cpp файлов C++ класса в каталоге проекта через FileService; без имени спрашивает его.
+    bool CreateCppClass(const QString& directory, const QString& name = {});
     AiMachineEditorWindow* AiMachineEditor(const QString& machine) const;
     void SetSelectedProperty(const QString& path, const QString& text); // строковое свойство выделенного объекта, через Undo
     // Открытое окно скрипта (/Game путь) или nullptr.

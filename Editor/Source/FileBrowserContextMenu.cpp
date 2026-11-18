@@ -88,6 +88,14 @@ void FileBrowserDock::AddCreateSubmenu(QMenu& menu, const QString& folderParent,
         CommandRegistry::Instance().Execute(QStringLiteral("Assets.Import"), {{QStringLiteral("kind"), int(AssetKind::Texture)}});
     });
 
+    QMenu* code = create->addMenu(Tr("Код", "Code"));
+    QAction* cppClass = code->addAction(Tr("C++ класс…", "C++ Class…"));
+    cppClass->setObjectName(QStringLiteral("AssetsCreateCppClass"));
+    connect(cppClass, &QAction::triggered, this, [directory] {
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.CreateCppClass"),
+            {{QStringLiteral("directory"), directory}});
+    });
+
     QMenu* logic = create->addMenu(Tr("Логика", "Logic"));
     if (host_->ReadSnapshot().scripts)
     {
