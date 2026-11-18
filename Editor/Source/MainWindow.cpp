@@ -1249,6 +1249,7 @@ void EditorMainWindow::OnLightColorRequested(quint64 objectId, const QColor& cur
             c.pointLight.color[0] = selected.redF();
             c.pointLight.color[1] = selected.greenF();
             c.pointLight.color[2] = selected.blueF();
+            c.castShadows = object.lightCastShadows;
 
             host_->PostCommand(c);
             break;

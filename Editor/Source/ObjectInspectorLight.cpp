@@ -59,7 +59,7 @@ void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
     lightEnabled_ = new QCheckBox(Tr("Включён", "Enabled"), rowTop);
     lightEnabled_->setObjectName(QStringLiteral("LightEnabled")); lightEnabled_->hide();
     connect(lightEnabled_, &QCheckBox::clicked, this, emitChanged);
-    lightShadows_ = new QCheckBox(Tr("Тени", "Shadows"), rowTop);
+    lightShadows_ = new QCheckBox(Tr("Отбрасывает тени", "Cast Shadows"), rowTop);
     lightShadows_->setObjectName(QStringLiteral("LightShadows"));
     connect(lightShadows_, &QCheckBox::clicked, this, [this, emitChanged] {
         if (refreshing_ || selectedId_ == 0) return;
