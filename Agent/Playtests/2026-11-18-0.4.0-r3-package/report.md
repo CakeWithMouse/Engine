@@ -1,5 +1,9 @@
 # PainEngine 0.4.0 r3 — документы и архив из main
 
+ZIP: `Engine/build/releases/PainEngine-0.4.0-r3-win64.zip`,148294973 байта.
+SHA256 `8a3938c707369f3795000f526b8ec2d94f484812ad4bad8edbaf86949a506fe2`.
+Packaging revision: `07b1ec27e81b85019eeacf62f4d44d2df31ae050`.
+
 Основа: main `62b4eb49`, после fast-forward release/v0.4.0.
 Код движка совпадает с r2. Новый комплект содержит обновлённые release notes,
 инструкцию к ZIP, HTML-страницу выпуска и обновлённые оглавления.
@@ -47,3 +51,11 @@ EngineStore и PATH без DLL рабочего Runtime. Полный прого
 Ручной Inspector и collision импортированной сцены после reopen остались
 partial в игровом r2 отчёте; новым r3 результатом они не объявляются.
 Другие ОС и мониторы не проверялись. GitHub Release не создаётся.
+
+ZIP проверен по SHA256 и CRC; после новой распаковки совпали все1601 SHA256:
+[extraction-integrity.json](extraction-integrity.json), [archive.log](archive.log).
+Результаты запусков из распаковки сохраняются отдельно от полной проверки папки.
+Все19/19 прошли: [extracted-VALIDATION.json](extracted-VALIDATION.json),
+[журнал](extracted-validation.log). Рядом с ZIP сохранены .zip.sha256 и
+.zip.validation.json: целостность, оба прогона, quickstart и сравнение бинарников.
+Документы и аудит фиксируются в main; push выполняется после фиксации отчёта.
