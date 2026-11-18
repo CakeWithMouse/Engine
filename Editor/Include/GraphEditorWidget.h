@@ -4,6 +4,7 @@
 #include "Graph/GraphHistory.h"
 #include "Graph/GraphSchema.h"
 
+#include <QGraphicsView>
 #include <QHash>
 #include <QHBoxLayout>
 #include <QList>

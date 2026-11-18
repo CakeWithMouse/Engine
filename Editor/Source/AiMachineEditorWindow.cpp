@@ -122,8 +122,9 @@ void AiMachineEditorWindow::BuildUi()
     thinkInterval_->setSpecialValueText(Tr("как у персонажа", "the character's"));
     thinkInterval_->setToolTip(Tr("Секунды между решениями; 0 — каждый кадр.", "Seconds between thinks; 0 — every frame."));
     thinkInterval_->setKeyboardTracking(false);
-    auto iconLabel = [memoryPanel_](const QString& icon, const QString& text) {
-        auto* row = new QWidget(memoryPanel_);
+    auto* memoryPanel = memoryPanel_;
+    auto iconLabel = [memoryPanel](const QString& icon, const QString& text) {
+        auto* row = new QWidget(memoryPanel);
         auto* box = new QHBoxLayout(row);
         box->setContentsMargins(0, 0, 0, 0);
         box->setSpacing(6);
