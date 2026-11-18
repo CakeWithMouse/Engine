@@ -45,14 +45,14 @@ protected:
 
     void dragMoveEvent(QDragMoveEvent* event) override
     {
-        if (event->mimeData()->hasFormat(QStringLiteral("application/x-qabstractitemmodeldatalist")) ||
-            EditorCore::AssetDrag::HasAssetMime(*event->mimeData()) ||
-            event->mimeData()->hasUrls())
+        if (EditorCore::AssetDrag::HasAssetMime(*event->mimeData()) || event->mimeData()->hasUrls())
         {
             event->acceptProposedAction();
         }
         else
         {
+            // Base implementation only updates the drop indicator; rows are never
+            // moved by Qt itself (see dropEvent).
             QTreeWidget::dragMoveEvent(event);
         }
     }
@@ -72,24 +72,40 @@ protected:
             }
         }
 
+        // Internal hierarchy drag: the scene is the single source of truth.
+        // Never call QTreeWidget::dropEvent here — its internal move copies/removes
+        // rows in the widget model and duplicates objects once the tree is rebuilt
+        // from the scene. Only emit the reparent request; the tree refreshes from
+        // the scene snapshot after the command applies. IgnoreAction also stops
+        // QAbstractItemView::startDrag from deleting the source rows.
         QTreeWidgetItem* draggedItem = currentItem();
-        if (!draggedItem) {
-            QTreeWidget::dropEvent(event);
+        if (!draggedItem)
+        {
+            event->ignore();
             return;
         }
-
-        uint64_t childId = draggedItem->data(0, Qt::UserRole).toULongLong();
-
-        QTreeWidget::dropEvent(event);
+        const uint64_t childId = draggedItem->data(0, Qt::UserRole).toULongLong();
 
         uint64_t parentId = 0;
-        if (draggedItem->parent()) {
-            parentId = draggedItem->parent()->data(0, Qt::UserRole).toULongLong();
+        QTreeWidgetItem* target = itemAt(event->position().toPoint());
+        if (target)
+        {
+            if (dropIndicatorPosition() == QAbstractItemView::OnItem)
+            {
+                parentId = target->data(0, Qt::UserRole).toULongLong();
+            }
+            else if (target->parent())
+            {
+                parentId = target->parent()->data(0, Qt::UserRole).toULongLong();
+            }
         }
 
-        if (childId && onParentChanged) {
+        if (childId && childId != parentId && onParentChanged)
+        {
             onParentChanged(childId, parentId);
         }
+        event->setDropAction(Qt::IgnoreAction);
+        event->accept();
     }
 
 private:

@@ -4,10 +4,12 @@
 #include "../../Core/DropRules.h"
 #include "../../Core/AssetOps.h"
 #include "../../Core/UiWidgetDrag.h"
+#include "../../Core/SceneReparent.h"
 
 #include <QMimeData>
 #include <QTemporaryDir>
 #include <QUrl>
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 
@@ -147,6 +149,63 @@ inline int RunDragDropTests()
     CheckDragDrop(UiWidgetDrag::FromMime(widgetMime).type == QStringLiteral("Button"), "UiWidgetDrag FromMime decodes");
     QMimeData emptyMime;
     CheckDragDrop(UiWidgetDrag::FromMime(emptyMime).type.isEmpty(), "UiWidgetDrag FromMime empty without format");
+
+    // --- Scene reparent validation (single source of truth for Scene.Reparent) ---
+    {
+        using EditorCore::SceneReparent::Node;
+        std::vector<Node> scene;
+        for (uint64_t i = 1; i <= 12; ++i)
+            scene.push_back({i, 0});
+
+        CheckDragDrop(EditorCore::SceneReparent::CanReparent(scene, 2, 1), "Reparent root child under another root allowed");
+        CheckDragDrop(!EditorCore::SceneReparent::CanReparent(scene, 2, 2), "Reparent into itself rejected");
+        CheckDragDrop(!EditorCore::SceneReparent::CanReparent(scene, 0, 1), "Reparent of missing child rejected");
+        CheckDragDrop(!EditorCore::SceneReparent::CanReparent(scene, 2, 99), "Reparent under missing parent rejected");
+        CheckDragDrop(EditorCore::SceneReparent::CanReparent(scene, 2, 0), "Reparent to scene root allowed");
+
+        // Build chain 1 -> 2 -> 3 (3 is child of 2, 2 is child of 1).
+        scene[1].parent = 1;
+        scene[2].parent = 2;
+        CheckDragDrop(!EditorCore::SceneReparent::CanReparent(scene, 1, 3), "Reparent into own descendant rejected");
+        CheckDragDrop(!EditorCore::SceneReparent::CanReparent(scene, 1, 2), "Reparent into own child rejected");
+        CheckDragDrop(EditorCore::SceneReparent::CanReparent(scene, 3, 4), "Reparent leaf elsewhere allowed");
+        CheckDragDrop(!EditorCore::SceneReparent::HasCycle(scene), "Chain scene has no cycle");
+
+        // Corrupt input is rejected, not looped on.
+        std::vector<Node> dup = scene;
+        dup.push_back({3, 0});
+        CheckDragDrop(!EditorCore::SceneReparent::CanReparent(dup, 4, 1), "Duplicate ids rejected");
+        std::vector<Node> cyclic = {{1, 2}, {2, 1}};
+        CheckDragDrop(!EditorCore::SceneReparent::CanReparent(cyclic, 1, 2), "Pre-existing cycle rejected");
+        CheckDragDrop(EditorCore::SceneReparent::HasCycle(cyclic), "HasCycle detects cycle");
+
+        // N random reparents through the same guard: object count stays constant,
+        // ids stay unique, no cycles ever appear.
+        uint32_t rng = 0x12345678u;
+        const auto nextRand = [&rng]() { rng = rng * 1664525u + 1013904223u; return rng; };
+        int applied = 0;
+        for (int step = 0; step < 500; ++step)
+        {
+            const uint64_t childId = 1 + nextRand() % 12;
+            const uint64_t parentId = nextRand() % 13; // 0 = root
+            if (!EditorCore::SceneReparent::CanReparent(scene, childId, parentId))
+                continue;
+            for (auto& n : scene)
+                if (n.id == childId)
+                    n.parent = parentId;
+            ++applied;
+            CheckDragDrop(scene.size() == 12, "Reparent keeps object count constant");
+            CheckDragDrop(!EditorCore::SceneReparent::HasCycle(scene), "Reparent never creates a cycle");
+        }
+        CheckDragDrop(applied > 100, "Random reparent sequence actually applied moves");
+        std::vector<Node> sorted = scene;
+        std::sort(sorted.begin(), sorted.end(), [](const Node& a, const Node& b) { return a.id < b.id; });
+        bool uniqueIds = true;
+        for (size_t i = 0; i < sorted.size(); ++i)
+            if (sorted[i].id != i + 1)
+                uniqueIds = false;
+        CheckDragDrop(uniqueIds, "No duplicate or lost ids after reparent sequence");
+    }
 
     return gDragDropChecks;
 }

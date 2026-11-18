@@ -7,6 +7,7 @@
 #include "Logger.h"
 #include "CameraGuide.h"
 #include "EditorLocale.h"
+#include "SceneReparent.h"
 
 #include <QDir>
 #include <QFileInfo>
@@ -28,16 +29,12 @@ bool KeepWorldTransform(const IEditorHost::Snapshot& scene, uint64_t childId, ui
     }
     if (!child || (parentId != 0 && !parent))
         return false;
-    for (const IEditorHost::SceneObject* a = parent; a; )
-    {
-        if (a->id == childId)
-            return false;
-        const uint64_t up = a->parent;
-        a = nullptr;
-        if (up == 0) break;
-        for (const auto& o : scene.objects)
-            if (o.id == up) { a = &o; break; }
-    }
+    std::vector<EditorCore::SceneReparent::Node> nodes;
+    nodes.reserve(scene.objects.size());
+    for (const auto& o : scene.objects)
+        nodes.push_back({o.id, o.parent});
+    if (!EditorCore::SceneReparent::CanReparent(nodes, childId, parentId))
+        return false;
     const glm::mat4 childWorld = CameraGuide::World(*child, scene);
     const glm::mat4 local = parent
         ? glm::inverse(CameraGuide::World(*parent, scene)) * childWorld
