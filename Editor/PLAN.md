@@ -14,8 +14,8 @@
 
 ### Чек-лист Итерации 3
 - [x] А1. Reparent иерархии без дублей: Qt не двигает строки, единственный источник — сцена (Scene.Reparent), запрет циклов, один Undo, Core-автотест
-- [ ] А2. Папка: в инспекторе только Общие+Трансформация (без Скрипт/Физика/АИ/компонентов); у Empty скрипт остаётся
-- [ ] А3. Инспектор: двойной отступ между карточками Трансформация/Скрипт; заголовок «Параметры» обрезан
+- [x] А2. Папка: в инспекторе только Общие+Трансформация (без Скрипт/Физика/АИ/компонентов); у Empty скрипт остаётся
+- [x] А3. Инспектор: двойной отступ между карточками Трансформация/Скрипт; заголовок «Параметры» обрезан
 - [ ] А4. UI-редактор: правая панель (секции нулевой высоты) — layout fix
 - [ ] А5. Меню «ИИ» → подменю внутри «Инструменты», отдельную вкладку убрать
 - [ ] А6. InfoButton: clamp попапа в экран, непустой текст, ~360px, скролл; кнопка в тулбар графа
@@ -31,6 +31,11 @@
 
 ### Решения (Итерация 3)
 1. **А1 (fix(editor)):** Дублирование объектов при DnD в иерархии. Причина: `SceneOutlinerTree::dropEvent` (Editor/UI/SceneOutlinerTree.h, до правки строка 83) вызывал `QTreeWidget::dropEvent` — internal move Qt копировал/удалял строки в модели виджета, затем читался `draggedItem->parent()` у потенциально удалённого item, и параллельно шла команда `Scene.Reparent` → двойная операция; при отказе команды (цикл/вырожденный scale) дерево оставалось в состоянии Qt-копии с дублями ID. Правка: внутренний drag больше не вызывает базовый `dropEvent`; parentId вычисляется по `itemAt` + `dropIndicatorPosition` (OnItem → цель, Above/Below → родитель цели, пусто → корень); `event->setDropAction(Qt::IgnoreAction); accept()` — Qt не двигает строки и `startDrag` не удаляет источник; дерево перестраивается из снапшота сцены (`RefreshHierarchy`). Валидация reparent вынесена в Core `Editor/Core/SceneReparent.h` (`CanReparent`: существование child/parent, запрет в себя/потомка, отказ на дублях ID и предсуществующих циклах; `HasCycle`), используется в `KeepWorldTransform` (DragDropCommands.cpp). Один Undo сохранён: SetParent+keepworld в одном чекпоинте (SceneCommandHandler.cpp:134-139). Core-автотест в `tests/core/DragDropTests.h`: 500 псевдослучайных reparent через тот же guard — число объектов неизменно, ID уникальны, циклов нет (+ явные отказы self/descendant/missing/dup/cycle).
+
+2. **А2+А3 (fix(editor)):**
+    - А2: `ObjectInspectorPanel.cpp` — флаг `isFolder` (type == "Scene.Folder"); для папки скрыты Физика (`showPhysics`), Геометрия/Материал (`showGeometry/showMaterial`), секция свойств (`showProperties`), Скрипт (`showScript`), Автомат ИИ (`aiMachine`). Остаются Общие + Трансформация. У Empty скрипт сохранён. Причина появления карточек у папки: `showScript = view.scripts || hasSavedScript` (наличие скриптов в проекте), `aiMachine` по propertySchema, `showProperties` по отрицанию меш/свет/частицы.
+    - А3 (двойной отступ): между TransformCard и ScriptCard в layout стоит контейнер `properties_`; у пустого объекта он видим, но пуст (секций схемы нет) — нулевая высота + два spacing по 4px давали двойной зазор. Правка: `properties_->setVisible(showProperties && propertiesLayout_->count() > 0)`. Единообразно для всех типов.
+    - А3 (обрезанный «Параметры»): заголовок секции схемы — `QToolButton` (`PropertySection.h`); селектор `QToolButton[objectName^="Section."]` в QSS ненадёжен (оператор `^=`), кнопка наследовала generic `QToolButton { padding: 4px 8px; border: 1px }` — при фиксированной высоте 22px текст обрезался сверху. Правка: свойство `cardHeader=true` + селектор `QToolButton[cardHeader="true"]` (padding 0 8px, border none, height 22) в EditorStyles.cpp — тот же стиль, что у `CardHeaderBtn`. Тип виджета не менялся, тесты-локаторы по objectName не затронуты.
 
 ### Вопросы к Юрию (Итерация 3)
 *(заполняются по мере необходимости, с решением по умолчанию)*

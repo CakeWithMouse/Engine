@@ -23,6 +23,9 @@ public:
 
         header = new QToolButton(this);
         header->setObjectName("Section." + key);
+        // Explicit property selector: the generic QToolButton QSS (padding 4px 8px,
+        // 1px border) eats the fixed 22px height and clips the title text.
+        header->setProperty("cardHeader", true);
         header->setText(title);
         header->setCheckable(true);
         header->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);

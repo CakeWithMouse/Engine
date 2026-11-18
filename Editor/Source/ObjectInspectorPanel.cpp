@@ -465,6 +465,7 @@ void ObjectInspectorPanel::Refresh(
         const bool isCharacter = (object.gameplayKind == 1 || type == "Gameplay.Character" || type == "Character");
         const bool isCamera = CameraGuide::IsCamera(object);
         const bool isParticles = (type == "Particles" || type.find("Particle") != std::string::npos);
+        const bool isFolder = (type == "Scene.Folder");
 
         // Preserved saved data guards (no silent loss of existing components)
         const bool hasSavedPhysics = object.hasPhysics && object.physics.enabled != 0;
@@ -485,7 +486,7 @@ void ObjectInspectorPanel::Refresh(
         if (object.gameplayKind == 1 && canReplaceField(characterSpeed_))
             characterSpeed_->setValue(QJsonDocument::fromJson(QByteArray::fromStdString(object.projectData)).object()["moveSpeed"].toDouble(5));
 
-        const bool showPhysics = isMesh || isCharacter || (!isLight && !isCamera && hasSavedPhysics);
+        const bool showPhysics = !isFolder && (isMesh || isCharacter || (!isLight && !isCamera && hasSavedPhysics));
         if (showPhysics) {
             const EnginePhysicsObjectState state = object.hasPhysics
                 ? object.physics
@@ -527,9 +528,9 @@ void ObjectInspectorPanel::Refresh(
             UpdateLightColorButton(object.pointLight.color); cardLight_->show();
         } else { cardLight_->hide(); }
 
-        const bool showGeometry = isMesh || (!isLight && !isCamera && hasSavedModel);
-        const bool showMaterial = isMesh || (!isLight && !isCamera && hasSavedMaterial);
-        const bool showProperties = (!isModel && !isPrimitive && !isPointLight && !isDirLight && !isParticles);
+        const bool showGeometry = !isFolder && (isMesh || (!isLight && !isCamera && hasSavedModel));
+        const bool showMaterial = !isFolder && (isMesh || (!isLight && !isCamera && hasSavedMaterial));
+        const bool showProperties = !isFolder && (!isModel && !isPrimitive && !isPointLight && !isDirLight && !isParticles);
 
         const QString cr = property("contentRoot").toString();
         const QString modelPath = QString::fromStdString(object.modelAsset);
@@ -565,17 +566,17 @@ void ObjectInspectorPanel::Refresh(
             lastCardsRoot_ = cr;
             lastCardsValid_ = true;
         }
-        if (properties_->isHidden() == showProperties)
-            properties_->setVisible(showProperties);
+        // An empty visible properties container still occupies layout spacing (double gap).
+        properties_->setVisible(showProperties && propertiesLayout_->count() > 0);
 
-        const bool showScript = !isLight ? (view.scripts || hasSavedScript) : hasSavedScript;
+        const bool showScript = !isFolder && (!isLight ? (view.scripts || hasSavedScript) : hasSavedScript);
         if (showScript) {
             cardScript_->SetData(QString::fromStdString(object.scriptAsset), true);
             cardScript_->SetVariables(QString::fromStdString(object.scriptAsset), QString::fromStdString(object.scriptVariables), true);
         }
         cardScript_->setVisible(showScript);
 
-        const bool aiMachine = !isLight && !isCamera && HasAiMachine(object.propertySchema);
+        const bool aiMachine = !isFolder && !isLight && !isCamera && HasAiMachine(object.propertySchema);
         if (aiMachine)
         {
             const auto data = QJsonDocument::fromJson(QByteArray::fromStdString(object.projectData)).object();

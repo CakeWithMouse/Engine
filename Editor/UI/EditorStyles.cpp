@@ -315,7 +315,7 @@ QFrame#ScriptCard, QWidget#ScriptCard, QFrame#AiMachineCard, QWidget#AiMachineCa
     border-radius: 4px;
     margin-bottom: 4px;
 }
-QPushButton#CardHeaderBtn, QToolButton[objectName^="Section."] {
+QPushButton#CardHeaderBtn, QToolButton[objectName^="Section."], QToolButton[cardHeader="true"] {
     background-color: %8;
     color: %1;
     font-weight: 600;
@@ -329,7 +329,7 @@ QPushButton#CardHeaderBtn, QToolButton[objectName^="Section."] {
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
 }
-QPushButton#CardHeaderBtn:hover, QToolButton[objectName^="Section."]:hover {
+QPushButton#CardHeaderBtn:hover, QToolButton[objectName^="Section."]:hover, QToolButton[cardHeader="true"]:hover {
     background-color: %9;
     color: %1;
 }
