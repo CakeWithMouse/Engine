@@ -1205,7 +1205,7 @@ void EditorMainWindow::OnPhysicsEdited(
         c.physicsBody = {
             value.enabled ? 1u : 0u,
             static_cast<uint32_t>(std::clamp(value.bodyType, 0, 2)),
-            static_cast<uint32_t>(std::clamp(value.shapeType, 0, 2)),
+            static_cast<uint32_t>(std::clamp(value.shapeType, 0, 3)),
             static_cast<float>(value.friction),
             static_cast<float>(value.restitution),
             static_cast<float>(value.density)};

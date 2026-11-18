@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <Engine/Physics/PhysicsSettings.h>
@@ -17,7 +18,10 @@ enum class PhysicsShapeType
 {
     Box,
     Sphere,
-    Capsule
+    Capsule,
+    // Complex collision built from the render mesh: exact per-triangle shape for
+    // static bodies, convex hull for moving ones (Jolt restricts concave shapes to static).
+    Mesh
 };
 
 // Creation parameters of one physics body. Positions/rotations are world-space.
@@ -31,6 +35,10 @@ struct PhysicsBodyDesc
     glm::vec3 halfExtents = glm::vec3(0.5f);
     float radius = 0.5f;
     float halfHeight = 0.5f;
+    // Mesh: render geometry in the body's local space (world scale already baked
+    // into the vertices by the caller). Non-owning; must outlive CreateBody.
+    const std::vector<glm::vec3>* meshVertices = nullptr;
+    const std::vector<uint32_t>* meshIndices = nullptr;
     float friction = 0.5f;
     float restitution = 0.0f;
     // Used to compute the mass of dynamic bodies.
