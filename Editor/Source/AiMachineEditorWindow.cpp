@@ -4,6 +4,7 @@
 #include "FsmGraphWidget.h"
 #include "Graph/GraphSchemaRegistry.h"
 #include "Graph/GraphFileIo.h"
+#include "VariablePanelWidget.h"
 
 #include <QComboBox>
 #include <QDir>
@@ -29,42 +30,7 @@
 using EditorCore::FsmGraphSchema;
 using EditorCore::GraphDocument;
 
-namespace
-{
-QString ValueText(const QJsonValue& value, const QString& type)
-{
-    if (value.isUndefined() || value.isNull()) return {};
-    if (type == QStringLiteral("bool")) return value.toBool() ? QStringLiteral("true") : QStringLiteral("false");
-    if (type == QStringLiteral("vec3"))
-    {
-        const QJsonArray list = value.toArray();
-        QStringList parts;
-        for (int i = 0; i < 3; ++i) parts << QString::number(i < list.size() ? list[i].toDouble() : 0.0, 'g', 6);
-        return parts.join(QStringLiteral(", "));
-    }
-    if (type == QStringLiteral("float") || type == QStringLiteral("int")) return QString::number(value.toDouble(), 'g', 10);
-    return value.toString();
-}
 
-// Начальное значение из текста ячейки; пусто — без начального значения (ключ пуст, пока его не запишут).
-QJsonValue ValueOf(const QString& text, const QString& type)
-{
-    const QString trimmed = text.trimmed();
-    if (type == QStringLiteral("object") || (trimmed.isEmpty() && type != QStringLiteral("string"))) return QJsonValue(QJsonValue::Undefined);
-    if (type == QStringLiteral("bool"))
-        return QStringList{QStringLiteral("true"), QStringLiteral("1"), QStringLiteral("да"), QStringLiteral("yes")}.contains(trimmed.toLower());
-    if (type == QStringLiteral("int")) return trimmed.toInt();
-    if (type == QStringLiteral("float")) return QString(trimmed).replace(QLatin1Char(','), QLatin1Char('.')).toDouble();
-    if (type == QStringLiteral("vec3"))
-    {
-        const QStringList parts = trimmed.split(QRegularExpression(QStringLiteral("[,;\\s]+")), Qt::SkipEmptyParts);
-        QJsonArray list;
-        for (int i = 0; i < 3; ++i) list.append(i < parts.size() ? parts[i].toDouble() : 0.0);
-        return list;
-    }
-    return text.isEmpty() ? QJsonValue(QJsonValue::Undefined) : QJsonValue(text);
-}
-} // namespace
 
 AiMachineEditorWindow::AiMachineEditorWindow(EditorQtHost* host, const QString& machine, QWidget* parent)
     : QMainWindow(nullptr, Qt::Window), host_(host), machine_(machine), schema_(std::make_unique<FsmGraphSchema>())
@@ -115,30 +81,16 @@ void AiMachineEditorWindow::BuildUi()
     auto* panel = new QWidget(dock);
     auto* panelLayout = new QVBoxLayout(panel);
     panelLayout->addWidget(new QLabel(Tr("Память (ключи, которыми пользуются блоки):", "Memory (keys the blocks use):"), panel));
-    variables_ = new QTableWidget(0, 3, panel);
+    variables_ = new QTableWidget(panel);
     variables_->setObjectName(QStringLiteral("FsmVariables"));
-    variables_->setHorizontalHeaderLabels({Tr("Ключ", "Key"), Tr("Тип", "Type"), Tr("Начальное", "Initial")});
-    variables_->horizontalHeader()->setStretchLastSection(true);
-    variables_->verticalHeader()->hide();
-    variables_->setSelectionBehavior(QAbstractItemView::SelectRows);
-    connect(variables_, &QTableWidget::cellChanged, this, [this] { EditVariables(); });
-    panelLayout->addWidget(variables_, 1);
-    auto* buttons = new QHBoxLayout;
-    auto* add = new QPushButton(Tr("+ Ключ", "+ Key"), panel);
-    add->setObjectName(QStringLiteral("FsmAddVariable"));
-    connect(add, &QPushButton::clicked, this, [this] { AddVariable(); });
-    auto* remove = new QPushButton(Tr("Удалить", "Remove"), panel);
-    remove->setObjectName(QStringLiteral("FsmRemoveVariable"));
-    connect(remove, &QPushButton::clicked, this, [this] { RemoveVariable(); });
-    buttons->addWidget(add);
-    buttons->addWidget(remove);
-    panelLayout->addLayout(buttons);
-    auto* hint = new QLabel(Tr("Пустое начальное значение — ключ пуст, пока его не запишут. Вектор — три числа через запятую. "
-                               "Значения у конкретного персонажа задаются в его карточке «Автомат ИИ».",
-                               "An empty initial value leaves the key empty until written. A vector is three numbers. "
-                               "Values of one character are set in its AI State Machine card."), panel);
-    hint->setWordWrap(true);
-    panelLayout->addWidget(hint);
+    variablesPanel_ = new VariablePanelWidget(variables_, QStringLiteral("Fsm"),
+        FsmGraphSchema::VariableTypes(), Tr("Ключ", "Key"), Tr("Начальное", "Initial"),
+        [](const QString& t) { return FsmGraphSchema::TypeLabel(t); }, panel);
+    variablesPanel_->onVariablesChanged = [this](const QJsonArray& list, const QHash<QString, QString>& renames) {
+        if (!ready_ || readOnly_) return;
+        graph_->SetVariables(list, renames);
+    };
+    panelLayout->addWidget(variablesPanel_, 1);
 
     panelLayout->addWidget(new QLabel(Tr("Настройки персонажа:", "Character settings:"), panel));
     auto* settings = new QFormLayout;
@@ -340,39 +292,7 @@ void AiMachineEditorWindow::ShowProblems()
 void AiMachineEditorWindow::RefreshPanels()
 {
     refreshing_ = true;
-    const QJsonArray list = graph_->Document().Variables();
-    variables_->setRowCount(0); // строки строятся заново: старые ячейки и выпадающие списки уходят целиком
-    variables_->setRowCount(list.size());
-    // Ячейки — поля ввода: текстовые элементы таблицы рядом с выпадающими списками в этой теме не рисовались.
-    for (int row = 0; row < list.size(); ++row)
-    {
-        const QJsonObject variable = list[row].toObject();
-        const QString name = variable.value(QStringLiteral("name")).toString();
-        const QString type = variable.value(QStringLiteral("type")).toString();
-        auto* nameField = new QLineEdit(name);
-        nameField->setObjectName(QStringLiteral("FsmVariableName_%1").arg(row));
-        nameField->setProperty("previous", name); // прежнее имя: переименование переносится на блоки
-        connect(nameField, &QLineEdit::editingFinished, this, [this] { EditVariables(); });
-        variables_->setCellWidget(row, 0, nameField);
-        auto* combo = new QComboBox;
-        combo->setObjectName(QStringLiteral("FsmVariableType_%1").arg(row));
-        for (const QString& candidate : FsmGraphSchema::VariableTypes()) combo->addItem(FsmGraphSchema::TypeLabel(candidate), candidate);
-        combo->setCurrentIndex(std::max(0, combo->findData(type)));
-        connect(combo, &QComboBox::currentIndexChanged, this, [this] { EditVariables(); });
-        variables_->setCellWidget(row, 1, combo);
-        auto* valueField = new QLineEdit(ValueText(variable.value(QStringLiteral("value")), type));
-        valueField->setObjectName(QStringLiteral("FsmVariableValue_%1").arg(row));
-        valueField->setPlaceholderText(type == QStringLiteral("vec3") ? QStringLiteral("x, y, z") : Tr("пусто", "empty"));
-        if (type == QStringLiteral("object"))
-        {
-            valueField->setEnabled(false);
-            valueField->setPlaceholderText(QString());
-            valueField->setToolTip(Tr("У объекта нет начального значения: его пишет восприятие или «Найти объект».",
-                                      "An object has no initial value: perception or Find object writes it."));
-        }
-        connect(valueField, &QLineEdit::editingFinished, this, [this] { EditVariables(); });
-        variables_->setCellWidget(row, 2, valueField);
-    }
+    if (variablesPanel_ && graph_) variablesPanel_->SetVariables(graph_->Document().Variables());
 
     const QJsonObject settings = graph_->Settings();
     for (auto [combo, key, type] : {std::tuple{targetKey_, "targetKey", "object"}, std::tuple{lastSeenKey_, "lastSeenKey", "vec3"}})
@@ -388,52 +308,9 @@ void AiMachineEditorWindow::RefreshPanels()
     refreshing_ = false;
 }
 
-void AiMachineEditorWindow::EditVariables()
-{
-    if (refreshing_ || !ready_ || readOnly_) return;
-    const QJsonArray before = graph_->Document().Variables();
-    QJsonArray list;
-    QHash<QString, QString> renames;
-    for (int row = 0; row < variables_->rowCount(); ++row)
-    {
-        const auto* nameField = qobject_cast<QLineEdit*>(variables_->cellWidget(row, 0));
-        const auto* combo = qobject_cast<QComboBox*>(variables_->cellWidget(row, 1));
-        const auto* valueField = qobject_cast<QLineEdit*>(variables_->cellWidget(row, 2));
-        if (!nameField || !combo) continue;
-        const QString name = nameField->text().trimmed(), old = nameField->property("previous").toString();
-        const QString type = combo->currentData().toString();
-        const QString oldType = row < before.size() ? before[row].toObject().value(QStringLiteral("type")).toString() : type;
-        QJsonObject variable{{QStringLiteral("name"), name}, {QStringLiteral("type"), type}};
-        // Новый тип начинает без значения: число 5 не превращается в вектор.
-        const QJsonValue value = type == oldType ? ValueOf(valueField ? valueField->text() : QString(), type) : QJsonValue(QJsonValue::Undefined);
-        if (!value.isUndefined()) variable.insert(QStringLiteral("value"), value);
-        list.append(variable);
-        if (!old.isEmpty() && old != name) renames.insert(old, name);
-    }
-    if (list == before && renames.isEmpty()) return; // уход фокуса без правки — без шага отмены
-    QTimer::singleShot(0, this, [this, list, renames] { graph_->SetVariables(list, renames); });
-}
-
 void AiMachineEditorWindow::AddVariable()
 {
-    if (!ready_ || readOnly_) return;
-    QJsonArray list = graph_->Document().Variables();
-    QStringList taken;
-    for (const auto& value : list) taken << value.toObject().value(QStringLiteral("name")).toString();
-    QString name = QStringLiteral("Key");
-    for (int i = 2; taken.contains(name); ++i) name = QStringLiteral("Key%1").arg(i);
-    list.append(QJsonObject{{QStringLiteral("name"), name}, {QStringLiteral("type"), QStringLiteral("float")}});
-    graph_->SetVariables(list);
-}
-
-void AiMachineEditorWindow::RemoveVariable()
-{
-    const int row = variables_->currentRow();
-    if (!ready_ || readOnly_ || row < 0) return;
-    QJsonArray list = graph_->Document().Variables();
-    if (row >= list.size()) return;
-    list.removeAt(row);
-    graph_->SetVariables(list);
+    if (variablesPanel_) variablesPanel_->AddVariable();
 }
 
 void AiMachineEditorWindow::EditSettings()

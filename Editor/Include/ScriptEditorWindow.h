@@ -15,6 +15,7 @@ class QListWidget;
 class QTableWidget;
 class QTimer;
 class ScriptGraphWidget;
+class VariablePanelWidget;
 
 // Окно одного визуального скрипта (.vscript). Без Q_OBJECT: найти окно можно через EditorMainWindow::ScriptEditor.
 //
@@ -69,9 +70,6 @@ private:
     void PollTrace();
     void ShowProblems();
     void RefreshVariables();
-    void EditVariables(int row, int column);
-    void AddVariable();
-    void RemoveVariable();
     QString PhysicalPath() const;
     QString ProjectRoot() const;
 
@@ -80,6 +78,7 @@ private:
     std::unique_ptr<EditorCore::CodeGraphSchema> schema_;
     ScriptGraphWidget* graph_ = nullptr;
     QTableWidget* variables_ = nullptr;
+    VariablePanelWidget* variablesPanel_ = nullptr;
     QListWidget* problemList_ = nullptr;
     QLabel* banner_ = nullptr;
     QTimer* saveTimer_ = nullptr;
@@ -92,6 +91,6 @@ private:
     QVector<Problem> checkProblems_, playProblems_;
     QHash<int, QString> warnings_;
     QString status_;
-    bool ready_ = false, readOnly_ = false, refreshingVariables_ = false;
+    bool ready_ = false, readOnly_ = false;
     int checks_ = 0;
 };

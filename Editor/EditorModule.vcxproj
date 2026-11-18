@@ -402,6 +402,7 @@
         <ClInclude Include="UI/ScriptCard.h"/>
         <ClInclude Include="UI/AiMachineCard.h"/>
         <ClInclude Include="UI/VariableValuesEditor.h"/>
+        <ClInclude Include="UI/VariablePanelWidget.h"/>
         <ClInclude Include="UI/InspectorCardStyle.h"/>
         <ClInclude Include="UI/InfoButton.h"/>
         <ClInclude Include="UI/AssetTreeView.h"/>

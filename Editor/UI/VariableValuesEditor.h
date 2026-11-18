@@ -52,6 +52,7 @@ public:
             const QString name = variable.value(QStringLiteral("name")).toString();
             const QString type = variable.value(QStringLiteral("type")).toString(QStringLiteral("float"));
             if (name.isEmpty() || !Supported(type)) continue;
+            if (!variable.value(QStringLiteral("public")).toBool(true)) continue;
             AddRow(name, type, variable.value(QStringLiteral("value")), editable);
         }
         return !rows_.isEmpty();

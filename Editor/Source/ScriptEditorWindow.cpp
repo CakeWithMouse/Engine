@@ -5,6 +5,7 @@
 #include "ScriptMessages.h"
 #include "Graph/GraphSchemaRegistry.h"
 #include "Graph/GraphFileIo.h"
+#include "VariablePanelWidget.h"
 
 #include <QComboBox>
 #include <QDir>
@@ -29,37 +30,6 @@ using EditorCore::GraphDocument;
 
 namespace
 {
-QString VariableText(const QJsonValue& value, const QString& type)
-{
-    if (type == QStringLiteral("bool")) return value.toBool() ? QStringLiteral("true") : QStringLiteral("false");
-    if (type == QStringLiteral("vec3"))
-    {
-        const QJsonArray list = value.toArray();
-        QStringList parts;
-        for (int i = 0; i < 3; ++i) parts << QString::number(i < list.size() ? list[i].toDouble() : 0.0, 'g', 6);
-        return parts.join(QStringLiteral(", "));
-    }
-    if (type == QStringLiteral("float")) return QString::number(value.toDouble(), 'g', 6);
-    return value.toString();
-}
-
-// Значение переменной из текста ячейки; неразборчивый текст даёт ноль своего типа.
-QJsonValue VariableValue(const QString& text, const QString& type)
-{
-    const QString trimmed = text.trimmed();
-    if (type == QStringLiteral("bool"))
-        return QStringList{QStringLiteral("true"), QStringLiteral("1"), QStringLiteral("да"), QStringLiteral("yes")}.contains(trimmed.toLower());
-    if (type == QStringLiteral("vec3"))
-    {
-        const QStringList parts = trimmed.split(QRegularExpression(QStringLiteral("[,;\\s]+")), Qt::SkipEmptyParts);
-        QJsonArray list;
-        for (int i = 0; i < 3; ++i) list.append(i < parts.size() ? parts[i].toDouble() : 0.0);
-        return list;
-    }
-    if (type == QStringLiteral("float")) return trimmed.toDouble();
-    return text;
-}
-
 struct ProblemRow
 {
     int node = 0;
@@ -125,31 +95,16 @@ void ScriptEditorWindow::BuildUi()
     auto* dock = new QDockWidget(Tr("Переменные", "Variables"), this);
     dock->setObjectName(QStringLiteral("ScriptVariablesDock"));
     dock->setFeatures(QDockWidget::NoDockWidgetFeatures);
-    auto* panel = new QWidget(dock);
-    auto* panelLayout = new QVBoxLayout(panel);
-    variables_ = new ScriptVariableTable(0, 3, panel);
+    variables_ = new ScriptVariableTable(dock);
     variables_->setObjectName(QStringLiteral("ScriptVariables"));
-    variables_->setHorizontalHeaderLabels({Tr("Имя", "Name"), Tr("Тип", "Type"), Tr("Значение", "Value")});
-    variables_->horizontalHeader()->setStretchLastSection(true);
-    variables_->verticalHeader()->hide();
-    variables_->setSelectionBehavior(QAbstractItemView::SelectRows);
-    connect(variables_, &QTableWidget::cellChanged, this, [this](int row, int column) { EditVariables(row, column); });
-    panelLayout->addWidget(variables_, 1);
-    auto* buttons = new QHBoxLayout;
-    auto* add = new QPushButton(Tr("+ Переменная", "+ Variable"), panel);
-    add->setObjectName(QStringLiteral("ScriptAddVariable"));
-    connect(add, &QPushButton::clicked, this, [this] { AddVariable(); });
-    auto* remove = new QPushButton(Tr("Удалить", "Remove"), panel);
-    remove->setObjectName(QStringLiteral("ScriptRemoveVariable"));
-    connect(remove, &QPushButton::clicked, this, [this] { RemoveVariable(); });
-    buttons->addWidget(add);
-    buttons->addWidget(remove);
-    panelLayout->addLayout(buttons);
-    auto* hint = new QLabel(Tr("Переменные хранят значения между кадрами. Вектор — три числа через запятую.",
-                               "Variables keep values between frames. A vector is three numbers separated by commas."), panel);
-    hint->setWordWrap(true);
-    panelLayout->addWidget(hint);
-    dock->setWidget(panel);
+    variablesPanel_ = new VariablePanelWidget(variables_, QStringLiteral("Script"),
+        CodeGraphSchema::VariableTypes(), Tr("Имя", "Name"), Tr("Значение", "Value"),
+        [](const QString& t) { return CodeGraphSchema::TypeLabel(t); }, dock);
+    variablesPanel_->onVariablesChanged = [this](const QJsonArray& list, const QHash<QString, QString>& renames) {
+        if (!ready_ || readOnly_) return;
+        graph_->SetVariables(list, renames);
+    };
+    dock->setWidget(variablesPanel_);
     addDockWidget(Qt::LeftDockWidgetArea, dock);
     dock->setEnabled(false);
 
@@ -445,79 +400,5 @@ void ScriptEditorWindow::ShowProblems()
 
 void ScriptEditorWindow::RefreshVariables()
 {
-    refreshingVariables_ = true;
-    const QJsonArray list = graph_->Document().Variables();
-    variables_->setRowCount(0);
-    variables_->setRowCount(list.size());
-    // Ячейки — поля ввода: текстовые элементы таблицы рядом с выпадающими списками в этой теме не рисовались
-    // (видна была только первая строка).
-    for (int row = 0; row < list.size(); ++row)
-    {
-        const QJsonObject variable = list[row].toObject();
-        const QString name = variable.value(QStringLiteral("name")).toString();
-        const QString type = variable.value(QStringLiteral("type")).toString();
-        auto* nameField = new QLineEdit(name);
-        nameField->setObjectName(QStringLiteral("ScriptVariableName_%1").arg(row));
-        nameField->setProperty("previous", name); // прежнее имя: переименование переносится на ноды
-        connect(nameField, &QLineEdit::editingFinished, this, [this, row] { EditVariables(row, 0); });
-        variables_->setCellWidget(row, 0, nameField);
-        auto* combo = new QComboBox;
-        combo->setObjectName(QStringLiteral("ScriptVariableType_%1").arg(row));
-        for (const QString& candidate : CodeGraphSchema::VariableTypes()) combo->addItem(CodeGraphSchema::TypeLabel(candidate), candidate);
-        combo->setCurrentIndex(std::max(0, combo->findData(type)));
-        connect(combo, &QComboBox::currentIndexChanged, this, [this, row] { EditVariables(row, 1); });
-        variables_->setCellWidget(row, 1, combo);
-        auto* valueField = new QLineEdit(VariableText(variable.value(QStringLiteral("value")), type));
-        valueField->setObjectName(QStringLiteral("ScriptVariableValue_%1").arg(row));
-        connect(valueField, &QLineEdit::editingFinished, this, [this, row] { EditVariables(row, 2); });
-        variables_->setCellWidget(row, 2, valueField);
-    }
-    refreshingVariables_ = false;
-}
-
-void ScriptEditorWindow::EditVariables(int, int)
-{
-    if (refreshingVariables_ || !ready_ || readOnly_) return;
-    const QJsonArray before = graph_->Document().Variables();
-    QJsonArray list;
-    QHash<QString, QString> renames;
-    for (int row = 0; row < variables_->rowCount(); ++row)
-    {
-        const auto* nameField = qobject_cast<QLineEdit*>(variables_->cellWidget(row, 0));
-        const auto* combo = qobject_cast<QComboBox*>(variables_->cellWidget(row, 1));
-        const auto* valueField = qobject_cast<QLineEdit*>(variables_->cellWidget(row, 2));
-        if (!nameField || !combo) continue;
-        const QString name = nameField->text().trimmed(), old = nameField->property("previous").toString();
-        const QString type = combo->currentData().toString();
-        const QString oldType = row < before.size() ? before[row].toObject().value(QStringLiteral("type")).toString() : type;
-        // Новый тип начинает с нуля: число "5" не превращается в вектор.
-        const QJsonValue value = type == oldType ? VariableValue(valueField ? valueField->text() : QString(), type) : VariableValue(QString(), type);
-        list.append(QJsonObject{{QStringLiteral("name"), name}, {QStringLiteral("type"), type}, {QStringLiteral("value"), value}});
-        if (!old.isEmpty() && old != name) renames.insert(old, name);
-    }
-    if (list == before && renames.isEmpty()) return; // уход фокуса без правки — без шага отмены
-    // Перестройка таблицы из обработчика её же сигнала — после возврата из него.
-    QTimer::singleShot(0, this, [this, list, renames] { graph_->SetVariables(list, renames); });
-}
-
-void ScriptEditorWindow::AddVariable()
-{
-    if (!ready_ || readOnly_) return;
-    QJsonArray list = graph_->Document().Variables();
-    QStringList taken;
-    for (const auto& value : list) taken << value.toObject().value(QStringLiteral("name")).toString();
-    QString name = QStringLiteral("Var");
-    for (int i = 2; taken.contains(name); ++i) name = QStringLiteral("Var%1").arg(i);
-    list.append(QJsonObject{{QStringLiteral("name"), name}, {QStringLiteral("type"), QStringLiteral("float")}, {QStringLiteral("value"), 0}});
-    graph_->SetVariables(list);
-}
-
-void ScriptEditorWindow::RemoveVariable()
-{
-    const int row = variables_->currentRow();
-    if (!ready_ || readOnly_ || row < 0) return;
-    QJsonArray list = graph_->Document().Variables();
-    if (row >= list.size()) return;
-    list.removeAt(row);
-    graph_->SetVariables(list);
+    if (variablesPanel_ && graph_) variablesPanel_->SetVariables(graph_->Document().Variables());
 }

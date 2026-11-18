@@ -16,6 +16,7 @@ class QListWidget;
 class QTableWidget;
 class QTimer;
 class FsmGraphWidget;
+class VariablePanelWidget;
 
 // Окно одного автомата ИИ (.fsm). Без Q_OBJECT: найти окно можно через EditorMainWindow::AiMachineEditor.
 //
@@ -55,8 +56,6 @@ private:
     void Check();
     void ShowProblems();
     void RefreshPanels();
-    void EditVariables();
-    void RemoveVariable();
     void EditSettings();
     QString PhysicalPath() const;
     QString ProjectRoot() const;
@@ -66,6 +65,7 @@ private:
     std::unique_ptr<EditorCore::FsmGraphSchema> schema_;
     FsmGraphWidget* graph_ = nullptr;
     QTableWidget* variables_ = nullptr;
+    VariablePanelWidget* variablesPanel_ = nullptr;
     QComboBox* targetKey_ = nullptr;
     QComboBox* lastSeenKey_ = nullptr;
     QDoubleSpinBox* thinkInterval_ = nullptr;
