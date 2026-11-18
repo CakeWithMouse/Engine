@@ -72,7 +72,14 @@ try {
     }
     $report = @{version='0.4.0';status='passed';checks=$results;scope=if($SmokeOnly){'extracted archive smoke'}else{'staged distribution + SDK + export'};limitations=@('Manual panel interactions remained partial in the earlier playtest; see release notes.','Linux, macOS and clang-cl were not tested for this archive.')}
     $report | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath (Join-Path $Output 'VALIDATION.json') -Encoding utf8
-    if (!$SmokeOnly) { Copy-Item -LiteralPath (Join-Path $Output 'VALIDATION.json') -Destination (Join-Path $Package 'VALIDATION.json') }
+    if (!$SmokeOnly) {
+        $logDirectory = Join-Path $Package 'Validation'
+        New-Item -ItemType Directory -Force $logDirectory | Out-Null
+        Get-ChildItem -LiteralPath $Output -File | Where-Object { $_.Extension -in @('.log','.json') } |
+            Copy-Item -Destination $logDirectory -Force
+        $report.logDirectory = 'Validation'
+        $report | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath (Join-Path $Package 'VALIDATION.json') -Encoding utf8
+    }
     Write-Output "Validated $($results.Count) package checks"
 } finally {
     Pop-Location
