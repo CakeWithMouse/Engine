@@ -6,10 +6,10 @@
 #include "Graph/GraphSchemaRegistry.h"
 #include "Graph/GraphFileIo.h"
 #include "VariablePanelWidget.h"
+#include "IconProvider.h"
 
 #include <QComboBox>
 #include <QDir>
-#include <QDockWidget>
 #include <QFileInfo>
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -42,6 +42,13 @@ void ENGINE_MODULE_CALL CollectProblem(void* user, const EngineScriptProblem* pr
     static_cast<QVector<ProblemRow>*>(user)->append({problem->node, QString::fromUtf8(problem->objectName),
                                                      EditorCore::LocalizeScriptMessage(QString::fromUtf8(problem->message)),
                                                      problem->runtime != 0});
+}
+
+// В комбобоксе переменных тип float подписан явно; TypeLabel schema остаётся для сообщений о пинах.
+QString VariableTypeLabel(const QString& type)
+{
+    if (type == QStringLiteral("float")) return Tr("число (float)", "number (float)");
+    return EditorCore::CodeGraphSchema::TypeLabel(type);
 }
 } // namespace
 
@@ -82,31 +89,43 @@ void ScriptEditorWindow::BuildUi()
     graph_->setEnabled(false); // до загрузки каталога и файла
     layout->addWidget(graph_, 1);
 
-    problemList_ = new QListWidget(central);
+    variables_ = new ScriptVariableTable(central);
+    variables_->setObjectName(QStringLiteral("ScriptVariables"));
+    variablesPanel_ = new VariablePanelWidget(variables_, QStringLiteral("Script"),
+        CodeGraphSchema::VariableTypes(), Tr("Имя", "Name"), Tr("Значение", "Value"),
+        VariableTypeLabel, Tr("Переменные", "Variables"), central);
+    variablesPanel_->onVariablesChanged = [this](const QJsonArray& list, const QHash<QString, QString>& renames) {
+        if (!ready_ || readOnly_) return;
+        graph_->SetVariables(list, renames);
+    };
+    variablesPanel_->setEnabled(false);
+    graph_->EmbedSidePanel(variablesPanel_);
+
+    auto* save = new QPushButton(IconProvider::SaveIcon(), QString(), central);
+    save->setObjectName(QStringLiteral("ScriptSave"));
+    save->setFixedSize(34, 26);
+    save->setIconSize(QSize(16, 16));
+    save->setToolTip(Tr("Сохранить: записать файл и проверить движком сразу", "Save: write the file and check with the engine now"));
+    connect(save, &QPushButton::clicked, this, [this] { SaveNow(); });
+    graph_->PrependToolbarWidget(save);
+    for (auto* button : variablesPanel_->ToolbarButtons())
+        graph_->AddToolbarWidget(button);
+
+    auto* console = new QWidget(central);
+    auto* consoleLayout = new QVBoxLayout(console);
+    consoleLayout->setContentsMargins(0, 0, 0, 0);
+    consoleLayout->setSpacing(0);
+    consoleLayout->addWidget(EditorWindowSetup::MakePanelHeader(Tr("Консоль", "Console"), console));
+    problemList_ = new QListWidget(console);
     problemList_->setObjectName(QStringLiteral("ScriptProblems"));
     problemList_->setMaximumHeight(140);
     problemList_->setToolTip(Tr("Ошибки графа и Play; щелчок показывает ноду", "Graph and Play problems; click to show the node"));
     connect(problemList_, &QListWidget::itemClicked, this, [this](QListWidgetItem* item) {
         if (const int node = item->data(Qt::UserRole).toInt()) graph_->FocusNode(node);
     });
-    layout->addWidget(problemList_);
+    consoleLayout->addWidget(problemList_);
+    layout->addWidget(console);
     setCentralWidget(central);
-
-    auto* dock = new QDockWidget(Tr("Переменные", "Variables"), this);
-    dock->setObjectName(QStringLiteral("ScriptVariablesDock"));
-    dock->setFeatures(QDockWidget::NoDockWidgetFeatures);
-    variables_ = new ScriptVariableTable(dock);
-    variables_->setObjectName(QStringLiteral("ScriptVariables"));
-    variablesPanel_ = new VariablePanelWidget(variables_, QStringLiteral("Script"),
-        CodeGraphSchema::VariableTypes(), Tr("Имя", "Name"), Tr("Значение", "Value"),
-        [](const QString& t) { return CodeGraphSchema::TypeLabel(t); }, dock);
-    variablesPanel_->onVariablesChanged = [this](const QJsonArray& list, const QHash<QString, QString>& renames) {
-        if (!ready_ || readOnly_) return;
-        graph_->SetVariables(list, renames);
-    };
-    dock->setWidget(variablesPanel_);
-    addDockWidget(Qt::LeftDockWidgetArea, dock);
-    dock->setEnabled(false);
 
     saveTimer_ = new QTimer(this);
     saveTimer_->setSingleShot(true);
@@ -201,7 +220,7 @@ void ScriptEditorWindow::LoadFile(const QString& catalog)
         return SetReadOnly(Tr("Файл записан более новой версией редактора: он открыт только для чтения.",
                               "The file was written by a newer editor: it is open read-only."));
     graph_->setEnabled(true);
-    findChild<QDockWidget*>(QStringLiteral("ScriptVariablesDock"))->setEnabled(true);
+    variablesPanel_->setEnabled(true);
     statusBar()->showMessage(Tr("Правки сохраняются сразу; Play берёт файл при запуске.", "Edits are saved at once; Play reads the file when it starts."));
     Check();
     playTimer_->start();
@@ -215,6 +234,7 @@ void ScriptEditorWindow::SetReadOnly(const QString& reason)
     banner_->setText(reason);
     banner_->show();
     graph_->setEnabled(false);
+    variablesPanel_->setEnabled(false);
     statusBar()->showMessage(Tr("Только для чтения", "Read-only"));
 }
 
@@ -395,7 +415,11 @@ void ScriptEditorWindow::ShowProblems()
     graph_->SetNodeWarnings(warnings_);
     graph_->SetNodeProblems(Problems());
     if (problemList_->count() == 0)
-        (new QListWidgetItem(Tr("Ошибок нет", "No problems"), problemList_))->setFlags(Qt::NoItemFlags);
+    {
+        auto* item = new QListWidgetItem(Tr("Нет сообщений", "No messages"), problemList_);
+        item->setFlags(Qt::NoItemFlags);
+        item->setForeground(QColor(0x80, 0x80, 0x80));
+    }
 }
 
 void ScriptEditorWindow::RefreshVariables()

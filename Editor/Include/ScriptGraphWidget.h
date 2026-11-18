@@ -53,6 +53,11 @@ public:
     // Входы данных без связи, которым можно задать значение в ноде (не объект и не поток).
     QVector<EditorCore::GraphPin> EditableInputs(const EditorCore::GraphNodeData& node) const;
 
+    // Боковая панель слева от холста под общим тулбаром и кнопки окна на общем тулбаре.
+    using GraphEditorWidget::EmbedSidePanel;
+    using GraphEditorWidget::AddToolbarWidget;
+    using GraphEditorWidget::PrependToolbarWidget;
+
 protected:
     qreal NodeWidth(const EditorCore::GraphNodeData& node) const override { return 180; }
     qreal NodeContentHeight(const EditorCore::GraphNodeData& node) const override;

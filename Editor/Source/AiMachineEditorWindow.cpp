@@ -85,11 +85,13 @@ void AiMachineEditorWindow::BuildUi()
     variables_->setObjectName(QStringLiteral("FsmVariables"));
     variablesPanel_ = new VariablePanelWidget(variables_, QStringLiteral("Fsm"),
         FsmGraphSchema::VariableTypes(), Tr("Ключ", "Key"), Tr("Начальное", "Initial"),
-        [](const QString& t) { return FsmGraphSchema::TypeLabel(t); }, panel);
+        [](const QString& t) { return FsmGraphSchema::TypeLabel(t); }, QString(), panel);
     variablesPanel_->onVariablesChanged = [this](const QJsonArray& list, const QHash<QString, QString>& renames) {
         if (!ready_ || readOnly_) return;
         graph_->SetVariables(list, renames);
     };
+    for (auto* button : variablesPanel_->ToolbarButtons())
+        graph_->AddToolbarWidget(button);
     panelLayout->addWidget(variablesPanel_, 1);
 
     panelLayout->addWidget(new QLabel(Tr("Настройки персонажа:", "Character settings:"), panel));

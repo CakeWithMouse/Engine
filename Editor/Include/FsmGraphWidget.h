@@ -33,6 +33,11 @@ public:
     bool SetNodeProperties(int nodeId, const QVariantMap& properties);
     QStringList NodeSummary(const EditorCore::GraphNodeData& node) const;
 
+    // Боковая панель слева от холста под общим тулбаром и кнопки окна на общем тулбаре.
+    using GraphEditorWidget::EmbedSidePanel;
+    using GraphEditorWidget::AddToolbarWidget;
+    using GraphEditorWidget::PrependToolbarWidget;
+
 protected:
     qreal NodeWidth(const EditorCore::GraphNodeData& node) const override;
     qreal NodeContentHeight(const EditorCore::GraphNodeData& node) const override;

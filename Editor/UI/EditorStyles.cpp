@@ -338,6 +338,14 @@ QLabel#CardSectionLabel {
     font-size: 10px;
     font-weight: 500;
 }
+QLabel#PanelHeader {
+    background-color: %8;
+    color: %1;
+    font-weight: 600;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-bottom: 1px solid %6;
+}
 QLabel#CardFieldLabel {
     color: %4;
     font-size: 11px;

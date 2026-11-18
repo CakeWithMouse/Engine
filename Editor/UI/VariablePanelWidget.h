@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EditorLocale.h"
+#include "EditorWindowSetup.h"
 #include "IconProvider.h"
 
 #include <QComboBox>
@@ -24,7 +25,7 @@ public:
     VariablePanelWidget(QTableWidget* table, const QString& prefix, const QStringList& types,
                         const QString& nameColTitle, const QString& valColTitle,
                         std::function<QString(const QString&)> typeLabel = nullptr,
-                        QWidget* parent = nullptr)
+                        const QString& panelTitle = QString(), QWidget* parent = nullptr)
         : QWidget(parent), table_(table), prefix_(prefix), types_(types),
           nameColTitle_(nameColTitle), valColTitle_(valColTitle),
           typeLabel_(std::move(typeLabel))
@@ -32,49 +33,46 @@ public:
         auto* layout = new QVBoxLayout(this);
         layout->setContentsMargins(0, 0, 0, 0);
         layout->setSpacing(4);
+        if (!panelTitle.isEmpty())
+            layout->addWidget(EditorWindowSetup::MakePanelHeader(panelTitle, this));
 
-        auto* bar = new QHBoxLayout;
-        bar->setContentsMargins(0, 0, 0, 0);
-        bar->setSpacing(4);
-
+        // Кнопки создаются здесь, но живут на общем тулбаре окна (ToolbarButtons).
         addBtn_ = new QPushButton(IconProvider::PlusIcon(), QString(), this);
         addBtn_->setObjectName(prefix_ + QStringLiteral("AddVariable"));
-        addBtn_->setFixedSize(28, 24);
+        addBtn_->setFixedSize(34, 26);
+        addBtn_->setIconSize(QSize(16, 16));
         addBtn_->setToolTip(Tr("Добавить переменную", "Add variable"));
         connect(addBtn_, &QPushButton::clicked, this, [this] { AddVariable(); });
-        bar->addWidget(addBtn_);
 
         dupBtn_ = new QPushButton(IconProvider::CopyIcon(), QString(), this);
         dupBtn_->setObjectName(prefix_ + QStringLiteral("DuplicateVariable"));
-        dupBtn_->setFixedSize(28, 24);
+        dupBtn_->setFixedSize(34, 26);
+        dupBtn_->setIconSize(QSize(16, 16));
         dupBtn_->setToolTip(Tr("Дублировать переменную", "Duplicate variable"));
         connect(dupBtn_, &QPushButton::clicked, this, [this] { DuplicateVariable(); });
-        bar->addWidget(dupBtn_);
 
         removeBtn_ = new QPushButton(IconProvider::TrashIcon(), QString(), this);
         removeBtn_->setObjectName(prefix_ + QStringLiteral("RemoveVariable"));
-        removeBtn_->setFixedSize(28, 24);
+        removeBtn_->setFixedSize(34, 26);
+        removeBtn_->setIconSize(QSize(16, 16));
         removeBtn_->setToolTip(Tr("Удалить переменную", "Remove variable"));
         connect(removeBtn_, &QPushButton::clicked, this, [this] { RemoveVariable(table_->currentRow()); });
-        bar->addWidget(removeBtn_);
 
-        bar->addStretch(1);
-        layout->addLayout(bar);
-
-        table_->setColumnCount(5);
-        table_->setHorizontalHeaderLabels({nameColTitle_, Tr("Тип", "Type"), valColTitle_, QString(), QString()});
+        table_->setColumnCount(4);
+        table_->setHorizontalHeaderLabels({nameColTitle_, Tr("Тип", "Type"), valColTitle_, Tr("Публичная", "Public")});
         table_->verticalHeader()->hide();
         table_->setSelectionBehavior(QAbstractItemView::SelectRows);
-        table_->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
-        table_->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Interactive);
+        table_->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+        table_->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
         table_->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
         table_->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Fixed);
-        table_->horizontalHeader()->setSectionResizeMode(4, QHeaderView::Fixed);
-        table_->setColumnWidth(3, 26);
-        table_->setColumnWidth(4, 26);
+        table_->setColumnWidth(1, 100);
+        table_->setColumnWidth(3, 56);
 
         layout->addWidget(table_, 1);
     }
+
+    QList<QPushButton*> ToolbarButtons() const { return {addBtn_, dupBtn_, removeBtn_}; }
 
     std::function<void(const QJsonArray& list, const QHash<QString, QString>& renames)> onVariablesChanged;
 
@@ -116,9 +114,15 @@ public:
             connect(valField, &QLineEdit::editingFinished, this, [this, row] { OnRowEdited(row); });
             table_->setCellWidget(row, 2, valField);
 
-            auto* eyeBtn = new QPushButton(IconProvider::EyeIcon(isPub), QString());
+            auto* actions = new QWidget;
+            auto* actionsLayout = new QHBoxLayout(actions);
+            actionsLayout->setContentsMargins(2, 0, 2, 0);
+            actionsLayout->setSpacing(2);
+
+            auto* eyeBtn = new QPushButton(IconProvider::EyeIcon(isPub), QString(), actions);
             eyeBtn->setObjectName(QStringLiteral("%1VariableEye_%2").arg(prefix_).arg(row));
             eyeBtn->setFixedSize(24, 20);
+            eyeBtn->setIconSize(QSize(14, 14));
             eyeBtn->setCheckable(true);
             eyeBtn->setChecked(isPub);
             eyeBtn->setToolTip(isPub ? Tr("Публичная переменная: видна в инспекторе", "Public variable: visible in inspector")
@@ -129,14 +133,16 @@ public:
                                            : Tr("Приватная переменная: скрыта из инспектора", "Private variable: hidden in inspector"));
                 OnRowEdited(row);
             });
-            table_->setCellWidget(row, 3, eyeBtn);
+            actionsLayout->addWidget(eyeBtn);
 
-            auto* trashBtn = new QPushButton(IconProvider::TrashIcon(), QString());
+            auto* trashBtn = new QPushButton(IconProvider::TrashIcon(), QString(), actions);
             trashBtn->setObjectName(QStringLiteral("%1VariableTrash_%2").arg(prefix_).arg(row));
             trashBtn->setFixedSize(24, 20);
+            trashBtn->setIconSize(QSize(14, 14));
             trashBtn->setToolTip(Tr("Удалить строку", "Delete row"));
             connect(trashBtn, &QPushButton::clicked, this, [this, row] { RemoveVariable(row); });
-            table_->setCellWidget(row, 4, trashBtn);
+            actionsLayout->addWidget(trashBtn);
+            table_->setCellWidget(row, 3, actions);
         }
         refreshing_ = false;
     }
@@ -196,7 +202,9 @@ public:
             const auto* nameField = qobject_cast<QLineEdit*>(table_->cellWidget(row, 0));
             const auto* combo = qobject_cast<QComboBox*>(table_->cellWidget(row, 1));
             const auto* valField = qobject_cast<QLineEdit*>(table_->cellWidget(row, 2));
-            const auto* eyeBtn = qobject_cast<QPushButton*>(table_->cellWidget(row, 3));
+            const auto* eyeBtn = table_->cellWidget(row, 3)
+                ? table_->cellWidget(row, 3)->findChild<QPushButton*>(QStringLiteral("%1VariableEye_%2").arg(prefix_).arg(row))
+                : nullptr;
             if (!nameField || !combo) continue;
             const QString name = nameField->text().trimmed();
             const QString type = combo->currentData().isValid() ? combo->currentData().toString() : combo->currentText();

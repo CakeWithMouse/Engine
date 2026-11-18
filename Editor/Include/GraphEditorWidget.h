@@ -5,10 +5,13 @@
 #include "Graph/GraphSchema.h"
 
 #include <QHash>
+#include <QHBoxLayout>
 #include <QList>
 #include <QPointF>
+#include <QSplitter>
 #include <QString>
 #include <QVariant>
+#include <QVBoxLayout>
 #include <QWidget>
 #include <functional>
 
@@ -142,6 +145,27 @@ protected:
 
     // Кнопка на панели после стандартных (+ Нода, отмена, повтор, «Показать всё»).
     void AddToolbarWidget(QWidget* widget);
+    // Кнопка в начало панели (например, «Сохранить» окна-владельца).
+    void PrependToolbarWidget(QWidget* widget) { toolbar_->insertWidget(0, widget); }
+    // Заменить холст в layout обёрткой (сплиттер с боковой панелью): тулбар остаётся на всю ширину.
+    void EmbedView(QWidget* wrapper)
+    {
+        auto* box = static_cast<QVBoxLayout*>(layout());
+        box->replaceWidget(view_, wrapper);
+        box->setStretchFactor(wrapper, 1);
+    }
+    // Боковая панель слева от холста под общим тулбаром; ручка сплиттера 3px.
+    void EmbedSidePanel(QWidget* panel)
+    {
+        auto* splitter = new QSplitter(Qt::Horizontal, this);
+        EmbedView(splitter);
+        splitter->addWidget(panel);
+        splitter->addWidget(view_);
+        splitter->setHandleWidth(3);
+        splitter->setStretchFactor(0, 0);
+        splitter->setStretchFactor(1, 1);
+        splitter->setSizes({240, 700});
+    }
 
     EditorCore::GraphDocument& MutableDocument() { return document_; }
     // Снимок до правки; правки с одинаковым ключом подряд — один шаг отмены.

@@ -4,6 +4,7 @@
 
 #include <QApplication>
 #include <QEvent>
+#include <QLabel>
 #include <QMainWindow>
 #include <QObject>
 #include <QPointer>
@@ -76,6 +77,14 @@ protected:
 private:
     QPointer<QWidget> child_;
 };
+
+// Подписанный заголовок боковой/нижней панели: единый стиль во всех редакторах (QLabel#PanelHeader).
+inline QLabel* MakePanelHeader(const QString& text, QWidget* parent)
+{
+    auto* header = new QLabel(text, parent);
+    header->setObjectName(QStringLiteral("PanelHeader"));
+    return header;
+}
 
 inline void ConfigureSubWindow(QWidget* window, QWidget* mainWindow, const QString& title = QString())
 {
