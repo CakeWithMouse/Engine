@@ -93,6 +93,16 @@ void TestTexturePinRoundTrip()
     RoundTrip(model, "Texture RGB/A pins round-trip parses");
 }
 
+void TestNormalMapRoundTrip()
+{
+    EditorCore::MaterialGraphModel model;
+    const int out = model.AddNode(QStringLiteral("MaterialOutput"), QStringLiteral("Material Output"), QPointF(600, 180));
+    const int normal = model.AddNode(QStringLiteral("NormalMap"), QStringLiteral("NormalMap"), QPointF(100, 100),
+                                     {{QStringLiteral("textureName"), QStringLiteral("NormalMap")}, {QStringLiteral("slot"), 1}});
+    model.AddConnection(normal, QStringLiteral("Normal"), out, QStringLiteral("Normal"));
+    RoundTrip(model, "NormalMap node round-trip parses");
+}
+
 void TestRejectsHandHlsl()
 {
     const QString hand = QStringLiteral("void Surface(MaterialInput i, inout MaterialOutput o)\n{\n    o.Albedo = i.Color.rgb;\n}\n");
@@ -125,6 +135,7 @@ inline int RunHlslToGraphTests()
     TestMultiplyRoundTrip();
     TestLerpRoundTrip();
     TestTexturePinRoundTrip();
+    TestNormalMapRoundTrip();
     TestRejectsHandHlsl();
     TestUnknownIdentifierProblem();
     std::printf("HlslToGraph tests: %d checks passed\n", gHlslParseChecks);

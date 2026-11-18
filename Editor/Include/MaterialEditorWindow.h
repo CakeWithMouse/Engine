@@ -13,6 +13,7 @@ class QComboBox;
 class QCheckBox;
 class QDoubleSpinBox;
 class QFormLayout;
+class QHBoxLayout;
 class QListWidget;
 class QWidget;
 class QTabWidget;
@@ -135,6 +136,11 @@ private:
     void SetParameterByName(const QString& name, const std::array<float, 4>& value);
     // Миниатюры нод и назначение текстур, выбранных до того, как у материала появился слот.
     void SyncGraphTextures();
+    void BuildParameterRow(QWidget* row, QHBoxLayout* layout, int index);
+    void SetParamPublic(const QString& name, bool isPublic);
+    void LoadPublicParams();
+    void SavePublicParams();
+    static QColor ValueToColor(const std::array<float, 4>& value, uint32_t components);
     QSet<QString> autoAssigned_; // "слот|путь": каждое такое назначение пробуется один раз
 
     struct GraphBackup
@@ -143,6 +149,10 @@ private:
         QByteArray hlsl, graph;
     };
     GraphBackup graphBackup_;
+    QSet<QString> publicParams_;
+    bool hasExplicitPublicParams_ = false;
+    QString savedGraphJson_;
+    QString savedGraphHlsl_;
     bool graphMode_ = false, sourceLoaded_ = false;
     MaterialGraphWidget* graph_ = nullptr;
     QWidget* graphPage_ = nullptr;

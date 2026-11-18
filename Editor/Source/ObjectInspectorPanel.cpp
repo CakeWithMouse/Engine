@@ -110,6 +110,7 @@ void ObjectInspectorPanel::BuildUi()
     cardMaterial_->onEditMaterial = [this](const QString& path) { emit EditMaterialRequested(path); };
     cardMaterial_->onChooseMaterial = [this] { CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignMaterial")); };
     cardMaterial_->onClearMaterial = [this] { emit ClearMaterialRequested(); };
+    cardMaterial_->onParameterChanged = [this](const QString& m, const QString& p, const std::array<float, 4>& v) { emit MaterialParameterChanged(m, p, v); };
     cardMaterial_->onMaterialDropped = [this](const QString& path) {
         CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignMaterial"), {{QStringLiteral("objectId"), QVariant::fromValue(selectedId_)}, {QStringLiteral("material"), path}});
     };

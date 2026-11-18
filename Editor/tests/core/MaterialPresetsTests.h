@@ -40,14 +40,15 @@ void TestSimplePreset()
 {
     const EditorCore::MaterialGraphModel model = EditorCore::MaterialGraphPresets::BuildSimple();
     CheckPreset(FindByType(model, QStringLiteral("MaterialOutput")) != nullptr, "Simple has MaterialOutput");
-    CheckPreset(FindByType(model, QStringLiteral("ColorParam")) != nullptr, "Simple has ColorParam");
-    CheckPreset(FindByType(model, QStringLiteral("Texture2D")) == nullptr, "Simple has no texture");
+    CheckPreset(FindByType(model, QStringLiteral("Texture2D")) != nullptr, "Simple has Texture2D nodes");
+    CheckPreset(FindByType(model, QStringLiteral("NormalMap")) != nullptr, "Simple has NormalMap node");
 
     const EditorCore::GraphCompileResult result = EditorCore::HlslGraphCompiler::Compile(model);
     CheckPreset(result.problems.isEmpty(), "Simple compiles without problems");
-    CheckPreset(result.hlsl.contains(QStringLiteral("o.Albedo = saturate(BaseColor.rgb);")), "Simple albedo from BaseColor");
-    CheckPreset(result.hlsl.contains(QStringLiteral("o.SpecularWeight = saturate(Specular);")), "Simple specular param");
-    CheckPreset(!result.hlsl.contains(QStringLiteral("register(t")), "Simple declares no texture register");
+    CheckPreset(result.hlsl.contains(QStringLiteral("o.Albedo = saturate(BaseMap.Sample(MaterialSampler, i.UV).rgb);")), "Simple albedo from BaseMap");
+    CheckPreset(result.hlsl.contains(QStringLiteral("Texture2D BaseMap : register(t6);")), "Simple declares BaseMap register t6");
+    CheckPreset(result.hlsl.contains(QStringLiteral("Texture2D NormalMap : register(t7);")), "Simple declares NormalMap register t7");
+    CheckPreset(result.hlsl.contains(QStringLiteral("o.Normal = NormalFromMap(i, NormalMap.Sample(MaterialSampler, i.UV).xyz, 1.0f);")), "Simple normal from NormalMap");
 }
 
 void TestOrmPresetStructure()
@@ -57,13 +58,12 @@ void TestOrmPresetStructure()
     const auto* split = FindByType(model, QStringLiteral("Split"));
     const auto* inv = FindByType(model, QStringLiteral("OneMinus"));
     const auto* master = FindByType(model, QStringLiteral("MaterialOutput"));
-    CheckPreset(orm && split && inv && master, "ORM has Texture2D, Split, OneMinus, MaterialOutput");
-    CheckPreset(orm->properties.value(QStringLiteral("textureName")).toString() == EditorCore::MaterialGraphPresets::OrmTextureName(),
-                "ORM texture named ORM");
-    CheckPreset(HasConnection(model, orm->id, QStringLiteral("RGBA"), split->id, QStringLiteral("In")), "ORM texture feeds Split.In");
+    const auto* normal = FindByType(model, QStringLiteral("NormalMap"));
+    CheckPreset(orm && split && inv && master && normal, "ORM has Texture2D, Split, OneMinus, MaterialOutput, NormalMap");
     CheckPreset(HasConnection(model, split->id, QStringLiteral("R"), master->id, QStringLiteral("AmbientModel")), "ORM R(AO) -> AmbientModel");
     CheckPreset(HasConnection(model, split->id, QStringLiteral("G"), inv->id, QStringLiteral("In")), "ORM G(Roughness) -> OneMinus");
     CheckPreset(HasConnection(model, inv->id, QStringLiteral("Out"), master->id, QStringLiteral("Specular")), "ORM (1-roughness) -> Specular");
+    CheckPreset(HasConnection(model, normal->id, QStringLiteral("Normal"), master->id, QStringLiteral("Normal")), "ORM NormalMap -> Normal");
     // Metallic (B) распакован, но не подключён: входа Metallic в движке нет.
     bool bUsed = false;
     for (const auto& c : model.Connections())
@@ -99,10 +99,15 @@ void TestOrmPresetCompile()
     const EditorCore::GraphCompileResult result = EditorCore::HlslGraphCompiler::Compile(model);
     CheckPreset(result.problems.isEmpty(), "ORM preset compiles without problems");
     CheckPreset(result.hlsl.contains(QStringLiteral("Texture2D ORM : register(t6);")), "ORM preset declares texture t6");
+    CheckPreset(result.hlsl.contains(QStringLiteral("Texture2D BaseMap : register(t7);")), "ORM preset declares BaseMap t7");
+    CheckPreset(result.hlsl.contains(QStringLiteral("Texture2D NormalMap : register(t8);")), "ORM preset declares NormalMap t8");
+    CheckPreset(result.hlsl.contains(QStringLiteral("o.Albedo = saturate(BaseMap.Sample(MaterialSampler, i.UV).rgb);")), "ORM preset albedo from BaseMap");
     CheckPreset(result.hlsl.contains(QStringLiteral("o.AmbientModel = saturate((ORM.Sample(MaterialSampler, i.UV)).x);")),
                 "ORM preset AO wired to AmbientModel");
     CheckPreset(result.hlsl.contains(QStringLiteral("o.SpecularWeight = saturate((1.0f - (ORM.Sample(MaterialSampler, i.UV)).y));")),
                 "ORM preset roughness inverted to SpecularWeight");
+    CheckPreset(result.hlsl.contains(QStringLiteral("o.Normal = NormalFromMap(i, NormalMap.Sample(MaterialSampler, i.UV).xyz, 1.0f);")),
+                "ORM preset normal from NormalMap");
 }
 
 } // namespace

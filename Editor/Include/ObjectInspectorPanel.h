@@ -113,6 +113,7 @@ signals:
     void ChooseMaterialRequested();
     void EditMaterialRequested(const QString& virtualPath);
     void ClearMaterialRequested();
+    void MaterialParameterChanged(const QString& material, const QString& param, const std::array<float, 4>& value);
     void OpenScriptRequested(const QString& virtualPath); // пустой путь: создать скрипт для объекта
     void ChooseScriptRequested();
     void ClearScriptRequested();

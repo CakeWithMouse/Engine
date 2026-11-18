@@ -4,6 +4,7 @@
 #include "MaterialGraphTransform.h"
 #include "MaterialGraphWidget.h"
 #include "EditorLocale.h"
+#include "EditorTheme.h"
 #include "IconProvider.h"
 
 #include <QMenu>
@@ -12,6 +13,16 @@
 #include <QToolButton>
 #include <QAction>
 #include <QStatusBar>
+#include <QColorDialog>
+#include <QDoubleSpinBox>
+#include <QLabel>
+#include <QPushButton>
+#include <QHBoxLayout>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <algorithm>
 
 // Шаблоны материала (Simple/ORM) и команды графа, вынесенные из MaterialEditorWindow.cpp:
 // работают с graph_ через публичный API, не меняя размер самого окна.
@@ -50,7 +61,7 @@ void MaterialEditorWindow::BuildGraphTools(QToolBar* tools)
                                      [this] { ExposeSelectedAsParameter(); });
     exposeAction_->setObjectName(QStringLiteral("MaterialExposeParam"));
     exposeAction_->setToolTip(Tr("Превратить выбранную ноду Constant в параметр материала без перекомпиляции",
-                                 "Turn the selected Constant node into a material parameter without recompiling"));
+                                 "Turn the selected Constant node into a parameter without recompiling"));
     exposeAction_->setEnabled(false); // до загрузки HLSL
 }
 
@@ -88,4 +99,163 @@ void MaterialEditorWindow::ExposeSelectedAsParameter()
     ApplyGraph();
     statusBar()->showMessage(Tr("Константа стала параметром: правится без перекомпиляции",
                                 "Constant exposed as a parameter: editable without recompile"));
+}
+
+QColor MaterialEditorWindow::ValueToColor(const std::array<float, 4>& value, uint32_t components)
+{
+    auto channel = [](float v) { return std::clamp(v, 0.0f, 1.0f); };
+    return QColor::fromRgbF(channel(value[0]), channel(value[1]), channel(value[2]),
+                            components == 4 ? channel(value[3]) : 1.0f);
+}
+
+void MaterialEditorWindow::LoadPublicParams()
+{
+    publicParams_.clear();
+    hasExplicitPublicParams_ = false;
+    const QString path = PhysicalPath(material_);
+    QFile file(path);
+    if (file.open(QIODevice::ReadOnly))
+    {
+        const QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+        if (doc.isObject() && doc.object().contains(QStringLiteral("publicParams")))
+        {
+            hasExplicitPublicParams_ = true;
+            const QJsonArray arr = doc.object().value(QStringLiteral("publicParams")).toArray();
+            for (const auto& val : arr)
+                publicParams_.insert(val.toString());
+        }
+    }
+    if (!hasExplicitPublicParams_)
+    {
+        for (const auto& p : state_.parameters)
+            publicParams_.insert(p.name);
+    }
+}
+
+void MaterialEditorWindow::SavePublicParams()
+{
+    const QString path = PhysicalPath(material_);
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) return;
+    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+    file.close();
+    if (!doc.isObject()) return;
+    QJsonObject obj = doc.object();
+    QJsonArray arr;
+    for (const QString& name : publicParams_)
+        arr.append(name);
+    obj[QStringLiteral("publicParams")] = arr;
+    doc.setObject(obj);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        file.write(doc.toJson(QJsonDocument::Indented));
+}
+
+void MaterialEditorWindow::SetParamPublic(const QString& name, bool isPublic)
+{
+    hasExplicitPublicParams_ = true;
+    if (isPublic) publicParams_.insert(name);
+    else publicParams_.remove(name);
+    edited_ = true;
+    UpdateTitle();
+}
+
+void MaterialEditorWindow::BuildParameterRow(QWidget* row, QHBoxLayout* layout, int index)
+{
+    const auto& parameter = state_.parameters[index];
+    const bool isPublic = publicParams_.contains(parameter.name);
+    auto* eyeBtn = new QPushButton(IconProvider::EyeIcon(isPublic), QString(), row);
+    eyeBtn->setObjectName(QStringLiteral("MaterialParamEye_%1").arg(parameter.name));
+    eyeBtn->setFixedSize(24, 22);
+    eyeBtn->setCheckable(true);
+    eyeBtn->setChecked(isPublic);
+    eyeBtn->setToolTip(isPublic ? Tr("Параметр публичный: виден в инспекторе", "Public parameter: visible in inspector")
+                                : Tr("Параметр приватный: скрыт из инспектора", "Private parameter: hidden in inspector"));
+    connect(eyeBtn, &QPushButton::clicked, this, [this, eyeBtn, name = parameter.name](bool checked) {
+        SetParamPublic(name, checked);
+        eyeBtn->setIcon(IconProvider::EyeIcon(checked));
+        eyeBtn->setToolTip(checked ? Tr("Параметр публичный: виден в инспекторе", "Public parameter: visible in inspector")
+                                   : Tr("Параметр приватный: скрыт из инспектора", "Private parameter: hidden in inspector"));
+    });
+    layout->addWidget(eyeBtn);
+
+    if (!parameter.components)
+    {
+        layout->addWidget(new QLabel(Tr("тип не поддерживается редактором", "type not supported by editor"), row));
+        return;
+    }
+
+    std::vector<QDoubleSpinBox*> spins;
+    for (uint32_t i = 0; i < parameter.components; ++i)
+    {
+        auto* spin = new QDoubleSpinBox(row);
+        spin->setObjectName(QStringLiteral("MaterialParam_%1_%2").arg(parameter.name).arg(i));
+        spin->setRange(-100000.0, 100000.0);
+        spin->setDecimals(3);
+        spin->setSingleStep(0.05);
+        spin->setKeyboardTracking(false);
+        spin->setValue(parameter.value[i]);
+        spin->setMinimumWidth(64);
+        layout->addWidget(spin, 1);
+        spins.push_back(spin);
+    }
+    auto values = [spins] {
+        std::array<float, 4> value{};
+        for (size_t i = 0; i < spins.size(); ++i) value[i] = static_cast<float>(spins[i]->value());
+        return value;
+    };
+    auto setValues = [spins](const std::array<float, 4>& value) {
+        for (size_t i = 0; i < spins.size(); ++i)
+        {
+            const QSignalBlocker block(spins[i]);
+            spins[i]->setValue(value[i]);
+        }
+    };
+
+    QPushButton* color = nullptr;
+    if (parameter.components >= 3)
+    {
+        color = new QPushButton(row);
+        color->setObjectName(QStringLiteral("MaterialColor_%1").arg(parameter.name));
+        color->setFixedSize(28, 22);
+        color->setToolTip(Tr("Выбрать цвет", "Choose color"));
+        layout->addWidget(color);
+    }
+    const uint32_t components = parameter.components;
+    auto paint = [color, components](const std::array<float, 4>& value) {
+        if (color) color->setStyleSheet(QStringLiteral("background-color: %1;").arg(ValueToColor(value, components).name()));
+    };
+    paint(parameter.value);
+
+    for (auto* spin : spins)
+        connect(spin, &QDoubleSpinBox::valueChanged, this, [this, index, values, paint]
+        {
+            paint(values());
+            SetParameter(index, values());
+        });
+    if (color)
+        connect(color, &QPushButton::clicked, this, [this, index, values, setValues, paint, components]
+        {
+            QColorDialog::ColorDialogOptions options;
+            if (components == 4) options |= QColorDialog::ShowAlphaChannel;
+            const QColor picked = QColorDialog::getColor(ValueToColor(values(), components), this,
+                                                         state_.parameters[index].name, options);
+            if (!picked.isValid()) return;
+            auto value = values();
+            value[0] = static_cast<float>(picked.redF());
+            value[1] = static_cast<float>(picked.greenF());
+            value[2] = static_cast<float>(picked.blueF());
+            if (components == 4) value[3] = static_cast<float>(picked.alphaF());
+            setValues(value);
+            paint(value);
+            SetParameter(index, value);
+        });
+
+    auto* reset = new QPushButton(EditorTheme::CreateResetIcon(), QString(), row);
+    reset->setFixedWidth(28);
+    reset->setToolTip(Tr("Значение из HLSL", "Value from HLSL"));
+    layout->addWidget(reset);
+    connect(reset, &QPushButton::clicked, this, [this, index, setValues, paint] {
+        const auto val = state_.parameters[index].defaultValue;
+        setValues(val); paint(val); SetParameter(index, val);
+    });
 }

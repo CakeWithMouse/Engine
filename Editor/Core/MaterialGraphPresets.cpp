@@ -33,39 +33,53 @@ QString MaterialGraphPresets::OrmTextureName()
 MaterialGraphModel MaterialGraphPresets::BuildSimple()
 {
     MaterialGraphModel model;
-    const int master = model.AddNode(QStringLiteral("MaterialOutput"), QStringLiteral("Material Output"), QPointF(600, 180));
-    const int base = model.AddNode(QStringLiteral("ColorParam"), QStringLiteral("BaseColor"), QPointF(100, 100),
-                                   ColorProp(QStringLiteral("BaseColor"), QColor(220, 220, 225)));
-    const int specular = model.AddNode(QStringLiteral("ScalarParam"), QStringLiteral("Specular"), QPointF(100, 260),
-                                       ScalarProp(QStringLiteral("Specular"), 0.5));
-    const int defaults = model.AddNode(QStringLiteral("SurfaceDefaults"), QStringLiteral("Surface Defaults"), QPointF(100, 420));
+    const int master = model.AddNode(QStringLiteral("MaterialOutput"), QStringLiteral("Material Output"), QPointF(600, 200));
+    const int base = model.AddNode(QStringLiteral("Texture2D"), QStringLiteral("BaseMap"), QPointF(-100, 60),
+                                   TextureProp(QStringLiteral("BaseMap"), 0));
+    const int normal = model.AddNode(QStringLiteral("NormalMap"), QStringLiteral("NormalMap"), QPointF(-100, 220),
+                                     TextureProp(QStringLiteral("NormalMap"), 1));
+    const int spec = model.AddNode(QStringLiteral("Texture2D"), QStringLiteral("SpecularMap"), QPointF(-100, 380),
+                                   TextureProp(QStringLiteral("SpecularMap"), 2));
+    const int ambient = model.AddNode(QStringLiteral("Texture2D"), QStringLiteral("AmbientMap"), QPointF(-100, 540),
+                                     TextureProp(QStringLiteral("AmbientMap"), 3));
+    const int emissive = model.AddNode(QStringLiteral("Texture2D"), QStringLiteral("EmissiveMap"), QPointF(-100, 700),
+                                       TextureProp(QStringLiteral("EmissiveMap"), 4));
+    const int alpha = model.AddNode(QStringLiteral("Texture2D"), QStringLiteral("AlphaMap"), QPointF(-100, 860),
+                                    TextureProp(QStringLiteral("AlphaMap"), 5));
+
     model.AddConnection(base, QStringLiteral("RGB"), master, QStringLiteral("Albedo"));
-    model.AddConnection(specular, QStringLiteral("Value"), master, QStringLiteral("Specular"));
-    model.AddConnection(defaults, QStringLiteral("Alpha"), master, QStringLiteral("Alpha"));
-    model.AddConnection(defaults, QStringLiteral("Normal"), master, QStringLiteral("Normal"));
+    model.AddConnection(alpha, QStringLiteral("A"), master, QStringLiteral("Alpha"));
+    model.AddConnection(spec, QStringLiteral("R"), master, QStringLiteral("Specular"));
+    model.AddConnection(ambient, QStringLiteral("R"), master, QStringLiteral("AmbientModel"));
+    model.AddConnection(emissive, QStringLiteral("RGB"), master, QStringLiteral("Emissive"));
+    model.AddConnection(normal, QStringLiteral("Normal"), master, QStringLiteral("Normal"));
     return model;
 }
 
 MaterialGraphModel MaterialGraphPresets::BuildOrm()
 {
     MaterialGraphModel model;
-    const int master = model.AddNode(QStringLiteral("MaterialOutput"), QStringLiteral("Material Output"), QPointF(620, 180));
-    const int orm = model.AddNode(QStringLiteral("Texture2D"), OrmTextureName(), QPointF(-200, 120),
+    const int master = model.AddNode(QStringLiteral("MaterialOutput"), QStringLiteral("Material Output"), QPointF(620, 200));
+    const int orm = model.AddNode(QStringLiteral("Texture2D"), OrmTextureName(), QPointF(-200, 220),
                                   TextureProp(OrmTextureName(), 6));
-    const int split = model.AddNode(QStringLiteral("Split"), QStringLiteral("Unpack ORM"), QPointF(60, 120));
-    const int base = model.AddNode(QStringLiteral("ColorParam"), QStringLiteral("BaseColor"), QPointF(-200, 340),
-                                   ColorProp(QStringLiteral("BaseColor"), QColor(255, 255, 255)));
-    const int inv = model.AddNode(QStringLiteral("OneMinus"), QStringLiteral("1 - Roughness"), QPointF(320, 240));
-    const int defaults = model.AddNode(QStringLiteral("SurfaceDefaults"), QStringLiteral("Surface Defaults"), QPointF(-200, 500));
-    model.AddConnection(orm, QStringLiteral("RGBA"), split, QStringLiteral("In"));
+    const int base = model.AddNode(QStringLiteral("Texture2D"), QStringLiteral("BaseMap"), QPointF(-200, 60),
+                                   TextureProp(QStringLiteral("BaseMap"), 7));
+    const int split = model.AddNode(QStringLiteral("Split"), QStringLiteral("Unpack ORM"), QPointF(80, 220));
+    const int inv = model.AddNode(QStringLiteral("OneMinus"), QStringLiteral("1 - Roughness"), QPointF(320, 300));
+    const int normal = model.AddNode(QStringLiteral("NormalMap"), QStringLiteral("NormalMap"), QPointF(-200, 420),
+                                     TextureProp(QStringLiteral("NormalMap"), 8));
+    const int defaults = model.AddNode(QStringLiteral("SurfaceDefaults"), QStringLiteral("Surface Defaults"), QPointF(-200, 580));
+
     model.AddConnection(base, QStringLiteral("RGB"), master, QStringLiteral("Albedo"));
+    model.AddConnection(orm, QStringLiteral("RGBA"), split, QStringLiteral("In"));
     // R = Ambient Occlusion -> AmbientModel; G = Roughness -> (1 - roughness) -> SpecularWeight.
     model.AddConnection(split, QStringLiteral("R"), master, QStringLiteral("AmbientModel"));
     model.AddConnection(split, QStringLiteral("G"), inv, QStringLiteral("In"));
     model.AddConnection(inv, QStringLiteral("Out"), master, QStringLiteral("Specular"));
+    // NormalMap -> Normal
+    model.AddConnection(normal, QStringLiteral("Normal"), master, QStringLiteral("Normal"));
     // B = Metallic распакован (пин Split.B свободен): входа Metallic в движке Блинн-Фонг нет.
     model.AddConnection(defaults, QStringLiteral("Alpha"), master, QStringLiteral("Alpha"));
-    model.AddConnection(defaults, QStringLiteral("Normal"), master, QStringLiteral("Normal"));
     return model;
 }
 

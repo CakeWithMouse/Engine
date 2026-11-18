@@ -241,11 +241,15 @@ private:
     {
         if (Peek() == QStringLiteral(".") && Peek(1) == QStringLiteral("Sample") && Peek(2) == QStringLiteral("("))
             return TextureSample(name);
-        if (name == QStringLiteral("i") && Peek() == QStringLiteral("."))
+        if (name == QStringLiteral("i"))
         {
-            Take();
-            const QString field = Take();
-            return Postfix(InputNode(field));
+            if (Peek() == QStringLiteral("."))
+            {
+                Take();
+                const QString field = Take();
+                return Postfix(InputNode(field));
+            }
+            return {-1, QStringLiteral("i"), 0};
         }
         if (name == QStringLiteral("defaults") && Peek() == QStringLiteral("."))
         {
@@ -350,6 +354,18 @@ private:
         }
         if (argc >= 3)
         {
+            if (name == QStringLiteral("NormalFromMap"))
+            {
+                const int texNode = arg(1).node;
+                if (GraphNodeData* n = model_.FindNode(texNode))
+                {
+                    n->type = QStringLiteral("NormalMap");
+                    n->title = QStringLiteral("NormalMap");
+                }
+                if (arg(2).node >= 0 && TypeOf(arg(2).node) != QStringLiteral("Constant"))
+                    Link(arg(2), texNode, QStringLiteral("Strength"));
+                return {texNode, QStringLiteral("Normal"), 3};
+            }
             if (name == QStringLiteral("lerp"))
             {
                 const int id = Make(QStringLiteral("Lerp"), QStringLiteral("Lerp"));

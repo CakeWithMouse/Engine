@@ -554,6 +554,7 @@ void MaterialEditorWindow::Apply(const MaterialEditorState& state, bool valid, b
             shaderFile_ = PhysicalPath(state_.shader);
             LoadShaderText();
             LoadGraph();
+            LoadPublicParams();
         }
         if (graphMode_) SyncGraphTextures();
         // Смена режима смешивания тоже меняет слоты: компилятор выбрасывает то, что режим не читает.
@@ -695,21 +696,39 @@ void MaterialEditorWindow::EnableGraph()
     if (!loaded_ || graphMode_ || !sourceLoaded_ || saving_) return;
     BackupGraphFiles();
     const QString hlsl = source_->toPlainText();
-    const auto parsed = EditorCore::HlslToGraph::Parse(hlsl);
-    if (parsed.ok)
+    if (!savedGraphJson_.isEmpty() && savedGraphHlsl_ == hlsl)
     {
-        graph_->SetModel(parsed.model);
+        EditorCore::MaterialGraphModel model;
+        if (model.ImportFromJson(savedGraphJson_))
+        {
+            graph_->SetModel(model);
+            SyncGraphTextures();
+        }
+        else
+        {
+            const auto parsed = EditorCore::HlslToGraph::Parse(hlsl);
+            if (parsed.ok) { graph_->SetModel(parsed.model); SyncGraphTextures(); }
+        }
     }
     else
     {
-        EditorCore::MaterialGraphModel model;
-        model.SetupDefaultMasterNode();
-        graph_->SetModel(model);
-        statusBar()->showMessage(EditorCore::HlslToGraph::IsGenerated(hlsl)
-            ? Tr("Граф разобран не полностью, создан пустой граф: %1", "Graph parsed partially, empty graph created: %1")
-                  .arg(parsed.problems.join(QStringLiteral("; ")))
-            : Tr("Шейдер не является нодовым графом: создан пустой граф, «Откатить» вернёт код",
-                 "Shader is not a node graph: empty graph created, Revert restores the code"));
+        const auto parsed = EditorCore::HlslToGraph::Parse(hlsl);
+        if (parsed.ok)
+        {
+            graph_->SetModel(parsed.model);
+            SyncGraphTextures();
+        }
+        else
+        {
+            EditorCore::MaterialGraphModel model;
+            model.SetupDefaultMasterNode();
+            graph_->SetModel(model);
+            statusBar()->showMessage(EditorCore::HlslToGraph::IsGenerated(hlsl)
+                ? Tr("Граф разобран не полностью, создан пустой граф: %1", "Graph parsed partially, empty graph created: %1")
+                      .arg(parsed.problems.join(QStringLiteral("; ")))
+                : Tr("Шейдер не является нодовым графом: создан пустой граф, «Откатить» вернёт код",
+                     "Shader is not a node graph: empty graph created, Revert restores the code"));
+        }
     }
     SetGraphMode(true);
     ApplyGraph();
@@ -720,6 +739,8 @@ void MaterialEditorWindow::DisableGraph()
     if (!graphMode_ || saving_) return;
     ApplyGraph(); // HLSL должен соответствовать последнему виду графа
     BackupGraphFiles();
+    savedGraphJson_ = graph_->Model().ExportToJson();
+    savedGraphHlsl_ = source_->toPlainText();
     EditorCore::GraphFileIo::Delete(ProjectRoot(), ContentRoot(), GraphFile());
     SetGraphMode(false);
     UpdateTitle();
@@ -817,92 +838,11 @@ void MaterialEditorWindow::RebuildSettings()
 
     for (int index = 0; index < state_.parameters.size(); ++index)
     {
-        const auto& parameter = state_.parameters[index];
         auto* row = new QWidget(parameters_);
         auto* layout = new QHBoxLayout(row);
         layout->setContentsMargins(0, 0, 0, 0);
-        if (!parameter.components)
-        {
-            layout->addWidget(new QLabel(QStringLiteral("тип не поддерживается редактором"), row));
-            parameterForm_->addRow(parameter.name, row);
-            continue;
-        }
-
-        std::vector<QDoubleSpinBox*> spins;
-        for (uint32_t i = 0; i < parameter.components; ++i)
-        {
-            auto* spin = new QDoubleSpinBox(row);
-            spin->setObjectName(QStringLiteral("MaterialParam_%1_%2").arg(parameter.name).arg(i));
-            spin->setRange(-100000.0, 100000.0);
-            spin->setDecimals(3);
-            spin->setSingleStep(0.05);
-            spin->setKeyboardTracking(false);
-            spin->setValue(parameter.value[i]);
-            spin->setMinimumWidth(64);
-            layout->addWidget(spin, 1);
-            spins.push_back(spin);
-        }
-        auto values = [spins] {
-            std::array<float, 4> value{};
-            for (size_t i = 0; i < spins.size(); ++i) value[i] = static_cast<float>(spins[i]->value());
-            return value;
-        };
-        auto setValues = [spins](const std::array<float, 4>& value) {
-            for (size_t i = 0; i < spins.size(); ++i)
-            {
-                const QSignalBlocker block(spins[i]);
-                spins[i]->setValue(value[i]);
-            }
-        };
-
-        QPushButton* color = nullptr;
-        if (parameter.components >= 3)
-        {
-            color = new QPushButton(row);
-            color->setObjectName(QStringLiteral("MaterialColor_%1").arg(parameter.name));
-            color->setFixedSize(28, 22);
-            color->setToolTip(QStringLiteral("Выбрать цвет"));
-            layout->addWidget(color);
-        }
-        const uint32_t components = parameter.components;
-        auto paint = [color, components](const std::array<float, 4>& value) {
-            if (color) color->setStyleSheet(QStringLiteral("background-color: %1;").arg(ToColor(value, components).name()));
-        };
-        paint(parameter.value);
-
-        for (auto* spin : spins)
-            connect(spin, &QDoubleSpinBox::valueChanged, this, [this, index, values, paint]
-            {
-                paint(values());
-                SetParameter(index, values());
-            });
-        if (color)
-            connect(color, &QPushButton::clicked, this, [this, index, values, setValues, paint, components]
-            {
-                QColorDialog::ColorDialogOptions options;
-                if (components == 4) options |= QColorDialog::ShowAlphaChannel;
-                const QColor picked = QColorDialog::getColor(ToColor(values(), components), this,
-                                                             state_.parameters[index].name, options);
-                if (!picked.isValid()) return;
-                auto value = values();
-                value[0] = static_cast<float>(picked.redF());
-                value[1] = static_cast<float>(picked.greenF());
-                value[2] = static_cast<float>(picked.blueF());
-                if (components == 4) value[3] = static_cast<float>(picked.alphaF());
-                setValues(value);
-                paint(value);
-                SetParameter(index, value);
-            });
-
-        auto* reset = new QPushButton(EditorTheme::CreateResetIcon(), QString(), row);
-        reset->setFixedWidth(28);
-        reset->setToolTip(QStringLiteral("Значение из HLSL"));
-        layout->addWidget(reset);
-        connect(reset, &QPushButton::clicked, this, [this, index, setValues, paint] {
-            const auto val = state_.parameters[index].defaultValue;
-            setValues(val); paint(val); SetParameter(index, val);
-        });
-        parameterForm_->addRow(parameter.name, row);
+        BuildParameterRow(row, layout, index);
+        parameterForm_->addRow(state_.parameters[index].name, row);
     }
 
     parameters_->parentWidget()->setEnabled(true);
@@ -1227,7 +1167,10 @@ bool MaterialEditorWindow::Save(std::function<void(bool)> completion)
     }, sourceChanged, [this, completion](bool saved) {
         saving_ = false;
         setEnabled(true);
-        if (saved) graphBackup_.active = false; // граф и HLSL на диске теперь сохранённые
+        if (saved) {
+            SavePublicParams();
+            graphBackup_.active = false; // граф и HLSL на диске теперь сохранённые
+        }
         UpdateTitle();
         if (completion) completion(saved);
     });

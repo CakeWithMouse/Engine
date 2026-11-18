@@ -841,27 +841,25 @@ void EditorMainWindow::ConnectPanels()
             c.path = QString::fromUtf8(QJsonDocument(data).toJson()); host_->PostCommand(c);
         }
     });
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseMaterialRequested, this, []
-    {
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseMaterialRequested, this, [] {
         CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignMaterial"));
     });
-
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::EditMaterialRequested, this, [this](const QString& material)
-    {
-        if (!material.isEmpty())
-            OpenMaterialEditor(material);
-        else
-            CreateMaterialForSelection();
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::EditMaterialRequested, this, [this](const QString& mat) {
+        if (!mat.isEmpty()) OpenMaterialEditor(mat); else CreateMaterialForSelection();
     });
-
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::OpenScriptRequested, this, [this](const QString& script)
-    {
-        if (!script.isEmpty()) OpenScriptEditor(script);
-        else CreateScriptForSelection();
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::MaterialParameterChanged, this,
+        [this](const QString& mat, const QString& param, const std::array<float, 4>& val) {
+            EditorCommand c; c.type = EditorCommand::RunTask;
+            const QByteArray m = mat.toUtf8(), p = param.toUtf8();
+            c.task = [m, p, val](const EngineEditSessionApi& api) {
+                if (api.setMaterialParameter) api.setMaterialParameter(api.context, m.constData(), p.constData(), val.data());
+            };
+            host_->PostCommand(c);
+        });
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::OpenScriptRequested, this, [this](const QString& script) {
+        if (!script.isEmpty()) OpenScriptEditor(script); else CreateScriptForSelection();
     });
-
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseScriptRequested, this, []
-    {
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseScriptRequested, this, [] {
         CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignScript"));
     });
 
