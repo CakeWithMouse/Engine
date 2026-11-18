@@ -1,6 +1,9 @@
 # ИИ: общий инструмент и стратегический слой
 
-Дата: 2026-11-13. Статус: реализовано, этапы 1–10 и 12. Этап 11 заменён: графического редактора нет, автомат выбирается по имени из C++. Код: `Engine/Include/Engine/AI`, `Engine/Source/AI`; тесты: `Engine/tests/ai`; живой пример: `Battle --ai`. Схемы: [AI-DESIGN.html](AI-DESIGN.html). Как писать ИИ на C++: [AI-CPP-GUIDE.md](AI-CPP-GUIDE.md).
+Обновлено для 0.4.0. Автоматы задаются на C++ или в [файлах .fsm через редактор](AI-FSM.md).
+Код: `Engine/Include/Engine/AI`, `Engine/Source/AI`; тесты: `Engine/tests/ai`;
+живой пример: `Battle --ai`. Исторические схемы архитектуры:
+[AI-DESIGN.html](AI-DESIGN.html). Текущий C++ API: [AI-CPP-GUIDE.md](AI-CPP-GUIDE.md).
 
 ## Коротко
 
