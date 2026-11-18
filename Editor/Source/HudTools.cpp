@@ -175,18 +175,21 @@ void EditorMainWindow::BuildToolsMenu()
         nullptr
     });
 
-    aiMenu_ = menuBar()->addMenu(Tr("ИИ", "AI"));
-    aiMenu_->addAction(Tr("Открыть редактор AI Machine…", "Open AI Machine Editor…"), this, [this] {
+    toolsMenu_ = menuBar()->addMenu(Tr("Инструменты", "Tools"));
+    aiMenu_ = toolsMenu_->addMenu(Tr("ИИ", "AI"));
+    aiMenu_->addAction(Tr("Навигация", "Navigation"), this, [] {
+        CommandRegistry::Instance().Execute(QStringLiteral("View.ToggleAiDiagnostics"));
+    });
+    aiMenu_->addAction(Tr("Диагностика", "Diagnostics"), this, [] {
+        CommandRegistry::Instance().Execute(QStringLiteral("Tools.ToggleAiDiagnostics"));
+    });
+    aiMenu_->addAction(Tr("Открыть редактор автомата ИИ…", "Open AI Machine Editor…"), this, [this] {
         AssetPickerDialog picker(EditorCore::AssetKind::AiMachine, QString::fromUtf8(host_->host().contentRoot), QString(), this);
         if (picker.exec() == QDialog::Accepted && !picker.SelectedVirtualPath().isEmpty()) {
             OpenAiMachineEditor(picker.SelectedVirtualPath());
         }
     });
-    aiMenu_->addAction(Tr("Навигация и диагностика", "Navigation and Diagnostics"), this, [] {
-        CommandRegistry::Instance().Execute(QStringLiteral("Tools.ToggleAiDiagnostics"));
-    });
 
-    toolsMenu_ = menuBar()->addMenu(Tr("Инструменты", "Tools"));
     uiSubMenu_ = toolsMenu_->addMenu(Tr("Интерфейс (UI)", "Interface (UI)"));
     actCreateUI_ = uiSubMenu_->addAction(Tr("Создать интерфейс…", "Create UI…"), this, [this] {
         CommandRegistry::Instance().Execute(QStringLiteral("UI.Create"));

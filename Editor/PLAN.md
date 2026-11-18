@@ -17,7 +17,7 @@
 - [x] А2. Папка: в инспекторе только Общие+Трансформация (без Скрипт/Физика/АИ/компонентов); у Empty скрипт остаётся
 - [x] А3. Инспектор: двойной отступ между карточками Трансформация/Скрипт; заголовок «Параметры» обрезан
 - [x] А4. UI-редактор: правая панель (секции нулевой высоты) — layout fix
-- [ ] А5. Меню «ИИ» → подменю внутри «Инструменты», отдельную вкладку убрать
+- [x] А5. Меню «ИИ» → подменю внутри «Инструменты», отдельную вкладку убрать
 - [ ] А6. InfoButton: clamp попапа в экран, непустой текст, ~360px, скролл; кнопка в тулбар графа
 - [ ] Контрольная точка А (Debug + check -Quick + слои + wc + визуальный просмотр)
 - [ ] Б1. Visual Script: общая верхняя панель, таблица переменных, Int/Float, консоль с плейсхолдером
@@ -38,6 +38,8 @@
     - А3 (обрезанный «Параметры»): заголовок секции схемы — `QToolButton` (`PropertySection.h`); селектор `QToolButton[objectName^="Section."]` в QSS ненадёжен (оператор `^=`), кнопка наследовала generic `QToolButton { padding: 4px 8px; border: 1px }` — при фиксированной высоте 22px текст обрезался сверху. Правка: свойство `cardHeader=true` + селектор `QToolButton[cardHeader="true"]` (padding 0 8px, border none, height 22) в EditorStyles.cpp — тот же стиль, что у `CardHeaderBtn`. Тип виджета не менялся, тесты-локаторы по objectName не затронуты.
 
 3. **А4 (fix(editor)):** Правая панель UI-редактора, секции нулевой высоты. Причина: `UIEditorWindow_Inspector.cpp` создавал `new QFormLayout(card->Content())`, но `Content()` уже владеет `QVBoxLayout` из конструктора `CollapsibleCard` (CollapsibleCard.h:53-56) — Qt отклоняет второй top-level layout («Attempting to set QLayout which already has a layout»), форма не устанавливалась, все поля оставались без управления layout и секции имели нулевую высоту. Правка: все 4 формы (Общие/Макет/Вид/Поведение) создаются без родителя и добавляются через `card->ContentLayout()->addLayout(form)`; margins формы 0 (отступы уже у ContentLayout = CardMargins 6,4,6,4), spacing 4, ExpandingFieldsGrow. Секции развёрнуты по умолчанию (CollapsibleCard expanded=true). QScrollArea widgetResizable уже был (BuildInspector).
+
+4. **А5 (fix(editor)):** Меню «ИИ» перенесено внутрь «Инструменты» как подменю (`HudTools.cpp BuildToolsMenu`): «Навигация» → существующая команда `View.ToggleAiDiagnostics` (оверлей навигации, SettingsService ai/enabled), «Диагностика» → `Tools.ToggleAiDiagnostics` (dock-панель), «Открыть редактор автомата ИИ…» → AssetPickerDialog + OpenAiMachineEditor. Отдельная вкладка menuBar убрана; `aiMenu_` исключён из цикла перестановки top-level меню в MainWindow.cpp:277 (иначе его menuAction добавлялся бы обратно в menuBar). RetranslateUi (MainWindow.cpp:1617) продолжает обновлять заголовок подменю.
 
 ### Вопросы к Юрию (Итерация 3)
 *(заполняются по мере необходимости, с решением по умолчанию)*

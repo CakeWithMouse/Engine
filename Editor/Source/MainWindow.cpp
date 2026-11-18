@@ -274,7 +274,7 @@ void EditorMainWindow::BuildUi()
     BuildSceneMenu();
     BuildCodeTools();
     BuildToolsMenu();
-    for (auto* menu : { sceneMenu_, editMenu_, viewMenu_, playMenu_, projectMenu_, aiMenu_, toolsMenu_ }) {
+    for (auto* menu : { sceneMenu_, editMenu_, viewMenu_, playMenu_, projectMenu_, toolsMenu_ }) {
         if (menu) {
             auto* action = menu->menuAction();
             menuBar()->removeAction(action);
