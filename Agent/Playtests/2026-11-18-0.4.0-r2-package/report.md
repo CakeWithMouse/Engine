@@ -1,5 +1,9 @@
 # PainEngine 0.4.0 r2 — готовая поставка Windows x64
 
+ZIP: `Engine/build/releases/PainEngine-0.4.0-r2-win64.zip`, 148268134 байта.
+SHA256: `65cbcf1644a74fd60962a684a00df777f9b5568f1a1b286bd032821836b6d0dd`.
+Packaging revision: `02cb6215e5aee110a792dcd1b45c4a0839a0c04b`.
+
 Новый комплект собран отдельно от первого ZIP 0.4.0. Основа — main
 `48901772`, релизные исправления Mesh и уникальных backup из `477728f7`.
 Числовая версия Engine/SDK остаётся 0.4.0; revision в manifest — r2.
@@ -42,3 +46,16 @@ ZIP создаётся только после VALIDATION.json. `Test-ReleaseArc
 SHA256 ZIP и CRC, безопасно распаковывает в новый каталог и сверяет SHA256
 каждого файла. После этого `Test-ReleasePackage.ps1 -SmokeOnly` повторяет
 запуски из распаковки. GitHub Release не создаётся; ZIP сохраняется локально.
+
+ZIP SHA256 и CRC прошли, все 1580 SHA256 совпали после новой распаковки:
+[extraction-integrity.json](extraction-integrity.json). Последний fetch перед
+публикацией подтвердил тот же origin/main `48901772`; удалённая release-ветка
+оставалась на прежнем `b4a10514`, конфликтующих публикаций не было.
+
+Все 19/19 запусков из новой распаковки прошли:
+[extracted-VALIDATION.json](extracted-VALIDATION.json),
+[журнал](extracted-validation.log). Рядом с ZIP сохранены `.sha256` и
+`.zip.validation.json` с полной проверкой папки, распаковки и целостности.
+Отправка release/v0.4.0 в https://github.com/CakeWithMouse/Engine.git
+авторизована пользователем ранее и выполняется обычным push после фиксации
+этого аудита. Ветка main не публикуется.

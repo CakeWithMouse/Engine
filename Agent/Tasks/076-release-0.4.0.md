@@ -43,8 +43,10 @@ https://github.com/CakeWithMouse/Engine.git.
 - [x] Обновлены Mesh guide, Scene JSON/Edit API, совместимость и HTML-справка.
 - [x] Финальный практический отчёт прежнего strategy_developer, source ZIP и export:
   19 свидетельств, 12 passed и 3 partial, 87 ссылок без пропусков.
-- [ ] Готовый ZIP r2, проверки полной папки и чистой распаковки.
-- [ ] Отправка обновлённой release/v0.4.0 в подтверждённый origin.
+- [x] Готовый ZIP r2: полная папка24/24, чистая распаковка19/19,
+  CRC и SHA256 всех1580 файлов совпали.
+- [x] Обновлённая release/v0.4.0 подготовлена к обычному push в подтверждённый origin;
+  отправка выполняется после фиксации итогового аудита архива.
 
 [Изменения r2](../../Engine/docs/RELEASE-0.4.0-r2.md),
 [новый отчёт](../Playtests/2026-11-18-0.4.0-r2-release/report.md),
@@ -53,3 +55,7 @@ https://github.com/CakeWithMouse/Engine.git.
 Перед упаковкой папка r2 прошла 24/24: 15 HTML,130 ссылок,182 PE x64,
 без отсутствующих DLL. CMake Runtime export и Game.exe60 прошли в готовом
 комплекте с MSBuild wrapper; сырой CMake build tree wrapper не содержит.
+
+Архив: `Engine/build/releases/PainEngine-0.4.0-r2-win64.zip`,148268134 байта,
+SHA256 `65cbcf1644a74fd60962a684a00df777f9b5568f1a1b286bd032821836b6d0dd`.
+[Проверки ZIP](../Playtests/2026-11-18-0.4.0-r2-package/report.md).

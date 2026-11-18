@@ -1,0 +1,124 @@
+{
+  "limitations": [
+    "Manual panel interactions remained partial in the earlier playtest; see release notes.",
+    "Linux, macOS and clang-cl were not tested for this archive."
+  ],
+  "version": "0.4.0",
+  "checks": [
+    {
+      "log": "files-validation.json",
+      "status": "passed",
+      "name": "files-and-dependencies"
+    },
+    {
+      "log": "game-BasicExamples.log",
+      "status": "passed",
+      "name": "game-BasicExamples",
+      "exitCode": 0
+    },
+    {
+      "log": "game-Pong.log",
+      "status": "passed",
+      "name": "game-Pong",
+      "exitCode": 0
+    },
+    {
+      "log": "game-SunGame.log",
+      "status": "passed",
+      "name": "game-SunGame",
+      "exitCode": 0
+    },
+    {
+      "log": "game-Battle.log",
+      "status": "passed",
+      "name": "game-Battle",
+      "exitCode": 0
+    },
+    {
+      "log": "game-Katamari.log",
+      "status": "passed",
+      "name": "game-Katamari",
+      "exitCode": 0
+    },
+    {
+      "log": "game-RuntimeExample.log",
+      "status": "passed",
+      "name": "game-RuntimeExample",
+      "exitCode": 0
+    },
+    {
+      "log": "editor-BasicExamples.log",
+      "status": "passed",
+      "name": "editor-BasicExamples",
+      "exitCode": 0
+    },
+    {
+      "log": "editor-Pong.log",
+      "status": "passed",
+      "name": "editor-Pong",
+      "exitCode": 0
+    },
+    {
+      "log": "editor-SunGame.log",
+      "status": "passed",
+      "name": "editor-SunGame",
+      "exitCode": 0
+    },
+    {
+      "log": "editor-Battle.log",
+      "status": "passed",
+      "name": "editor-Battle",
+      "exitCode": 0
+    },
+    {
+      "log": "editor-RuntimeExample.log",
+      "status": "passed",
+      "name": "editor-RuntimeExample",
+      "exitCode": 0
+    },
+    {
+      "log": "sample-AiTutorial-game.log",
+      "status": "passed",
+      "name": "sample-AiTutorial-game",
+      "exitCode": 0
+    },
+    {
+      "log": "sample-AiTutorial-editor.log",
+      "status": "passed",
+      "name": "sample-AiTutorial-editor",
+      "exitCode": 0
+    },
+    {
+      "log": "sample-RepairCorridor-game.log",
+      "status": "passed",
+      "name": "sample-RepairCorridor-game",
+      "exitCode": 0
+    },
+    {
+      "log": "sample-RepairCorridor-editor.log",
+      "status": "passed",
+      "name": "sample-RepairCorridor-editor",
+      "exitCode": 0
+    },
+    {
+      "log": "create-project.log",
+      "status": "passed",
+      "name": "create-project",
+      "exitCode": 0
+    },
+    {
+      "log": "project-game.log",
+      "status": "passed",
+      "name": "project-game",
+      "exitCode": 0
+    },
+    {
+      "log": "project-editor.log",
+      "status": "passed",
+      "name": "project-editor",
+      "exitCode": 0
+    }
+  ],
+  "scope": "extracted archive smoke",
+  "status": "passed"
+}
