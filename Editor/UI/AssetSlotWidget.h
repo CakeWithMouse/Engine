@@ -37,16 +37,6 @@ public:
         display_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
         l->addWidget(display_, 1);
 
-        clearBtn_ = new QToolButton(this);
-        clearBtn_->setIcon(IconProvider::TrashIcon());
-        clearBtn_->setIconSize(QSize(14, 14));
-        clearBtn_->setFixedSize(InspectorCardStyle::kFieldHeight, InspectorCardStyle::kFieldHeight);
-        clearBtn_->setEnabled(false);
-        QObject::connect(clearBtn_, &QToolButton::clicked, [this] {
-            if (onClearRequested) onClearRequested();
-        });
-        l->addWidget(clearBtn_);
-
         RetranslateUi();
         langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
             RetranslateUi();
@@ -76,7 +66,6 @@ public:
 
     void RetranslateUi()
     {
-        if (clearBtn_) clearBtn_->setToolTip(Tr("Очистить слот", "Clear slot"));
     }
 
     void SetContentRoot(const QString& root) { contentRoot_ = root; }
@@ -86,12 +75,11 @@ public:
         rawPath_ = rawPath;
         display_->setText(formatted.isEmpty() ? rawPath : formatted);
         display_->setToolTip(rawPath);
-        clearBtn_->setEnabled(!rawPath.isEmpty());
     }
 
     void SetPlaceholderText(const QString& text) { display_->setPlaceholderText(text); }
     void SetReadOnly(bool ro) { display_->setReadOnly(ro); }
-    void SetSlotEnabled(bool en) { display_->setEnabled(en); clearBtn_->setEnabled(en && !rawPath_.isEmpty()); }
+    void SetSlotEnabled(bool en) { display_->setEnabled(en); }
     void SetErrorStyle(bool error, const QString& tip = QString())
     {
         if (error)
@@ -107,7 +95,7 @@ public:
     }
 
     QLineEdit* LineEdit() const { return display_; }
-    QToolButton* ClearButton() const { return clearBtn_; }
+    QToolButton* ClearButton() const { return nullptr; }
     QString RawPath() const { return rawPath_; }
 
     std::function<void(const QString& path)> onAssetDropped;
@@ -151,6 +139,5 @@ private:
     QString contentRoot_;
     QString rawPath_;
     QLineEdit* display_ = nullptr;
-    QToolButton* clearBtn_ = nullptr;
     int langSubId_ = 0;
 };
