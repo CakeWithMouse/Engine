@@ -111,6 +111,8 @@ inline int RunDragDropTests()
     CheckDragDrop(action(DragSource::Hierarchy, DropTarget::Viewport, AssetKind::Unknown) == DropAction::None, "Hierarchy->Viewport disallowed");
     CheckDragDrop(action(DragSource::GraphVariable, DropTarget::GraphCanvas, AssetKind::Unknown) == DropAction::CreateVariableNode, "Variable->Graph Get/Set node");
     CheckDragDrop(action(DragSource::UiPalette, DropTarget::UiCanvas, AssetKind::Unknown) == DropAction::AddUiWidget, "UiPalette->Canvas widget");
+    CheckDragDrop(action(DragSource::UiPalette, DropTarget::Hierarchy, AssetKind::Unknown) == DropAction::AddUiWidget, "UiPalette->Hierarchy widget");
+    CheckDragDrop(action(DragSource::UiPalette, DropTarget::Viewport, AssetKind::Unknown) == DropAction::None, "UiPalette->Viewport disallowed");
     CheckDragDrop(action(DragSource::ContentBrowser, DropTarget::Viewport, AssetKind::Unknown) == DropAction::None, "Unknown kind disallowed");
 
     // --- Allowed decisions carry a command id ---

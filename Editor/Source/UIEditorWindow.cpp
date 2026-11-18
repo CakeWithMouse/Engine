@@ -47,7 +47,8 @@ QIcon TypeIcon(const QString& type) {
 }
 
 // Palette of engine widget types; dragging an item onto the canvas adds that widget at the
-// drop point (DropRules UiPalette -> UiCanvas, "UI.AddWidget"). Only engine-supported types.
+// drop point, dragging into the hierarchy adds it to the container under the cursor
+// (DropRules UiPalette -> UiCanvas/Hierarchy, "UI.AddWidget"). Only engine-supported types.
 class UIPaletteList : public QListWidget {
 public:
     using QListWidget::QListWidget;
@@ -99,19 +100,6 @@ UIEditorWindow::UIEditorWindow(EditorQtHost* host, const QString& file, QWidget*
 
     tools->addSeparator();
 
-    const struct { const char* type; const char* ru; const char* en; } elemTypes[] = {
-        {"Panel", "Добавить панель", "Add Panel"},
-        {"Label", "Добавить текст", "Add Label"},
-        {"Button", "Добавить кнопку", "Add Button"},
-        {"Bar", "Добавить полосу прогресса", "Add Progress Bar"},
-        {"Group", "Добавить группу", "Add Group"}
-    };
-    for (const auto& item : elemTypes) {
-        auto* action = tools->addAction(TypeIcon(QString::fromLatin1(item.type)), QString::fromLatin1(item.type), this, [this, t = QString::fromLatin1(item.type)] { AddElement(t); });
-        action->setObjectName("UIAdd" + QString::fromLatin1(item.type));
-        action->setToolTip(Tr(item.ru, item.en));
-    }
-
     deleteAction_ = tools->addAction(IconProvider::TrashIcon(), Tr("Удалить", "Delete"), this, [this] { DeleteSelected(); });
     deleteAction_->setObjectName("UIDelete");
     deleteAction_->setToolTip(Tr("Удалить выбранный элемент (Delete)", "Delete selected element (Delete)"));
@@ -126,11 +114,17 @@ UIEditorWindow::UIEditorWindow(EditorQtHost* host, const QString& file, QWidget*
 
     tools->addSeparator();
 
-    gridAction_ = tools->addAction(IconProvider::SnapIcon(), Tr("Сетка", "Grid"), this, [this](bool on) { if (canvas_) canvas_->SetGrid(on); });
+    gridAction_ = tools->addAction(IconProvider::GetIcon(QStringLiteral("layout-grid")), Tr("Сетка", "Grid"), this, [this](bool on) { if (canvas_) canvas_->SetGrid(on); });
     gridAction_->setCheckable(true);
     gridAction_->setChecked(true);
     gridAction_->setObjectName("UIGrid");
     gridAction_->setToolTip(Tr("Включить/выключить сетку", "Toggle Grid"));
+
+    snapAction_ = tools->addAction(IconProvider::SnapIcon(), Tr("Привязка", "Snap"), this, [this](bool on) { if (canvas_) canvas_->SetSnap(on); });
+    snapAction_->setCheckable(true);
+    snapAction_->setChecked(false);
+    snapAction_->setObjectName("UISnap");
+    snapAction_->setToolTip(Tr("Привязка к сетке при перетаскивании (шаг 40)", "Snap to grid while dragging (step 40)"));
 
     tools->addSeparator();
 
@@ -139,8 +133,8 @@ UIEditorWindow::UIEditorWindow(EditorQtHost* host, const QString& file, QWidget*
     helpBtn_->SetToolbarStyle(true);
     helpBtn_->SetInfoText(
         Tr("Редактор интерфейса", "UI Editor"),
-        Tr("• СКМ или Пробел+ЛКМ: панорамирование холста\n• Колесо мыши: масштабирование к курсору\n• Перетаскивание из палитры: добавление виджета в точку отпускания\n• Дерево иерархии: переупорядочивание и вложенность элементов",
-           "• MMB or Space+LMB: pan canvas\n• Mouse wheel: zoom to cursor\n• Drag from palette: add widget at drop location\n• Hierarchy tree: reorder and nest elements"),
+        Tr("• СКМ или Пробел+ЛКМ: панорамирование холста\n• Колесо мыши: масштабирование к курсору\n• Палитра: перетащите тип на холст или в иерархию; двойной щелчок добавляет в выбранную панель\n• Магнит: привязка к сетке при перетаскивании (шаг 40)\n• Дерево иерархии: переупорядочивание и вложенность элементов",
+           "• MMB or Space+LMB: pan canvas\n• Mouse wheel: zoom to cursor\n• Palette: drag a type onto the canvas or into the hierarchy; double-click adds to the selected panel\n• Magnet: snap to grid while dragging (step 40)\n• Hierarchy tree: reorder and nest elements"),
         QString());
     tools->addWidget(helpBtn_);
 
@@ -152,10 +146,12 @@ UIEditorWindow::UIEditorWindow(EditorQtHost* host, const QString& file, QWidget*
     leftLayout->setContentsMargins(0, 0, 0, 0);
     leftLayout->setSpacing(2);
 
+    hierarchyHeader_ = EditorWindowSetup::MakePanelHeader(Tr("Иерархия", "Hierarchy"), left);
+    leftLayout->addWidget(hierarchyHeader_);
     auto* hierarchy = new UIHierarchyTree(left);
     hierarchy->editor = this;
     tree_ = hierarchy;
-    tree_->setHeaderLabel(Tr("Иерархия", "Hierarchy"));
+    tree_->setHeaderHidden(true);
     tree_->setObjectName("UIHierarchy");
     tree_->setAlternatingRowColors(true);
     tree_->setIndentation(16);
@@ -167,26 +163,41 @@ UIEditorWindow::UIEditorWindow(EditorQtHost* host, const QString& file, QWidget*
     tree_->setSelectionMode(QAbstractItemView::SingleSelection);
     leftLayout->addWidget(tree_, 1);
 
+    paletteHeader_ = EditorWindowSetup::MakePanelHeader(Tr("Палитра", "Palette"), left);
+    leftLayout->addWidget(paletteHeader_);
     auto* palette = new UIPaletteList(left);
     palette->setObjectName("UIPalette");
+    palette->setIconSize(QSize(16, 16));
+    palette->setSpacing(1);
+    const struct { const char* type; } elemTypes[] = {{"Panel"}, {"Label"}, {"Button"}, {"Bar"}, {"Group"}};
     for (const auto& item : elemTypes) {
         auto* pItem = new QListWidgetItem(TypeIcon(QString::fromLatin1(item.type)), QString::fromLatin1(item.type), palette);
-        pItem->setToolTip(Tr("Перетащите на холст для добавления", "Drag to canvas to add"));
+        pItem->setSizeHint(QSize(0, 28));
+        pItem->setToolTip(Tr("Перетащите на холст или в иерархию; двойной щелчок — добавить в выбранную панель",
+                             "Drag onto the canvas or into the hierarchy; double-click adds to the selected panel"));
     }
     palette->setDragEnabled(true);
     palette->setDragDropMode(QAbstractItemView::DragOnly);
-    palette->setMaximumHeight(150);
-    palette->setToolTip(Tr("Перетащите тип на холст", "Drag a type onto the canvas"));
+    palette->setMaximumHeight(160);
+    palette->setToolTip(Tr("Перетащите тип на холст или в иерархию", "Drag a type onto the canvas or into the hierarchy"));
+    connect(palette, &QListWidget::itemDoubleClicked, this, [this](QListWidgetItem* item) { AddElement(item->text()); });
     leftLayout->addWidget(palette);
 
     canvas_ = new UICanvas(this);
     split->addWidget(canvas_);
 
-    auto* scroll = new QScrollArea(split);
+    auto* right = new QWidget(split);
+    auto* rightLayout = new QVBoxLayout(right);
+    rightLayout->setContentsMargins(0, 0, 0, 0);
+    rightLayout->setSpacing(0);
+    propsHeader_ = EditorWindowSetup::MakePanelHeader(Tr("Свойства", "Properties"), right);
+    rightLayout->addWidget(propsHeader_);
+    auto* scroll = new QScrollArea(right);
     auto* props = new QWidget(scroll);
     scroll->setWidget(props);
     BuildInspector(props, scroll);
-    split->addWidget(scroll);
+    rightLayout->addWidget(scroll, 1);
+    split->addWidget(right);
 
     split->setSizes({220, 700, 280});
     split->setStretchFactor(1, 1);
@@ -288,10 +299,11 @@ void UIEditorWindow::Select(UIElement* element) {
     canvas_->update();
 }
 
-void UIEditorWindow::AddElement(const QString& type) { InsertNewElement(type, 16, 16); }
-void UIEditorWindow::AddElementAt(const QString& type, const QPointF& pos) { InsertNewElement(type, float(pos.x()), float(pos.y())); }
+void UIEditorWindow::AddElement(const QString& type) { InsertNewElement(type, 16, 16, nullptr); }
+void UIEditorWindow::AddElementAt(const QString& type, const QPointF& pos) { InsertNewElement(type, float(pos.x()), float(pos.y()), nullptr); }
+void UIEditorWindow::AddElementTo(const QString& type, UIElement* parent) { if (parent) InsertNewElement(type, 16, 16, parent); }
 
-void UIEditorWindow::InsertNewElement(const QString& type, float x, float y) {
+void UIEditorWindow::InsertNewElement(const QString& type, float x, float y, UIElement* parent) {
     if (!root_) return;
     std::unique_ptr<UIElement> next;
     if (type == QStringLiteral("Panel")) next = std::make_unique<UIPanel>();
@@ -306,8 +318,10 @@ void UIEditorWindow::InsertNewElement(const QString& type, float x, float y) {
     const bool box = (type == QStringLiteral("Panel") || type == QStringLiteral("Group"));
     next->Rect = {UIAnchor::TopLeft, x, y, box ? 320.0f : 200.0f, box ? 180.0f : 36.0f};
 
-    auto* parent = selected_ ? selected_ : root_.get();
-    while (parent != root_.get() && Type(parent) != "Panel" && Type(parent) != "Group") parent = parent->GetParent();
+    if (!parent) {
+        parent = selected_ ? selected_ : root_.get();
+        while (parent != root_.get() && Type(parent) != "Panel" && Type(parent) != "Group") parent = parent->GetParent();
+    }
     Checkpoint();
     selected_ = parent->Add(std::move(next));
     Changed();

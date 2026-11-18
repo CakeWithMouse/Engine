@@ -15,6 +15,8 @@ class QPushButton;
 class QAction;
 class QFormLayout;
 class QDropEvent;
+class QDragEnterEvent;
+class QDragMoveEvent;
 class UICanvas;
 class EditorQtHost;
 class CollapsibleCard;
@@ -29,6 +31,8 @@ public:
     bool ConfirmClose();
     void AddElement(const QString& type);
     void AddElementAt(const QString& type, const QPointF& pos);
+    // Добавление из палитры в конкретный контейнер дерева (drop в иерархию).
+    void AddElementTo(const QString& type, UIElement* parent);
     void DeleteSelected();
     void Select(UIElement* element);
     UIElement* Root() const { return root_.get(); }
@@ -47,7 +51,7 @@ private:
     void BuildInspector(QWidget* props, class QScrollArea* scroll);
     void RefreshInspector();
     bool ApplyInspector();
-    void InsertNewElement(const QString& type, float x, float y);
+    void InsertNewElement(const QString& type, float x, float y, UIElement* parent);
     void PushUndo(const std::string& snapshot);
     void RestoreSnapshot(const std::string& text);
     void UpdateHistoryActions();
@@ -75,6 +79,10 @@ private:
     QAction* undoAction_ = nullptr;
     QAction* redoAction_ = nullptr;
     QAction* gridAction_ = nullptr;
+    QAction* snapAction_ = nullptr;
+    QLabel* hierarchyHeader_ = nullptr;
+    QLabel* paletteHeader_ = nullptr;
+    QLabel* propsHeader_ = nullptr;
     QLabel* labelName_ = nullptr;
     QLabel* labelText_ = nullptr;
     QLabel* labelRect_[4]{};
@@ -103,10 +111,13 @@ private:
 
 // Hierarchy tree with internal drag: dropping on a container reparents, dropping above or below
 // a sibling reorders. The drop mutates the engine tree through MoveElement, then rebuilds.
+// Palette drops (UiWidgetDrag mime) add a new widget into the container under the cursor.
 class UIHierarchyTree : public QTreeWidget {
 public:
     using QTreeWidget::QTreeWidget;
     UIEditorWindow* editor = nullptr;
 protected:
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dragMoveEvent(QDragMoveEvent* event) override;
     void dropEvent(QDropEvent* event) override;
 };

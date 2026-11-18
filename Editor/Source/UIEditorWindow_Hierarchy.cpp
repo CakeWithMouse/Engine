@@ -1,4 +1,8 @@
 #include "UIEditorWindow.h"
+#include "UiWidgetDrag.h"
+#include "DropRules.h"
+#include <QDragEnterEvent>
+#include <QDragMoveEvent>
 #include <QDropEvent>
 #include <QTreeWidgetItem>
 
@@ -18,8 +22,32 @@ bool IsContainer(UIElement* e) {
 }
 }
 
+// InternalMove отбрасывает внешние источники до dropEvent; палитру принимаем поверх базового
+// обработчика, чтобы дерево продолжало показывать индикатор и принимать свои же перемещения.
+void UIHierarchyTree::dragEnterEvent(QDragEnterEvent* event) {
+    QTreeWidget::dragEnterEvent(event);
+    if (EditorCore::UiWidgetDrag::HasMime(*event->mimeData())) event->acceptProposedAction();
+}
+
+void UIHierarchyTree::dragMoveEvent(QDragMoveEvent* event) {
+    QTreeWidget::dragMoveEvent(event);
+    if (EditorCore::UiWidgetDrag::HasMime(*event->mimeData())) event->acceptProposedAction();
+}
+
 void UIHierarchyTree::dropEvent(QDropEvent* event) {
     if (!editor) { event->ignore(); return; }
+    if (EditorCore::UiWidgetDrag::HasMime(*event->mimeData())) {
+        const auto payload = EditorCore::UiWidgetDrag::FromMime(*event->mimeData());
+        const auto decision = EditorCore::DecideDrop(EditorCore::DragSource::UiPalette, EditorCore::DropTarget::Hierarchy, EditorCore::AssetKind::Unknown);
+        if (payload.type.isEmpty() || !decision.allowed) { event->ignore(); return; }
+        auto* parent = ElementOf(itemAt(event->position().toPoint()));
+        while (parent && !IsContainer(parent)) parent = parent->GetParent();
+        if (!parent) parent = editor->Root();
+        if (!parent) { event->ignore(); return; }
+        editor->AddElementTo(payload.type, parent);
+        event->acceptProposedAction();
+        return;
+    }
     auto* element = ElementOf(currentItem());
     if (!element) { event->ignore(); return; }
     auto* target = ElementOf(itemAt(event->position().toPoint()));

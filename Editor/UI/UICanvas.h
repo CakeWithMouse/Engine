@@ -23,6 +23,7 @@
 #include <d3d11.h>
 #include <wrl/client.h>
 #include <algorithm>
+#include <cmath>
 
 // Preview consumes the engine's actual Layout/Build output and GDI font atlas.
 // Only the final quad compositing is done by Qt; no duplicate layout or widget renderer.
@@ -51,8 +52,13 @@ public:
                 atlas_.setPixelColor(x, y, QColor(255, 255, 255, atlas_.pixelColor(x, y).red()));
     }
     QSize resolution{1280, 720};
+    static constexpr float GridStep = 40.0f;
     bool Ready() const { return !atlas_.isNull(); }
     void SetGrid(bool on) { grid_ = on; update(); }
+    void SetSnap(bool on) { snap_ = on; }
+    QPointF Snapped(const QPointF& pos) const {
+        return snap_ ? QPointF(std::round(pos.x() / GridStep) * GridStep, std::round(pos.y() / GridStep) * GridStep) : pos;
+    }
     void Layout() { if (auto* root = editor_->Root()) root->Layout({0, 0, float(resolution.width()), float(resolution.height())}); }
 
     double GetBaseScale() const {
@@ -86,8 +92,8 @@ protected:
 
         if (grid_) {
             p.setPen(QPen(QColor("#384250"), 1.0 / scale_));
-            for (int x = 40; x < resolution.width(); x += 40) p.drawLine(x, 0, x, resolution.height());
-            for (int y = 40; y < resolution.height(); y += 40) p.drawLine(0, y, resolution.width(), y);
+            for (int x = int(GridStep); x < resolution.width(); x += int(GridStep)) p.drawLine(x, 0, x, resolution.height());
+            for (int y = int(GridStep); y < resolution.height(); y += int(GridStep)) p.drawLine(0, y, resolution.width(), y);
         }
 
         Layout();
@@ -194,6 +200,10 @@ protected:
         e->Rect.Height = original_.Height;
         e->Rect.X = original_.X + float(delta.x()) * (a % 3 == 2 ? -1 : 1);
         e->Rect.Y = original_.Y + float(delta.y()) * (a / 3 == 2 ? -1 : 1);
+        if (snap_) {
+            e->Rect.X = std::round(e->Rect.X / GridStep) * GridStep;
+            e->Rect.Y = std::round(e->Rect.Y / GridStep) * GridStep;
+        }
         editor_->Changed();
         editor_->Select(e);
     }
@@ -260,12 +270,12 @@ protected:
         const double baseScale = GetBaseScale();
         scale_ = baseScale * zoom_;
         const QPointF origin = GetOrigin(scale_);
-        editor_->AddElementAt(payload.type, (event->position() - origin) / scale_);
+        editor_->AddElementAt(payload.type, Snapped((event->position() - origin) / scale_));
         event->acceptProposedAction();
     }
 private:
     UIEditorWindow* editor_; FontAtlas font_; QImage atlas_; QHash<QRgb, QImage> tinted_;
-    double scale_ = 1; double zoom_ = 1; bool grid_ = true; bool drag_ = false; bool checkpointed_ = false;
+    double scale_ = 1; double zoom_ = 1; bool grid_ = true; bool snap_ = false; bool drag_ = false; bool checkpointed_ = false;
     bool panning_ = false; bool isSpacePressed_ = false; bool testCoordMode_ = false;
     QPointF start_; QPointF pan_; QPointF lastPanPos_; UIRect original_;
 };

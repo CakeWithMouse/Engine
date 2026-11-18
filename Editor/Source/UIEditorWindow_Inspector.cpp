@@ -204,7 +204,10 @@ void UIEditorWindow::RetranslateUi() {
     if (undoAction_) { undoAction_->setText(Tr("Отменить", "Undo")); undoAction_->setToolTip(Tr("Отменить: Ctrl+Z", "Undo: Ctrl+Z")); }
     if (redoAction_) { redoAction_->setText(Tr("Повторить", "Redo")); redoAction_->setToolTip(Tr("Повторить: Ctrl+Y", "Redo: Ctrl+Y")); }
     if (gridAction_) { gridAction_->setText(Tr("Сетка", "Grid")); gridAction_->setToolTip(Tr("Включить/выключить сетку", "Toggle Grid")); }
-    if (tree_) tree_->setHeaderLabel(Tr("Иерархия", "Hierarchy"));
+    if (snapAction_) { snapAction_->setText(Tr("Привязка", "Snap")); snapAction_->setToolTip(Tr("Привязка к сетке при перетаскивании (шаг 40)", "Snap to grid while dragging (step 40)")); }
+    if (hierarchyHeader_) hierarchyHeader_->setText(Tr("Иерархия", "Hierarchy"));
+    if (paletteHeader_) paletteHeader_->setText(Tr("Палитра", "Palette"));
+    if (propsHeader_) propsHeader_->setText(Tr("Свойства", "Properties"));
     if (cardGeneral_) cardGeneral_->SetTitle(Tr("Общие", "General"));
     if (labelName_) labelName_->setText(Tr("Имя", "Name"));
     if (labelText_) labelText_->setText(Tr("Текст", "Text"));
@@ -230,8 +233,8 @@ void UIEditorWindow::RetranslateUi() {
     if (helpBtn_) {
         helpBtn_->SetInfoText(
             Tr("Редактор интерфейса", "UI Editor"),
-            Tr("• СКМ или Пробел+ЛКМ: панорамирование холста\n• Колесо мыши: масштабирование к курсору\n• Перетаскивание из палитры: добавление виджета в точку отпускания\n• Дерево иерархии: переупорядочивание и вложенность элементов",
-               "• MMB or Space+LMB: pan canvas\n• Mouse wheel: zoom to cursor\n• Drag from palette: add widget at drop location\n• Hierarchy tree: reorder and nest elements"),
+            Tr("• СКМ или Пробел+ЛКМ: панорамирование холста\n• Колесо мыши: масштабирование к курсору\n• Палитра: перетащите тип на холст или в иерархию; двойной щелчок добавляет в выбранную панель\n• Магнит: привязка к сетке при перетаскивании (шаг 40)\n• Дерево иерархии: переупорядочивание и вложенность элементов",
+               "• MMB or Space+LMB: pan canvas\n• Mouse wheel: zoom to cursor\n• Palette: drag a type onto the canvas or into the hierarchy; double-click adds to the selected panel\n• Magnet: snap to grid while dragging (step 40)\n• Hierarchy tree: reorder and nest elements"),
             QString());
     }
     RefreshInspector();

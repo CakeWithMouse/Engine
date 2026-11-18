@@ -26,9 +26,9 @@ DropDecision DecideDrop(DragSource source, DropTarget target, AssetKind kind, bo
     if (source == DragSource::GraphVariable)
         return target == DropTarget::GraphCanvas ? Allow(DropAction::CreateVariableNode, "Graph.CreateVariableNode") : none;
 
-    // Палитра UI-редактора -> виджет на холсте.
+    // Палитра UI-редактора -> виджет на холсте или контейнер в дереве иерархии.
     if (source == DragSource::UiPalette)
-        return target == DropTarget::UiCanvas ? Allow(DropAction::AddUiWidget, "UI.AddWidget") : none;
+        return target == DropTarget::UiCanvas || target == DropTarget::Hierarchy ? Allow(DropAction::AddUiWidget, "UI.AddWidget") : none;
 
     // Внешние файлы (Проводник): импорт в Content Browser; остальные цели требуют импорта.
     if (source == DragSource::Explorer)
