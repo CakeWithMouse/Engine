@@ -12,7 +12,9 @@
 #include <QPoint>
 #include <QRect>
 #include <QScreen>
+#include <QScrollArea>
 #include <QSize>
+#include <QStyle>
 #include <QToolButton>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -176,7 +178,8 @@ public:
         isToolbar_ = toolbar;
         if (isToolbar_)
         {
-            setFixedSize(26, 26);
+            // Match the sibling toolbar QToolButtons: 16px icon + 4px/8px padding + 1px border.
+            setFixedSize(34, 26);
             setIconSize(QSize(16, 16));
         }
         else
@@ -203,11 +206,20 @@ public:
             titleLabel_->setWordWrap(true);
             layout->addWidget(titleLabel_);
 
-            popupLabel_ = new QLabel(popup_);
+            popupScroll_ = new QScrollArea(popup_);
+            popupScroll_->setObjectName(QStringLiteral("InfoPopupScroll"));
+            popupScroll_->setWidgetResizable(true);
+            popupScroll_->setFrameShape(QFrame::NoFrame);
+            popupScroll_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+            popupScroll_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+            layout->addWidget(popupScroll_);
+
+            popupLabel_ = new QLabel(popupScroll_);
             popupLabel_->setObjectName(QStringLiteral("InfoPopupText"));
             popupLabel_->setWordWrap(true);
             popupLabel_->setTextInteractionFlags(Qt::TextSelectableByMouse);
-            layout->addWidget(popupLabel_);
+            popupLabel_->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+            popupScroll_->setWidget(popupLabel_);
         }
         UpdatePopupStyle();
         if (!CurrentTitle().isEmpty())
@@ -219,8 +231,10 @@ public:
         {
             titleLabel_->hide();
         }
-        popupLabel_->setText(CurrentText());
-        popup_->adjustSize();
+        QString text = CurrentText();
+        if (text.trimmed().isEmpty())
+            text = Tr("Описание отсутствует.", "No description available.");
+        popupLabel_->setText(text);
 
         QRect btnRect(mapToGlobal(QPoint(0, 0)), size());
         QScreen* screen = this->screen();
@@ -233,6 +247,18 @@ public:
             screen = QGuiApplication::primaryScreen();
         }
         QRect screenGeom = screen ? screen->availableGeometry() : QRect(0, 0, 1920, 1080);
+
+        // Word-wrapped QLabel::sizeHint ignores the width constraint; measure the
+        // wrapped height explicitly and cap it so long texts scroll instead of
+        // overflowing the screen.
+        const int contentW = InfoButtonGeometry::kMaxPopupWidth - 22;
+        const int sbExtent = style()->pixelMetric(QStyle::PM_ScrollBarExtent, nullptr, popupScroll_);
+        const int textH = popupLabel_->heightForWidth(contentW - sbExtent);
+        const int titleH = titleLabel_->isVisible() ? titleLabel_->heightForWidth(contentW) + 4 : 0;
+        const int maxScrollH = std::max(60, screenGeom.height() - 40 - titleH);
+        popupScroll_->setFixedHeight(std::min(textH + 2, maxScrollH));
+        popup_->adjustSize();
+
         QRect targetRect = InfoButtonGeometry::CalculatePopupGeometry(btnRect, popup_->sizeHint(), screenGeom);
 
         popup_->setGeometry(targetRect);
@@ -307,6 +333,10 @@ private:
             "  font-size: 11px;"
             "  line-height: 1.4;"
             "}"
+            "QScrollArea#InfoPopupScroll, QScrollArea#InfoPopupScroll > QWidget > QWidget {"
+            "  background: transparent;"
+            "  border: none;"
+            "}"
         ).arg(pal.bgPanel.name(), pal.textPrimary.name(), pal.borderMid.name()));
     }
 
@@ -315,6 +345,7 @@ private:
     QString ruText_;
     QString enText_;
     QFrame* popup_{nullptr};
+    QScrollArea* popupScroll_{nullptr};
     QLabel* titleLabel_{nullptr};
     QLabel* popupLabel_{nullptr};
     int langSubId_{0};

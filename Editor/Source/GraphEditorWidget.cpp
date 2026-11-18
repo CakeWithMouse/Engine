@@ -803,10 +803,11 @@ void GraphEditorWidget::BuildToolbar()
     toolbarIndex_ = toolbar_->count();
     auto* overflow = new GraphToolbarOverflow(toolbar_, this);
 
-    toolbar_->addStretch(1);
+    // Help stays visible right after the action buttons, not in the far corner.
     auto* help = MakeGraphHelpButton(this);
     help->setObjectName(prefix + QStringLiteral("Help"));
     toolbar_->addWidget(help);
+    toolbar_->addStretch(1);
     overflow->AddButton(comment, Tr("Комментарий", "Comment"));
     overflow->AddButton(arrange, Tr("Упорядочить", "Arrange"));
     overflow->AddButton(frame, Tr("Показать всё", "Frame all"));
