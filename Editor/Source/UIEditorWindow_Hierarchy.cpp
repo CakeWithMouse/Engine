@@ -1,25 +1,26 @@
 #include "UIEditorWindow.h"
 #include "UiWidgetDrag.h"
 #include "DropRules.h"
+#include "UiReparent.h"
 #include <QDragEnterEvent>
 #include <QDragMoveEvent>
 #include <QDropEvent>
+#include <QKeyEvent>
 #include <QTreeWidgetItem>
 
 namespace {
 UIElement* ElementOf(QTreeWidgetItem* item) {
     return item ? reinterpret_cast<UIElement*>(item->data(0, Qt::UserRole).value<quintptr>()) : nullptr;
 }
-size_t IndexOfChild(UIElement* child) {
-    auto* parent = child->GetParent();
-    if (!parent) return 0;
-    const auto& children = parent->GetChildren();
-    for (size_t i = 0; i < children.size(); ++i) if (children[i].get() == child) return i;
-    return children.size();
 }
-bool IsContainer(UIElement* e) {
-    return !dynamic_cast<UILabel*>(e) && !dynamic_cast<UIButton*>(e) && !dynamic_cast<UIBar*>(e);
-}
+
+void UIHierarchyTree::keyPressEvent(QKeyEvent* event) {
+    if (editor && (event->key() == Qt::Key_Delete || event->key() == Qt::Key_Backspace)) {
+        editor->DeleteSelected();
+        event->accept();
+        return;
+    }
+    QTreeWidget::keyPressEvent(event);
 }
 
 // InternalMove отбрасывает внешние источники до dropEvent; палитру принимаем поверх базового
@@ -41,7 +42,7 @@ void UIHierarchyTree::dropEvent(QDropEvent* event) {
         const auto decision = EditorCore::DecideDrop(EditorCore::DragSource::UiPalette, EditorCore::DropTarget::Hierarchy, EditorCore::AssetKind::Unknown);
         if (payload.type.isEmpty() || !decision.allowed) { event->ignore(); return; }
         auto* parent = ElementOf(itemAt(event->position().toPoint()));
-        while (parent && !IsContainer(parent)) parent = parent->GetParent();
+        while (parent && !EditorCore::UiReparent::IsContainer(parent)) parent = parent->GetParent();
         if (!parent) parent = editor->Root();
         if (!parent) { event->ignore(); return; }
         editor->AddElementTo(payload.type, parent);
@@ -49,33 +50,30 @@ void UIHierarchyTree::dropEvent(QDropEvent* event) {
         return;
     }
     auto* element = ElementOf(currentItem());
-    if (!element) { event->ignore(); return; }
+    if (!element) { event->setDropAction(Qt::IgnoreAction); event->accept(); return; }
     auto* target = ElementOf(itemAt(event->position().toPoint()));
     const auto pos = dropIndicatorPosition();
-    UIElement* newParent = nullptr; size_t index = 0;
-    if (!target || pos == OnViewport) {
-        newParent = editor->Root(); index = newParent ? newParent->GetChildren().size() : 0;
-    } else if (pos == OnItem && IsContainer(target)) {
-        newParent = target; index = target->GetChildren().size();
-    } else {
-        newParent = target->GetParent(); index = IndexOfChild(target) + (pos == BelowItem ? 1 : 0);
+    EditorCore::UiReparent::DropPosition dropPos = EditorCore::UiReparent::OnItem;
+    if (pos == AboveItem) dropPos = EditorCore::UiReparent::AboveItem;
+    else if (pos == BelowItem) dropPos = EditorCore::UiReparent::BelowItem;
+    else if (pos == OnViewport || !target) dropPos = EditorCore::UiReparent::OnViewport;
+
+    UIElement* newParent = nullptr;
+    size_t index = 0;
+    EditorCore::UiReparent::ResolveDropTarget(target, dropPos, editor->Root(), newParent, index);
+    if (newParent) {
+        editor->MoveElement(element, newParent, index);
     }
-    if (!newParent) { event->ignore(); return; }
-    editor->MoveElement(element, newParent, index);
+    event->setDropAction(Qt::IgnoreAction);
     event->accept();
 }
 
 void UIEditorWindow::MoveElement(UIElement* element, UIElement* newParent, size_t index) {
-    if (!element || !newParent || !root_ || element == root_.get() || element == newParent) return;
-    if (!IsContainer(newParent)) return;
-    for (auto* p = newParent; p; p = p->GetParent()) if (p == element) return;
-    auto* oldParent = element->GetParent();
-    if (!oldParent) return;
-    const size_t oldIndex = IndexOfChild(element);
+    if (!EditorCore::UiReparent::CanReparent(element, newParent, root_.get())) return;
     Checkpoint();
-    auto taken = oldParent->TakeChild(element);
-    if (!taken) return;
-    if (newParent == oldParent && index > oldIndex) --index;
-    newParent->InsertChild(index, std::move(taken));
-    selected_ = element; Changed(); RebuildTree(); RefreshInspector();
+    if (!EditorCore::UiReparent::MoveElement(element, newParent, index, root_.get())) return;
+    selected_ = element;
+    Changed();
+    RebuildTree();
+    RefreshInspector();
 }

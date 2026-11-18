@@ -103,6 +103,8 @@ UIEditorWindow::UIEditorWindow(EditorQtHost* host, const QString& file, QWidget*
     deleteAction_ = tools->addAction(IconProvider::TrashIcon(), Tr("Удалить", "Delete"), this, [this] { DeleteSelected(); });
     deleteAction_->setObjectName("UIDelete");
     deleteAction_->setToolTip(Tr("Удалить выбранный элемент (Delete)", "Delete selected element (Delete)"));
+    deleteAction_->setShortcut(QKeySequence::Delete);
+    deleteAction_->setShortcutContext(Qt::WindowShortcut);
 
     tools->addSeparator();
 
@@ -156,7 +158,7 @@ UIEditorWindow::UIEditorWindow(EditorQtHost* host, const QString& file, QWidget*
     tree_->setObjectName("UIHierarchy");
     tree_->setAlternatingRowColors(true);
     tree_->setIndentation(16);
-    tree_->setAnimated(true);
+    tree_->setAnimated(false);
     tree_->setDragEnabled(true);
     tree_->setAcceptDrops(true);
     tree_->setDropIndicatorShown(true);

@@ -244,6 +244,10 @@ protected:
         if (event->key() == Qt::Key_Space && !event->isAutoRepeat()) {
             isSpacePressed_ = true;
             if (!panning_) setCursor(Qt::OpenHandCursor);
+        } else if (editor_ && (event->key() == Qt::Key_Delete || event->key() == Qt::Key_Backspace)) {
+            editor_->DeleteSelected();
+            event->accept();
+            return;
         }
         QWidget::keyPressEvent(event);
     }

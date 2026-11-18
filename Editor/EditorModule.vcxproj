@@ -339,6 +339,7 @@
         <ClInclude Include="Core/ScriptMessages.h"/>
         <ClInclude Include="Core/SceneFile.h"/>
         <ClInclude Include="Core/SceneReparent.h"/>
+        <ClInclude Include="Core/UiReparent.h"/>
         <ClInclude Include="Core/ImportSettings.h"/>
         <ClInclude Include="Core/ModelImportSidecar.h"/>
         <ClInclude Include="Core/ModelImportSidecarTransaction.h"/>

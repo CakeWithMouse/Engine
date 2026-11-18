@@ -98,6 +98,7 @@
         <ClCompile Include="../Core/CodeGraphSchema.cpp"/>
         <ClCompile Include="../Core/ScriptVariableDrag.cpp"/>
         <ClCompile Include="../Core/UiWidgetDrag.cpp"/>
+        <ClCompile Include="../../Engine/Source/UI/UIElement.cpp"/>
         <ClCompile Include="../Core/FsmGraphSchema.cpp"/>
         <ClCompile Include="../Core/ScriptMessages.cpp"/>
         <ClCompile Include="../Core/SceneFile.cpp"/>
@@ -174,6 +175,7 @@
         <ClInclude Include="../Core/ScriptMessages.h"/>
         <ClInclude Include="../Core/SceneFile.h"/>
         <ClInclude Include="../Core/SceneReparent.h"/>
+        <ClInclude Include="../Core/UiReparent.h"/>
         <ClInclude Include="../Core/ImportSettings.h"/>
         <ClInclude Include="../Core/ModelImportSidecar.h"/>
         <ClInclude Include="../Core/ModelImportSidecarTransaction.h"/>
