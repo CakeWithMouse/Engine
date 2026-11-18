@@ -1,0 +1,32 @@
+Using CMake / C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\cl.exe
+-- The CXX compiler identification is MSVC 19.44.35223.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - not found
+-- Found Threads: TRUE
+-- Configuring done (1.8s)
+-- Generating done (0.0s)
+-- Build files have been written to: E:/Engine/Engine/build/playtests/strategy-040-r2/RepairCorridor/Intermediate/CMake/Release/9F5B2F17B7A46CA4
+[0/2] Re-checking globbed directories...
+[1/2] Cleaning all built files...
+Cleaning... 0 files.
+[0/2] Re-checking globbed directories...
+[1/8] C:\WINDOWS\system32\cmd.exe /C "cd /D E:\Engine\Engine\build\playtests\strategy-040-r2\RepairCorridor\Intermediate\CMake\Release\9F5B2F17B7A46CA4 && E:\Engine\build\cmake\editor-Release\bin\Release\Runtime\SDK\bin\ComponentGenerator.exe E:/Engine/Engine/build/playtests/strategy-040-r2/RepairCorridor/Intermediate/CMake/Release/9F5B2F17B7A46CA4/generated/Game/roots.txt E:/Engine/Engine/build/playtests/strategy-040-r2/RepairCorridor/Intermediate/CMake/Release/9F5B2F17B7A46CA4/generated/Game Project"
+ComponentGenerator: 3 component(s), Project
+[2/8] Building CXX object CMakeFiles\Game.dir\Source\ProjectComponent.cpp.obj
+[3/8] Building CXX object CMakeFiles\Game.dir\Source\RotatingCube.cpp.obj
+[4/8] Building CXX object CMakeFiles\Game.dir\generated\Game\GeneratedComponents.cpp.obj
+[5/8] Building CXX object CMakeFiles\Game.dir\Source\Module.cpp.obj
+[6/8] Building CXX object CMakeFiles\Game.dir\Source\ProjectGame.cpp.obj
+[7/8] Linking CXX shared module E:\Engine\Engine\build\playtests\strategy-040-r2\RepairCorridor\Binaries\Release\1978d5aef7f146c39b610e40fc71939a\Game.dll
+
+Full build log: E:\Engine\Engine\build\playtests\strategy-040-r2\RepairCorridor\Binaries\Release\1978d5aef7f146c39b610e40fc71939a\build.log
+Build validated and activated. Use Hot Reload in the editor, or reopen the project.

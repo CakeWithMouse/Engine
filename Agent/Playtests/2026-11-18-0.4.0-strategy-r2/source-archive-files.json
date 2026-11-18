@@ -1,0 +1,177 @@
+[
+  {
+    "path": "Build.ps1",
+    "sha256": "AB1719CF3DC4798B706ABB2269CE42805D13889F21B73F8CC4B0082D8018AEC8",
+    "bytes": 488
+  },
+  {
+    "path": "CMakeLists.txt",
+    "sha256": "812C118C4183022F2A365A9922571F4419745095A94AB6C5E54CD48CDF01FFFA",
+    "bytes": 847
+  },
+  {
+    "path": "Content/MeshPhysicsFixtures/OpenCargo.obj",
+    "sha256": "D87552FD411586F9E2156B56645CE2293FB8508510432C3D344E9419EF9016F0",
+    "bytes": 1144
+  },
+  {
+    "path": "Content/MeshPhysicsFixtures/StaticMeshArch.obj",
+    "sha256": "EA47B24D20BAD13C8C5B0FF8F3B9DF316CD0D8F281B13D12A35A1FDCA750D91A",
+    "bytes": 904
+  },
+  {
+    "path": "Content/Models/auto-multiple/auto-multiple.fbx",
+    "sha256": "6A86D65B01A6FF85D5E07D3ACD48281758BB4777476A248BA40CA04606382248",
+    "bytes": 13371
+  },
+  {
+    "path": "Content/Models/auto-multiple/auto-multiple.fbx.import.json",
+    "sha256": "A357F9CF250257CAC64F05DFDCD79D993A42839BD9A70D8AA709604D512D4071",
+    "bytes": 252
+  },
+  {
+    "path": "Content/Models/auto-multiple/auto-multiple.fbx.importsettings.json",
+    "sha256": "9440FBDE57F4253C0E25AA6A0ADE0A24BFA426D5CDB6E2F55A0E8086CD415527",
+    "bytes": 258
+  },
+  {
+    "path": "Content/Models/auto-multiple/auto-multiple.fbx.source.json",
+    "sha256": "F89439C4A2DF65A0569228597922C84A5E916DF84BCD59C86CF8B8AE0BBD3D91",
+    "bytes": 127
+  },
+  {
+    "path": "Content/Models/auto-multiple/Materials/Imported.hlsl",
+    "sha256": "242CD3BD7ACA6FD2A30B699FD9FC1C5176460751992209A0DD6CC8738BD4C283",
+    "bytes": 359
+  },
+  {
+    "path": "Content/Models/auto-multiple/Materials/Material_0.mat",
+    "sha256": "362EF1C094BECC95DB024540DC6F2A06E715FD65B835285510A8392E60D71D15",
+    "bytes": 229
+  },
+  {
+    "path": "Content/Models/auto-multiple/Materials/Material_1.mat",
+    "sha256": "1C1C2038A45D8C712D0A5E4F45AF64008BC7A7587B7CDDA6843AC60CC80B0F2E",
+    "bytes": 229
+  },
+  {
+    "path": "Content/Models/auto-multiple/Textures/BaseColor_0.bmp",
+    "sha256": "B71B6C5B61316FA2AE7A4C4FCCBE360EB442847CB6A759C6D3713DBA5A3A92FA",
+    "bytes": 58
+  },
+  {
+    "path": "Content/Models/OpenCargo/OpenCargo.obj",
+    "sha256": "D87552FD411586F9E2156B56645CE2293FB8508510432C3D344E9419EF9016F0",
+    "bytes": 1144
+  },
+  {
+    "path": "Content/Models/OpenCargo/OpenCargo.obj.importsettings.json",
+    "sha256": "9440FBDE57F4253C0E25AA6A0ADE0A24BFA426D5CDB6E2F55A0E8086CD415527",
+    "bytes": 258
+  },
+  {
+    "path": "Content/Models/OpenCargo/OpenCargo.obj.source.json",
+    "sha256": "C98E3D42CE04910A0B09790164A831C525E7285C4C4C838BD74DFC31239139EA",
+    "bytes": 125
+  },
+  {
+    "path": "Content/Models/StaticMeshArch/StaticMeshArch.obj",
+    "sha256": "EA47B24D20BAD13C8C5B0FF8F3B9DF316CD0D8F281B13D12A35A1FDCA750D91A",
+    "bytes": 904
+  },
+  {
+    "path": "Content/Models/StaticMeshArch/StaticMeshArch.obj.importsettings.json",
+    "sha256": "9440FBDE57F4253C0E25AA6A0ADE0A24BFA426D5CDB6E2F55A0E8086CD415527",
+    "bytes": 258
+  },
+  {
+    "path": "Content/Models/StaticMeshArch/StaticMeshArch.obj.source.json",
+    "sha256": "384BC49192513CFB08C0B019FFC2D476C6221F5CA3B26C9F49F06BCBBEB45C9C",
+    "bytes": 130
+  },
+  {
+    "path": "Content/ProjectGame.txt",
+    "sha256": "935078A7B25C1A7591A848AF3C514340B1F5EE9A8D7B07A55BB82C9B8E8597B2",
+    "bytes": 13
+  },
+  {
+    "path": "Content/Scenes/Main.scene.json",
+    "sha256": "50C1E3AD3E4041DBD2115C7CFCF435A97CD16945AD3F57582242CD89E555BE50",
+    "bytes": 83
+  },
+  {
+    "path": "Content/Scenes/MeshPhysicsPersistence.scene.json",
+    "sha256": "3D26AA7977F674DE4A948ED91D8C063DE35987DA23F32F0A518D41BEC9D0794A",
+    "bytes": 1763
+  },
+  {
+    "path": "Engine.lock.json",
+    "sha256": "47BB72A5EFB54E428DFEC91B359B33036740C674118D28563A9AF44DE6628718",
+    "bytes": 108
+  },
+  {
+    "path": "Game.sln",
+    "sha256": "9F1248651927FC82454BCDACBD427690615AA09C0F67EF8E3C9D7BE89A496959",
+    "bytes": 752
+  },
+  {
+    "path": "Game.vcxproj",
+    "sha256": "89B891C80CEB04A73D2FEDDF57302A3694429B10013E49D77A1FB2DBAA1F2A8A",
+    "bytes": 2427
+  },
+  {
+    "path": "Project.code.json",
+    "sha256": "E3A240D8ED6C725E1B4EE762A3697C1E9A03BDAED920E2458714B774FA2A6489",
+    "bytes": 364
+  },
+  {
+    "path": "Project.json",
+    "sha256": "D70A0B9790DA3E27FDA71B7A47D9E4EEC074D929A31E561B993B1973E1E5C069",
+    "bytes": 204
+  },
+  {
+    "path": "ProjectTypes.tsv",
+    "sha256": "28CA87DFB867E540744AC227289E063578D6DB7ECE41D65651FFB55B6759F4EE",
+    "bytes": 455
+  },
+  {
+    "path": "README.md",
+    "sha256": "2F1FB77967343D4F1BAD318CD4F0D516FD54CA2382F38DF0F33A8F65650BEFF1",
+    "bytes": 3791
+  },
+  {
+    "path": "Source/Module.cpp",
+    "sha256": "B11BEC4A4B8D0FA8A6E8A3580D5FF4AB31637537E4A9031C90BA9A66E06E15E2",
+    "bytes": 493
+  },
+  {
+    "path": "Source/ProjectComponent.cpp",
+    "sha256": "D8D3B292B046E5F0EE6BC0DF2F706B6CC66D2CCBECB83919FE2F04A5040415EA",
+    "bytes": 178
+  },
+  {
+    "path": "Source/ProjectComponent.h",
+    "sha256": "86C23D45D6FF1E26FC7D4EA7EC73EAA53D7E61713BD15666C6F7355456FCC678",
+    "bytes": 313
+  },
+  {
+    "path": "Source/ProjectGame.cpp",
+    "sha256": "52C0D3C626234DCE71AC68ABC2B6C10DF2CA44A2A6C7C335EE16761FDD5E89DA",
+    "bytes": 39890
+  },
+  {
+    "path": "Source/ProjectGame.h",
+    "sha256": "B6A4E7F87A24AFFDCF0AE1655276C62C2F51AA000D5C40B752DD2F376A3B24C9",
+    "bytes": 4461
+  },
+  {
+    "path": "Source/RotatingCube.cpp",
+    "sha256": "E6681ACE233DD9F71E62D55FCE63943AF520953183FC8817AE82BAAF6CC7CFA8",
+    "bytes": 461
+  },
+  {
+    "path": "Source/RotatingCube.h",
+    "sha256": "384421CAB600C18BEA217895112302A4F2366ACF3FF6D8F5CCCF25AB7B32BB16",
+    "bytes": 530
+  }
+]

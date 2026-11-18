@@ -1,0 +1,19 @@
+{
+  "requestFrames": 1241,
+  "exit": "exit=0",
+  "firstSampleCrateZ": 3.13567,
+  "maxCrateZ": 5.52,
+  "finalCrateZ": 5.51999,
+  "earlyProbeY": 1.48259,
+  "meshGateBody": 1,
+  "crateMeshBody": 1,
+  "probeBody": 1,
+  "selectedCount": 3,
+  "acceptedOrders": 2,
+  "orderStatus": "на месте",
+  "gateOpen": 1,
+  "barrierViolationFrames": 0,
+  "won": 0,
+  "lost": 1,
+  "note": "Old ServiceBarrier navigation path only. The squad does not cross MeshGateArch; the crate passes it."
+}

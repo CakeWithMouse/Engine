@@ -1,0 +1,15 @@
+{
+  "command": "EngineRuntime.exe --project E:\\Engine\\Engine\\build\\playtests\\strategy-040-r2\\RepairCorridor\\Project.json --mode editor",
+  "runtime": "E:\\Engine\\Game\\build\\x64\\Release\\Runtime",
+  "pidReturned": 35644,
+  "observations": {
+    "skyListAppsEngineWindow": false,
+    "skyListWindowsEngineWindow": false,
+    "processPresentAtFollowup": false,
+    "exitCode": null,
+    "stdoutCaptured": false,
+    "stderrCaptured": false
+  },
+  "status": "partial",
+  "note": "One bounded attempt only. The Editor window was not targetable; a later process query found it absent. Cause is unknown, so this is not attributed solely to CUA inventory and no UI behavior is claimed."
+}

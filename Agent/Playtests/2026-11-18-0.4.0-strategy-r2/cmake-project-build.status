@@ -1,0 +1,6 @@
+status=passed
+project=E:\Engine\Engine\build\playtests\strategy-040-r2\RepairCorridor\Project.json
+runtime=E:\Engine\build\cmake\editor-Release\bin\Release\Runtime
+module=Binaries/Release/775a66ba2e404d3f9662cb0ba7e5b16a/Game.dll
+moduleSha256=3B6E8DCB0CDE219819744B7F55CEF8BA05E86F1CB71A1375FFD3C83A4185A468
+engineLibSha256=D033131814F0B45BD8113FE7ED0F62792B13280E696FC2CA523FBC754C8D52C9

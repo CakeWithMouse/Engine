@@ -1,0 +1,16 @@
+{
+  "version": "0.4.0",
+  "msbuild": {
+    "runtime": "E:/Engine/Game/build/x64/Release/Runtime",
+    "EngineRuntime.exe": "BBCCF2A943C902185A397AA055F2099F8672ECC1BE6AB8B130767F075E69F674",
+    "EngineCommandlets.exe": "22A1875991225DA24D44C56251B6E368572D8D5386AAD46409CA3CF8CB1D4C76",
+    "SDK/Lib/Engine.lib": "D288D5DF2ACEDE3836A0D89AFD2715F3AC8C318C36E68D7F159100F8530449B3",
+    "Sdk.json": {"toolset":"v143","configuration":"Release","platform":"x64","localOnly":true}
+  },
+  "cmake": {
+    "runtime": "E:/Engine/build/cmake/editor-Release/bin/Release/Runtime",
+    "EngineRuntime.exe": "CD8F4218326D91DE9322FFBA2BA093A021F20A2CA7161545442AE796C036F795",
+    "SDK/Lib/Engine.lib": "A4288DC061C10C16B86470C85B97BA79C2342E4369F5BFDAC739E987DEB520CB",
+    "Sdk.json": {"version":"0.4.0","configuration":"Release","platform":"x64","buildSystem":"cmake"}
+  }
+}

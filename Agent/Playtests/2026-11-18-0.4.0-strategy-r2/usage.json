@@ -1,0 +1,11 @@
+{
+  "windowDurationMins": 10080,
+  "resetAt": 1795354343,
+  "checkpoints": [
+    {"label":"r2-start","usedPercent":53,"source":"coordinator message and get_usage_limits","dateUtc":"2026-11-18"},
+    {"label":"source-preparation","usedPercent":54,"source":"coordinator checkpoint","dateUtc":"2026-11-18"},
+    {"label":"final-validation","usedPercent":55,"source":"coordinator checkpoint","dateUtc":"2026-11-18"},
+    {"label":"final-freeze","usedPercent":57,"source":"coordinator get_usage_limits; account-wide rounded usage","dateUtc":"2026-11-18"}
+  ],
+  "note":"Shared account-wide usage metric, rounded; baseline 53%. No reset credits used."
+}

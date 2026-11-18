@@ -1,0 +1,4 @@
+archive=E:\Engine\Agent\Playtests\2026-11-18-0.4.0-strategy-r2\RepairCorridor-0.4.0-r2-source.zip
+sha256=111B211E3AF7B5FD52879DE12DCC55E46B625A3EA3EA10A591B75DAD97B56321
+entries=36
+bytes=28424

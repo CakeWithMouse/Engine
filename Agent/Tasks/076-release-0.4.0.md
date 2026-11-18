@@ -41,10 +41,15 @@ https://github.com/CakeWithMouse/Engine.git.
 - [x] MSBuild/CMake Engine86/86, AI58/58, CTest3/3, внешний SDK2/2,
   Core/Host/Ui, native UI/API и CMake Unicode workflow прошли.
 - [x] Обновлены Mesh guide, Scene JSON/Edit API, совместимость и HTML-справка.
-- [ ] Финальный практический отчёт прежнего strategy_developer, source ZIP и export.
+- [x] Финальный практический отчёт прежнего strategy_developer, source ZIP и export:
+  19 свидетельств, 12 passed и 3 partial, 87 ссылок без пропусков.
 - [ ] Готовый ZIP r2, проверки полной папки и чистой распаковки.
 - [ ] Отправка обновлённой release/v0.4.0 в подтверждённый origin.
 
 [Изменения r2](../../Engine/docs/RELEASE-0.4.0-r2.md),
 [новый отчёт](../Playtests/2026-11-18-0.4.0-r2-release/report.md),
 [практический прогон](../Playtests/2026-11-18-0.4.0-strategy-r2/report.md).
+
+Перед упаковкой папка r2 прошла 24/24: 15 HTML,130 ссылок,182 PE x64,
+без отсутствующих DLL. CMake Runtime export и Game.exe60 прошли в готовом
+комплекте с MSBuild wrapper; сырой CMake build tree wrapper не содержит.

@@ -1,0 +1,4 @@
+status=partial
+reason=Raw CMake build-tree Runtime lacks GameExecutable.exe; Export-Project.ps1 raised LaunchError before an exit status was recorded.
+stderr=export-fresh-cmake-final.stderr.log
+classification=build-tree packaging limitation; coordinator verified packaged CMake Runtime export separately.

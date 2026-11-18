@@ -1,0 +1,44 @@
+Сборка начата 18.11.2026 12:04:35.
+Уровень детализации журнала: Normal.
+     1>Проект "E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\MeshPersistenceHost.vcxproj" в узле 1 (целевые объекты Rebuild).
+     1>CoreClean:
+         Создание каталога "E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\obj\".
+       PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+         Создание каталога "E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\out\".
+         Создание каталога "E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\obj\MeshPers.94040A11.tlog\".
+       InitializeBuildStatus:
+         Создание "E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\obj\MeshPers.94040A11.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\obj\MeshPers.94040A11.tlog\unsuccessfulbuild".
+       VcpkgTripletSelection:
+         Using triplet "x64-windows" from "C:\Users\serge\vcpkg\installed\x64-windows\"
+         Using normalized configuration "Release"
+       VcpkgCheckManifestRoot:
+         The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+       ClCompile:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\bin\HostX86\x64\CL.exe /c /IE:\Engine\Game\build\x64\Release\Runtime\SDK\Include /I"C:\Users\serge\vcpkg\installed\x64-windows\include" /Zi /nologo /W4 /WX- /diagnostics:column /sdl /O2 /D WIN32_LEAN_AND_MEAN /D NOMINMAX /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++17 /permissive- /Fo"E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\obj\\" /Fd"E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\obj\vc143.pdb" /external:W4 /Gd /TP /FC /errorReport:queue "mesh-persistence-host.cpp"
+         mesh-persistence-host.cpp
+     1>E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\mesh-persistence-host.cpp(1,9): warning C4005: WIN32_LEAN_AND_MEAN: изменение макроопределения [E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\MeshPersistenceHost.vcxproj]
+             E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\mesh-persistence-host.cpp(1,9):
+             "WIN32_LEAN_AND_MEAN" ранее объявлен в командной строке
+         
+       Link:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\bin\HostX86\x64\link.exe /ERRORREPORT:QUEUE /OUT:"E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\out\MeshPersistenceHost.exe" /NOLOGO /LIBPATH:"C:\Users\serge\vcpkg\installed\x64-windows\lib" /LIBPATH:"C:\Users\serge\vcpkg\installed\x64-windows\lib\manual-link" kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "C:\Users\serge\vcpkg\installed\x64-windows\lib\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\out\MeshPersistenceHost.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\out\MeshPersistenceHost.lib" /MACHINE:X64 "E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\obj\mesh-persistence-host.obj"
+         MeshPersistenceHost.vcxproj -> E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\out\MeshPersistenceHost.exe
+       AppLocalFromInstalled:
+         pwsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\Users\serge\vcpkg\scripts\buildsystems\msbuild\applocal.ps1" "E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\out\MeshPersistenceHost.exe" "C:\Users\serge\vcpkg\installed\x64-windows\bin" "E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\obj\MeshPers.94040A11.tlog\MeshPersistenceHost.write.1u.tlog" "E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\obj\vcpkg.applocal.log"
+       FinalizeBuildStatus:
+         Файл "E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\obj\MeshPers.94040A11.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\obj\MeshPers.94040A11.tlog\MeshPersistenceHost.lastbuildstate".
+     1>Сборка проекта "E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\MeshPersistenceHost.vcxproj" завершена (целевые объекты Rebuild).
+
+Сборка успешно завершена.
+
+       "E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\MeshPersistenceHost.vcxproj" (целевой объект Rebuild ) (1) ->
+       (Целевой объект ClCompile) -> 
+         E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\mesh-persistence-host.cpp(1,9): warning C4005: WIN32_LEAN_AND_MEAN: изменение макроопределения [E:\Engine\Engine\build\playtests\strategy-040-r2\MeshPersistenceHost\MeshPersistenceHost.vcxproj]
+
+    Предупреждений: 1
+    Ошибок: 0
+
+Прошло времени 00:00:02.59
