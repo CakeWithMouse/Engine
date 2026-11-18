@@ -230,6 +230,41 @@ inline void RunGizmoMathTests()
         CheckGizmo(outPitch.rotation[0] > 0.0f, "Positive mouse Y produces X rotation");
     }
 
+    // 16. Child drag WorldPosToLocalPos and LocalPosToWorldPos roundtrip with parent transform
+    {
+        const double parentPos[3] = {10.0, 20.0, 30.0};
+        double parentRot[4];
+        AxisAngleQuat(0.0, 1.0, 0.0, 3.14159265358979323846 * 0.5, parentRot); // 90 deg Y
+        const double parentScale[3] = {2.0, 3.0, 4.0};
+        const double localPos[3] = {1.0, 2.0, 3.0};
+
+        // With inheritScale = true
+        double worldPos[3]{};
+        LocalPosToWorldPos(localPos, parentPos, parentRot, parentScale, true, worldPos);
+        double roundLocal[3]{};
+        WorldPosToLocalPos(worldPos, parentPos, parentRot, parentScale, true, roundLocal);
+        for (int i = 0; i < 3; ++i)
+        {
+            CheckGizmo(std::fabs(roundLocal[i] - localPos[i]) < 1e-5, "Roundtrip local-world-local preserves coordinates (inheritScale=true)");
+        }
+
+        // Child dragged in world along world X by +4
+        double draggedWorld[3] = {worldPos[0] + 4.0, worldPos[1], worldPos[2]};
+        double newLocal[3]{};
+        WorldPosToLocalPos(draggedWorld, parentPos, parentRot, parentScale, true, newLocal);
+        // Under 90 deg Y rotation, world X corresponds to local -Z; scaled by parentScale[2] = 4.0, delta is -4.0 / 4.0 = -1.0
+        CheckGizmo(std::fabs(newLocal[1] - localPos[1]) < 1e-5, "Child Y unchanged during pure X drag");
+        CheckGizmo(std::fabs(newLocal[2] - (localPos[2] - 1.0)) < 1e-5, "Child local Z correctly accounts for parent rotation and scale");
+
+        // With inheritScale = false
+        LocalPosToWorldPos(localPos, parentPos, parentRot, parentScale, false, worldPos);
+        WorldPosToLocalPos(worldPos, parentPos, parentRot, parentScale, false, roundLocal);
+        for (int i = 0; i < 3; ++i)
+        {
+            CheckGizmo(std::fabs(roundLocal[i] - localPos[i]) < 1e-5, "Roundtrip local-world-local preserves coordinates (inheritScale=false)");
+        }
+    }
+
 }
 
 } // namespace

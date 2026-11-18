@@ -115,6 +115,53 @@ namespace GizmoMath
         const float camPos[3],
         bool spawnAtOrigin
     );
+
+    inline void WorldPosToLocalPos(
+        const double worldPos[3],
+        const double parentPos[3],
+        const double parentRot[4],
+        const double parentScale[3],
+        bool inheritScale,
+        double outLocalPos[3]
+    )
+    {
+        const double diff[3] = {
+            worldPos[0] - parentPos[0],
+            worldPos[1] - parentPos[1],
+            worldPos[2] - parentPos[2]
+        };
+        const double invRot[4] = {-parentRot[0], -parentRot[1], -parentRot[2], parentRot[3]};
+        double rotated[3]{};
+        RotateVectorQuat(invRot, diff, rotated);
+        for (int i = 0; i < 3; ++i)
+        {
+            const double s = (inheritScale && std::abs(parentScale[i]) > 1e-6) ? parentScale[i] : 1.0;
+            outLocalPos[i] = rotated[i] / s;
+        }
+    }
+
+    inline void LocalPosToWorldPos(
+        const double localPos[3],
+        const double parentPos[3],
+        const double parentRot[4],
+        const double parentScale[3],
+        bool inheritScale,
+        double outWorldPos[3]
+    )
+    {
+        double scaled[3]{};
+        for (int i = 0; i < 3; ++i)
+        {
+            const double s = inheritScale ? parentScale[i] : 1.0;
+            scaled[i] = localPos[i] * s;
+        }
+        double rotated[3]{};
+        RotateVectorQuat(parentRot, scaled, rotated);
+        for (int i = 0; i < 3; ++i)
+        {
+            outWorldPos[i] = parentPos[i] + rotated[i];
+        }
+    }
 } // namespace GizmoMath
 
 namespace EditorCore

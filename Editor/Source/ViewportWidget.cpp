@@ -526,7 +526,7 @@ void ViewportWidget::ApplyGizmoDragGesture(const QPointF& logicalPos)
         if (activeGizmoHandle_ == GizmoGeometry::Handle::Center)
         {
             float cs[2];
-            if (GizmoGeometry::ProjectPointToScreen(dragStartTransform_.position, lastCameraInfo_.viewMatrix, lastCameraInfo_.projMatrix, lastCameraInfo_.width, lastCameraInfo_.height, cs))
+            if (GizmoGeometry::ProjectPointToScreen(dragStartWorldPos_, lastCameraInfo_.viewMatrix, lastCameraInfo_.projMatrix, lastCameraInfo_.width, lastCameraInfo_.height, cs))
             {
                 float curDist = std::hypot(static_cast<float>(pos.x()) - cs[0], static_cast<float>(pos.y()) - cs[1]);
                 const float sDist = (dragStartDist_ > 5.0f) ? dragStartDist_ : 30.0f;
@@ -547,7 +547,7 @@ void ViewportWidget::ApplyGizmoDragGesture(const QPointF& logicalPos)
             const float* a = (activeGizmoHandle_ == GizmoGeometry::Handle::AxisX) ? ax :
                              (activeGizmoHandle_ == GizmoGeometry::Handle::AxisY ? ay : az);
             float curPt[3]; float curS = 0.0f;
-            if (GizmoGeometry::ClosestPointOnAxis(rayOrig, rayDir, dragStartTransform_.position, a, curPt, &curS))
+            if (GizmoGeometry::ClosestPointOnAxis(rayOrig, rayDir, dragStartWorldPos_, a, curPt, &curS))
             {
                 const float sDist = (std::abs(dragStartS_) > 0.05f) ? dragStartS_ : 1.0f;
                 float ratio = curS / sDist;

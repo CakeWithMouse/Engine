@@ -183,20 +183,17 @@ bool ViewportWidget::HandleMousePress(QMouseEvent* mouse)
         {
             uint64_t selId = 0;
             EngineSceneTransform selTrans{};
-            if (SelectedTransform(selId, selTrans))
+            float wp[3]{}; float wr[4]{};
+            if (SelectedWorldTransform(selId, selTrans, wp, wr))
             {
                 GizmoMath::GizmoMode mode = (gizmoMode_ == EditorGizmoTranslate) ? GizmoMath::GizmoMode::Translate :
                                             (gizmoMode_ == EditorGizmoRotate) ? GizmoMath::GizmoMode::Rotate :
                                                                                 GizmoMath::GizmoMode::Scale;
                 auto hitHandle = GizmoGeometry::PickHandle(
-                    mode,
-                    selTrans.position,
-                    selTrans.rotation,
-                    localOrientation_,
+                    mode, wp, wr, localOrientation_,
                     static_cast<float>(cameraPos.x()),
                     static_cast<float>(cameraPos.y()),
-                    lastCameraInfo_,
-                    10.0f
+                    lastCameraInfo_, 10.0f
                 );
                 if (hitHandle != GizmoGeometry::Handle::None)
                 {
