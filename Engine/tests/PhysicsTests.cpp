@@ -123,3 +123,86 @@ void PhysicsWorldTests()
     world.Shutdown();
     Require(!world.IsInitialized(), "world still initialized after shutdown");
 }
+
+// Complex (mesh) collision: exact concave shape for static/kinematic bodies, convex
+// hull for dynamic ones, all built from render-mesh vertex/index data.
+void PhysicsMeshShapeTests()
+{
+    PhysicsSettings settings;
+    PhysicsWorld world;
+    std::string error;
+    if (!world.Initialize(settings, error)) throw TestSkipped(error);
+
+    // Unit cube as render geometry: 8 vertices, 12 triangles.
+    const std::vector<glm::vec3> cubeVertices = {
+        {-.5f, -.5f, -.5f}, {.5f, -.5f, -.5f}, {.5f, .5f, -.5f}, {-.5f, .5f, -.5f},
+        {-.5f, -.5f,  .5f}, {.5f, -.5f,  .5f}, {.5f, .5f,  .5f}, {-.5f, .5f,  .5f}};
+    const std::vector<uint32_t> cubeIndices = {
+        0, 1, 5, 0, 5, 4,  3, 7, 6, 3, 6, 2,  4, 5, 6, 4, 6, 7,
+        0, 3, 2, 0, 2, 1,  1, 2, 6, 1, 6, 5,  0, 4, 7, 0, 7, 3};
+
+    // Static mesh floor: a wide concave shape; a ray straight down hits its top face.
+    const std::vector<glm::vec3> floorVertices = {
+        {-5.f, -.5f, -5.f}, {5.f, -.5f, -5.f}, {5.f, .5f, -5.f}, {-5.f, .5f, -5.f},
+        {-5.f, -.5f,  5.f}, {5.f, -.5f,  5.f}, {5.f, .5f,  5.f}, {-5.f, .5f,  5.f}};
+    PhysicsBodyDesc floorDesc;
+    floorDesc.type = PhysicsBodyType::Static;
+    floorDesc.shape = PhysicsShapeType::Mesh;
+    floorDesc.meshVertices = &floorVertices;
+    floorDesc.meshIndices = &cubeIndices;
+    floorDesc.position = glm::vec3(0.0f, -0.5f, 0.0f); // top surface at y=0
+    const uint32_t floor = world.CreateBody(floorDesc);
+    Require(floor != 0, "static mesh body was not created");
+    PhysicsRaycastHit hit;
+    Require(world.Raycast(glm::vec3(1.0f, 5.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f), 100.0f, hit) &&
+            hit.body == floor && Near(hit.position.y, 0.0f),
+            "raycast missed the static mesh floor");
+
+    // Kinematic mesh body is accepted as well.
+    PhysicsBodyDesc kinematicDesc;
+    kinematicDesc.type = PhysicsBodyType::Kinematic;
+    kinematicDesc.shape = PhysicsShapeType::Mesh;
+    kinematicDesc.meshVertices = &cubeVertices;
+    kinematicDesc.meshIndices = &cubeIndices;
+    kinematicDesc.position = glm::vec3(20.0f, 0.0f, 0.0f);
+    const uint32_t kinematic = world.CreateBody(kinematicDesc);
+    Require(kinematic != 0, "kinematic mesh body was not created");
+
+    // Dynamic mesh body: Jolt wraps the render mesh in a convex hull, so the body
+    // must fall and settle on the floor like a unit box (center rest height 0.5).
+    PhysicsBodyDesc boxDesc;
+    boxDesc.type = PhysicsBodyType::Dynamic;
+    boxDesc.shape = PhysicsShapeType::Mesh;
+    boxDesc.meshVertices = &cubeVertices;
+    boxDesc.meshIndices = &cubeIndices;
+    boxDesc.position = glm::vec3(0.0f, 3.0f, 0.0f);
+    const uint32_t box = world.CreateBody(boxDesc);
+    Require(box != 0, "dynamic mesh body was not created");
+    for (int i = 0; i < 900; ++i) world.Update(settings.GetFixedTimeStep());
+    Require(Near(world.GetPosition(box).y, 0.5f, 0.1f), "dynamic mesh body did not settle on the floor");
+    Require(std::fabs(world.GetLinearVelocity(box).y) < 0.5f, "mesh body did not settle");
+
+    // The hull volume is the unit cube's, so the requested density drives the mass:
+    // an impulse of 100 N*s on a 10 kg body (density 10 * volume 1) yields 10 m/s.
+    PhysicsBodyDesc lightDesc;
+    lightDesc.shape = PhysicsShapeType::Mesh;
+    lightDesc.meshVertices = &cubeVertices;
+    lightDesc.meshIndices = &cubeIndices;
+    lightDesc.position = glm::vec3(0.0f, 30.0f, 0.0f);
+    lightDesc.density = 10.0f;
+    const uint32_t light = world.CreateBody(lightDesc);
+    Require(light != 0, "density mesh body was not created");
+    world.AddImpulse(light, glm::vec3(100.0f, 0.0f, 0.0f));
+    Require(Near(world.GetLinearVelocity(light).x, 10.0f), "mesh body mass must use requested density");
+
+    // Degenerate input must not create a body: missing geometry and empty index list.
+    PhysicsBodyDesc invalidDesc;
+    invalidDesc.shape = PhysicsShapeType::Mesh;
+    Require(world.CreateBody(invalidDesc) == 0, "mesh body without geometry must not be created");
+    const std::vector<uint32_t> noTriangles;
+    invalidDesc.meshVertices = &cubeVertices;
+    invalidDesc.meshIndices = &noTriangles;
+    Require(world.CreateBody(invalidDesc) == 0, "mesh body without triangles must not be created");
+
+    world.Shutdown();
+}

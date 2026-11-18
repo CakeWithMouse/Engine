@@ -231,7 +231,7 @@ bool SceneComponentSnapshot::PhysicsBody::IsValid() const noexcept
     const auto typeValid = bodyType == PhysicsBodyType::Static || bodyType == PhysicsBodyType::Dynamic ||
         bodyType == PhysicsBodyType::Kinematic;
     const auto shapeValid = shapeType == PhysicsShapeType::Box || shapeType == PhysicsShapeType::Sphere ||
-        shapeType == PhysicsShapeType::Capsule;
+        shapeType == PhysicsShapeType::Capsule || shapeType == PhysicsShapeType::Mesh;
     return typeValid && shapeValid && std::isfinite(friction) && friction >= 0.0f &&
         std::isfinite(restitution) && restitution >= 0.0f &&
         std::isfinite(density) && density > 0.0f;

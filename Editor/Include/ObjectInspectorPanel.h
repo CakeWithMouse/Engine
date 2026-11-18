@@ -51,7 +51,7 @@ struct InspectorPhysicsValue
 {
     bool enabled = false;
     int bodyType = 1;   // 0 static, 1 dynamic, 2 kinematic
-    int shapeType = 0;  // 0 box, 1 sphere, 2 capsule
+    int shapeType = 0;  // 0 box, 1 sphere, 2 capsule, 3 mesh (complex)
     double friction = 0.5;
     double restitution = 0.0;
     double density = 1000.0;

@@ -524,6 +524,7 @@ EnginePhysicsObjectApi SceneEditSession::GetPhysicsObjectApi() noexcept
                 uint32_t shapeType = EnginePhysicsShapeBox;
                 if (component->GetPhysicsShapeType() == PhysicsShapeType::Sphere) shapeType = EnginePhysicsShapeSphere;
                 else if (component->GetPhysicsShapeType() == PhysicsShapeType::Capsule) shapeType = EnginePhysicsShapeCapsule;
+                else if (component->GetPhysicsShapeType() == PhysicsShapeType::Mesh) shapeType = EnginePhysicsShapeMesh;
                 *output = {component->IsPhysicsEnabled() ? 1u : 0u, bodyType, shapeType,
                            component->GetPhysicsFriction(), component->GetPhysicsRestitution(),
                            component->GetPhysicsDensity()};
@@ -535,7 +536,7 @@ EnginePhysicsObjectApi SceneEditSession::GetPhysicsObjectApi() noexcept
                 (value->bodyType != EnginePhysicsBodyStatic && value->bodyType != EnginePhysicsBodyDynamic &&
                  value->bodyType != EnginePhysicsBodyKinematic) ||
                 (value->shapeType != EnginePhysicsShapeBox && value->shapeType != EnginePhysicsShapeSphere &&
-                 value->shapeType != EnginePhysicsShapeCapsule) ||
+                 value->shapeType != EnginePhysicsShapeCapsule && value->shapeType != EnginePhysicsShapeMesh) ||
                 !std::isfinite(value->friction) || value->friction < 0.0f ||
                 !std::isfinite(value->restitution) || value->restitution < 0.0f ||
                 !std::isfinite(value->density) || value->density <= 0.0f)
@@ -547,6 +548,7 @@ EnginePhysicsObjectApi SceneEditSession::GetPhysicsObjectApi() noexcept
                 PhysicsShapeType shapeType = PhysicsShapeType::Box;
                 if (value->shapeType == EnginePhysicsShapeSphere) shapeType = PhysicsShapeType::Sphere;
                 else if (value->shapeType == EnginePhysicsShapeCapsule) shapeType = PhysicsShapeType::Capsule;
+                else if (value->shapeType == EnginePhysicsShapeMesh) shapeType = PhysicsShapeType::Mesh;
                 const auto result = s.Active().GetScene().SetPhysicsBody(objectId,
                     {value->enabled != 0, bodyType, shapeType, value->friction, value->restitution, value->density});
                 return result == SceneResult::Ok ? EngineSceneOk :

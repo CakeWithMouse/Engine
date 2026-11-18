@@ -21,6 +21,8 @@
 #include <Jolt/Physics/Collision/RayCast.h>
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
+#include <Jolt/Physics/Collision/Shape/ConvexHullShape.h>
+#include <Jolt/Physics/Collision/Shape/MeshShape.h>
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
 #include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/RegisterTypes.h>
@@ -79,6 +81,55 @@ JPH::Vec3 ToJolt(const glm::vec3& v) { return JPH::Vec3(v.x, v.y, v.z); }
 JPH::Quat ToJolt(const glm::quat& q) { return JPH::Quat(q.x, q.y, q.z, q.w); }
 glm::vec3 FromJolt(JPH::Vec3Arg v) { return glm::vec3(v.GetX(), v.GetY(), v.GetZ()); }
 glm::quat FromJolt(JPH::QuatArg q) { return glm::quat(q.GetW(), q.GetX(), q.GetY(), q.GetZ()); }
+
+// Complex collision from render geometry: exact concave mesh for static bodies,
+// convex hull for dynamic and kinematic ones (Jolt simulates moving bodies convex only).
+JPH::Ref<JPH::Shape> CreateMeshShape(const PhysicsBodyDesc& desc)
+{
+    if (!desc.meshVertices || desc.meshVertices->empty() ||
+        !desc.meshIndices || desc.meshIndices->size() < 3)
+        return {};
+    if (desc.type != PhysicsBodyType::Static)
+    {
+        JPH::Array<JPH::Vec3> hullPoints;
+        hullPoints.reserve(desc.meshVertices->size());
+        for (const glm::vec3& v : *desc.meshVertices)
+            hullPoints.emplace_back(v.x, v.y, v.z);
+        JPH::ConvexHullShapeSettings settings(hullPoints);
+        const JPH::ShapeSettings::ShapeResult result = settings.Create();
+        if (result.HasError()) return {};
+        return result.Get();
+    }
+    const auto& source = *desc.meshVertices;
+    JPH::VertexList vertices;
+    vertices.reserve(source.size());
+    for (const glm::vec3& v : source)
+        vertices.emplace_back(v.x, v.y, v.z);
+    // MeshShape collides single sided following the triangle winding, but render
+    // meshes arrive in either winding (D3D assets are usually clockwise), so emit
+    // every triangle in both windings: collision stays double sided and Jolt keeps
+    // the edges between back to back triangles inactive (no ghost collisions).
+    // Degenerate or out-of-range triangles make Jolt reject the whole shape, so drop them.
+    JPH::IndexedTriangleList triangles;
+    triangles.reserve(desc.meshIndices->size() / 3 * 2);
+    for (size_t i = 0; i + 2 < desc.meshIndices->size(); i += 3)
+    {
+        const uint32_t i0 = (*desc.meshIndices)[i];
+        const uint32_t i1 = (*desc.meshIndices)[i + 1];
+        const uint32_t i2 = (*desc.meshIndices)[i + 2];
+        if (i0 >= source.size() || i1 >= source.size() || i2 >= source.size()) continue;
+        const JPH::Vec3 e1 = ToJolt(source[i1]) - ToJolt(source[i0]);
+        const JPH::Vec3 e2 = ToJolt(source[i2]) - ToJolt(source[i0]);
+        if (e1.Cross(e2).LengthSq() < 1.0e-12f) continue;
+        triangles.emplace_back(i0, i1, i2, 0);
+        triangles.emplace_back(i0, i2, i1, 0);
+    }
+    if (triangles.empty()) return {};
+    JPH::MeshShapeSettings settings(std::move(vertices), std::move(triangles));
+    const JPH::ShapeSettings::ShapeResult result = settings.Create();
+    if (result.HasError()) return {};
+    return result.Get();
+}
 } // namespace
 
 struct PhysicsWorld::Impl
@@ -142,7 +193,7 @@ uint32_t PhysicsWorld::CreateBody(const PhysicsBodyDesc& desc)
     if (!impl_ || !std::isfinite(desc.density) || desc.density <= 0.0f) return 0;
     try
     {
-        JPH::Ref<JPH::ConvexShape> shape;
+        JPH::Ref<JPH::Shape> shape;
         switch (desc.shape)
         {
         case PhysicsShapeType::Box:
@@ -154,11 +205,19 @@ uint32_t PhysicsWorld::CreateBody(const PhysicsBodyDesc& desc)
         case PhysicsShapeType::Capsule:
             shape = new JPH::CapsuleShape(std::abs(desc.halfHeight), std::abs(desc.radius));
             break;
+        case PhysicsShapeType::Mesh:
+            shape = CreateMeshShape(desc);
+            if (!shape) return 0;
+            break;
         default:
             return 0;
         }
         // Set density before Jolt derives the body's mass and inertia from the shape.
-        shape->SetDensity(desc.density);
+        // Static and kinematic bodies have infinite mass; concave mesh shapes have no
+        // density at all, so only convex shapes take part in the mass computation.
+        // Jolt builds without RTTI, so identify convex shapes by type tag, not dynamic_cast.
+        if (shape->GetType() == JPH::EShapeType::Convex)
+            static_cast<JPH::ConvexShape*>(shape.GetPtr())->SetDensity(desc.density);
         JPH::EMotionType motionType = JPH::EMotionType::Dynamic;
         JPH::ObjectLayer layer = LayerMoving;
         if (desc.type == PhysicsBodyType::Static)
