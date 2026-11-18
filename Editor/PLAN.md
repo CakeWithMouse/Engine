@@ -24,10 +24,10 @@
 - [x] Б2. FSM: общая верхняя панель, панель памяти, «Новый автомат», консоль, диалог состояния
 - [x] Б3. UI-редактор: палитра с заголовком, DnD в иерархию, кнопки добавления убрать из тулбара, сетка/магнит+snap, заголовки панелей
 - [x] Б4. Материал: зум 0.2x..10x, «Сделать параметром» в ПКМ, live-обновление инспектора, Material Instance (записан отказ, формата нет), группы «Рендер», сплиттеры 3-4px
-- [ ] В1. Контрольная точка Б+В (Debug + check -Quick + визуальный просмотр всех окон)
-- [ ] В2. Release-сборка (один раз)
-- [ ] В3. Итоговый отчёт по пунктам
-- [ ] В4. git-подтверждение (ветка, main не изменена)
+- [x] В1. Контрольная точка Б+В (Debug + check -Quick + визуальный просмотр всех окон)
+- [x] В2. Release-сборка (один раз)
+- [x] В3. Итоговый отчёт по пунктам
+- [x] В4. git-подтверждение (ветка, main не изменена)
 
 ### Решения (Итерация 3)
 1. **А1 (fix(editor)):** Дублирование объектов при DnD в иерархии. Причина: `SceneOutlinerTree::dropEvent` (Editor/UI/SceneOutlinerTree.h, до правки строка 83) вызывал `QTreeWidget::dropEvent` — internal move Qt копировал/удалял строки в модели виджета, затем читался `draggedItem->parent()` у потенциально удалённого item, и параллельно шла команда `Scene.Reparent` → двойная операция; при отказе команды (цикл/вырожденный scale) дерево оставалось в состоянии Qt-копии с дублями ID. Правка: внутренний drag больше не вызывает базовый `dropEvent`; parentId вычисляется по `itemAt` + `dropIndicatorPosition` (OnItem → цель, Above/Below → родитель цели, пусто → корень); `event->setDropAction(Qt::IgnoreAction); accept()` — Qt не двигает строки и `startDrag` не удаляет источник; дерево перестраивается из снапшота сцены (`RefreshHierarchy`). Валидация reparent вынесена в Core `Editor/Core/SceneReparent.h` (`CanReparent`: существование child/parent, запрет в себя/потомка, отказ на дублях ID и предсуществующих циклах; `HasCycle`), используется в `KeepWorldTransform` (DragDropCommands.cpp). Один Undo сохранён: SetParent+keepworld в одном чекпоинте (SceneCommandHandler.cpp:134-139). Core-автотест в `tests/core/DragDropTests.h`: 500 псевдослучайных reparent через тот же guard — число объектов неизменно, ID уникальны, циклов нет (+ явные отказы self/descendant/missing/dup/cycle).
@@ -66,12 +66,39 @@
 - А5: проверено по коду (HudTools.cpp, MainWindow.cpp), визуально не подтверждено (MainWindow вне link-set UiTests).
 - Замечание: QT_QPA_PLATFORM=offscreen вешает QApplication в этой сборке Qt6 — UiTests и harness запускались без offscreen, как baseline check.ps1.
 
+### Контрольная точка Б+В — результаты (18.11.2026)
+- **В1 (Debug + check + слои + wc + визуальный просмотр):** Debug-сборка ВСЕГО решения `Engine/Engine.sln` (Engine затронут аддитивным коммитом Б4 f024c57) с `-p:EngineEnableAssimp=true` — существующая асимметрия конфигов Game-проектов (Engine.lib собирает assimp, Game-проекты по умолчанию нет), не правка кода; BUILD_EXIT=0, 0 ошибок. check.ps1 -Quick: запретные зоны OK, слои OK, локализация OK, размеры OK, Debug EditorModule OK; CoreTests 2198, HostTests 165; UiTests — все сюиты зелёные кроме известного красного `CrossTypeInfoButtonTests` (игнорируется по ТЗ; средозависимый: в прогоне check2 зелёный, в финальном красный «GeometryCard InfoPopupWindow is strictly within screen bounds»).
+- **В2 (Release, один раз):** `Engine/Engine.sln -p:Configuration=Release -p:EngineEnableAssimp=true`, BUILD_EXIT=0; SDK compatibility v142 / v143 / v145 headers and whole-archive link passed.
+- **Слои (grep):** Core без QWidget/QMessageBox/QFileDialog/QColorDialog/QAction/QMenu/QDialog и без include UI/Host; Host без include UI — чисто.
+- **wc -l (legacy ratchet):** GraphEditorWidget.cpp 1751/1756, MaterialEditorWindow.cpp 1281/1315, MainWindow.cpp 1732/1734; AiMachineEditorWindow.cpp 377, UIEditorWindow.cpp 354, UIEditorWindow_Inspector.cpp 323, GraphEditorWidget.h 245 — все <500.
+- **Сырые хвосты:**
+  - Debug: `SDK compatibility: v145 / 14.50.35717 headers and whole-archive link passed.` · `BUILD_EXIT=0`
+  - Release: `SDK compatibility: v142 / 14.29.30133 … passed.` · `v143 / 14.44.35207 … passed.` · `v145 / 14.50.35717 … passed.` · `BUILD_EXIT=0`
+  - check: `CoreTests: 2198 checks passed.` · `HostTests: 165 checks passed.` · `CrossTypeInfoButtonTests failed: GeometryCard InfoPopupWindow is strictly within screen bounds` · `UiTests finished with 1 failed suite(s).` (известный красный, игнорируется)
+- **Визуально подтверждено** (QWidget::grab временного harness `tests/VisualGrabB.cpp`, удалён после просмотра; vcxproj-swap откачен; grabs: `%TEMP%/iter3-grabs-b`):
+  - Б1 `B_script.png`: тулбар на всю ширину (save/undo/redo/…/«?»), панель «Переменные» сплиттером ПОД тулбаром, таблица 4 колонки Имя/Тип/Значение/Публичная, «Консоль» с живыми предупреждениями; ноды «Начало игры»/«Каждый кадр».
+  - Б2 `B_fsm.png`: тулбар на всю ширину + «Новый автомат» (robot), «Память и настройки» (таблица памяти Target/Объект + глаз/корзина, «Настройки персонажа» с Tabler-иконками), «Консоль» с серым плейсхолдером «Нет сообщений», нода Idle.
+  - Б3 `B_ui.png`: тулбар БЕЗ кнопок добавления (сетка layout-grid + магнит + «?»), «Иерархия» с иконками типов, «Палитра» с типами, холст с сеткой и размещёнными Panel/Label, правые «Свойства» — все 4 секции развёрнуты и заполнены (подтверждает А4).
+  - Б4 `B_material.png`: сворачиваемые «Рендер»/«Текстуры»/«Параметры» с подписанными заголовками, глаз-публичность у Tint/Gloss, тулбар save/revert/форма/«?», вкладка HLSL, статус «Шейдер скомпилирован»; диагностика settingsEnabled=1 paramsVisible=1 errCount=0 spinCount=6.
+  - А2 `B_empty.png` / `B_folder.png`: Empty = Общие+Трансформация+Скрипт; Folder = только Общие+Трансформация; одинарные зазоры между карточками.
+  - А5 `B_tools_menu.png`: «Инструменты» содержит подменю «ИИ» и «Интерфейс (UI)» — отдельной вкладки ИИ в menuBar нет.
+- **В4 (git):** ветка `feature/editor-graphs-ux-overhaul`; `main` = 6b9b053 не изменена; коммиты Итерации 3: 9cdde15, c4cfe15, 8a58a92, f1f20dc, 82b0c54, 55275f1, 518ec99, 9294cfe, 5c6e925, f024c57 (engine), 37784d2, ec5cff2.
+
+### Итоговый отчёт по пунктам (В3)
+- А1 — сделано. А2 — сделано. А3 — сделано. А4 — сделано. А5 — сделано. А6 — сделано.
+- Б1 — сделано; подпункт Int — пропущен (рантайм без int, требование в «Нужно в ABI» п. 16).
+- Б2 — сделано. Б3 — сделано.
+- Б4 — частично: зум/ПКМ-параметр/live-инспектор/группы/сплиттеры — сделано; Material Instance — пропущен (формата в движке нет, муляж запрещён, требование в «Нужно в ABI» п. 15).
+- В1–В4 — сделано.
+- **Реальные риски / ограничения:** (1) превью материала — нативный D3D swapchain, не захватывается QWidget::grab (на B_material.png область превью чёрная); зум 0.2x..10x подтверждён кодом engine f024c57 и движковым тестом, не скриншотом. (2) Заголовки колонок таблиц переменных/памяти («Значение», «Публичная», «Начальное») обрезаются при минимальной ширине сплиттера 240px (B_script/B_fsm) — косметика, колонки растягиваются пользователем; в этой итерации не исправлялось. (3) `CrossTypeInfoButtonTests` средозависимый красный (известный baseline, игнорируется по ТЗ). (4) А1 живой GUI-жест drag&drop не выполнялся (Core-тест + чтение кода).
+
 ### Вопросы к Юрию (Итерация 3)
 *(заполняются по мере необходимости, с решением по умолчанию)*
 
 ### Не проверено в рантайме (Итерация 3)
 - А1: живой drag&drop в иерархии (drop на объект, между строк, в корень, на потомка) — логика покрыта Core-тестом и чтением кода, GUI-жест не выполнялся.
-- А5: меню «Инструменты» → «ИИ» визуально не подтверждено (только код).
+- А5: подтверждено визуально на контрольной точке Б+В (B_tools_menu.png — «ИИ» внутри «Инструменты»).
+- Превью материала (нативный D3D) и обрезка заголовков колонок при 240px — см. «Реальные риски / ограничения» контрольной точки Б+В.
 
 ---
 
