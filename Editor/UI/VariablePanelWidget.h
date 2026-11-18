@@ -3,6 +3,7 @@
 #include "EditorLocale.h"
 #include "EditorWindowSetup.h"
 #include "IconProvider.h"
+#include "InfoButton.h"
 
 #include <QComboBox>
 #include <QHBoxLayout>
@@ -31,10 +32,34 @@ public:
           typeLabel_(std::move(typeLabel))
     {
         auto* layout = new QVBoxLayout(this);
-        layout->setContentsMargins(0, 0, 0, 0);
-        layout->setSpacing(4);
+        const int m = panelTitle.isEmpty() ? 0 : 8;
+        layout->setContentsMargins(m, m, m, m);
+        layout->setSpacing(6);
         if (!panelTitle.isEmpty())
-            layout->addWidget(EditorWindowSetup::MakePanelHeader(panelTitle, this));
+        {
+            auto* headerWidget = new QWidget(this);
+            auto* headerBox = new QHBoxLayout(headerWidget);
+            headerBox->setContentsMargins(0, 0, 0, 0);
+            headerBox->setSpacing(4);
+            headerBox->addWidget(EditorWindowSetup::MakePanelHeader(panelTitle, headerWidget), 1);
+            auto* help = new InfoButton(
+                Tr("Переменные скрипта", "Script Variables"),
+                Tr("Управление переменными:\n"
+                   "• Тип «число (float)» — число с плавающей точкой\n"
+                   "• Иконка глаза «Показ.» — публичная переменная (видна и редактируется в инспекторе объекта)\n"
+                   "• Перетащите имя переменной на холст для создания нод Get / Set\n"
+                   "• Корзина в строке — быстрое удаление переменной",
+                   "Variable management:\n"
+                   "• Type \"number (float)\" — floating point value\n"
+                   "• Eye icon \"Show\" — public variable (visible and editable in object inspector)\n"
+                   "• Drag variable name onto canvas to create Get / Set nodes\n"
+                   "• Trash icon in row — quick delete variable"),
+                headerWidget);
+            help->setObjectName(prefix_ + QStringLiteral("VariablesHelp"));
+            help->setFixedSize(22, 22);
+            headerBox->addWidget(help);
+            layout->addWidget(headerWidget);
+        }
 
         // Кнопки создаются здесь, но живут на общем тулбаре окна (ToolbarButtons).
         addBtn_ = new QPushButton(IconProvider::PlusIcon(), QString(), this);
@@ -59,14 +84,17 @@ public:
         connect(removeBtn_, &QPushButton::clicked, this, [this] { RemoveVariable(table_->currentRow()); });
 
         table_->setColumnCount(4);
-        table_->setHorizontalHeaderLabels({nameColTitle_, Tr("Тип", "Type"), valColTitle_, Tr("Публичная", "Public")});
+        table_->setHorizontalHeaderLabels({nameColTitle_, Tr("Тип", "Type"), valColTitle_, Tr("Показ.", "Show")});
+        if (auto* item = table_->horizontalHeaderItem(3))
+            item->setToolTip(Tr("Публичная (видна в инспекторе)", "Public (visible in inspector)"));
         table_->verticalHeader()->hide();
         table_->setSelectionBehavior(QAbstractItemView::SelectRows);
+        table_->horizontalHeader()->setMinimumSectionSize(40);
         table_->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
         table_->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
         table_->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
         table_->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Fixed);
-        table_->setColumnWidth(1, 100);
+        table_->setColumnWidth(1, 95);
         table_->setColumnWidth(3, 56);
 
         layout->addWidget(table_, 1);

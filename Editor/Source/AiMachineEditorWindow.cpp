@@ -7,6 +7,7 @@
 #include "Graph/GraphFileIo.h"
 #include "VariablePanelWidget.h"
 #include "IconProvider.h"
+#include "InfoButton.h"
 
 #include <QComboBox>
 #include <QDir>
@@ -85,9 +86,36 @@ void AiMachineEditorWindow::BuildUi()
 
     memoryPanel_ = new QWidget(central);
     auto* panelLayout = new QVBoxLayout(memoryPanel_);
-    panelLayout->setContentsMargins(0, 0, 0, 0);
-    panelLayout->setSpacing(4);
-    panelLayout->addWidget(EditorWindowSetup::MakePanelHeader(Tr("Память и настройки", "Memory and settings"), memoryPanel_));
+    panelLayout->setContentsMargins(8, 8, 8, 8);
+    panelLayout->setSpacing(6);
+    auto* headerWidget = new QWidget(memoryPanel_);
+    auto* headerLayout = new QHBoxLayout(headerWidget);
+    headerLayout->setContentsMargins(0, 0, 0, 0);
+    headerLayout->setSpacing(4);
+    headerLayout->addWidget(EditorWindowSetup::MakePanelHeader(Tr("Память и настройки", "Memory and settings"), headerWidget), 1);
+    auto* help = new InfoButton(
+        Tr("Память и настройки ИИ", "AI Memory and Settings"),
+        Tr("Память автомата:\n"
+           "• Ключи памяти хранят состояние и цели персонажа\n"
+           "• Иконка глаза «Показ.» — публичный ключ (виден в инспекторе объекта)\n"
+           "• Корзина в строке — быстрое удаление ключа\n\n"
+           "Настройки персонажа:\n"
+           "• «Цель восприятия» (тип Объект) — зрение персонажа записывает найденную цель\n"
+           "• «Где видели» (тип Вектор) — координаты последней точки видимости\n"
+           "• «Интервал решений» — секунды между пересчётами логики автомата",
+           "AI State Machine memory:\n"
+           "• Memory keys store character state and targets\n"
+           "• Eye icon \"Show\" — public key (visible in object inspector)\n"
+           "• Trash icon in row — quick delete key\n\n"
+           "Character settings:\n"
+           "• \"Perceived target\" (Object type) — vision writes detected target here\n"
+           "• \"Last seen at\" (Vector type) — coordinates where target was last seen\n"
+           "• \"Think interval\" — seconds between state machine decisions"),
+        headerWidget);
+    help->setObjectName(QStringLiteral("FsmMemoryHelp"));
+    help->setFixedSize(22, 22);
+    headerLayout->addWidget(help);
+    panelLayout->addWidget(headerWidget);
     auto* memoryLabel = new QLabel(Tr("Память (ключи блоков)", "Memory (block keys)"), memoryPanel_);
     memoryLabel->setObjectName(QStringLiteral("CardSectionLabel"));
     panelLayout->addWidget(memoryLabel);
@@ -106,7 +134,8 @@ void AiMachineEditorWindow::BuildUi()
     settingsLabel->setObjectName(QStringLiteral("CardSectionLabel"));
     panelLayout->addWidget(settingsLabel);
     auto* settings = new QFormLayout;
-    settings->setSpacing(4);
+    settings->setContentsMargins(0, 0, 0, 0);
+    settings->setSpacing(6);
     targetKey_ = new QComboBox(memoryPanel_);
     targetKey_->setObjectName(QStringLiteral("FsmTargetKey"));
     targetKey_->setToolTip(Tr("Ключ типа «Объект»: восприятие пишет сюда лучшую видимую цель (нужно зрение у персонажа).",

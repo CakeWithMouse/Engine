@@ -49,9 +49,14 @@ FsmBlockListEditor::FsmBlockListEditor(const FsmGraphSchema& schema, const QStri
     layout->addWidget(list_, 1);
 
     auto* buttons = new QHBoxLayout;
+    buttons->setContentsMargins(0, 0, 0, 0);
+    buttons->setSpacing(4);
     add_ = new QToolButton(this);
     add_->setObjectName(prefix + QStringLiteral("Add"));
-    add_->setText(Tr("+ Добавить", "+ Add"));
+    add_->setIcon(IconProvider::PlusIcon());
+    add_->setIconSize(QSize(14, 14));
+    add_->setFixedSize(28, 24);
+    add_->setToolTip(Tr("Добавить блок", "Add block"));
     add_->setPopupMode(QToolButton::InstantPopup);
     auto* menu = new QMenu(add_);
     connect(menu, &QMenu::aboutToShow, this, [this, menu] {
@@ -72,8 +77,12 @@ FsmBlockListEditor::FsmBlockListEditor(const FsmGraphSchema& schema, const QStri
     });
     menu->setToolTipsVisible(true);
     add_->setMenu(menu);
-    remove_ = new QPushButton(Tr("Удалить", "Remove"), this);
+    remove_ = new QPushButton(this);
     remove_->setObjectName(prefix + QStringLiteral("Remove"));
+    remove_->setIcon(IconProvider::TrashIcon());
+    remove_->setIconSize(QSize(14, 14));
+    remove_->setFixedSize(28, 24);
+    remove_->setToolTip(Tr("Удалить выбранный блок", "Remove selected block"));
     connect(remove_, &QPushButton::clicked, this, [this] {
         const int row = CurrentRow();
         if (row < 0) return;
@@ -82,14 +91,20 @@ FsmBlockListEditor::FsmBlockListEditor(const FsmGraphSchema& schema, const QStri
         SelectBlock(std::min(row, static_cast<int>(blocks_.size()) - 1));
         if (changed) changed();
     });
-    up_ = new QPushButton(QStringLiteral("↑"), this);
+    up_ = new QPushButton(this);
     up_->setObjectName(prefix + QStringLiteral("Up"));
+    up_->setIcon(IconProvider::GetIcon(QStringLiteral("arrow-up")));
+    up_->setIconSize(QSize(14, 14));
+    up_->setFixedSize(28, 24);
     up_->setToolTip(Tr("Выше: раньше по порядку", "Up: earlier in order"));
     connect(up_, &QPushButton::clicked, this, [this] { Move(-1); });
-    down_ = new QPushButton(QStringLiteral("↓"), this);
+    down_ = new QPushButton(this);
     down_->setObjectName(prefix + QStringLiteral("Down"));
+    down_->setIcon(IconProvider::GetIcon(QStringLiteral("arrow-down")));
+    down_->setIconSize(QSize(14, 14));
+    down_->setFixedSize(28, 24);
+    down_->setToolTip(Tr("Ниже: позже по порядку", "Down: later in order"));
     connect(down_, &QPushButton::clicked, this, [this] { Move(1); });
-    for (auto* button : {up_, down_}) button->setFixedWidth(28);
     buttons->addWidget(add_);
     buttons->addWidget(remove_);
     buttons->addStretch(1);
