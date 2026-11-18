@@ -17,6 +17,8 @@ class QFormLayout;
 class QDropEvent;
 class UICanvas;
 class EditorQtHost;
+class CollapsibleCard;
+class InfoButton;
 
 class UIEditorWindow : public QMainWindow {
 public:
@@ -42,9 +44,9 @@ public:
 protected:
     void closeEvent(QCloseEvent* event) override;
 private:
+    void BuildInspector(QWidget* props, class QScrollArea* scroll);
     void RefreshInspector();
     bool ApplyInspector();
-    void BuildPropertyEditors(QFormLayout* form, QWidget* props);
     void InsertNewElement(const QString& type, float x, float y);
     void PushUndo(const std::string& snapshot);
     void RestoreSnapshot(const std::string& text);
@@ -91,9 +93,11 @@ private:
     QLabel* labelBorderWidth_ = nullptr;
     QLabel* labelAlignRight_ = nullptr;
     QLabel* labelFill_ = nullptr;
-    QLabel* sectionLayout_ = nullptr;
-    QLabel* sectionAppearance_ = nullptr;
-    QLabel* sectionBehavior_ = nullptr;
+    CollapsibleCard* cardGeneral_ = nullptr;
+    CollapsibleCard* cardLayout_ = nullptr;
+    CollapsibleCard* cardAppearance_ = nullptr;
+    CollapsibleCard* cardBehavior_ = nullptr;
+    InfoButton* helpBtn_ = nullptr;
     int langSubId_ = 0;
 };
 
