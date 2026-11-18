@@ -171,12 +171,12 @@ void SceneObjectsPanel::RebuildAddMenu()
     auto* actFolder = addMenu_->addAction(IconProvider::FolderIcon(), Tr("Папка", "Folder"), this, [this] {
         emit AddPrimitiveRequested(QStringLiteral("Scene.Folder"), Tr("Папка", "Folder"), SpawnPosition());
     });
-    actFolder->setObjectName(QStringLiteral("CreateObject.Scene.Folder"));
+    actFolder->setObjectName(QStringLiteral("SceneFolderAction"));
 
     auto* actEmpty = addMenu_->addAction(IconProvider::GetIcon(QStringLiteral("circle-dotted")), Tr("Пустой объект", "Empty"), this, [this] {
         emit AddPrimitiveRequested(QStringLiteral("Scene.Empty"), Tr("Пустой объект", "Empty"), SpawnPosition());
     });
-    actEmpty->setObjectName(QStringLiteral("CreateObject.Scene.Empty"));
+    actEmpty->setObjectName(QStringLiteral("SceneEmptyAction"));
     addMenu_->addSeparator();
 
     auto* menuPrimitives = addMenu_->addMenu(Tr("Примитивы", "Primitives"));

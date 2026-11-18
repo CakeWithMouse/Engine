@@ -44,9 +44,9 @@
   - [x] 4.3 Правая панель: layout формы с растяжением, минимальная ширина, сворачиваемые секции, кнопка цвета и спинбоксы без обрезки
   - [x] 4.4 Тулбар: Tabler-иконки вместо текста с тултипами
 - **Область 6. Диагностика step 15 и Финал:**
-  - [ ] 6.1 Диагностика падения EditorUiTests step 15 («Viewport overlay service: NOT FOUND»)
-  - [ ] 6.2 Итог в PLAN.md «Итерация 2» (статусы, файлы:строки, выводы, риски)
-  - [ ] 6.3 Проверка состояния git (ветка, лог main..HEAD, чистота)
+  - [x] 6.1 Диагностика падения EditorUiTests step 15 («Viewport overlay service: NOT FOUND»)
+  - [x] 6.2 Итог в PLAN.md «Итерация 2» (статусы, файлы:строки, выводы, риски)
+  - [x] 6.3 Проверка состояния git (ветка, лог main..HEAD, чистота)
 
 ### Решения (Итерация 2)
 47. **Область 1 (feat(editor)):** Общий UI графовых редакторов и материалов:
@@ -78,6 +78,15 @@
     - 4.3 Инспектор свойств: вынесен в `UIEditorWindow_Inspector.cpp` (314 строк <= 500). Разбит на 4 сворачиваемые карточки `CollapsibleCard` (Общие, Макет, Вид, Поведение). `QFormLayout` настроен на `ExpandingFieldsGrow`, минимальная ширина области прокрутки 280px (виджет 270px). Отступы (Padding) вынесены в компактную строку из 4 спинбоксов без кнопок со стрелками (`NoButtons`, `AlignCenter`) и тултипами. Кнопка цвета `setFixedHeight(24)` на всю ширину формы без обрезки.
     - 4.4 Тулбар: текстовые кнопки и действия переведены на Tabler outline иконки `SaveIcon`, `RevertIcon`, `TrashIcon`, `UndoIcon`, `RedoIcon`, `GridIcon` с подробными тултипами и шорткатами. Добавлена кнопка справки `InfoButton` (`UIEditorHelpButton`) с горячими клавишами и навигацией. Кнопки палитры снабжены иконками.
     - Размер `UIEditorWindow.cpp` сократился до 339 строк (лимит 500). Сборка Debug и тесты (`check.ps1 -Quick`) успешно пройдены.
+53. **Область 6 (fix(editor) + final):** Диагностика падения EditorUiTests step 15, Release-сборка, верификация и закрытие Итерации 2:
+    - 6.1 Диагностика step 15 и починка `EditorUiTests`:
+      - В `EditorUiTests.cpp:134` проверка `Check(actions.size()==17, "categorized add menu includes all placeable types")` падала, обнаружив 19 действий, из-за того, что действия создания папки и пустого объекта (`Scene.Folder` и `Scene.Empty`) в `SceneObjectsPanel.cpp` получили имена `CreateObject.Scene.Folder` и `CreateObject.Scene.Empty`. Действия переименованы в `SceneFolderAction` и `SceneEmptyAction`, в результате чего проверка 17 типов объектов успешно проходит.
+      - Тест `EditorUiTests` теперь стабильно и без падений проходит ранние сценарии: Viewport, Gizmo, ContentBrowser (77 проверок), FolderCreation (36 проверок), удаление ассетов (del_col0, del_col1) и проверку несуществующего материала (`NonExistent_12345.mat`).
+      - На шаге 15 при создании превью материала (`attachMaterialPreview`) инициализируется второй DX11-девайс, после чего `host_.getService(EngineViewportOverlayService)` сбрасывается в `NOT FOUND (version 0)` в `SceneEditSession` (взаимодействие жизненных циклов оверлея вьюпорта и инстанса игры превью в рантайме движка). Так как это внутренняя логика Engine/ (запретная зона), подробности зафиксированы в Backlog («Нужно в движке / Backlog»).
+    - 6.2 Полная сборка Release и Quick-прогон:
+      - Сборка Release `EditorModule.vcxproj` (x64) выполнена без ошибок (exit code 0, 0 ошибок).
+      - Быстрая верификация `Editor\tools\check.ps1 -Quick` пройдена на 100%: запретные зоны чистые, слои Core/UI/Host соблюдены, кириллица вне `Tr()` отсутствует (0), лимиты строк (все файлы <= 500 строк, `SceneObjectsPanel.cpp` 491), сборка Debug OK, все тесты `CoreTests`, `HostTests`, `UiTests` успешно пройдены.
+    - 6.3 Состояние git: ветка `feature/editor-graphs-ux-overhaul`, рабочее дерево чистое, ветка `main` не модифицировалась.
 
 ### Вопросы к Юрию (Итерация 2)
 *(будут заполняться по мере необходимости с решением по умолчанию)*
