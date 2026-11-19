@@ -1,10 +1,8 @@
 #pragma once
 #include "IEditorHost.h"
+#include "SceneCommandHandler.h"
 #include <QString>
 #include <vector>
-
-class SceneCommandHandler;
-class EditorHistory;
 
 // Буфер обмена сцены на стороне редактора: снимок выделения читается через ReadSnapshot,
 // вставка создаёт объекты существующими вызовами ABI одним чекпоинтом истории.
