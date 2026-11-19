@@ -91,24 +91,22 @@ void ScriptEditorWindow::BuildUi()
         tools->addWidget(b);
         return b;
     };
-    auto* save = makeBtn(IconProvider::SaveIcon(), QStringLiteral("ScriptSave"), Tr("Сохранить [Ctrl+S]", "Save [Ctrl+S]"));
-    connect(save, &QPushButton::clicked, this, [this] { SaveNow(); });
-    auto* revert = makeBtn(IconProvider::RevertIcon(), QStringLiteral("ScriptRevert"), Tr("Откатить все изменения", "Revert all changes"));
-    connect(revert, &QPushButton::clicked, this, [this] { Revert(); });
+    auto* save = makeBtn(IconProvider::SaveIcon(), QStringLiteral("ScriptSave"), Tr("Сохранить [Ctrl+S]", "Save [Ctrl+S]")); connect(save, &QPushButton::clicked, this, [this] { SaveNow(); });
+    auto* revert = makeBtn(IconProvider::RevertIcon(), QStringLiteral("ScriptRevert"), Tr("Откатить все изменения", "Revert all changes")); connect(revert, &QPushButton::clicked, this, [this] { Revert(); });
 
     auto* templates = new QToolButton(tools);
     templates->setObjectName(QStringLiteral("ScriptTemplates"));
     templates->setProperty("toolbarBtn", true);
     templates->setIcon(IconProvider::TemplateIcon());
-    templates->setFixedSize(EditorWindowSetup::kToolbarBtnWidth, EditorWindowSetup::kToolbarBtnHeight);
-    templates->setIconSize(QSize(EditorWindowSetup::kToolbarIconSize, EditorWindowSetup::kToolbarIconSize));
+    templates->setFixedSize(EditorWindowSetup::kToolbarBtnWidth, EditorWindowSetup::kToolbarBtnHeight); templates->setIconSize(QSize(EditorWindowSetup::kToolbarIconSize, EditorWindowSetup::kToolbarIconSize));
     templates->setToolTip(Tr("Шаблоны скрипта", "Script templates"));
     templates->setPopupMode(QToolButton::InstantPopup);
-    auto* menu = new QMenu(templates);
-    menu->setObjectName(QStringLiteral("ScriptTemplateMenu"));
+    auto* menu = new QMenu(templates); menu->setObjectName(QStringLiteral("ScriptTemplateMenu"));
+    menu->addAction(Tr("Движение по таймеру/каждый кадр (синусоида по Y)", "Motion every frame (sinusoid along Y)"), this, [this] { ApplyTemplate(1); });
+    menu->addAction(Tr("Таймер: через N секунд выполнить действие", "Timer: action after N seconds"), this, [this] { ApplyTemplate(2); });
+    menu->addAction(Tr("Счётчик с переменной (Get/Set +1 каждый кадр)", "Counter with variable (+1 every frame)"), this, [this] { ApplyTemplate(3); });
+    menu->addAction(Tr("Условие: если переменная > порога", "Condition: if variable > threshold"), this, [this] { ApplyTemplate(4); });
     menu->addAction(Tr("Пустой", "Empty"), this, [this] { ApplyTemplate(0); });
-    menu->addAction(Tr("Событие Start → Print", "Event Start → Print"), this, [this] { ApplyTemplate(1); });
-    menu->addAction(Tr("Каждый кадр → вращение объекта", "Every frame → rotate object"), this, [this] { ApplyTemplate(2); });
     templates->setMenu(menu);
     tools->addWidget(templates);
 
@@ -341,9 +339,10 @@ void ScriptEditorWindow::ApplyTemplate(int kind)
             Tr("Заменить текущий граф графом шаблона?", "Replace current graph with template?")) != QMessageBox::Yes)
         return;
     const EditorCore::GraphDocument doc = (kind == 0) ? EditorCore::ScriptGraphPresets::BuildEmpty()
-                                        : (kind == 1) ? EditorCore::ScriptGraphPresets::BuildStartPrint()
-                                        : (kind == 2) ? EditorCore::ScriptGraphPresets::BuildTickRotate()
-                                        : EditorCore::GraphDocument{};
+        : (kind == 1) ? EditorCore::ScriptGraphPresets::BuildSinMoveY()
+        : (kind == 2) ? EditorCore::ScriptGraphPresets::BuildTimerAction()
+        : (kind == 3) ? EditorCore::ScriptGraphPresets::BuildCounterVariable()
+        : (kind == 4) ? EditorCore::ScriptGraphPresets::BuildConditionThreshold() : EditorCore::GraphDocument{};
     if (doc.Schema().isEmpty()) return;
     graph_->ApplyTemplate(doc);
     RefreshVariables();

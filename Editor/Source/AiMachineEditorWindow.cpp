@@ -88,9 +88,9 @@ void AiMachineEditorWindow::BuildUi()
     templates->setPopupMode(QToolButton::InstantPopup);
     auto* tMenu = new QMenu(templates);
     tMenu->setObjectName(QStringLiteral("FsmTemplateMenu"));
-    tMenu->addAction(Tr("Idle → Patrol", "Idle → Patrol"), this, [this] { ApplyTemplate(0); });
-    tMenu->addAction(Tr("Idle → Chase цели", "Idle → Chase target"), this, [this] { ApplyTemplate(1); });
-    tMenu->addAction(Tr("Idle → Attack", "Idle → Attack"), this, [this] { ApplyTemplate(2); });
+    tMenu->addAction(Tr("Патруль → погоня → возврат", "Patrol → chase → return"), this, [this] { ApplyTemplate(0); });
+    tMenu->addAction(Tr("Охрана: Idle ↔ Attack по дистанции", "Guard: Idle ↔ Attack by distance"), this, [this] { ApplyTemplate(1); });
+    tMenu->addAction(Tr("Простая реакция: Idle → Flee", "Simple reaction: Idle → Flee"), this, [this] { ApplyTemplate(2); });
     templates->setMenu(tMenu);
     tools->addWidget(templates);
 
@@ -386,9 +386,9 @@ void AiMachineEditorWindow::ApplyTemplate(int kind)
         QMessageBox::question(this, Tr("Шаблон автомата", "Machine template"),
             Tr("Заменить текущий граф графом шаблона?", "Replace current graph with template?")) != QMessageBox::Yes)
         return;
-    const EditorCore::GraphDocument doc = (kind == 0) ? EditorCore::FsmGraphPresets::BuildIdlePatrol()
-                                        : (kind == 1) ? EditorCore::FsmGraphPresets::BuildIdleChase()
-                                        : (kind == 2) ? EditorCore::FsmGraphPresets::BuildIdleAttack()
+    const EditorCore::GraphDocument doc = (kind == 0) ? EditorCore::FsmGraphPresets::BuildPatrolChaseReturn()
+                                        : (kind == 1) ? EditorCore::FsmGraphPresets::BuildGuardAttackDistance()
+                                        : (kind == 2) ? EditorCore::FsmGraphPresets::BuildIdleFlee()
                                         : EditorCore::GraphDocument{};
     if (doc.Schema().isEmpty()) return;
     graph_->ApplyTemplate(doc);
