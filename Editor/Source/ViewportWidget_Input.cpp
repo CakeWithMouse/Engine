@@ -41,6 +41,19 @@ void ViewportWidget::SendCursor(QPointF p,bool valid) {
 
 bool ViewportWidget::event(QEvent* e)
 {
+    if (e->type() == QEvent::ShortcutOverride)
+    {
+        // Пока летим камерой (ПКМ) или тащим объект, клавиши остаются вьюпорту,
+        // иначе оконные шорткаты команд перехватили бы управление полётом.
+        auto* key = static_cast<QKeyEvent*>(e);
+        const int navKey = CameraNavigationKey(key->nativeScanCode(), key->key());
+        const bool flyKey = navKey == Qt::Key_W || navKey == Qt::Key_A || navKey == Qt::Key_S || navKey == Qt::Key_D || navKey == Qt::Key_Q || navKey == Qt::Key_E;
+        const bool blender = EditorSettings::Instance().GetControlScheme() == ControlScheme::Blender;
+        const bool schemeKey = blender ? (navKey == Qt::Key_G || navKey == Qt::Key_R || navKey == Qt::Key_F)
+                                       : (navKey == Qt::Key_R || navKey == Qt::Key_F);
+        if (looking_ && (flyKey || schemeKey)) { e->accept(); return true; }
+        if (draggingSelectedObject_ && key->key() == Qt::Key_Delete) { e->accept(); return true; }
+    }
     if (e->type() == QEvent::DevicePixelRatioChange)
     {
         const bool handled = QWidget::event(e);
@@ -376,7 +389,6 @@ bool ViewportWidget::HandleKeyPress(QKeyEvent* key)
     if ((key->modifiers() & Qt::ControlModifier)) return false;
     if (key->isAutoRepeat()) return true;
 
-    if (key->key() == Qt::Key_Delete && !looking_ && !draggingSelectedObject_) { emit deleteRequested(); return true; }
     if (key->key() == Qt::Key_Escape)
     {
         if (draggingSelectedObject_)
@@ -394,7 +406,6 @@ bool ViewportWidget::HandleKeyPress(QKeyEvent* key)
     }
 
     const int navKey = CameraNavigationKey(key->nativeScanCode(), key->key());
-    const ControlScheme scheme = EditorSettings::Instance().GetControlScheme();
 
     // Hotkeys active when not flying camera with RMB
     if (!looking_)
@@ -447,21 +458,8 @@ bool ViewportWidget::HandleKeyPress(QKeyEvent* key)
             return true;
         }
 
-        if (scheme == ControlScheme::UnrealUnity)
-        {
-            if (navKey == 'W') { CommandRegistry::Instance().Execute(QStringLiteral("Gizmo.SetTranslate")); return true; }
-            if (navKey == 'E') { CommandRegistry::Instance().Execute(QStringLiteral("Gizmo.SetRotate")); return true; }
-            if (navKey == 'R') { CommandRegistry::Instance().Execute(QStringLiteral("Gizmo.SetScale")); return true; }
-            if (navKey == 'F') { CommandRegistry::Instance().Execute(QStringLiteral("Gizmo.FocusSelected")); return true; }
-        }
-        else if (scheme == ControlScheme::Blender)
-        {
-            if (navKey == 'G') { CommandRegistry::Instance().Execute(QStringLiteral("Gizmo.SetTranslate")); return true; }
-            if (navKey == 'R') { CommandRegistry::Instance().Execute(QStringLiteral("Gizmo.SetRotate")); return true; }
-            if (navKey == 'S' && key->modifiers() == Qt::NoModifier) { CommandRegistry::Instance().Execute(QStringLiteral("Gizmo.SetScale")); return true; }
-            if (navKey == 'F') { CommandRegistry::Instance().Execute(QStringLiteral("Gizmo.FocusSelected")); return true; }
-        }
-
+        // Режимы гизмо и фокус назначены оконными шорткатами Gizmo.* (SceneEditCommands),
+        // поэтому здесь остались только локальные клавиши вьюпорта.
         if (key->key() == Qt::Key_1) { CommandRegistry::Instance().Execute(QStringLiteral("Gizmo.SetTranslate")); return true; }
         if (key->key() == Qt::Key_2) { CommandRegistry::Instance().Execute(QStringLiteral("Gizmo.SetRotate")); return true; }
         if (key->key() == Qt::Key_3) { CommandRegistry::Instance().Execute(QStringLiteral("Gizmo.SetScale")); return true; }

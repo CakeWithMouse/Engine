@@ -395,6 +395,12 @@ void EditorQtHost::DrainCommands()
                 completedCmd, result, error);
             Complete(completedCmd, result, error);
         }
+        else if (cmd.type == EditorCommand::CopyObject || cmd.type == EditorCommand::CutObject || cmd.type == EditorCommand::PasteObject)
+        {
+            SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api(), PhysicsObjectApi(), ScriptApi()};
+            result = clipboard_.Apply(cmd, sctx, sceneHandler_, history_, playState_.load(), error);
+            Complete(cmd, result, error);
+        }
         else if (sceneHandler_.CanHandle(cmd.type))
         {
             SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api(), PhysicsObjectApi(), ScriptApi()};

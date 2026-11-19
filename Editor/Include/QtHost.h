@@ -4,6 +4,7 @@
 #include "ViewportCommandHandler.h"
 #include "AssetCommandHandler.h"
 #include "SceneCommandHandler.h"
+#include "SceneClipboard.h"
 #include <Engine/Runtime/EditExtensions.h>
 #include <Engine/Runtime/PhysicsEditApi.h>
 #include <Engine/Runtime/PhysicsObjectEditApi.h>
@@ -52,6 +53,7 @@ public:
     void MoveSelectedObject(float right, float up, float forward) override;
     void FetchSceneAndSelectNext() override;
     bool HasSelection() const override;
+    bool HasSceneClipboard() const { return clipboard_.HasContent(); }
     std::string GetSelectedObjectName() override;
 
     void SetGizmoMode(EditorGizmoMode mode) override;
@@ -213,4 +215,5 @@ private:
     ViewportCommandHandler viewportHandler_;
     AssetCommandHandler assetHandler_;
     SceneCommandHandler sceneHandler_;
+    SceneClipboard clipboard_;
 };

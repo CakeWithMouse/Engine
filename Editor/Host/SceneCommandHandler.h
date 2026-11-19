@@ -36,6 +36,8 @@ public:
     void PublishScene(const Context& ctx, IEditorHost::EditorState playState);
 
     void SetSelectedId(uint64_t id);
+    const std::vector<uint64_t>& SelectedIds() const { return selectedIds_; }
+    void SetSelectedIds(const std::vector<uint64_t>& ids) { selectedIds_ = ids; selectedId_ = ids.empty() ? 0 : ids.front(); }
     // Reads the live scene and selects the object with the given name (0 if absent),
     // so a publish after ReplaceEdit never shows an intermediate empty selection.
     void SelectByName(const Context& ctx, const std::string& name);

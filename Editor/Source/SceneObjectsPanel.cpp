@@ -122,24 +122,14 @@ void SceneObjectsPanel::BuildUi()
     connect(hierarchy_, &QTreeWidget::customContextMenuRequested, this, &SceneObjectsPanel::ShowTreeContextMenu);
 
     actDuplicate_ = new QAction(Tr("Дублировать объект", "Duplicate Object"), hierarchy_);
-    actDuplicate_->setShortcut(QKeySequence(QStringLiteral("Ctrl+D")));
-    actDuplicate_->setShortcutContext(Qt::WidgetShortcut);
     actDuplicate_->setIcon(IconProvider::CubeIcon());
     hierarchy_->addAction(actDuplicate_);
-    connect(actDuplicate_, &QAction::triggered, this, &SceneObjectsPanel::DuplicateRequested);
+    connect(actDuplicate_, &QAction::triggered, this, [] { CommandRegistry::Instance().Execute(QStringLiteral("Scene.Duplicate")); });
 
     actRemove_ = new QAction(Tr("Удалить объект", "Remove Object"), hierarchy_);
-    actRemove_->setShortcut(QKeySequence::Delete);
-    actRemove_->setShortcutContext(Qt::WidgetShortcut);
     actRemove_->setIcon(IconProvider::TrashIcon());
     hierarchy_->addAction(actRemove_);
-    connect(actRemove_, &QAction::triggered, this, &SceneObjectsPanel::RemoveRequested);
-
-    removeShortcut_ = new QAction(hierarchy_);
-    removeShortcut_->setShortcut(QKeySequence(Qt::Key_Backspace));
-    removeShortcut_->setShortcutContext(Qt::WidgetShortcut);
-    hierarchy_->addAction(removeShortcut_);
-    connect(removeShortcut_, &QAction::triggered, this, &SceneObjectsPanel::RemoveRequested);
+    connect(actRemove_, &QAction::triggered, this, [] { CommandRegistry::Instance().Execute(QStringLiteral("Scene.Delete")); });
 
     connect(hierarchy_, &QTreeWidget::itemSelectionChanged, this, [this] {
         if (suppressSelectionChanged_) return;
@@ -459,7 +449,7 @@ void SceneObjectsPanel::ShowTreeContextMenu(const QPoint& pos)
         auto* actFoc = menu.addAction(Tr("Фокус на объекте (F)", "Focus Selected (F)"), this, &SceneObjectsPanel::FocusRequested);
         actFoc->setEnabled(true);
 
-        auto* actDup = menu.addAction(Tr("Дублировать (Ctrl+D)", "Duplicate (Ctrl+D)"), this, &SceneObjectsPanel::DuplicateRequested);
+        auto* actDup = menu.addAction(Tr("Дублировать (Ctrl+D)", "Duplicate (Ctrl+D)"), this, [] { CommandRegistry::Instance().Execute(QStringLiteral("Scene.Duplicate")); });
         actDup->setEnabled(true);
 
         auto* actRen = menu.addAction(Tr("Переименовать (F2)", "Rename (F2)"), this, [this, item] {
@@ -468,7 +458,7 @@ void SceneObjectsPanel::ShowTreeContextMenu(const QPoint& pos)
         actRen->setEnabled(true);
 
         menu.addSeparator();
-        auto* actDel = menu.addAction(Tr("Удалить (Delete)", "Delete (Delete)"), this, &SceneObjectsPanel::RemoveRequested);
+        auto* actDel = menu.addAction(Tr("Удалить (Delete)", "Delete (Delete)"), this, [] { CommandRegistry::Instance().Execute(QStringLiteral("Scene.Delete")); });
         actDel->setEnabled(true);
     }
 

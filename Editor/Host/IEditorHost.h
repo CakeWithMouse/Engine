@@ -39,6 +39,7 @@ struct EditorCommand
         RunTask, WriteRecovery, DiscardRecovery, SetProperty, UpdateAsset,
         SetScript, // path: /Game путь .vscript, пустой — снять скрипт
         SetScriptVariables, // name: значения переменных скрипта у объекта, JSON {"Speed": 45}; пустой — значения скрипта
+        CopyObject, CutObject, PasteObject, // буфер обмена редактора: снимок выделения / вырез / вставка одним шагом Undo
     };
 
     Type type = None;

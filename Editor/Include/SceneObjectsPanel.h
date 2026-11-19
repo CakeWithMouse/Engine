@@ -59,9 +59,6 @@ signals:
     void AddModelRequested();
     void ImportModelRequested();
 
-    void DuplicateRequested();
-    void RemoveRequested();
-
     void SelectionChanged(quint64 objectId, const QVector<quint64>& objectIds);
     void FocusRequested();
     void SetParentRequested(quint64 childId, quint64 parentId);
@@ -95,8 +92,6 @@ private:
     QPushButton* addPrimitiveButton_ = nullptr;
 
     QTreeWidget* hierarchy_ = nullptr;
-
-    QAction* removeShortcut_ = nullptr;
 
     QString hierarchyKey_;
     QString primitiveKey_;

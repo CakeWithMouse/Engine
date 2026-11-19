@@ -45,7 +45,6 @@ public:
 
 signals:
     void contextMenuRequested(const QPoint& globalPos);
-    void deleteRequested();
     void gizmoModeChanged(EditorGizmoMode mode);
 
 protected:

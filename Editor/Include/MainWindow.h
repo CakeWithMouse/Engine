@@ -34,6 +34,7 @@ class AiMachineEditorWindow;
 class MainToolBar;
 class ExternalGameRunner;
 class UIEditorWindow;
+class SceneEditCommands;
 
 class EditorMainWindow : public QMainWindow, public IEditorUiListener
 {
@@ -255,6 +256,7 @@ private:
     QAction* redoAction_ = nullptr;
     QAction* duplicateAction_ = nullptr;
     QAction* deleteAction_ = nullptr;
+    SceneEditCommands* sceneEditCommands_ = nullptr;
 
     ExternalGameRunner* externalGameRunner_ = nullptr;
     QProcess* gameProc_ = nullptr;

@@ -14,6 +14,7 @@
 #include "FileService.h"
 #include "Logger.h"
 #include "ViewportCommands.h"
+#include "SceneEditCommands.h"
 #include "ViewportHeaderBar.h"
 #include "AiDiagnosticsPanel.h"
 #include "UIEditorWindow.h"
@@ -141,7 +142,6 @@ void EditorMainWindow::BuildUi()
     viewportLayout->addWidget(viewport_, 1);
 
     RegisterViewportCommands(viewport_, host_);
-    connect(viewport_, &ViewportWidget::deleteRequested, this, [this] { SubmitObjectCommand(EditorCommand::RemoveObject); });
 
     viewportDock_ = new QDockWidget(Tr("Вьюпорт", "Viewport"), this);
     viewportDock_->setObjectName(QStringLiteral("ViewportDock"));
@@ -370,7 +370,7 @@ void EditorMainWindow::BuildSceneMenu()
     }, QKeySequence::Open);
 
     saveAction_ = sceneMenu_->addAction(Tr("Сохранить сцену", "Save Scene"), this, [this] {
-        SaveScene();
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.Save"));
     }, QKeySequence::Save);
 
     actSaveSceneAs_ = sceneMenu_->addAction(Tr("Сохранить как…", "Save As…"), this, [this] {
@@ -403,10 +403,12 @@ void EditorMainWindow::BuildSceneMenu()
 
 
     editMenu_ = menuBar()->addMenu(Tr("Правка", "Edit"));
-    undoAction_ = editMenu_->addAction(Tr("Отменить", "Undo"), this, [this] { SubmitObjectCommand(EditorCommand::Undo); }, QKeySequence::Undo);
-    redoAction_ = editMenu_->addAction(Tr("Повторить", "Redo"), this, [this] { SubmitObjectCommand(EditorCommand::Redo); }, QKeySequence::Redo);
-    duplicateAction_ = editMenu_->addAction(Tr("Дублировать объект", "Duplicate Object"), this, [this] { SubmitObjectCommand(EditorCommand::DuplicateObject); }, QKeySequence(QStringLiteral("Ctrl+D")));
-    deleteAction_ = editMenu_->addAction(Tr("Удалить объект", "Remove Object"), this, [this] { SubmitObjectCommand(EditorCommand::RemoveObject); });
+    undoAction_ = editMenu_->addAction(Tr("Отменить", "Undo"), this, [this] { CommandRegistry::Instance().Execute(QStringLiteral("Scene.Undo")); }, QKeySequence::Undo);
+    redoAction_ = editMenu_->addAction(Tr("Повторить", "Redo"), this, [this] { CommandRegistry::Instance().Execute(QStringLiteral("Scene.Redo")); }, QKeySequence::Redo);
+    duplicateAction_ = editMenu_->addAction(Tr("Дублировать объект", "Duplicate Object"), this, [this] { CommandRegistry::Instance().Execute(QStringLiteral("Scene.Duplicate")); }, QKeySequence(QStringLiteral("Ctrl+D")));
+    deleteAction_ = editMenu_->addAction(Tr("Удалить объект", "Remove Object"), this, [this] { CommandRegistry::Instance().Execute(QStringLiteral("Scene.Delete")); });
+    deleteAction_->setShortcuts({QKeySequence::Delete, QKeySequence(Qt::Key_Backspace)});
+    sceneEditCommands_ = new SceneEditCommands(host_, editMenu_, this, [this](int type) { SubmitObjectCommand(type); }, [this] { SaveScene(); });
     editMenu_->addSeparator();
     schemeMenu_ = editMenu_->addMenu(Tr("Схема управления", "Control Scheme"));
     actSchemeUnreal_ = schemeMenu_->addAction(QStringLiteral("Unreal / Unity"), this, [] { CommandRegistry::Instance().Execute(QStringLiteral("Editor.SetControlSchemeUnreal")); });
@@ -774,8 +776,6 @@ void EditorMainWindow::ConnectPanels()
 
     connect(sceneObjectsPanel_, &SceneObjectsPanel::AddModelRequested, this, [this] { AddModel(); });
     connect(sceneObjectsPanel_, &SceneObjectsPanel::ImportModelRequested, this, [this] { CommandRegistry::Instance().Execute(QStringLiteral("Assets.Import"), {{QStringLiteral("kind"), 0}}); });
-    connect(sceneObjectsPanel_, &SceneObjectsPanel::DuplicateRequested, this, [this] { SubmitObjectCommand(EditorCommand::DuplicateObject); });
-    connect(sceneObjectsPanel_, &SceneObjectsPanel::RemoveRequested, this, [this] { SubmitObjectCommand(EditorCommand::RemoveObject); });
 
     connect(sceneObjectsPanel_, &SceneObjectsPanel::SelectionChanged, this, [this](quint64 objectId, const QVector<quint64>& ids) {
         if (sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
@@ -967,6 +967,8 @@ void EditorMainWindow::RefreshSceneUi()
 
     if (deleteAction_)
         deleteAction_->setEnabled(edit && view.selected);
+
+    if (sceneEditCommands_) sceneEditCommands_->UpdateActions(view, edit);
 
     if (saveAction_)
         saveAction_->setEnabled(!sceneBusy_);
