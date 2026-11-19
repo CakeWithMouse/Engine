@@ -88,6 +88,7 @@ EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
 
 EditorMainWindow::~EditorMainWindow() {
     UnregisterAssetCommands();
+    UnregisterViewportMenuCommands();
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("UI.Create"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("UI.OpenEditor"));
     if (host_) host_->SetUiListener(nullptr);
@@ -142,6 +143,7 @@ void EditorMainWindow::BuildUi()
     viewportLayout->addWidget(viewport_, 1);
 
     RegisterViewportCommands(viewport_, host_);
+    RegisterViewportMenuCommands();
 
     viewportDock_ = new QDockWidget(Tr("Вьюпорт", "Viewport"), this);
     viewportDock_->setObjectName(QStringLiteral("ViewportDock"));
@@ -625,53 +627,22 @@ void EditorMainWindow::PollAiMachine()
 
 void EditorMainWindow::ShowViewportContextMenu(const QPoint& globalPos)
 {
-    UpdatePlayButtons();
-
-    QMenu menu(this);
-
-    if (actPlay_)
-        menu.addAction(actPlay_);
-
-    if (actPause_)
-        menu.addAction(actPause_);
-
-    if (actStop_)
-        menu.addAction(actStop_);
-
-    menu.addSeparator();
-
-    if (duplicateAction_)
-        menu.addAction(duplicateAction_);
-
-    if (deleteAction_)
-        menu.addAction(deleteAction_);
-
-    if (saveAction_)
-        menu.addAction(saveAction_);
-
-    if (actExternal_)
-        menu.addAction(actExternal_);
-
-    menu.addSeparator();
-
-    if (viewportDock_)
-        menu.addAction(viewportDock_->toggleViewAction());
-
-    if (consoleDock_)
-        menu.addAction(consoleDock_->toggleViewAction());
-
-    if (fileDock_)
-        menu.addAction(fileDock_->toggleViewAction());
-
-    if (sceneObjectsDock_)
-        menu.addAction(sceneObjectsDock_->toggleViewAction());
-
-    if (inspectorDock_)
-        menu.addAction(inspectorDock_->toggleViewAction());
-    if (aiDiagnosticsDock_)
-        menu.addAction(aiDiagnosticsDock_->toggleViewAction());
-
-    menu.exec(globalPos);
+    // Выделение под курсором применяется в потоке команд, поэтому меню строится
+    // по завершении PickObject (CommandFinished), а не до применения пика.
+    if (host_->HasScene() && host_->PlayState() == EditorQtHost::Edit && viewport_ &&
+        viewport_->width() > 0 && viewport_->height() > 0)
+    {
+        const QPoint local = viewport_->mapFromGlobal(globalPos);
+        pendingViewportMenu_ = true;
+        pendingViewportMenuPos_ = globalPos;
+        EditorCommand c;
+        c.type = EditorCommand::PickObject;
+        c.right = static_cast<float>(2.0 * local.x() / viewport_->width() - 1.0);
+        c.up = static_cast<float>(1.0 - 2.0 * local.y() / viewport_->height());
+        host_->PostCommand(c);
+        return;
+    }
+    BuildViewportContextMenu(globalPos);
 }
 
 void EditorMainWindow::BuildSceneDocks()
@@ -1291,6 +1262,14 @@ void EditorMainWindow::CommandFinished(
         command.path == QLatin1String("gizmo"))
     {
         if (!gizmoRefreshTimer_->isActive()) gizmoRefreshTimer_->start();
+        return;
+    }
+
+    if (pendingViewportMenu_ && command.type == EditorCommand::PickObject)
+    {
+        pendingViewportMenu_ = false;
+        RefreshSceneUi();
+        BuildViewportContextMenu(pendingViewportMenuPos_);
         return;
     }
 

@@ -3,6 +3,7 @@
 #include <QMainWindow>
 #include <QHash>
 #include <QPointer>
+#include <QPoint>
 #include <QSet>
 #include <functional>
 #include <cstdint>
@@ -143,6 +144,9 @@ private:
     void UnregisterDragDropCommands();
     void RegisterAssetCreateCommands();
     void UnregisterAssetCreateCommands();
+    void RegisterViewportMenuCommands();
+    void UnregisterViewportMenuCommands();
+    void BuildViewportContextMenu(const QPoint& globalPos);
     void HandleModelImported(const EditorCommand& command);
     float GetModelSpawnScale(const QString& path);
     void ConnectPanels();
@@ -274,6 +278,10 @@ private:
     bool sceneBusy_ = false;
     bool closing_ = false;
     bool checkingChanges_ = false;
+
+    // ПКМ-меню вьюпорта строится после завершения PickObject (выделение под курсором).
+    bool pendingViewportMenu_ = false;
+    QPoint pendingViewportMenuPos_;
 
     EditorCore::SidecarTransaction sidecarTx_;
 
