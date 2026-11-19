@@ -258,12 +258,12 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
             QString texture, material, script, projectData;
             EngineSceneTransform transform = cmd.transform;
             uint64_t parent = cmd.parentId;
-            bool inherit = true;
-            bool hasLight = false;
-            bool castShadows = false;
-            EngineScenePointLight light{};
-            bool hasPhysics = false;
-            EnginePhysicsObjectState physicsBody{};
+            bool inherit = true, hasLight = false, castShadows = false, hasPhysics = false;
+            EngineScenePointLight light{}; EnginePhysicsObjectState physicsBody{};
+            if (cmd.type == EditorCommand::CreateObject && (type == "Light.Point" || cmd.castShadows)) {
+                hasLight = true; castShadows = true;
+                light = (cmd.pointLight.intensity > 0.0f) ? cmd.pointLight : EngineScenePointLight{{1.f,1.f,1.f}, 2.f, 10.f, 1u};
+            }
 
             if (cmd.type == EditorCommand::DuplicateObject)
             {

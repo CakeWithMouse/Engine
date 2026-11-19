@@ -39,6 +39,7 @@ void EditorMainWindow::RegisterViewportMenuCommands()
         c.transform.position[0] = ctx.parameters.value(QStringLiteral("x"), 0.0).toFloat();
         c.transform.position[1] = ctx.parameters.value(QStringLiteral("y"), 0.0).toFloat();
         c.transform.position[2] = ctx.parameters.value(QStringLiteral("z"), 0.0).toFloat();
+        if (type == QStringLiteral("Light.Point")) c.castShadows = true;
         host_->PostCommand(c);
         return true;
     };

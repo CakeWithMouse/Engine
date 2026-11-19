@@ -742,6 +742,9 @@ void EditorMainWindow::ConnectPanels()
                 for (int i = 0; i < 3; ++i)
                     c.transform.position[i] = static_cast<float>(position[i]);
 
+                if (typeName == QStringLiteral("Light.Point"))
+                    c.castShadows = true;
+
                 host_->PostCommand(c);
             });
 
