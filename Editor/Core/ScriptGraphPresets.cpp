@@ -10,7 +10,6 @@ namespace EditorCore
 GraphDocument ScriptGraphPresets::BuildEmpty()
 {
     GraphDocument doc;
-    doc.SetFileFormat(GraphDocument::Format::V1);
     doc.SetSchema(QStringLiteral("code"), 1);
     return doc;
 }
@@ -18,7 +17,6 @@ GraphDocument ScriptGraphPresets::BuildEmpty()
 GraphDocument ScriptGraphPresets::BuildStartPrint()
 {
     GraphDocument doc;
-    doc.SetFileFormat(GraphDocument::Format::V1);
     doc.SetSchema(QStringLiteral("code"), 1);
 
     const int start = doc.AddNode(QStringLiteral("Event.BeginPlay"), QStringLiteral("Начало игры"), QPointF(100, 150));
@@ -31,7 +29,6 @@ GraphDocument ScriptGraphPresets::BuildStartPrint()
 GraphDocument ScriptGraphPresets::BuildTickRotate()
 {
     GraphDocument doc;
-    doc.SetFileFormat(GraphDocument::Format::V1);
     doc.SetSchema(QStringLiteral("code"), 1);
 
     const int tick = doc.AddNode(QStringLiteral("Event.Tick"), QStringLiteral("Каждый кадр"), QPointF(80, 120));

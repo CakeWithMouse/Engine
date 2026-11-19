@@ -10,7 +10,6 @@ namespace EditorCore
 GraphDocument FsmGraphPresets::BuildIdlePatrol()
 {
     GraphDocument doc;
-    doc.SetFileFormat(GraphDocument::Format::V1);
     doc.SetSchema(QStringLiteral("ai.fsm"), 1);
 
     QJsonArray vars{
@@ -51,7 +50,6 @@ GraphDocument FsmGraphPresets::BuildIdlePatrol()
 GraphDocument FsmGraphPresets::BuildIdleChase()
 {
     GraphDocument doc;
-    doc.SetFileFormat(GraphDocument::Format::V1);
     doc.SetSchema(QStringLiteral("ai.fsm"), 1);
 
     QJsonArray vars{
@@ -100,7 +98,6 @@ GraphDocument FsmGraphPresets::BuildIdleChase()
 GraphDocument FsmGraphPresets::BuildIdleAttack()
 {
     GraphDocument doc;
-    doc.SetFileFormat(GraphDocument::Format::V1);
     doc.SetSchema(QStringLiteral("ai.fsm"), 1);
 
     QJsonArray vars{

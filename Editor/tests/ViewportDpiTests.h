@@ -3,6 +3,9 @@
 #include "ViewportWidget.h"
 #include "ScriptEditorWindow.h"
 #include "AiMachineEditorWindow.h"
+#include "MaterialEditorWindow.h"
+#include "UIEditorWindow.h"
+#include "MaterialGraphPresets.h"
 #include "EditorTheme.h"
 #include <QApplication>
 #include <QElapsedTimer>
@@ -59,6 +62,17 @@ public:
         if (command.type == EditorCommand::RunTask && command.task)
         {
             EngineEditSessionApi session{};
+            session.readMaterial = [](void*, const char*, EngineMaterialVisitor visitor, void* user, char*, uint32_t) -> uint32_t {
+                EngineMaterialInfo info{};
+                info.shader = "/Game/Shaders/Test.hlsl";
+                visitor(user, &info);
+                return EngineSceneOk;
+            };
+            session.attachMaterialPreview = [](void*, void*, uint32_t, uint32_t, uint64_t* out) -> uint32_t {
+                if (out) *out = 1; return EngineSceneOk;
+            };
+            session.showMaterialPreview = [](void*, uint64_t, const char*, uint32_t, char*, uint32_t) -> uint32_t { return EngineSceneOk; };
+            session.detachMaterialPreview = [](void*, uint64_t) -> uint32_t { return EngineSceneOk; };
             command.task(session);
         }
         else if (command.type == EditorCommand::ViewportAttach ||
@@ -268,6 +282,29 @@ inline void Run()
         QDir dir(temp.path());
         dir.mkpath(QStringLiteral("Content/Scripts"));
         dir.mkpath(QStringLiteral("Content/AI"));
+        dir.mkpath(QStringLiteral("Content/Materials"));
+        dir.mkpath(QStringLiteral("Content/Shaders"));
+        dir.mkpath(QStringLiteral("Content/UI"));
+        {
+            QFile f(dir.filePath(QStringLiteral("Content/Materials/Test.mat")));
+            Check(f.open(QIODevice::WriteOnly), "mat opens");
+            f.write("{\"schema\":1}");
+        }
+        {
+            QFile f(dir.filePath(QStringLiteral("Content/Shaders/Test.hlsl")));
+            Check(f.open(QIODevice::WriteOnly), "hlsl opens");
+            f.write("struct VSOutput { float4 pos : SV_Position; };\nfloat4 main() : SV_Target { return float4(1,1,1,1); }\n");
+        }
+        {
+            QFile f(dir.filePath(QStringLiteral("Content/Materials/Test.mat.graph.json")));
+            Check(f.open(QIODevice::WriteOnly), "graph json opens");
+            f.write(EditorCore::MaterialGraphPresets::BuildSimple().ExportToJson().toUtf8());
+        }
+        {
+            QFile f(dir.filePath(QStringLiteral("Content/UI/Test.ui")));
+            Check(f.open(QIODevice::WriteOnly), "ui opens");
+            f.write("<Panel name=\"Root\" x=\"0\" y=\"0\" width=\"800\" height=\"600\"><Label name=\"Title\" text=\"Pain Engine UI\" x=\"20\" y=\"20\" width=\"200\" height=\"30\"/><Button name=\"StartBtn\" text=\"Start Game\" x=\"20\" y=\"60\" width=\"120\" height=\"32\"/></Panel>");
+        }
         auto writeFile = [&dir](const QString& rel, const QJsonObject& json) {
             QFile file(dir.filePath(rel));
             Check(file.open(QIODevice::WriteOnly), "capture fixture file opens");
@@ -371,6 +408,21 @@ inline void Run()
         Check(dialogSaved, "save FSM state dialog screenshot");
         fsmWin->close();
         Wait(50);
+
+        auto* matWin = new MaterialEditorWindow(&captureHost, QStringLiteral("/Game/Materials/Test.mat"));
+        matWin->show();
+        Wait(350);
+        Check(matWin->grab().save(outDir + QStringLiteral("/material-editor.png")), "save material window screenshot");
+        matWin->close();
+        Wait(50);
+
+        auto* uiWin = new UIEditorWindow(&captureHost, QStringLiteral("/Game/UI/Test.ui"));
+        uiWin->show();
+        Wait(250);
+        Check(uiWin->grab().save(outDir + QStringLiteral("/ui-editor.png")), "save UI editor screenshot");
+        uiWin->close();
+        Wait(50);
+
         std::printf("Graph editor screenshots: PASS\n");
     }
 }
