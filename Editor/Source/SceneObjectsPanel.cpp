@@ -262,6 +262,11 @@ void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
         key += QString::number(object.name.size());
         key += QLatin1Char(':');
         key += QString::fromStdString(object.name);
+        key += QLatin1Char('/');
+        // Тип в ключе: смена типа при неизменных id/parent/name (undo, замена модели) иначе не перестраивает дерево.
+        key += QString::fromStdString(object.type);
+        key += QLatin1Char('/');
+        key += QString::number(object.gameplayKind);
         key += QLatin1Char(';');
     }
 
