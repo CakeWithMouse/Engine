@@ -1,6 +1,8 @@
 #include "MaterialGraphTransform.h"
 #include "HlslGraphCompiler.h"
 
+#include <QColor>
+#include <QJsonArray>
 #include <QSet>
 #include <QString>
 
@@ -55,6 +57,49 @@ MaterialGraphModel MaterialGraphTransform::ExposeConstants(const GraphDocument& 
             node->properties[QStringLiteral("value")] = 1.0;
     }
     return result;
+}
+
+QJsonObject MaterialGraphTransform::ExtractDefaultParams(const GraphDocument& model)
+{
+    QJsonObject params;
+    for (const auto& n : model.Nodes())
+    {
+        if (n.type == QStringLiteral("ScalarParam"))
+        {
+            const QString name = n.properties.value(QStringLiteral("name"), QStringLiteral("Param_%1").arg(n.id)).toString();
+            const double val = n.properties.value(QStringLiteral("value"), 0.5).toDouble();
+            if (!name.isEmpty())
+                params.insert(name, val);
+        }
+        else if (n.type == QStringLiteral("ColorParam"))
+        {
+            const QString name = n.properties.value(QStringLiteral("name"), QStringLiteral("Color_%1").arg(n.id)).toString();
+            const QColor col = n.properties.value(QStringLiteral("color"), QColor(Qt::white)).value<QColor>();
+            if (!name.isEmpty())
+            {
+                QJsonArray arr;
+                arr.append(col.redF());
+                arr.append(col.greenF());
+                arr.append(col.blueF());
+                arr.append(col.alphaF());
+                params.insert(name, arr);
+            }
+        }
+        else if (n.type == QStringLiteral("Vector2Param") || n.type == QStringLiteral("Vector3Param"))
+        {
+            const int size = n.type == QStringLiteral("Vector2Param") ? 2 : 3;
+            const QString name = n.properties.value(QStringLiteral("name"), QStringLiteral("Vector_%1").arg(n.id)).toString();
+            const QVariantList stored = n.properties.value(QStringLiteral("value")).toList();
+            if (!name.isEmpty())
+            {
+                QJsonArray arr;
+                for (int i = 0; i < size; ++i)
+                    arr.append(i < stored.size() ? stored[i].toDouble() : 0.0);
+                params.insert(name, arr);
+            }
+        }
+    }
+    return params;
 }
 
 } // namespace EditorCore

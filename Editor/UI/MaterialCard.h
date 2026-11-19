@@ -35,7 +35,16 @@ public:
         BuildCard();
         // Редактор материала изменил .mat (публичный флаг, значения): обновляемся без перевыбора объекта.
         eventsSub_ = EditorCore::MaterialEvents::Instance().Subscribe([this](const QString& material) {
-            if (material == rawMaterialPath_ && cachedMaterialExists_ && !cachedPhysicalPath_.isEmpty())
+            auto norm = [](QString s) {
+                s.replace('\\', '/');
+                if (s.startsWith(QStringLiteral("/Game/"))) s = s.mid(6);
+                else if (s.startsWith(QStringLiteral("Content/"), Qt::CaseInsensitive)) s = s.mid(8);
+                return s.toLower();
+            };
+            const bool match = (material == rawMaterialPath_) ||
+                               (norm(material) == norm(rawMaterialPath_)) ||
+                               (!cachedPhysicalPath_.isEmpty() && QFileInfo(material).absoluteFilePath() == QFileInfo(cachedPhysicalPath_).absoluteFilePath());
+            if (match && cachedMaterialExists_ && !cachedPhysicalPath_.isEmpty())
                 RebuildPublicParams(cachedPhysicalPath_);
         });
     }

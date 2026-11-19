@@ -3,6 +3,7 @@
 #include "MaterialGraphModel.h"
 
 #include <QList>
+#include <QJsonObject>
 
 namespace EditorCore
 {
@@ -17,6 +18,8 @@ public:
     static bool CanExpose(const GraphDocument& model, const QList<int>& ids);
     // Копия модели, где выбранные Constant стали ScalarParam с уникальным именем.
     static MaterialGraphModel ExposeConstants(const GraphDocument& model, const QList<int>& ids);
+    // Сбор параметров графа по умолчанию (ScalarParam, ColorParam, Vector2/3Param) для сохранения в .mat
+    static QJsonObject ExtractDefaultParams(const GraphDocument& model);
 };
 
 } // namespace EditorCore

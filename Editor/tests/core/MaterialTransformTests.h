@@ -157,6 +157,34 @@ void TestPublicParamFilterOnDelete()
     CheckTransform(publicParams.contains(QStringLiteral("Tint")),   "publicParams filter keeps existing Tint");
 }
 
+void TestExtractDefaultParams()
+{
+    // 1. Проверяем сбор дефолтных параметров с мастер-ноды по умолчанию (BaseColor и Specular)
+    EditorCore::MaterialGraphModel defaultModel;
+    defaultModel.SetupDefaultMasterNode();
+    const QJsonObject defaultParams = EditorCore::MaterialGraphTransform::ExtractDefaultParams(defaultModel);
+    CheckTransform(defaultParams.contains(QStringLiteral("BaseColor")), "defaultParams contains BaseColor");
+    CheckTransform(defaultParams.contains(QStringLiteral("Specular")), "defaultParams contains Specular");
+    CheckTransform(defaultParams.value(QStringLiteral("BaseColor")).isArray(), "BaseColor is JsonArray");
+    const QJsonArray baseColorArr = defaultParams.value(QStringLiteral("BaseColor")).toArray();
+    CheckTransform(baseColorArr.size() == 4, "BaseColor array has 4 components");
+    CheckTransform(qAbs(defaultParams.value(QStringLiteral("Specular")).toDouble() - 0.5) < 1e-4, "Specular is 0.5");
+
+    // 2. Проверяем векторные параметры
+    EditorCore::MaterialGraphModel vectorModel;
+    vectorModel.AddNode(QStringLiteral("Vector2Param"), QStringLiteral("UVScale"), QPointF(0, 0),
+                        {{QStringLiteral("name"), QStringLiteral("UVScale")},
+                         {QStringLiteral("value"), QVariantList{2.0, 4.0}}});
+    vectorModel.AddNode(QStringLiteral("Vector3Param"), QStringLiteral("Offset3D"), QPointF(0, 100),
+                        {{QStringLiteral("name"), QStringLiteral("Offset3D")},
+                         {QStringLiteral("value"), QVariantList{1.0, 2.0, 3.0}}});
+    const QJsonObject vecParams = EditorCore::MaterialGraphTransform::ExtractDefaultParams(vectorModel);
+    CheckTransform(vecParams.contains(QStringLiteral("UVScale")), "vecParams contains UVScale");
+    CheckTransform(vecParams.value(QStringLiteral("UVScale")).toArray().size() == 2, "UVScale has 2 components");
+    CheckTransform(vecParams.contains(QStringLiteral("Offset3D")), "vecParams contains Offset3D");
+    CheckTransform(vecParams.value(QStringLiteral("Offset3D")).toArray().size() == 3, "Offset3D has 3 components");
+}
+
 } // namespace
 
 inline int RunMaterialTransformTests()
@@ -167,6 +195,7 @@ inline int RunMaterialTransformTests()
     TestExposeUniqueNames();
     TestExposeIgnoresNonConstants();
     TestPublicParamFilterOnDelete();
+    TestExtractDefaultParams();
     std::printf("MaterialTransform tests: %d checks passed\n", gMaterialTransformChecks);
     return gMaterialTransformChecks;
 }

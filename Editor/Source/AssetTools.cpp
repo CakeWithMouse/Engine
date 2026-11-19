@@ -348,6 +348,15 @@ QString EditorMainWindow::CreateMaterial(const QString& directory, const QString
         document.insert(QStringLiteral("version"), 1);
         document.insert(QStringLiteral("shader"), base + QStringLiteral(".hlsl"));
 
+        QJsonObject params;
+        QJsonArray tintArr{1.0, 1.0, 1.0, 1.0};
+        params.insert(QStringLiteral("Tint"), tintArr);
+        params.insert(QStringLiteral("Gloss"), 0.5);
+        document.insert(QStringLiteral("params"), params);
+
+        QJsonArray publicArr{QStringLiteral("Tint"), QStringLiteral("Gloss")};
+        document.insert(QStringLiteral("publicParams"), publicArr);
+
         QSaveFile shader(shaderFile), material(materialFile);
 
         if (!shader.open(QIODevice::WriteOnly) || shader.write(MaterialSurfaceTemplate) < 0 || !shader.commit() ||

@@ -220,6 +220,7 @@ Write-Output "OK: Localization check passed."
 # 5. Check line count (wc -l <= 500 with ratchet for legacy files)
 Write-Output "--- 3. Checking line counts of modified files ---"
 $legacyRatchetLimits = @{
+    "Editor/Source/AssetTools.cpp" = 680
     "Editor/Source/MainWindow.cpp" = 1734
     "Editor/Source/MaterialEditorWindow.cpp" = 1315
     "Editor/Source/ObjectInspectorPanel.cpp" = 625

@@ -138,18 +138,60 @@ void MaterialEditorWindow::SavePublicParams()
     file.close();
     if (!doc.isObject()) return;
     QJsonObject obj = doc.object();
+
+    // Default parameters from graph and state
+    QJsonObject params = obj.value(QStringLiteral("params")).toObject();
+    if (graph_)
+    {
+        const QJsonObject graphDefaults = EditorCore::MaterialGraphTransform::ExtractDefaultParams(graph_->Model());
+        for (auto it = graphDefaults.begin(); it != graphDefaults.end(); ++it)
+        {
+            if (!params.contains(it.key()))
+                params.insert(it.key(), it.value());
+        }
+    }
+    for (const auto& p : state_.parameters)
+    {
+        if (!params.contains(p.name))
+        {
+            if (p.components == 1)
+            {
+                params.insert(p.name, p.value[0]);
+            }
+            else if (p.components > 1)
+            {
+                QJsonArray vArr;
+                for (uint32_t i = 0; i < p.components; ++i)
+                    vArr.append(p.value[i]);
+                params.insert(p.name, vArr);
+            }
+        }
+    }
+
     // Убираем publicParams_, которых нет в текущих параметрах шейдера
     QSet<QString> validNames;
     for (const auto& p : state_.parameters) validNames.insert(p.name);
+    for (auto it = params.begin(); it != params.end(); ++it) validNames.insert(it.key());
+
     for (auto it = publicParams_.begin(); it != publicParams_.end(); )
         it = validNames.contains(*it) ? ++it : publicParams_.erase(it);
+
+    if (publicParams_.isEmpty() && !hasExplicitPublicParams_)
+    {
+        for (const QString& name : validNames)
+            publicParams_.insert(name);
+    }
+
     QJsonArray arr;
     for (const QString& name : publicParams_)
         arr.append(name);
     obj[QStringLiteral("publicParams")] = arr;
+    obj[QStringLiteral("params")] = params;
     doc.setObject(obj);
     if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
         file.write(doc.toJson(QJsonDocument::Indented));
+
+    EditorCore::MaterialEvents::Instance().NotifyChanged(material_);
 }
 
 void MaterialEditorWindow::SetParamPublic(const QString& name, bool isPublic)
