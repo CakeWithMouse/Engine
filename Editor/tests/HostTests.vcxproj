@@ -74,6 +74,7 @@
         <ClCompile Include="../Host/AssetCommandHandler.cpp"/>
         <ClCompile Include="../Host/EditorHistory.cpp"/>
         <ClCompile Include="../Host/SceneCommandHandler.cpp"/>
+        <ClCompile Include="../Host/SceneClipboard.cpp"/>
     </ItemGroup>
 
     <Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets"/>
