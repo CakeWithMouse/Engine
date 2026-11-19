@@ -33,8 +33,7 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
                                  uint32_t& result,
                                  QString& error)
 {
-    if (!ctx.scene.context)
-    {
+    if (!ctx.scene.context) {
         result = EngineSceneReadOnly;
         error = QStringLiteral("Этот проект поддерживает только preview.");
         return;
@@ -71,8 +70,7 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
         if (mutation && !coalesced)
             checkpoint = history.Checkpoint(ctx.scene);
 
-        if (cmd.type == EditorCommand::SelectObject)
-        {
+        if (cmd.type == EditorCommand::SelectObject) {
             if (cmd.name == "toggle" && ctx.batch) PickSelection(cmd.objectId, true);
             else { selectedId_ = cmd.objectId; selectedIds_ = cmd.objectIds; }
         }
@@ -109,14 +107,10 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
             auto transform = cmd.transform;
             if (cmd.path == QStringLiteral("nudge"))
             {
-                for (const auto& o : ReadSnapshot().objects)
-                {
-                    if (o.id == cmd.objectId)
-                    {
+                for (const auto& o : ReadSnapshot().objects) {
+                    if (o.id == cmd.objectId) {
                         transform = o.transform;
-                        transform.position[0] += cmd.right;
-                        transform.position[1] += cmd.up;
-                        transform.position[2] += cmd.forward;
+                        transform.position[0] += cmd.right; transform.position[1] += cmd.up; transform.position[2] += cmd.forward;
                         break;
                     }
                 }
@@ -515,15 +509,21 @@ void SceneCommandHandler::PublishScene(const Context& ctx, IEditorHost::EditorSt
         ancestor=item==view.objects.end()?0:item->parent;
         if(ancestor && std::find(selectedIds_.begin(),selectedIds_.end(),ancestor)!=selectedIds_.end())selectedId_=ancestor;
     }
-    view.authoring=ctx.authoring!=nullptr;
-    if(const auto* authoring=ctx.authoring)for(auto& o:view.objects)if(o.id==selectedId_)
-        authoring->describe(authoring->context,o.id,[](void* p,const char* text){*static_cast<std::string*>(p)=text;},&o.propertySchema);
-    view.selectedIds = selectedIds_;
-    view.batchEditing = ctx.batch != nullptr;
+    view.authoring = ctx.authoring != nullptr;
+    if (const auto* authoring = ctx.authoring) for (auto& o : view.objects) if (o.id == selectedId_)
+        authoring->describe(authoring->context, o.id, [](void* p, const char* text) { *static_cast<std::string*>(p) = text; }, &o.propertySchema);
+    view.selectedIds = selectedIds_; view.batchEditing = ctx.batch != nullptr;
     view.selected = selectedId_; view.dirty = dirty_; view.canUndo = false; view.canRedo = false;
     hasSelection_.store(selectedId_ != 0);
-    if (const auto* batch = ctx.batch; batch && batch->select) batch->select(batch->context,selectedIds_.data(),playState==IEditorHost::Edit ? static_cast<uint32_t>(selectedIds_.size()) : 0);
-    else if (ctx.selection.select) ctx.selection.select(ctx.selection.context, playState == IEditorHost::Edit ? selectedId_ : 0);
+    std::vector<uint64_t> engSel;
+    for (auto id : selectedIds_) {
+        const auto it = std::find_if(view.objects.begin(), view.objects.end(), [&](const auto& o) { return o.id == id; });
+        if (it != view.objects.end() && it->type != "Scene.Folder") engSel.push_back(id);
+    }
+    const auto itSel = std::find_if(view.objects.begin(), view.objects.end(), [&](const auto& o) { return o.id == selectedId_; });
+    const uint64_t engSelId = (itSel != view.objects.end() && itSel->type == "Scene.Folder") ? 0 : selectedId_;
+    if (const auto* batch = ctx.batch; batch && batch->select) batch->select(batch->context, engSel.data(), playState == IEditorHost::Edit ? static_cast<uint32_t>(engSel.size()) : 0);
+    else if (ctx.selection.select) ctx.selection.select(ctx.selection.context, playState == IEditorHost::Edit ? engSelId : 0);
 
     std::lock_guard lock(sceneMutex_);
     view.serial = snapshot_.serial + 1;

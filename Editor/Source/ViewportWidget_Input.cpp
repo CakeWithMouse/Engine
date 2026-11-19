@@ -227,12 +227,17 @@ bool ViewportWidget::HandleMousePress(QMouseEvent* mouse)
             );
             if (bbObj != 0)
             {
-                EditorCommand c;
-                c.type = EditorCommand::SelectObject;
-                c.objectId = bbObj;
-                if (mouse->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier)) c.name = "toggle";
-                host_->PostCommand(c);
-                return true;
+                const auto snap = host_->ReadSnapshot();
+                const auto found = std::find_if(snap.objects.begin(), snap.objects.end(), [&](const auto& o) { return o.id == bbObj; });
+                if (found != snap.objects.end() && found->type != "Scene.Folder")
+                {
+                    EditorCommand c;
+                    c.type = EditorCommand::SelectObject;
+                    c.objectId = bbObj;
+                    if (mouse->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier)) c.name = "toggle";
+                    host_->PostCommand(c);
+                    return true;
+                }
             }
         }
 
