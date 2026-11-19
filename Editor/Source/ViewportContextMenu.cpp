@@ -133,42 +133,24 @@ void EditorMainWindow::BuildViewportContextMenu(const QPoint& globalPos)
     };
     auto buildCreateMenu = [&](QMenu* m, uint64_t parentId) {
         const auto spawn = sceneObjectsPanel_ ? sceneObjectsPanel_->SpawnPosition() : std::array<double, 3>{0, 0, 0};
-        QVariantMap base;
-        base[QStringLiteral("parentId")] = QVariant::fromValue(parentId);
-        base[QStringLiteral("x")] = spawn[0];
-        base[QStringLiteral("y")] = spawn[1];
-        base[QStringLiteral("z")] = spawn[2];
-        m->addAction(IconProvider::GetIcon(QStringLiteral("circle-dotted")), Tr("Пустой объект", "Empty"), this,
-                     [base] { CommandRegistry::Instance().Execute(QStringLiteral("Scene.CreateEmpty"), base); });
-        m->addAction(IconProvider::FolderIcon(), Tr("Папка", "Folder"), this,
-                     [base] { CommandRegistry::Instance().Execute(QStringLiteral("Scene.CreateFolder"), base); });
-        m->addSeparator();
-        QMenu* prim = nullptr;
-        QMenu* light = nullptr;
-        QMenu* cam = nullptr;
+        QVector<std::pair<QString, QString>> typePairs;
         for (const auto& t : view.types)
-        {
-            const QString name = QString::fromStdString(t.name);
-            if (name == QLatin1String("Gameplay.PlaySettings") || name == QLatin1String("Scene.Folder") || name == QLatin1String("Scene.Empty"))
-                continue;
-            QMenu** slot = nullptr;
-            if (name.startsWith(QLatin1String("Primitive."))) slot = &prim;
-            else if (name.startsWith(QLatin1String("Light."))) slot = &light;
-            else if (name.startsWith(QLatin1String("Gameplay.Camera"))) slot = &cam;
-            else continue;
-            if (!*slot)
-            {
-                const QString title = slot == &prim ? Tr("Примитивы", "Primitives")
-                                    : slot == &light ? Tr("Свет", "Lights")
-                                                     : Tr("Камеры", "Cameras");
-                *slot = m->addMenu(title);
-            }
-            const QString label = EditorUI::LocalizedTypeLabel(name, QString::fromStdString(t.label));
-            QVariantMap p = base;
-            p[QStringLiteral("type")] = name;
+            typePairs.append({QString::fromStdString(t.label), QString::fromStdString(t.name)});
+        EditorUI::PopulateCategorizedCreateMenu(m, typePairs, [parentId, spawn](const QString& type, const QString& label) {
+            QVariantMap p;
+            p[QStringLiteral("parentId")] = QVariant::fromValue(parentId);
+            p[QStringLiteral("x")] = spawn[0];
+            p[QStringLiteral("y")] = spawn[1];
+            p[QStringLiteral("z")] = spawn[2];
+            p[QStringLiteral("type")] = type;
             p[QStringLiteral("name")] = label;
-            (*slot)->addAction(label, this, [p] { CommandRegistry::Instance().Execute(QStringLiteral("Scene.Create"), p); });
-        }
+            if (type == QStringLiteral("Scene.Folder"))
+                CommandRegistry::Instance().Execute(QStringLiteral("Scene.CreateFolder"), p);
+            else if (type == QStringLiteral("Scene.Empty"))
+                CommandRegistry::Instance().Execute(QStringLiteral("Scene.CreateEmpty"), p);
+            else
+                CommandRegistry::Instance().Execute(QStringLiteral("Scene.Create"), p);
+        }, parentId ? QStringLiteral("CreateChildObject.") : QStringLiteral("CreateObject."));
     };
 
     if (edit && sel)

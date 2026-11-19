@@ -157,51 +157,9 @@ void SceneObjectsPanel::RebuildAddMenu()
     if (!addMenu_) return;
     qDeleteAll(addMenu_->findChildren<QMenu*>(QString(), Qt::FindDirectChildrenOnly));
     addMenu_->clear();
-
-    auto* actFolder = addMenu_->addAction(IconProvider::FolderIcon(), Tr("Папка", "Folder"), this, [this] {
-        emit AddPrimitiveRequested(QStringLiteral("Scene.Folder"), Tr("Папка", "Folder"), SpawnPosition());
-    });
-    actFolder->setObjectName(QStringLiteral("SceneFolderAction"));
-
-    auto* actEmpty = addMenu_->addAction(IconProvider::GetIcon(QStringLiteral("circle-dotted")), Tr("Пустой объект", "Empty"), this, [this] {
-        emit AddPrimitiveRequested(QStringLiteral("Scene.Empty"), Tr("Пустой объект", "Empty"), SpawnPosition());
-    });
-    actEmpty->setObjectName(QStringLiteral("SceneEmptyAction"));
-    addMenu_->addSeparator();
-
-    auto* menuPrimitives = addMenu_->addMenu(Tr("Примитивы", "Primitives"));
-    auto* menuLights = addMenu_->addMenu(Tr("Свет", "Lights"));
-    auto* menuParticles = addMenu_->addMenu(Tr("Частицы", "Particles"));
-    auto* menuEnv = addMenu_->addMenu(Tr("Окружение", "Environment"));
-    auto* menuCharacters = addMenu_->addMenu(Tr("Персонажи", "Characters"));
-    auto* menuCameras = addMenu_->addMenu(Tr("Камеры", "Cameras"));
-    auto* menuProject = addMenu_->addMenu(Tr("Классы проекта", "Project Classes"));
-
-    for (const auto& type : types_) {
-        const auto& name = type.second;
-        if (name == "Gameplay.PlaySettings" || name == "Scene.Folder" || name == "Scene.Empty") continue;
-        const auto label = EditorUI::LocalizedTypeLabel(name, type.first);
-
-        QMenu* target = menuProject;
-        if (name.startsWith("Primitive.")) target = menuPrimitives;
-        else if (name.startsWith("Light.")) target = menuLights;
-        else if (name.startsWith("Particle.")) target = menuParticles;
-        else if (name.startsWith("Environment.")) target = menuEnv;
-        else if ((name.startsWith("Gameplay.Character") || name == "Gameplay.Player")) target = menuCharacters;
-        else if (name.startsWith("Gameplay.Camera")) target = menuCameras;
-
-        auto* action = target->addAction(label, this, [this, name, label] {
-            emit AddPrimitiveRequested(name, label, SpawnPosition());
-        });
-        action->setObjectName("CreateObject." + name);
-        action->setData(name);
-    }
-
-    for (auto* sub : {menuPrimitives, menuLights, menuParticles, menuEnv, menuCharacters, menuCameras, menuProject}) {
-        if (sub->actions().isEmpty()) {
-            sub->menuAction()->setVisible(false);
-        }
-    }
+    EditorUI::PopulateCategorizedCreateMenu(addMenu_, types_, [this](const QString& name, const QString& label) {
+        emit AddPrimitiveRequested(name, label, SpawnPosition());
+    }, QStringLiteral("CreateObject."));
 }
 
 void SceneObjectsPanel::FilterHierarchy(const QString& query)
@@ -381,26 +339,9 @@ void SceneObjectsPanel::ShowTreeContextMenu(const QPoint& pos)
     // 1. Создать внутри... / Add Child...
     if (selectedId) {
         auto* addChildMenu = menu.addMenu(Tr("Создать внутри…", "Add Child…"));
-        auto* actF = addChildMenu->addAction(IconProvider::FolderIcon(), Tr("Папка", "Folder"), this, [this, selectedId] {
-            emit AddChildPrimitiveRequested(selectedId, QStringLiteral("Scene.Folder"), Tr("Папка", "Folder"), SpawnPosition());
-        });
-        actF->setObjectName(QStringLiteral("CreateChildObject.Scene.Folder"));
-        auto* actE = addChildMenu->addAction(IconProvider::GetIcon(QStringLiteral("circle-dotted")), Tr("Пустой объект", "Empty"), this, [this, selectedId] {
-            emit AddChildPrimitiveRequested(selectedId, QStringLiteral("Scene.Empty"), Tr("Пустой объект", "Empty"), SpawnPosition());
-        });
-        actE->setObjectName(QStringLiteral("CreateChildObject.Scene.Empty"));
-        addChildMenu->addSeparator();
-
-        for (const auto& type : types_) {
-            const auto& name = type.second;
-            if (name == "Gameplay.PlaySettings" || name == "Scene.Folder" || name == "Scene.Empty") continue;
-            const auto label = EditorUI::LocalizedTypeLabel(name, type.first);
-            auto* act = addChildMenu->addAction(label, this, [this, selectedId, name, label] {
-                emit AddChildPrimitiveRequested(selectedId, name, label, SpawnPosition());
-            });
-            act->setObjectName(QStringLiteral("CreateChildObject.") + name);
-            act->setData(name);
-        }
+        EditorUI::PopulateCategorizedCreateMenu(addChildMenu, types_, [this, selectedId](const QString& name, const QString& label) {
+            emit AddChildPrimitiveRequested(selectedId, name, label, SpawnPosition());
+        }, QStringLiteral("CreateChildObject."));
         menu.addSeparator();
 
         // 2. Открепить / Назначить родителем
