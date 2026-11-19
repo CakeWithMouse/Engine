@@ -1,6 +1,8 @@
 #include "EditorLocale.h"
 #include "CommandRegistry.h"
 #include "AssetPickerDialog.h"
+#include "FileService.h"
+#include "Logger.h"
 #include <QMenuBar>
 #define NOMINMAX
 #include "MainWindow.h"
@@ -22,22 +24,96 @@
 #include <QLabel>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QInputDialog>
+#include <QRegularExpression>
 
 void EditorMainWindow::OpenUIEditor(const QString& path) {
     const auto key=QFileInfo(path).absoluteFilePath();
     if(uiEditors_.value(key)){uiEditors_[key]->show();uiEditors_[key]->raise();uiEditors_[key]->activateWindow();return;}
     auto* window=new UIEditorWindow(host_,key,this);window->setWindowFlag(Qt::Window);uiEditors_[key]=window;window->show();
 }
-QString EditorMainWindow::CreateUI(const QString& supplied) {
-    const auto root=QString::fromUtf8(host_->host().contentRoot);QDir(root).mkpath("UI");
-    QString file=supplied.isEmpty()?QFileDialog::getSaveFileName(this,Tr("Новый интерфейс", "New Interface"),QDir(root).filePath("UI/Hud.ui"),"UI (*.ui)"):supplied;
-    if(file.isEmpty())return {};if(!file.endsWith(".ui"))file+=".ui";
-    try { ProjectHud::Resolve(std::filesystem::u8path(root.toStdString()),QDir(root).relativeFilePath(file).toUtf8().toStdString()); }
-    catch(const std::exception& e){QMessageBox::warning(this,QStringLiteral("HUD"),QString::fromUtf8(e.what()));return {};}
-    if(QFileInfo::exists(file)){QMessageBox::warning(this,QStringLiteral("HUD"),Tr("Файл уже существует. Откройте его для редактирования.", "File already exists. Open it for editing."));return {};}
-    QSaveFile output(file);const QByteArray data("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI/>\n");
-    if(!output.open(QIODevice::WriteOnly)||output.write(data)!=data.size()||!output.commit()){QMessageBox::warning(this,QStringLiteral("HUD"),output.errorString());return {};}
-    OpenUIEditor(file);return file;
+QString EditorMainWindow::CreateUI(const QString& directoryOrFile, const QString& name) {
+    const QString projectRoot = QFileInfo(ProjectPath()).dir().absolutePath();
+    const QString contentRoot = host_ ? QString::fromUtf8(host_->host().contentRoot) : QString();
+
+    QString target;
+    QString base = name.trimmed();
+
+    if (directoryOrFile.endsWith(QStringLiteral(".ui"), Qt::CaseInsensitive)) {
+        target = QFileInfo(directoryOrFile).path();
+        if (base.isEmpty()) base = QFileInfo(directoryOrFile).completeBaseName();
+    } else {
+        target = directoryOrFile;
+    }
+
+    if (!target.isEmpty() && !QDir::isAbsolutePath(target))
+        target = QDir(contentRoot).filePath(target);
+
+    if (target.isEmpty() || !target.startsWith(contentRoot))
+        target = QDir(contentRoot).filePath(QStringLiteral("UI"));
+
+    if (base.isEmpty()) {
+        QString defaultName = QStringLiteral("Hud");
+        if (QFileInfo::exists(QDir(target).filePath(defaultName + QStringLiteral(".ui")))) {
+            defaultName = QStringLiteral("NewUI");
+            for (int i = 2; QFileInfo::exists(QDir(target).filePath(defaultName + QStringLiteral(".ui"))); ++i)
+                defaultName = QStringLiteral("NewUI_") + QString::number(i);
+        }
+        bool accepted = false;
+        base = QInputDialog::getText(this, Tr("Новый интерфейс", "New Interface"),
+                                     Tr("Имя интерфейса:", "Interface Name:"),
+                                     QLineEdit::Normal, defaultName, &accepted).trimmed();
+        if (!accepted || base.isEmpty()) return {};
+    }
+
+    static const QRegularExpression namePattern(QStringLiteral("^[A-Za-z0-9_][A-Za-z0-9_.-]*$"));
+    if (!namePattern.match(base).hasMatch()) {
+        QMessageBox::warning(this, Tr("Новый интерфейс", "New Interface"),
+                             Tr("Имя может содержать латинские буквы, цифры, «_», «-» и «.».",
+                                "Name can contain latin letters, digits, _, - and ."));
+        return {};
+    }
+
+    const QString file = QDir(target).filePath(base + QStringLiteral(".ui"));
+
+    try {
+        ProjectHud::Resolve(std::filesystem::u8path(contentRoot.toStdString()),
+                            QDir(contentRoot).relativeFilePath(file).toUtf8().toStdString());
+    } catch (const std::exception& e) {
+        QMessageBox::warning(this, QStringLiteral("HUD"), QString::fromUtf8(e.what()));
+        return {};
+    }
+
+    FileService fs(&Logger::Instance(), this);
+    fs.SetProjectRoot(projectRoot);
+    fs.SetContentRoot(contentRoot);
+
+    if (fs.FileExists(file)) {
+        QMessageBox::warning(this, Tr("Новый интерфейс", "New Interface"),
+                             Tr("В каталоге уже есть %1.ui.", "Directory already contains %1.ui.").arg(base));
+        return {};
+    }
+
+    if (!fs.DirectoryExists(target)) {
+        QString createErr;
+        if (!fs.CreateDirectoryPath(target, &createErr)) {
+            QMessageBox::warning(this, Tr("Новый интерфейс", "New Interface"),
+                                 Tr("Не удалось создать каталог %1.", "Failed to create directory %1.").arg(target));
+            return {};
+        }
+    }
+
+    const QByteArray data("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI/>\n");
+    QString writeErr;
+    if (!fs.WriteFileAtomic(file, data, &writeErr)) {
+        QMessageBox::warning(this, Tr("Новый интерфейс", "New Interface"),
+                             Tr("Не удалось записать %1: %2", "Failed to write %1: %2").arg(file, writeErr));
+        return {};
+    }
+
+    AppendLine(Tr("Создан интерфейс %1.", "Created UI %1.").arg(file));
+    OpenUIEditor(file);
+    return file;
 }
 void EditorMainWindow::ShowHudSettings() {
     const auto root=QString::fromUtf8(host_->host().contentRoot);
@@ -72,9 +148,10 @@ void EditorMainWindow::BuildToolsMenu()
         QStringLiteral("Create UI"),
         QString(),
         QStringLiteral("Create a new game UI asset"),
-        [this](const CommandContext&) {
-            CreateUI();
-            return true;
+        [this](const CommandContext& ctx) {
+            const QString directory = ctx.parameters.value(QStringLiteral("directory")).toString();
+            const QString name = ctx.parameters.value(QStringLiteral("name")).toString();
+            return !CreateUI(directory, name).isEmpty();
         },
         nullptr
     });

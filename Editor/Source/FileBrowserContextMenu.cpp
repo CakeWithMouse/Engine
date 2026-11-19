@@ -119,8 +119,9 @@ void FileBrowserDock::AddCreateSubmenu(QMenu& menu, const QString& folderParent,
 
     QMenu* ui = create->addMenu(Tr("UI", "UI"));
     QAction* newUi = ui->addAction(Tr("Новый UI…", "New UI…"));
-    connect(newUi, &QAction::triggered, this, [] {
-        CommandRegistry::Instance().Execute(QStringLiteral("UI.Create"));
+    connect(newUi, &QAction::triggered, this, [directory] {
+        CommandRegistry::Instance().Execute(QStringLiteral("UI.Create"),
+            {{QStringLiteral("directory"), directory}});
     });
 }
 

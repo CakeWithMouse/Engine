@@ -102,7 +102,7 @@ public:
     void ShowHudSettings();
     // Читает настройки физики в потоке движка и показывает диалог настройки.
     void ShowPhysicsSettings();
-    QString CreateUI(const QString& supplied = {});
+    QString CreateUI(const QString& directoryOrFile = {}, const QString& name = {});
 
 public slots:
     void AppendLine(const QString& line);
