@@ -8,7 +8,7 @@ constexpr int MaxShadowCascades = 3;
 constexpr int StaticCasterCascades = 2;
 
 // Point lights that cast shadows at the same time; each owns one cube of the shadow array.
-constexpr int MaxPointShadowLights = 2;
+constexpr int MaxPointShadowLights = 4;
 constexpr int PointShadowFaces = 6;
 constexpr int PointShadowStreams = MaxPointShadowLights * PointShadowFaces;
 // These three must match POINT_SHADOW_SIZE, POINT_SHADOW_NEAR and the register of pointShadowTex in

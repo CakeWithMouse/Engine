@@ -97,7 +97,7 @@ python Engine/tests/AnalyzeShadowCameraSequence.py --check E:/scratch/orbit
 
 ### 4.4. Тени точечных источников
 
-`PointLightComponent::SetCastShadows(true)` (в сцене — `castShadows`). Каждая такая лампа получает куб 1024×1024 в `TextureCubeArray`, одновременно их не больше `MaxPointShadowLights` (2); следующие светят без тени. Память выделяется при первой теневой лампе: 48 МБ.
+`PointLightComponent::SetCastShadows(true)` (в сцене — `castShadows`). Каждая такая лампа получает куб 1024×1024 в `TextureCubeArray`, одновременно их не больше `MaxPointShadowLights` (4); следующие светят без тени. Память выделяется при первой теневой лампе: 96 МБ (6 граней × 1024² × R32 × 4 лампы).
 
 Каждая грань рисуется тем же `RenderShadow`, что и каскад, только с перспективной матрицей (`PointShadowViewProjection`, 90°, дальняя плоскость — радиус лампы), поэтому меши и импортированные модели отдельного кода не требуют. Инстансы раскладываются по потокам граней на CPU: копия попадает только в те грани, которых может коснуться (`PointShadowFaceMask`), иначе плотное поле рисовалось бы шесть раз.
 
