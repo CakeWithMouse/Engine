@@ -108,7 +108,7 @@ QWidget* ValueEditor(QWidget* parent, const QString& name, const QString& type, 
 } // namespace
 
 ScriptGraphWidget::ScriptGraphWidget(CodeGraphSchema& schema, QWidget* parent)
-    : GraphEditorWidget(schema, parent), schema_(schema)
+    : GraphEditorWidget(schema, parent, Tr("Граф", "Graph")), schema_(schema)
 {
     setObjectName(QStringLiteral("ScriptGraph"));
     // Drop переменной ловится на viewport внутреннего холста (см. ScriptGraphWidget_DragDrop.cpp).

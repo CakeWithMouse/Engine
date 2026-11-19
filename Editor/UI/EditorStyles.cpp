@@ -23,6 +23,7 @@ QString EditorStyles::BuildStyleSheet(ThemeMode mode, const QColor& accentColor,
     const QString borderMid = isDark ? QStringLiteral("#3E4451") : QStringLiteral("#AFB8C1");
     const QString splitterColor = isDark ? QStringLiteral("rgba(44, 49, 58, 0.5)") : QStringLiteral("rgba(208, 215, 222, 0.6)");
     const QString splitterHover = QStringLiteral("rgba(%1, %2, %3, 0.5)").arg(accentColor.red()).arg(accentColor.green()).arg(accentColor.blue());
+    const QString accentAlpha = QStringLiteral("rgba(%1, %2, %3, 0.35)").arg(accentColor.red()).arg(accentColor.green()).arg(accentColor.blue());
 
     QString qss = QString(R"QSS(
 QWidget {
@@ -31,45 +32,14 @@ QWidget {
     selection-color: #FFFFFF;
     outline: none;
 }
-QMainWindow, QDialog {
-    background-color: %3;
-}
-QMenuBar {
-    background-color: %3;
-    border-bottom: 1px solid %6;
-    padding: 2px 6px;
-    font-size: 12px;
-}
-QMenuBar::item {
-    background: transparent;
-    padding: 4px 8px;
-    border-radius: 4px;
-    color: %4;
-}
-QMenuBar::item:selected {
-    background-color: %9;
-    color: %1;
-}
-QMenu {
-    background-color: %7;
-    border: 1px solid %6;
-    border-radius: 4px;
-    padding: 4px;
-}
-QMenu::item {
-    padding: 5px 24px 5px 12px;
-    border-radius: 3px;
-    color: %1;
-}
-QMenu::item:selected {
-    background-color: %2;
-    color: #FFFFFF;
-}
-QMenu::separator {
-    height: 1px;
-    background-color: %6;
-    margin: 4px 6px;
-}
+QMainWindow, QDialog { background-color: %3; }
+QMenuBar { background-color: %3; border-bottom: 1px solid %6; padding: 2px 6px; font-size: 12px; }
+QMenuBar::item { background: transparent; padding: 4px 8px; border-radius: 4px; color: %4; }
+QMenuBar::item:selected { background-color: %9; color: %1; }
+QMenu { background-color: %7; border: 1px solid %6; border-radius: 4px; padding: 4px; }
+QMenu::item { padding: 5px 24px 5px 12px; border-radius: 3px; color: %1; }
+QMenu::item:selected { background-color: %2; color: #FFFFFF; }
+QMenu::separator { height: 1px; background-color: %6; margin: 4px 6px; }
 QToolBar {
     background-color: %3;
     border-bottom: 1px solid %6;
@@ -90,6 +60,14 @@ QToolButton:hover {
 QToolButton:pressed, QToolButton:checked {
     background-color: %11;
     border-color: %2;
+}
+QPushButton[toolbarBtn="true"], QToolButton[toolbarBtn="true"] {
+    min-width: 34px; max-width: 34px; min-height: 26px; max-height: 26px;
+    padding: 3px 6px; margin: 0px;
+}
+QPushButton[panelBtn="true"], QToolButton[panelBtn="true"] {
+    min-width: 26px; max-width: 26px; min-height: 26px; max-height: 26px;
+    padding: 2px; margin: 0px;
 }
 QToolButton#InfoButton, QToolButton#CardInfoButton, QToolButton#AiLegendInfoButton, QToolButton#CameraGuideInfo, QToolButton[isInfoButton="true"] {
     background-color: transparent;
@@ -114,18 +92,9 @@ QPushButton {
     color: %1;
     font-weight: 500;
 }
-QPushButton:hover {
-    background-color: %9;
-    border-color: %10;
-}
-QPushButton:pressed {
-    background-color: %11;
-    border-color: %2;
-}
-QPushButton:disabled {
-    color: %12;
-    border-color: %6;
-}
+QPushButton:hover { background-color: %9; border-color: %10; }
+QPushButton:pressed { background-color: %11; border-color: %2; }
+QPushButton:disabled { color: %12; border-color: %6; }
 QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox {
     background-color: %5;
     border: 1px solid %6;
@@ -133,17 +102,13 @@ QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox {
     padding: 3px 6px;
     color: %1;
 }
-QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus {
-    border-color: %2;
-}
+QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus { border-color: %2; }
 QLineEdit:disabled, QSpinBox:disabled, QDoubleSpinBox:disabled, QComboBox:disabled {
     color: %12;
     background-color: %8;
     border-color: %6;
 }
-QLabel:disabled {
-    color: %12;
-}
+QLabel:disabled { color: %12; }
 QTreeView, QTreeWidget, QListView, QListWidget, QPlainTextEdit, QTextEdit {
     background-color: %5;
     border: 1px solid %6;
@@ -151,17 +116,27 @@ QTreeView, QTreeWidget, QListView, QListWidget, QPlainTextEdit, QTextEdit {
     color: %1;
     alternate-background-color: %7;
 }
-QTreeView::item:hover:!selected, QListView::item:hover:!selected {
-    background-color: %9;
+QDialog QListWidget, QDialog QTreeWidget {
+    background-color: %3;
+    border: 1px solid %6;
 }
-QTreeView::item:selected, QListView::item:selected {
-    background-color: %2;
-    color: #FFFFFF;
+QDialog QTabWidget::pane {
+    background-color: %3;
+    border: 1px solid %6;
+    padding: 8px;
 }
-QTreeView::item:selected:hover, QListView::item:selected:hover {
-    background-color: %13;
-    color: #FFFFFF;
+QDialog QTabBar::tab:selected {
+    background-color: %3;
+    color: %1;
 }
+QDialog QListWidget::item:selected, QDialog QTreeWidget::item:selected {
+    background-color: %16;
+    color: %1;
+    border-radius: 3px;
+}
+QTreeView::item:hover:!selected, QListView::item:hover:!selected { background-color: %9; }
+QTreeView::item:selected, QListView::item:selected { background-color: %2; color: #FFFFFF; }
+QTreeView::item:selected:hover, QListView::item:selected:hover { background-color: %13; color: #FFFFFF; }
 QHeaderView {
     background-color: %7;
     border: none;
@@ -442,7 +417,8 @@ QPushButton#PrimaryActionButton:disabled {
         .arg(textDisabled)    // %12
         .arg(accentHover)     // %13
         .arg(splitterColor)   // %14
-        .arg(splitterHover);  // %15
+        .arg(splitterHover)   // %15
+        .arg(accentAlpha);    // %16
 
     if (!arrowUp.isEmpty() && !arrowDown.isEmpty()) {
         qss += QString(R"QSS(

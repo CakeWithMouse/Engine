@@ -1,5 +1,6 @@
 #include "FsmBlockListEditor.h"
 #include "EditorLocale.h"
+#include "EditorWindowSetup.h"
 #include "IconProvider.h"
 
 #include <QCheckBox>
@@ -43,9 +44,11 @@ FsmBlockListEditor::FsmBlockListEditor(const FsmGraphSchema& schema, const QStri
     setObjectName(prefix);
     auto* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(6);
     list_ = new QListWidget(this);
     list_->setObjectName(prefix + QStringLiteral("List"));
     list_->setMinimumHeight(70);
+    list_->setContentsMargins(8, 8, 8, 8);
     connect(list_, &QListWidget::currentRowChanged, this, [this] { if (!refreshing_) ShowParams(); });
     layout->addWidget(list_, 1);
 
@@ -54,9 +57,12 @@ FsmBlockListEditor::FsmBlockListEditor(const FsmGraphSchema& schema, const QStri
     buttons->setSpacing(4);
     add_ = new QToolButton(this);
     add_->setObjectName(prefix + QStringLiteral("Add"));
+    add_->setText(Tr("Добавить", "Add"));
     add_->setIcon(IconProvider::PlusIcon());
-    add_->setIconSize(QSize(14, 14));
-    add_->setFixedSize(28, 24);
+    add_->setIconSize(QSize(EditorWindowSetup::kPanelIconSize, EditorWindowSetup::kPanelIconSize));
+    add_->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    add_->setProperty("panelBtn", true);
+    add_->setFixedHeight(EditorWindowSetup::kPanelBtnHeight);
     add_->setToolTip(Tr("Добавить блок", "Add block"));
     add_->setPopupMode(QToolButton::InstantPopup);
     auto* menu = new QMenu(add_);
@@ -78,11 +84,14 @@ FsmBlockListEditor::FsmBlockListEditor(const FsmGraphSchema& schema, const QStri
     });
     menu->setToolTipsVisible(true);
     add_->setMenu(menu);
+
     remove_ = new QPushButton(this);
     remove_->setObjectName(prefix + QStringLiteral("Remove"));
+    remove_->setText(Tr("Удалить", "Remove"));
     remove_->setIcon(IconProvider::TrashIcon());
-    remove_->setIconSize(QSize(14, 14));
-    remove_->setFixedSize(28, 24);
+    remove_->setIconSize(QSize(EditorWindowSetup::kPanelIconSize, EditorWindowSetup::kPanelIconSize));
+    remove_->setProperty("panelBtn", true);
+    remove_->setFixedHeight(EditorWindowSetup::kPanelBtnHeight);
     remove_->setToolTip(Tr("Удалить выбранный блок", "Remove selected block"));
     connect(remove_, &QPushButton::clicked, this, [this] {
         const int row = CurrentRow();
@@ -92,20 +101,25 @@ FsmBlockListEditor::FsmBlockListEditor(const FsmGraphSchema& schema, const QStri
         SelectBlock(std::min(row, static_cast<int>(blocks_.size()) - 1));
         if (changed) changed();
     });
+
     up_ = new QPushButton(this);
     up_->setObjectName(prefix + QStringLiteral("Up"));
     up_->setIcon(IconProvider::GetIcon(QStringLiteral("arrow-up")));
-    up_->setIconSize(QSize(14, 14));
-    up_->setFixedSize(28, 24);
+    up_->setIconSize(QSize(EditorWindowSetup::kPanelIconSize, EditorWindowSetup::kPanelIconSize));
+    up_->setProperty("panelBtn", true);
+    up_->setFixedSize(EditorWindowSetup::kPanelBtnWidth, EditorWindowSetup::kPanelBtnHeight);
     up_->setToolTip(Tr("Выше: раньше по порядку", "Up: earlier in order"));
     connect(up_, &QPushButton::clicked, this, [this] { Move(-1); });
+
     down_ = new QPushButton(this);
     down_->setObjectName(prefix + QStringLiteral("Down"));
     down_->setIcon(IconProvider::GetIcon(QStringLiteral("arrow-down")));
-    down_->setIconSize(QSize(14, 14));
-    down_->setFixedSize(28, 24);
+    down_->setIconSize(QSize(EditorWindowSetup::kPanelIconSize, EditorWindowSetup::kPanelIconSize));
+    down_->setProperty("panelBtn", true);
+    down_->setFixedSize(EditorWindowSetup::kPanelBtnWidth, EditorWindowSetup::kPanelBtnHeight);
     down_->setToolTip(Tr("Ниже: позже по порядку", "Down: later in order"));
     connect(down_, &QPushButton::clicked, this, [this] { Move(1); });
+
     buttons->addWidget(add_);
     buttons->addWidget(remove_);
     buttons->addStretch(1);

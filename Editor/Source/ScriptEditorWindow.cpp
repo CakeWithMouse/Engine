@@ -7,6 +7,7 @@
 #include "Graph/GraphFileIo.h"
 #include "VariablePanelWidget.h"
 #include "IconProvider.h"
+#include "InfoButton.h"
 
 #include <QComboBox>
 #include <QDir>
@@ -20,9 +21,11 @@
 #include <QPointer>
 #include <QPushButton>
 #include <QRegularExpression>
+#include <QSplitter>
 #include <QStatusBar>
 #include <QTableWidget>
 #include <QTimer>
+#include <QToolBar>
 #include <QVBoxLayout>
 
 using EditorCore::CodeGraphSchema;
@@ -47,7 +50,7 @@ void ENGINE_MODULE_CALL CollectProblem(void* user, const EngineScriptProblem* pr
 // В комбобоксе переменных тип float подписан явно; TypeLabel schema остаётся для сообщений о пинах.
 QString VariableTypeLabel(const QString& type)
 {
-    if (type == QStringLiteral("float")) return Tr("число (float)", "number (float)");
+    if (type == QStringLiteral("float")) return Tr("число [float]", "number [float]");
     return EditorCore::CodeGraphSchema::TypeLabel(type);
 }
 } // namespace
@@ -72,6 +75,49 @@ ScriptEditorWindow::~ScriptEditorWindow()
 
 void ScriptEditorWindow::BuildUi()
 {
+    auto* tools = addToolBar(Tr("Скрипт", "Script"));
+    tools->setMovable(false);
+
+    auto* save = new QPushButton(IconProvider::SaveIcon(), QString(), tools);
+    save->setObjectName(QStringLiteral("ScriptSave"));
+    save->setProperty("toolbarBtn", true);
+    save->setFixedSize(EditorWindowSetup::kToolbarBtnWidth, EditorWindowSetup::kToolbarBtnHeight);
+    save->setIconSize(QSize(EditorWindowSetup::kToolbarIconSize, EditorWindowSetup::kToolbarIconSize));
+    save->setToolTip(Tr("Сохранить [Ctrl+S]", "Save [Ctrl+S]"));
+    connect(save, &QPushButton::clicked, this, [this] { SaveNow(); });
+    tools->addWidget(save);
+
+    auto* help = new InfoButton(this);
+    help->setObjectName(QStringLiteral("ScriptHelp"));
+    help->SetToolbarStyle(true);
+    help->setProperty("toolbarBtn", true);
+    help->setFixedSize(EditorWindowSetup::kToolbarBtnWidth, EditorWindowSetup::kToolbarBtnHeight);
+    help->setIconSize(QSize(EditorWindowSetup::kToolbarIconSize, EditorWindowSetup::kToolbarIconSize));
+    help->SetInfoText(
+        Tr("Редактор визуальных скриптов", "Visual Script Editor"),
+        Tr("Визуальные скрипты [.vscript]:\n"
+           "• Верхняя строка: Сохранить [Ctrl+S] и справка окна\n"
+           "• Панель «Переменные»: именованные данные объекта [число, логический, вектор, строка]\n"
+           "  - Перетаскивание на холст: нода чтения [Get]; с зажатым Shift — нода записи [Set]\n"
+           "  - «Показ.»: публичные переменные, доступные для настройки в инспекторе\n"
+           "• Панель «Граф»: логика из нод событий, действий и математики\n"
+           "  - ЛКМ/рамка — выделение; ПКМ/колесо — навигация; F — уместить граф\n"
+           "  - Tab / «+ Нода» — каталог доступных нод движка и проекта\n"
+           "• Отладка в Play: зелёная рамка вокруг активных нод и счетчик срабатываний\n"
+           "• Панель «Консоль»: сообщения компилятора и предупреждения схемы",
+           "Visual Scripts [.vscript]:\n"
+           "• Top bar: Save [Ctrl+S] and window help\n"
+           "• Variables panel: named object data [number, bool, vector, string]\n"
+           "  - Drag onto canvas: Get node; drag with Shift: Set node\n"
+           "  - \"Show\": public variables configurable in inspector\n"
+           "• Graph panel: logic from events, actions and math nodes\n"
+           "  - LMB/box — select; RMB/wheel — navigate; F — frame all\n"
+           "  - Tab / \"+ Node\" — catalog of engine and project nodes\n"
+           "• Play debugging: green highlight on active nodes and fire count\n"
+           "• Console panel: compiler errors and schema warnings"),
+        QString());
+    tools->addWidget(help);
+
     auto* central = new QWidget(this);
     auto* layout = new QVBoxLayout(central);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -87,7 +133,6 @@ void ScriptEditorWindow::BuildUi()
 
     graph_ = new ScriptGraphWidget(*schema_, central);
     graph_->setEnabled(false); // до загрузки каталога и файла
-    layout->addWidget(graph_, 1);
 
     variables_ = new ScriptVariableTable(central);
     variables_->setObjectName(QStringLiteral("ScriptVariables"));
@@ -99,23 +144,41 @@ void ScriptEditorWindow::BuildUi()
         graph_->SetVariables(list, renames);
     };
     variablesPanel_->setEnabled(false);
-    graph_->EmbedSidePanel(variablesPanel_);
 
-    auto* save = new QPushButton(IconProvider::SaveIcon(), QString(), central);
-    save->setObjectName(QStringLiteral("ScriptSave"));
-    save->setFixedSize(34, 26);
-    save->setIconSize(QSize(16, 16));
-    save->setToolTip(Tr("Сохранить: записать файл и проверить движком сразу", "Save: write the file and check with the engine now"));
-    connect(save, &QPushButton::clicked, this, [this] { SaveNow(); });
-    graph_->PrependToolbarWidget(save);
-    for (auto* button : variablesPanel_->ToolbarButtons())
-        graph_->AddToolbarWidget(button);
+    auto* splitter = new QSplitter(Qt::Horizontal, central);
+    splitter->setHandleWidth(3);
+    splitter->addWidget(variablesPanel_);
+    splitter->addWidget(graph_);
+    splitter->setStretchFactor(0, 0);
+    splitter->setStretchFactor(1, 1);
+    splitter->setSizes({280, 720});
+    variablesPanel_->setMinimumWidth(260);
+    layout->addWidget(splitter, 1);
 
     auto* console = new QWidget(central);
     auto* consoleLayout = new QVBoxLayout(console);
     consoleLayout->setContentsMargins(0, 0, 0, 0);
     consoleLayout->setSpacing(0);
-    consoleLayout->addWidget(EditorWindowSetup::MakePanelHeader(Tr("Консоль", "Console"), console));
+    auto* consoleHeader = new QWidget(console);
+    auto* consoleHeaderLayout = new QHBoxLayout(consoleHeader);
+    consoleHeaderLayout->setContentsMargins(0, 0, 4, 0);
+    consoleHeaderLayout->setSpacing(4);
+    consoleHeaderLayout->addWidget(EditorWindowSetup::MakePanelHeader(Tr("Консоль", "Console"), consoleHeader), 1);
+    auto* clearConsole = new QPushButton(IconProvider::TrashIcon(EditorTheme::Instance().Palette().textSecondary), QString(), consoleHeader);
+    clearConsole->setObjectName(QStringLiteral("ScriptClearConsole"));
+    clearConsole->setProperty("panelBtn", true);
+    clearConsole->setFixedSize(EditorWindowSetup::kPanelBtnWidth, EditorWindowSetup::kPanelBtnHeight);
+    clearConsole->setIconSize(QSize(EditorWindowSetup::kPanelIconSize, EditorWindowSetup::kPanelIconSize));
+    clearConsole->setToolTip(Tr("Очистить сообщения", "Clear messages"));
+    connect(clearConsole, &QPushButton::clicked, this, [this] {
+        checkProblems_.clear();
+        playProblems_.clear();
+        warnings_.clear();
+        ShowProblems();
+    });
+    consoleHeaderLayout->addWidget(clearConsole);
+    consoleLayout->addWidget(consoleHeader);
+
     problemList_ = new QListWidget(console);
     problemList_->setObjectName(QStringLiteral("ScriptProblems"));
     problemList_->setMaximumHeight(140);
@@ -126,6 +189,7 @@ void ScriptEditorWindow::BuildUi()
     consoleLayout->addWidget(problemList_);
     layout->addWidget(console);
     setCentralWidget(central);
+    ShowProblems();
 
     saveTimer_ = new QTimer(this);
     saveTimer_->setSingleShot(true);

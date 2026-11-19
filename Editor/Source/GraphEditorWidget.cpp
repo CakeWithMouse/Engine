@@ -1,6 +1,7 @@
 #include "GraphEditorWidget.h"
 #include "EditorLocale.h"
 #include "EditorTheme.h"
+#include "EditorWindowSetup.h"
 #include "IconProvider.h"
 #include "InfoButton.h"
 #include "GraphToolbarOverflow.h"
@@ -694,19 +695,19 @@ InfoButton* MakeGraphHelpButton(QWidget* parent)
     auto* btn = new InfoButton(
         Tr("Навигация и редактирование графа", "Graph Navigation and Editing"),
         Tr("Связи между нодами:\n• Перетащите пин на другой пин для создания связи\n• Потяните за подключённый входной пин, чтобы отсоединить связь\n\n"
-           "Добавление нод и навигация:\n• ПКМ по холсту или Tab — поиск и добавление нод\n• ПКМ по ноде — контекстные действия и свойства\n• Колёсико мыши — масштаб (0.2x..10x), ПКМ/СКМ — сдвиг холста\n\n"
-           "Горячие клавиши:\n• F — показать всё (или выделенные ноды)\n• Ctrl+Z / Ctrl+Y — отменить / повторить\n• Ctrl+C / Ctrl+X / Ctrl+V — копировать / вырезать / вставить\n• Ctrl+D — дублировать выделенные ноды\n• Ctrl+A — выделить всё, Del — удалить",
+           "Добавление нод и навигация:\n• ПКМ по холсту или Tab — поиск и добавление нод\n• ПКМ по ноде — контекстные действия и свойства\n• Колёсико мыши — масштаб 0.2x..10x, ПКМ/СКМ — сдвиг холста\n\n"
+           "Горячие клавиши:\n• F — показать всё [или выделенные ноды]\n• Ctrl+Z / Ctrl+Y — отменить / повторить\n• Ctrl+C / Ctrl+X / Ctrl+V — копировать / вырезать / вставить\n• Ctrl+D — дублировать выделенные ноды\n• Ctrl+A — выделить всё, Del — удалить",
            "Node connections:\n• Drag a pin to another pin to create a link\n• Drag a connected input pin to disconnect it\n\n"
-           "Adding nodes and navigation:\n• RMB on canvas or Tab — search and add nodes\n• RMB on a node — context actions and properties\n• Mouse wheel — zoom (0.2x..10x), RMB/MMB drag — pan\n\n"
-           "Keyboard shortcuts:\n• F — frame all (or selected nodes)\n• Ctrl+Z / Ctrl+Y — undo / redo\n• Ctrl+C / Ctrl+X / Ctrl+V — copy / cut / paste\n• Ctrl+D — duplicate selected nodes\n• Ctrl+A — select all, Del — delete"),
+           "Adding nodes and navigation:\n• RMB on canvas or Tab — search and add nodes\n• RMB on a node — context actions and properties\n• Mouse wheel — zoom 0.2x..10x, RMB/MMB drag — pan\n\n"
+           "Keyboard shortcuts:\n• F — frame all [or selected nodes]\n• Ctrl+Z / Ctrl+Y — undo / redo\n• Ctrl+C / Ctrl+X / Ctrl+V — copy / cut / paste\n• Ctrl+D — duplicate selected nodes\n• Ctrl+A — select all, Del — delete"),
         parent);
     btn->SetToolbarStyle(true);
     return btn;
 }
 } // namespace
 
-GraphEditorWidget::GraphEditorWidget(const GraphSchema& schema, QWidget* parent)
-    : QWidget(parent), schema_(schema)
+GraphEditorWidget::GraphEditorWidget(const GraphSchema& schema, QWidget* parent, const QString& headerTitle)
+    : QWidget(parent), schema_(schema), headerTitle_(headerTitle)
 {
     if (!schema_.Id().isEmpty()) document_.SetSchema(schema_.Id(), schema_.Version());
     BuildUi();
@@ -716,6 +717,12 @@ GraphEditorWidget::GraphEditorWidget(const GraphSchema& schema, QWidget* parent)
 GraphEditorWidget::~GraphEditorWidget()
 {
     if (themeSubId_) EditorTheme::Instance().UnsubscribeThemeChanged(themeSubId_);
+}
+
+void GraphEditorWidget::SetHeaderTitle(const QString& title)
+{
+    headerTitle_ = title;
+    if (headerLabel_) headerLabel_->setText(title);
 }
 
 QPointF GraphEditorWidget::Snap(const QPointF& point)
@@ -736,23 +743,47 @@ QString GraphEditorWidget::RenameTitle() const
 void GraphEditorWidget::BuildToolbar()
 {
     const QString prefix = schema_.ObjectPrefix();
+    const bool panelHeader = !headerTitle_.isEmpty();
     toolbar_ = new QHBoxLayout;
-    toolbar_->setContentsMargins(4, 3, 4, 3);
+    toolbar_->setContentsMargins(panelHeader ? 0 : 4, panelHeader ? 0 : 3, panelHeader ? 4 : 4, panelHeader ? 0 : 3);
+    toolbar_->setSpacing(4);
+    if (panelHeader) {
+        headerLabel_ = EditorWindowSetup::MakePanelHeader(headerTitle_, this);
+        toolbar_->addWidget(headerLabel_);
+        toolbar_->addStretch(1);
+    }
+    auto setupBtn = [panelHeader](QAbstractButton* btn) {
+        if (panelHeader) {
+            btn->setProperty("panelBtn", true);
+            btn->setFixedSize(EditorWindowSetup::kPanelBtnWidth, EditorWindowSetup::kPanelBtnHeight);
+            btn->setIconSize(QSize(EditorWindowSetup::kPanelIconSize, EditorWindowSetup::kPanelIconSize));
+        } else {
+            btn->setFixedSize(EditorWindowSetup::kToolbarBtnWidth, EditorWindowSetup::kToolbarBtnHeight);
+            btn->setIconSize(QSize(16, 16));
+        }
+    };
+    auto makeBtn = [this, &prefix, &setupBtn](const char* name, const QString& tip, auto onClick) {
+        auto* b = new QToolButton(this);
+        b->setObjectName(prefix + QString::fromLatin1(name));
+        setupBtn(b);
+        b->setToolTip(tip);
+        connect(b, &QToolButton::clicked, this, onClick);
+        toolbar_->addWidget(b);
+        return b;
+    };
     auto* add = new QToolButton(this);
     add->setObjectName(prefix + QStringLiteral("AddNode"));
     add->setIcon(IconProvider::PlusIcon());
-    add->setIconSize(QSize(16, 16));
-    add->setToolTip(Tr("Добавить ноду (ПКМ по холсту или Tab)",
-                       "Add node (RMB on the canvas or Tab)"));
+    setupBtn(add);
+    add->setToolTip(Tr("Добавить ноду (ПКМ по холсту или Tab)", "Add node (RMB on the canvas or Tab)"));
     connect(add, &QToolButton::clicked, this, [this, add] {
         ShowNodeSearch(add->mapToGlobal(QPoint(0, add->height())), view_->mapToScene(view_->viewport()->rect().center()));
     });
     toolbar_->addWidget(add);
-
-    auto history = [this, &prefix](const char* name, const QString& tip, void (GraphEditorWidget::*slot)()) {
+    auto history = [this, &prefix, &setupBtn](const char* name, const QString& tip, void (GraphEditorWidget::*slot)()) {
         auto* button = new QToolButton(this);
         button->setObjectName(prefix + QString::fromLatin1(name));
-        button->setIconSize(QSize(16, 16));
+        setupBtn(button);
         button->setToolTip(tip);
         button->setEnabled(false);
         connect(button, &QToolButton::clicked, this, slot);
@@ -761,53 +792,24 @@ void GraphEditorWidget::BuildToolbar()
     };
     undoButton_ = history("Undo", Tr("Отменить (Ctrl+Z)", "Undo (Ctrl+Z)"), &GraphEditorWidget::Undo);
     redoButton_ = history("Redo", Tr("Повторить (Ctrl+Y)", "Redo (Ctrl+Y)"), &GraphEditorWidget::Redo);
-    auto* frame = new QToolButton(this);
-    frame->setObjectName(prefix + QStringLiteral("Frame"));
-    frame->setIconSize(QSize(16, 16));
-    frame->setToolTip(Tr("Уместить граф в окно, а при выделении — выделенные ноды (F)", "Fit the graph, or the selection, into view (F)"));
-    connect(frame, &QToolButton::clicked, this, [this] { FrameNodes(); });
-    toolbar_->addWidget(frame);
-    auto* arrange = new QToolButton(this);
-    arrange->setObjectName(prefix + QStringLiteral("Arrange"));
-    arrange->setIconSize(QSize(16, 16));
-    arrange->setToolTip(schema_.LayoutStyle() == EditorCore::GraphLayoutStyle::Tree
-                            ? Tr("Разложить дерево сверху вниз: дети под родителем в прежнем порядке слева направо",
-                                 "Lay the tree out top to bottom: children under their parent, keeping their left-to-right order")
-                            : Tr("Разложить граф слева направо по связям", "Lay the graph out left to right along the links"));
-    connect(arrange, &QToolButton::clicked, this, [this] { ArrangeNodes(); });
-    toolbar_->addWidget(arrange);
-    auto* comment = new QToolButton(this);
-    comment->setObjectName(prefix + QStringLiteral("Comment"));
-    comment->setIconSize(QSize(16, 16));
-    comment->setToolTip(Tr("Рамка с подписью вокруг выделенных нод (без выделения — в центре вида)",
-                           "A captioned frame around the selected nodes (without a selection — in the middle of the view)"));
-    connect(comment, &QToolButton::clicked, this, [this] { AddComment(); });
-    toolbar_->addWidget(comment);
-    auto* copyGraph = new QToolButton(this);
-    copyGraph->setObjectName(prefix + QStringLiteral("CopyGraph"));
-    copyGraph->setIconSize(QSize(16, 16));
-    copyGraph->setToolTip(Tr("Копировать весь граф в буфер обмена (JSON)", "Copy the whole graph to the clipboard (JSON)"));
-    connect(copyGraph, &QToolButton::clicked, this, [this] { CopyWholeGraph(); });
-    toolbar_->addWidget(copyGraph);
-    auto* pasteGraph = new QToolButton(this);
-    pasteGraph->setObjectName(prefix + QStringLiteral("PasteGraph"));
-    pasteGraph->setIconSize(QSize(16, 16));
-    pasteGraph->setToolTip(Tr("Вставить граф из буфера обмена (JSON)", "Paste a graph from the clipboard (JSON)"));
+    auto* frame = makeBtn("Frame", Tr("Уместить граф в окно, а при выделении — выделенные ноды (F)", "Fit the graph, or the selection, into view (F)"), [this] { FrameNodes(); });
+    const QString arrTip = schema_.LayoutStyle() == EditorCore::GraphLayoutStyle::Tree
+        ? Tr("Разложить дерево сверху вниз: дети под родителем в прежнем порядке слева направо", "Lay the tree out top to bottom: children under their parent, keeping their left-to-right order")
+        : Tr("Разложить граф слева направо по связям", "Lay the graph out left to right along the links");
+    auto* arrange = makeBtn("Arrange", arrTip, [this] { ArrangeNodes(); });
+    auto* comment = makeBtn("Comment", Tr("Рамка с подписью вокруг выделенных нод (без выделения — в центре вида)", "A captioned frame around the selected nodes (without a selection — in the middle of the view)"), [this] { AddComment(); });
+    auto* copyGraph = makeBtn("CopyGraph", Tr("Копировать весь граф в буфер обмена (JSON)", "Copy the whole graph to the clipboard (JSON)"), [this] { CopyWholeGraph(); });
+    auto* pasteGraph = makeBtn("PasteGraph", Tr("Вставить граф из буфера обмена (JSON)", "Paste a graph from the clipboard (JSON)"), [this] { PasteNodes(CursorScenePos()); });
     pasteGraph->setEnabled(CanPaste());
-    connect(pasteGraph, &QToolButton::clicked, this, [this] { PasteNodes(CursorScenePos()); });
-    connect(QGuiApplication::clipboard(), &QClipboard::dataChanged, this, [this, pasteGraph] {
-        pasteGraph->setEnabled(CanPaste());
-    });
-    toolbar_->addWidget(pasteGraph);
+    connect(QGuiApplication::clipboard(), &QClipboard::dataChanged, this, [this, pasteGraph] { pasteGraph->setEnabled(CanPaste()); });
     RefreshToolbarIcons();
     toolbarIndex_ = toolbar_->count();
     auto* overflow = new GraphToolbarOverflow(toolbar_, this);
-
-    // Help stays visible right after the action buttons, not in the far corner.
     auto* help = MakeGraphHelpButton(this);
     help->setObjectName(prefix + QStringLiteral("Help"));
+    setupBtn(help);
     toolbar_->addWidget(help);
-    toolbar_->addStretch(1);
+    if (!panelHeader) toolbar_->addStretch(1);
     overflow->AddButton(comment, Tr("Комментарий", "Comment"));
     overflow->AddButton(arrange, Tr("Упорядочить", "Arrange"));
     overflow->AddButton(frame, Tr("Показать всё", "Frame all"));

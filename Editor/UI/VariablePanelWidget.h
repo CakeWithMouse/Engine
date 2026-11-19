@@ -32,56 +32,68 @@ public:
           typeLabel_(std::move(typeLabel))
     {
         auto* layout = new QVBoxLayout(this);
-        const int m = panelTitle.isEmpty() ? 0 : 8;
+        const int m = panelTitle.isEmpty() ? 0 : 10;
         layout->setContentsMargins(m, m, m, m);
-        layout->setSpacing(6);
+        layout->setSpacing(8);
+
+        const QColor iconColor = EditorTheme::Instance().Palette().textSecondary;
+        addBtn_ = new QPushButton(IconProvider::PlusIcon(iconColor), QString(), this);
+        addBtn_->setObjectName(prefix_ + QStringLiteral("AddVariable"));
+        addBtn_->setProperty("panelBtn", true);
+        addBtn_->setFixedSize(EditorWindowSetup::kPanelBtnWidth, EditorWindowSetup::kPanelBtnHeight);
+        addBtn_->setIconSize(QSize(EditorWindowSetup::kPanelIconSize, EditorWindowSetup::kPanelIconSize));
+        addBtn_->setToolTip(Tr("Добавить переменную", "Add variable"));
+        connect(addBtn_, &QPushButton::clicked, this, [this] { AddVariable(); });
+
+        dupBtn_ = new QPushButton(IconProvider::CopyIcon(iconColor), QString(), this);
+        dupBtn_->setObjectName(prefix_ + QStringLiteral("DuplicateVariable"));
+        dupBtn_->setProperty("panelBtn", true);
+        dupBtn_->setFixedSize(EditorWindowSetup::kPanelBtnWidth, EditorWindowSetup::kPanelBtnHeight);
+        dupBtn_->setIconSize(QSize(EditorWindowSetup::kPanelIconSize, EditorWindowSetup::kPanelIconSize));
+        dupBtn_->setToolTip(Tr("Дублировать переменную", "Duplicate variable"));
+        connect(dupBtn_, &QPushButton::clicked, this, [this] { DuplicateVariable(); });
+
+        removeBtn_ = new QPushButton(IconProvider::TrashIcon(iconColor), QString(), this);
+        removeBtn_->setObjectName(prefix_ + QStringLiteral("RemoveVariable"));
+        removeBtn_->setProperty("panelBtn", true);
+        removeBtn_->setFixedSize(EditorWindowSetup::kPanelBtnWidth, EditorWindowSetup::kPanelBtnHeight);
+        removeBtn_->setIconSize(QSize(EditorWindowSetup::kPanelIconSize, EditorWindowSetup::kPanelIconSize));
+        removeBtn_->setToolTip(Tr("Удалить переменную", "Remove variable"));
+        connect(removeBtn_, &QPushButton::clicked, this, [this] { RemoveVariable(table_->currentRow()); });
+
         if (!panelTitle.isEmpty())
         {
             auto* headerWidget = new QWidget(this);
             auto* headerBox = new QHBoxLayout(headerWidget);
             headerBox->setContentsMargins(0, 0, 0, 0);
             headerBox->setSpacing(4);
-            headerBox->addWidget(EditorWindowSetup::MakePanelHeader(panelTitle, headerWidget), 1);
+            headerBox->addWidget(EditorWindowSetup::MakePanelHeader(panelTitle, headerWidget));
+            headerBox->addStretch(1);
+            headerBox->addWidget(addBtn_);
+            headerBox->addWidget(dupBtn_);
+            headerBox->addWidget(removeBtn_);
             auto* help = new InfoButton(
                 Tr("Переменные скрипта", "Script Variables"),
                 Tr("Управление переменными:\n"
-                   "• Тип float — число с плавающей точкой\n"
-                   "• Иконка глаза «Показ.» — публичная переменная, видна в инспекторе\n"
-                   "• Перетащите имя переменной на холст для создания нод Get / Set\n"
+                   "• Что такое переменная: хранит именованное значение для логики скрипта\n"
+                   "• Типы данных: число [float], логический [bool], вектор [vec3], строка [string]\n"
+                   "• Иконка глаза «Показ.» — публичная переменная, видна и настраивается в инспекторе\n"
+                   "• Перетаскивание в граф [DnD]: перетащите строку на холст для ноды Get [чтение]; перетаскивание с клавишей Shift создаёт ноду Set [запись]\n"
                    "• Корзина в строке — быстрое удаление переменной",
                    "Variable management:\n"
-                   "• Type float — floating point value\n"
-                   "• Eye icon \"Show\" — public variable, visible in inspector\n"
-                   "• Drag variable name onto canvas to create Get / Set nodes\n"
+                   "• What is a variable: stores a named value used by script logic\n"
+                   "• Data types: number [float], boolean [bool], vector [vec3], string\n"
+                   "• Eye icon \"Show\" — public variable, visible and editable in inspector\n"
+                   "• Drag into graph [DnD]: drag row onto canvas for Get node; drag with Shift for Set node\n"
                    "• Trash icon in row — quick delete variable"),
                 headerWidget);
             help->setObjectName(prefix_ + QStringLiteral("VariablesHelp"));
-            help->setFixedSize(22, 22);
+            help->setProperty("panelBtn", true);
+            help->setFixedSize(EditorWindowSetup::kPanelBtnWidth, EditorWindowSetup::kPanelBtnHeight);
+            help->setIconSize(QSize(EditorWindowSetup::kPanelIconSize, EditorWindowSetup::kPanelIconSize));
             headerBox->addWidget(help);
             layout->addWidget(headerWidget);
         }
-
-        // Кнопки создаются здесь, но живут на общем тулбаре окна (ToolbarButtons).
-        addBtn_ = new QPushButton(IconProvider::PlusIcon(), QString(), this);
-        addBtn_->setObjectName(prefix_ + QStringLiteral("AddVariable"));
-        addBtn_->setFixedSize(34, 26);
-        addBtn_->setIconSize(QSize(16, 16));
-        addBtn_->setToolTip(Tr("Добавить переменную", "Add variable"));
-        connect(addBtn_, &QPushButton::clicked, this, [this] { AddVariable(); });
-
-        dupBtn_ = new QPushButton(IconProvider::CopyIcon(), QString(), this);
-        dupBtn_->setObjectName(prefix_ + QStringLiteral("DuplicateVariable"));
-        dupBtn_->setFixedSize(34, 26);
-        dupBtn_->setIconSize(QSize(16, 16));
-        dupBtn_->setToolTip(Tr("Дублировать переменную", "Duplicate variable"));
-        connect(dupBtn_, &QPushButton::clicked, this, [this] { DuplicateVariable(); });
-
-        removeBtn_ = new QPushButton(IconProvider::TrashIcon(), QString(), this);
-        removeBtn_->setObjectName(prefix_ + QStringLiteral("RemoveVariable"));
-        removeBtn_->setFixedSize(34, 26);
-        removeBtn_->setIconSize(QSize(16, 16));
-        removeBtn_->setToolTip(Tr("Удалить переменную", "Remove variable"));
-        connect(removeBtn_, &QPushButton::clicked, this, [this] { RemoveVariable(table_->currentRow()); });
 
         table_->setColumnCount(4);
         table_->setHorizontalHeaderLabels({nameColTitle_, Tr("Тип", "Type"), valColTitle_, Tr("Показ.", "Show")});
@@ -94,12 +106,24 @@ public:
         table_->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
         table_->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
         table_->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Fixed);
-        table_->setColumnWidth(1, 95);
-        table_->setColumnWidth(3, 56);
+
+        QFontMetrics fm = table_->fontMetrics();
+        const QString showTitle = Tr("Показ.", "Show");
+        const int headerTextWidth = table_->horizontalHeader()->fontMetrics().horizontalAdvance(showTitle);
+        const int buttonsWidth = 24 + 24 + 4;
+        const int showColWidth = std::max(headerTextWidth + 12, buttonsWidth);
+        const int typeWidth = std::max(58, fm.horizontalAdvance(Tr("Тип", "Type")) + 20);
+        table_->setColumnWidth(1, typeWidth);
+        table_->horizontalHeader()->resizeSection(1, typeWidth);
+        table_->setColumnWidth(3, showColWidth);
+        table_->horizontalHeader()->resizeSection(3, showColWidth);
 
         layout->addWidget(table_, 1);
     }
 
+    QPushButton* AddButton() const { return addBtn_; }
+    QPushButton* DuplicateButton() const { return dupBtn_; }
+    QPushButton* RemoveButton() const { return removeBtn_; }
     QList<QPushButton*> ToolbarButtons() const { return {addBtn_, dupBtn_, removeBtn_}; }
 
     std::function<void(const QJsonArray& list, const QHash<QString, QString>& renames)> onVariablesChanged;

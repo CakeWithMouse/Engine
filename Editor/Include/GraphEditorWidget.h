@@ -51,8 +51,11 @@ class GraphEditorWidget : public QWidget
 {
 public:
     // Схема живёт дольше виджета (обычно статический экземпляр).
-    explicit GraphEditorWidget(const EditorCore::GraphSchema& schema, QWidget* parent = nullptr);
+    explicit GraphEditorWidget(const EditorCore::GraphSchema& schema, QWidget* parent = nullptr,
+                               const QString& headerTitle = QString());
     ~GraphEditorWidget() override;
+
+    void SetHeaderTitle(const QString& title);
 
     std::function<void()> structureChanged; // ноды, связи, имена или свойства, от которых зависит результат
     std::function<void()> layoutChanged;    // ноды сдвинуты: сохранить граф, результат прежний
@@ -241,5 +244,7 @@ private:
     QString lastNotice_;
     QToolButton* undoButton_ = nullptr;
     QToolButton* redoButton_ = nullptr;
+    QLabel* headerLabel_ = nullptr;
+    QString headerTitle_;
     int themeSubId_ = 0;
 };

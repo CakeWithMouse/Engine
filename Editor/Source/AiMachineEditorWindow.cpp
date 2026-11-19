@@ -22,9 +22,11 @@
 #include <QPointer>
 #include <QPushButton>
 #include <QRegularExpression>
+#include <QSplitter>
 #include <QStatusBar>
 #include <QTableWidget>
 #include <QTimer>
+#include <QToolBar>
 #include <QVBoxLayout>
 #include <algorithm>
 #include <tuple>
@@ -53,6 +55,63 @@ AiMachineEditorWindow::~AiMachineEditorWindow()
 
 void AiMachineEditorWindow::BuildUi()
 {
+    auto* tools = addToolBar(Tr("Автомат ИИ", "AI State Machine"));
+    tools->setMovable(false);
+
+    auto* save = new QPushButton(IconProvider::SaveIcon(), QString(), tools);
+    save->setObjectName(QStringLiteral("FsmSave"));
+    save->setProperty("toolbarBtn", true);
+    save->setFixedSize(EditorWindowSetup::kToolbarBtnWidth, EditorWindowSetup::kToolbarBtnHeight);
+    save->setIconSize(QSize(EditorWindowSetup::kToolbarIconSize, EditorWindowSetup::kToolbarIconSize));
+    save->setToolTip(Tr("Сохранить [Ctrl+S]", "Save [Ctrl+S]"));
+    connect(save, &QPushButton::clicked, this, [this] { SaveNow(); });
+    tools->addWidget(save);
+
+    auto* newMachine = new QPushButton(IconProvider::RobotIcon(), QString(), tools);
+    newMachine->setObjectName(QStringLiteral("FsmNewMachine"));
+    newMachine->setProperty("toolbarBtn", true);
+    newMachine->setFixedSize(EditorWindowSetup::kToolbarBtnWidth, EditorWindowSetup::kToolbarBtnHeight);
+    newMachine->setIconSize(QSize(EditorWindowSetup::kToolbarIconSize, EditorWindowSetup::kToolbarIconSize));
+    newMachine->setToolTip(Tr("Новый автомат: создать .fsm в той же папке", "New machine: create a .fsm in the same folder"));
+    connect(newMachine, &QPushButton::clicked, this, [this] {
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.CreateAiMachine"),
+            {{QStringLiteral("directory"), QFileInfo(PhysicalPath()).absolutePath()}});
+    });
+    tools->addWidget(newMachine);
+
+    auto* help = new InfoButton(this);
+    help->setObjectName(QStringLiteral("FsmHelp"));
+    help->SetToolbarStyle(true);
+    help->setProperty("toolbarBtn", true);
+    help->setFixedSize(EditorWindowSetup::kToolbarBtnWidth, EditorWindowSetup::kToolbarBtnHeight);
+    help->setIconSize(QSize(EditorWindowSetup::kToolbarIconSize, EditorWindowSetup::kToolbarIconSize));
+    help->SetInfoText(
+        Tr("Редактор автомата состояний ИИ", "AI State Machine Editor"),
+        Tr("Конечный автомат ИИ [.fsm]:\n"
+           "• Верхняя строка: Сохранить [Ctrl+S], Создать новый автомат и справка окна\n"
+           "• Панель «Память и настройки»:\n"
+           "  - Ключи памяти: переменные автомата [объект, вектор, число, логический, строка]\n"
+           "  - «Показ.»: публичные ключи, видимые в инспекторе объекта сцены\n"
+           "  - Настройки персонажа: цель восприятия, где видели, интервал решений\n"
+           "• Панель «Граф»: состояния [ноды] и переходы [связи]\n"
+           "  - Двойной клик по состоянию: редактирование задач, условий входа и служб\n"
+           "  - Двойной клик по переходу: триггеры [завершено, событие, тик], условия и задержка\n"
+           "  - Tab / «+ Нода» — добавление состояний и комментариев\n"
+           "• Панель «Консоль»: ошибки компиляции автомата и проверки движком",
+           "AI State Machine [.fsm]:\n"
+           "• Top bar: Save [Ctrl+S], Create new machine and window help\n"
+           "• Memory and settings panel:\n"
+           "  - Memory keys: machine variables [object, vector, number, bool, string]\n"
+           "  - \"Show\": public keys visible in object inspector\n"
+           "  - Character settings: perceived target, last seen, think interval\n"
+           "• Graph panel: states [nodes] and transitions [links]\n"
+           "  - Double click state: edit tasks, enter conditions and services\n"
+           "  - Double click transition: triggers [completed, event, tick], conditions, delay\n"
+           "  - Tab / \"+ Node\" — add states and comments\n"
+           "• Console panel: machine compilation and engine validation errors"),
+        QString());
+    tools->addWidget(help);
+
     auto* central = new QWidget(this);
     auto* layout = new QVBoxLayout(central);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -64,37 +123,37 @@ void AiMachineEditorWindow::BuildUi()
     banner_->setStyleSheet(QStringLiteral("background:#7c2d12;color:white;"));
     banner_->hide();
     layout->addWidget(banner_);
+
     graph_ = new FsmGraphWidget(*schema_, central);
     graph_->setEnabled(false);
-    layout->addWidget(graph_, 1);
-
-    auto* console = new QWidget(central);
-    auto* consoleLayout = new QVBoxLayout(console);
-    consoleLayout->setContentsMargins(0, 0, 0, 0);
-    consoleLayout->setSpacing(0);
-    consoleLayout->addWidget(EditorWindowSetup::MakePanelHeader(Tr("Консоль", "Console"), console));
-    problemList_ = new QListWidget(console);
-    problemList_->setObjectName(QStringLiteral("FsmProblems"));
-    problemList_->setMaximumHeight(140);
-    problemList_->setToolTip(Tr("Ошибки автомата по проверке движком; щелчок показывает ноду", "Machine problems from the engine's check; click to show the node"));
-    connect(problemList_, &QListWidget::itemClicked, this, [this](QListWidgetItem* item) {
-        if (const int node = item->data(Qt::UserRole).toInt()) graph_->FocusNode(node);
-    });
-    consoleLayout->addWidget(problemList_);
-    layout->addWidget(console);
-    setCentralWidget(central);
 
     memoryPanel_ = new QWidget(central);
     auto* panelLayout = new QVBoxLayout(memoryPanel_);
-    panelLayout->setContentsMargins(8, 8, 8, 8);
-    panelLayout->setSpacing(6);
+    panelLayout->setContentsMargins(10, 10, 10, 10);
+    panelLayout->setSpacing(8);
+
+    variables_ = new QTableWidget(memoryPanel_);
+    variables_->setObjectName(QStringLiteral("FsmVariables"));
+    variablesPanel_ = new VariablePanelWidget(variables_, QStringLiteral("Fsm"),
+        FsmGraphSchema::VariableTypes(), Tr("Ключ", "Key"), Tr("Начальное", "Initial"),
+        [](const QString& t) { return FsmGraphSchema::TypeLabel(t); }, QString(), memoryPanel_);
+    variablesPanel_->onVariablesChanged = [this](const QJsonArray& list, const QHash<QString, QString>& renames) {
+        if (!ready_ || readOnly_) return;
+        graph_->SetVariables(list, renames);
+    };
+
     auto* headerWidget = new QWidget(memoryPanel_);
     auto* headerLayout = new QHBoxLayout(headerWidget);
     headerLayout->setContentsMargins(0, 0, 0, 0);
     headerLayout->setSpacing(4);
-    headerLayout->addWidget(EditorWindowSetup::MakePanelHeader(Tr("Память и настройки", "Memory and settings"), headerWidget), 1);
-    auto* help = new InfoButton(
-        Tr("Память и настройки ИИ", "AI Memory and Settings"),
+    headerLayout->addWidget(EditorWindowSetup::MakePanelHeader(Tr("Память и настройки", "Memory and settings"), headerWidget));
+    headerLayout->addStretch(1);
+    headerLayout->addWidget(variablesPanel_->AddButton());
+    headerLayout->addWidget(variablesPanel_->DuplicateButton());
+    headerLayout->addWidget(variablesPanel_->RemoveButton());
+
+    auto* helpMem = new InfoButton(
+        Tr("Память и настройки автомата ИИ", "AI Machine Memory and Settings"),
         Tr("Память автомата:\n"
            "• Ключи памяти хранят состояние и цели персонажа\n"
            "• Иконка глаза «Показ.» — публичный ключ, виден в инспекторе\n"
@@ -112,30 +171,27 @@ void AiMachineEditorWindow::BuildUi()
            "• \"Last seen at\" — coordinates where target was last seen\n"
            "• \"Think interval\" — seconds between state machine decisions"),
         headerWidget);
-    help->setObjectName(QStringLiteral("FsmMemoryHelp"));
-    help->setFixedSize(22, 22);
-    headerLayout->addWidget(help);
+    helpMem->setObjectName(QStringLiteral("FsmMemoryHelp"));
+    helpMem->setProperty("panelBtn", true);
+    helpMem->setFixedSize(EditorWindowSetup::kPanelBtnWidth, EditorWindowSetup::kPanelBtnHeight);
+    helpMem->setIconSize(QSize(EditorWindowSetup::kPanelIconSize, EditorWindowSetup::kPanelIconSize));
+    headerLayout->addWidget(helpMem);
     panelLayout->addWidget(headerWidget);
-    auto* memoryLabel = new QLabel(Tr("Память (ключи блоков)", "Memory (block keys)"), memoryPanel_);
+
+    panelLayout->addSpacing(12);
+    auto* memoryLabel = new QLabel(Tr("Память — ключи блоков", "Memory — block keys"), memoryPanel_);
     memoryLabel->setObjectName(QStringLiteral("CardSectionLabel"));
     panelLayout->addWidget(memoryLabel);
-    variables_ = new QTableWidget(memoryPanel_);
-    variables_->setObjectName(QStringLiteral("FsmVariables"));
-    variablesPanel_ = new VariablePanelWidget(variables_, QStringLiteral("Fsm"),
-        FsmGraphSchema::VariableTypes(), Tr("Ключ", "Key"), Tr("Начальное", "Initial"),
-        [](const QString& t) { return FsmGraphSchema::TypeLabel(t); }, QString(), memoryPanel_);
-    variablesPanel_->onVariablesChanged = [this](const QJsonArray& list, const QHash<QString, QString>& renames) {
-        if (!ready_ || readOnly_) return;
-        graph_->SetVariables(list, renames);
-    };
     panelLayout->addWidget(variablesPanel_, 1);
 
+    panelLayout->addSpacing(12);
     auto* settingsLabel = new QLabel(Tr("Настройки персонажа", "Character settings"), memoryPanel_);
     settingsLabel->setObjectName(QStringLiteral("CardSectionLabel"));
     panelLayout->addWidget(settingsLabel);
     auto* settings = new QFormLayout;
     settings->setContentsMargins(0, 0, 0, 0);
-    settings->setSpacing(6);
+    settings->setHorizontalSpacing(8);
+    settings->setVerticalSpacing(8);
     targetKey_ = new QComboBox(memoryPanel_);
     targetKey_->setObjectName(QStringLiteral("FsmTargetKey"));
     targetKey_->setToolTip(Tr("Ключ типа «Объект»: восприятие пишет сюда лучшую видимую цель (нужно зрение у персонажа).",
@@ -171,34 +227,58 @@ void AiMachineEditorWindow::BuildUi()
     connect(lastSeenKey_, &QComboBox::activated, this, [this] { EditSettings(); });
     connect(thinkInterval_, &QDoubleSpinBox::valueChanged, this, [this] { EditSettings(); });
     memoryPanel_->setEnabled(false);
-    graph_->EmbedSidePanel(memoryPanel_);
 
-    auto* save = new QPushButton(IconProvider::SaveIcon(), QString(), central);
-    save->setObjectName(QStringLiteral("FsmSave"));
-    save->setFixedSize(34, 26);
-    save->setIconSize(QSize(16, 16));
-    save->setToolTip(Tr("Сохранить: записать файл и проверить движком сразу", "Save: write the file and check with the engine now"));
-    connect(save, &QPushButton::clicked, this, [this] { SaveNow(); });
-    graph_->PrependToolbarWidget(save);
-    for (auto* button : variablesPanel_->ToolbarButtons())
-        graph_->AddToolbarWidget(button);
-    auto* newMachine = new QPushButton(IconProvider::RobotIcon(), QString(), central);
-    newMachine->setObjectName(QStringLiteral("FsmNewMachine"));
-    newMachine->setFixedSize(34, 26);
-    newMachine->setIconSize(QSize(16, 16));
-    newMachine->setToolTip(Tr("Новый автомат: создать .fsm в той же папке", "New machine: create a .fsm in the same folder"));
-    connect(newMachine, &QPushButton::clicked, this, [this] {
-        CommandRegistry::Instance().Execute(QStringLiteral("Assets.CreateAiMachine"),
-            {{QStringLiteral("directory"), QFileInfo(PhysicalPath()).absolutePath()}});
+    auto* splitter = new QSplitter(Qt::Horizontal, central);
+    splitter->setHandleWidth(3);
+    splitter->addWidget(memoryPanel_);
+    splitter->addWidget(graph_);
+    splitter->setStretchFactor(0, 0);
+    splitter->setStretchFactor(1, 1);
+    splitter->setSizes({280, 720});
+    memoryPanel_->setMinimumWidth(260);
+    layout->addWidget(splitter, 1);
+
+    auto* console = new QWidget(central);
+    auto* consoleLayout = new QVBoxLayout(console);
+    consoleLayout->setContentsMargins(0, 0, 0, 0);
+    consoleLayout->setSpacing(0);
+    auto* consoleHeader = new QWidget(console);
+    auto* consoleHeaderLayout = new QHBoxLayout(consoleHeader);
+    consoleHeaderLayout->setContentsMargins(0, 0, 4, 0);
+    consoleHeaderLayout->setSpacing(4);
+    consoleHeaderLayout->addWidget(EditorWindowSetup::MakePanelHeader(Tr("Консоль", "Console"), consoleHeader), 1);
+    auto* clearConsole = new QPushButton(IconProvider::TrashIcon(EditorTheme::Instance().Palette().textSecondary), QString(), consoleHeader);
+    clearConsole->setObjectName(QStringLiteral("FsmClearConsole"));
+    clearConsole->setProperty("panelBtn", true);
+    clearConsole->setFixedSize(EditorWindowSetup::kPanelBtnWidth, EditorWindowSetup::kPanelBtnHeight);
+    clearConsole->setIconSize(QSize(EditorWindowSetup::kPanelIconSize, EditorWindowSetup::kPanelIconSize));
+    clearConsole->setToolTip(Tr("Очистить сообщения", "Clear messages"));
+    connect(clearConsole, &QPushButton::clicked, this, [this] {
+        problems_.clear();
+        warnings_.clear();
+        ShowProblems();
     });
-    graph_->AddToolbarWidget(newMachine);
+    consoleHeaderLayout->addWidget(clearConsole);
+    consoleLayout->addWidget(consoleHeader);
+
+    problemList_ = new QListWidget(console);
+    problemList_->setObjectName(QStringLiteral("FsmProblems"));
+    problemList_->setMaximumHeight(140);
+    problemList_->setToolTip(Tr("Ошибки автомата по проверке движком; щелчок показывает ноду", "Machine problems from the engine's check; click to show the node"));
+    connect(problemList_, &QListWidget::itemClicked, this, [this](QListWidgetItem* item) {
+        if (const int node = item->data(Qt::UserRole).toInt()) graph_->FocusNode(node);
+    });
+    consoleLayout->addWidget(problemList_);
+    layout->addWidget(console);
+    setCentralWidget(central);
+    ShowProblems();
 
     saveTimer_ = new QTimer(this);
     saveTimer_->setSingleShot(true);
     saveTimer_->setInterval(300);
     connect(saveTimer_, &QTimer::timeout, this, [this] { SaveNow(); });
     graph_->changed = [this] { saveTimer_->start(); };
-    graph_->layoutChanged = [this] { if (!WriteFile()) saveTimer_->start(); }; // занятый файл — запись с повтором
+    graph_->layoutChanged = [this] { if (!WriteFile()) saveTimer_->start(); };
     graph_->panelsChanged = [this] { RefreshPanels(); };
     statusBar()->showMessage(Tr("Загрузка каталога блоков…", "Loading the block catalog…"));
 }

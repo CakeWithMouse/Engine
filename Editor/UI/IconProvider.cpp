@@ -56,8 +56,10 @@ namespace
         if (name == QLatin1String("file")) return EditorIcons::TABLER_FILE;
         if (name == QLatin1String("search")) return EditorIcons::TABLER_SEARCH;
         if (name == QLatin1String("bulb") || name == QLatin1String("light")) return EditorIcons::TABLER_BULB;
-        if (name == QLatin1String("chevron-up") || name == QLatin1String("arrow-up")) return EditorIcons::TABLER_CHEVRON_UP;
-        if (name == QLatin1String("chevron-down") || name == QLatin1String("arrow-down")) return EditorIcons::TABLER_CHEVRON_DOWN;
+        if (name == QLatin1String("chevron-up")) return EditorIcons::TABLER_CHEVRON_UP;
+        if (name == QLatin1String("arrow-up")) return EditorIcons::TABLER_ARROW_UP;
+        if (name == QLatin1String("chevron-down")) return EditorIcons::TABLER_CHEVRON_DOWN;
+        if (name == QLatin1String("arrow-down")) return EditorIcons::TABLER_ARROW_DOWN;
         if (name == QLatin1String("chevron-right") || name == QLatin1String("arrow-right")) return EditorIcons::TABLER_CHEVRON_RIGHT;
         if (name == QLatin1String("help") || name == QLatin1String("help-circle")) return EditorIcons::TABLER_HELP;
         if (name == QLatin1String("info") || name == QLatin1String("info-circle")) return EditorIcons::TABLER_INFO_CIRCLE;

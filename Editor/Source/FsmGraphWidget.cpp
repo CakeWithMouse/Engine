@@ -52,7 +52,7 @@ void RenameKeys(const FsmGraphSchema& schema, QVariantList& blocks, const QHash<
 } // namespace
 
 FsmGraphWidget::FsmGraphWidget(FsmGraphSchema& schema, QWidget* parent)
-    : GraphEditorWidget(schema, parent), schema_(schema)
+    : GraphEditorWidget(schema, parent, Tr("Граф", "Graph")), schema_(schema)
 {
     setObjectName(QStringLiteral("FsmGraph"));
     structureChanged = [this] {
@@ -229,10 +229,10 @@ void FsmGraphWidget::EditNode(int nodeId)
     dialog.setWindowTitle(Tr("Состояние «%1»", "State \"%1\"").arg(schema_.NodeName(*node)));
     dialog.resize(520, 560);
     auto* layout = new QVBoxLayout(&dialog);
-    layout->setContentsMargins(12, 12, 12, 12);
-    layout->setSpacing(8);
+    layout->setContentsMargins(14, 14, 14, 14);
+    layout->setSpacing(10);
     auto* form = new QFormLayout;
-    form->setSpacing(6);
+    form->setSpacing(8);
     auto* name = new QLineEdit(schema_.NodeName(*node), &dialog);
     name->setObjectName(QStringLiteral("FsmStateName"));
     form->addRow(Tr("Имя", "Name"), name);
@@ -243,7 +243,7 @@ void FsmGraphWidget::EditNode(int nodeId)
         if (IsState(other) && other.id != nodeId && !FsmGraphSchema::IsAncestor(Document(), nodeId, other.id))
             parent->addItem(schema_.NodeName(other), other.id);
     parent->setCurrentIndex(std::max(0, parent->findData(node->properties.value(QStringLiteral("parent")).toInt())));
-    parent->setToolTip(Tr("Родитель входит в своего первого допустимого ребёнка (сверху вниз), его переходы действуют для всех детей.",
+    parent->setToolTip(Tr("Родитель входит в своего первого допустимого ребёнка — сверху вниз, его переходы действуют для всех детей.",
                           "A parent enters its first allowed child (top to bottom); its transitions apply to all children."));
     form->addRow(Tr("Внутри состояния", "Inside state"), parent);
     auto* linked = new QLineEdit(node->properties.value(QStringLiteral("linked")).toString(), &dialog);
@@ -274,7 +274,11 @@ void FsmGraphWidget::EditNode(int nodeId)
     auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
     buttons->button(QDialogButtonBox::Ok)->setIcon(IconProvider::GetIcon(QStringLiteral("check")));
     buttons->button(QDialogButtonBox::Cancel)->setIcon(IconProvider::GetIcon(QStringLiteral("x")));
-    layout->addWidget(buttons);
+    auto* bottomBox = new QHBoxLayout;
+    bottomBox->setContentsMargins(0, 0, 12, 12);
+    bottomBox->addStretch(1);
+    bottomBox->addWidget(buttons);
+    layout->addLayout(bottomBox);
     connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
     connect(buttons, &QDialogButtonBox::accepted, &dialog, [&] {
         const QString wanted = name->text().trimmed();
@@ -319,10 +323,10 @@ void FsmGraphWidget::EditLink(const GraphConnectionData& link)
     dialog.setWindowTitle(Tr("Переход: %1 → %2", "Transition: %1 → %2").arg(schema_.NodeTitle(*from), schema_.NodeTitle(*to)));
     dialog.resize(480, 460);
     auto* layout = new QVBoxLayout(&dialog);
-    layout->setContentsMargins(12, 12, 12, 12);
-    layout->setSpacing(8);
+    layout->setContentsMargins(14, 14, 14, 14);
+    layout->setSpacing(10);
     auto* form = new QFormLayout;
-    form->setSpacing(6);
+    form->setSpacing(8);
     auto* trigger = new QComboBox(&dialog);
     trigger->setObjectName(QStringLiteral("FsmLinkTrigger"));
     for (const QString& code : FsmGraphSchema::Triggers()) trigger->addItem(FsmGraphSchema::TriggerLabel(code), code);
@@ -357,7 +361,11 @@ void FsmGraphWidget::EditLink(const GraphConnectionData& link)
     auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
     buttons->button(QDialogButtonBox::Ok)->setIcon(IconProvider::GetIcon(QStringLiteral("check")));
     buttons->button(QDialogButtonBox::Cancel)->setIcon(IconProvider::GetIcon(QStringLiteral("x")));
-    layout->addWidget(buttons);
+    auto* bottomBox = new QHBoxLayout;
+    bottomBox->setContentsMargins(0, 0, 12, 12);
+    bottomBox->addStretch(1);
+    bottomBox->addWidget(buttons);
+    layout->addLayout(bottomBox);
     connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
     connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
     if (dialog.exec() != QDialog::Accepted) return;
