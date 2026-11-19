@@ -235,6 +235,8 @@
         <ClCompile Include="Core/Graph/GraphFileIo.cpp"/>
         <ClCompile Include="Core/MaterialGraphSchema.cpp"/>
         <ClCompile Include="Core/MaterialGraphPresets.cpp"/>
+        <ClCompile Include="Core/ScriptGraphPresets.cpp"/>
+        <ClCompile Include="Core/FsmGraphPresets.cpp"/>
         <ClCompile Include="Core/MaterialGraphTransform.cpp"/>
         <ClCompile Include="Core/CodeGraphSchema.cpp"/>
         <ClCompile Include="Core/ScriptVariableDrag.cpp"/>
@@ -333,6 +335,8 @@
         <ClInclude Include="Core/Graph/GraphFileIo.h"/>
         <ClInclude Include="Core/MaterialGraphSchema.h"/>
         <ClInclude Include="Core/MaterialGraphPresets.h"/>
+        <ClInclude Include="Core/ScriptGraphPresets.h"/>
+        <ClInclude Include="Core/FsmGraphPresets.h"/>
         <ClInclude Include="Core/MaterialGraphTransform.h"/>
         <ClInclude Include="Core/CodeGraphSchema.h"/>
         <ClInclude Include="Core/ScriptVariableDrag.h"/>

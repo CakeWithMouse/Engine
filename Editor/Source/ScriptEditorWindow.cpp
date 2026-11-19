@@ -2,6 +2,7 @@
 #include "EditorLocale.h"
 #include "EditorWindowSetup.h"
 #include "ScriptGraphWidget.h"
+#include "ScriptGraphPresets.h"
 #include "ScriptMessages.h"
 #include "Graph/GraphSchemaRegistry.h"
 #include "Graph/GraphFileIo.h"
@@ -18,6 +19,8 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
+#include <QMenu>
+#include <QMessageBox>
 #include <QPointer>
 #include <QPushButton>
 #include <QRegularExpression>
@@ -26,6 +29,7 @@
 #include <QTableWidget>
 #include <QTimer>
 #include <QToolBar>
+#include <QToolButton>
 #include <QVBoxLayout>
 
 using EditorCore::CodeGraphSchema;
@@ -69,7 +73,6 @@ ScriptEditorWindow::ScriptEditorWindow(EditorQtHost* host, const QString& script
 
 ScriptEditorWindow::~ScriptEditorWindow()
 {
-    // Правка, ждущая паузы, не теряется при закрытии окна.
     if (saveTimer_ && saveTimer_->isActive()) WriteFile();
 }
 
@@ -78,14 +81,36 @@ void ScriptEditorWindow::BuildUi()
     auto* tools = addToolBar(Tr("Скрипт", "Script"));
     tools->setMovable(false);
 
-    auto* save = new QPushButton(IconProvider::SaveIcon(), QString(), tools);
-    save->setObjectName(QStringLiteral("ScriptSave"));
-    save->setProperty("toolbarBtn", true);
-    save->setFixedSize(EditorWindowSetup::kToolbarBtnWidth, EditorWindowSetup::kToolbarBtnHeight);
-    save->setIconSize(QSize(EditorWindowSetup::kToolbarIconSize, EditorWindowSetup::kToolbarIconSize));
-    save->setToolTip(Tr("Сохранить [Ctrl+S]", "Save [Ctrl+S]"));
+    auto makeBtn = [tools](const QIcon& icon, const QString& name, const QString& tip) {
+        auto* b = new QPushButton(icon, QString(), tools);
+        b->setObjectName(name);
+        b->setProperty("toolbarBtn", true);
+        b->setFixedSize(EditorWindowSetup::kToolbarBtnWidth, EditorWindowSetup::kToolbarBtnHeight);
+        b->setIconSize(QSize(EditorWindowSetup::kToolbarIconSize, EditorWindowSetup::kToolbarIconSize));
+        b->setToolTip(tip);
+        tools->addWidget(b);
+        return b;
+    };
+    auto* save = makeBtn(IconProvider::SaveIcon(), QStringLiteral("ScriptSave"), Tr("Сохранить [Ctrl+S]", "Save [Ctrl+S]"));
     connect(save, &QPushButton::clicked, this, [this] { SaveNow(); });
-    tools->addWidget(save);
+    auto* revert = makeBtn(IconProvider::RevertIcon(), QStringLiteral("ScriptRevert"), Tr("Откатить все изменения", "Revert all changes"));
+    connect(revert, &QPushButton::clicked, this, [this] { Revert(); });
+
+    auto* templates = new QToolButton(tools);
+    templates->setObjectName(QStringLiteral("ScriptTemplates"));
+    templates->setProperty("toolbarBtn", true);
+    templates->setIcon(IconProvider::TemplateIcon());
+    templates->setFixedSize(EditorWindowSetup::kToolbarBtnWidth, EditorWindowSetup::kToolbarBtnHeight);
+    templates->setIconSize(QSize(EditorWindowSetup::kToolbarIconSize, EditorWindowSetup::kToolbarIconSize));
+    templates->setToolTip(Tr("Шаблоны скрипта", "Script templates"));
+    templates->setPopupMode(QToolButton::InstantPopup);
+    auto* menu = new QMenu(templates);
+    menu->setObjectName(QStringLiteral("ScriptTemplateMenu"));
+    menu->addAction(Tr("Пустой", "Empty"), this, [this] { ApplyTemplate(0); });
+    menu->addAction(Tr("Событие Start → Print", "Event Start → Print"), this, [this] { ApplyTemplate(1); });
+    menu->addAction(Tr("Каждый кадр → вращение объекта", "Every frame → rotate object"), this, [this] { ApplyTemplate(2); });
+    templates->setMenu(menu);
+    tools->addWidget(templates);
 
     auto* help = new InfoButton(this);
     help->setObjectName(QStringLiteral("ScriptHelp"));
@@ -93,37 +118,21 @@ void ScriptEditorWindow::BuildUi()
     help->setProperty("toolbarBtn", true);
     help->setFixedSize(EditorWindowSetup::kToolbarBtnWidth, EditorWindowSetup::kToolbarBtnHeight);
     help->setIconSize(QSize(EditorWindowSetup::kToolbarIconSize, EditorWindowSetup::kToolbarIconSize));
-    help->SetInfoText(
-        Tr("Редактор визуальных скриптов", "Visual Script Editor"),
-        Tr("Визуальные скрипты [.vscript]:\n"
-           "• Верхняя строка: Сохранить [Ctrl+S] и справка окна\n"
+    help->SetInfoText(Tr("Редактор визуальных скриптов", "Visual Script Editor"),
+        Tr("Визуальные скрипты [.vscript]:\n• Верхняя строка: Сохранить [Ctrl+S] и справка окна\n"
            "• Панель «Переменные»: именованные данные объекта [число, логический, вектор, строка]\n"
-           "  - Кнопки под заголовком: Добавить, Дублировать, Удалить по выделенной строке\n"
-           "  - «Показ.» [глаз]: публичные переменные, доступные для настройки в инспекторе\n"
-           "  - Перетаскивание на холст [DnD]: нода чтения [Get]; с зажатым Shift — нода записи [Set]\n"
-           "• Панель «Граф»: логика из нод событий, действий и математики\n"
-           "  - Кнопки графа: +Нода, Отменить, Повторить, Показать всё, Упорядочить, Комментарий, Копировать/Вставить граф\n"
-           "  - ЛКМ/рамка — выделение; ПКМ/колесо — навигация; F — уместить граф; Delete — удалить\n"
-           "  - Tab / «+ Нода» — каталог доступных нод движка и проекта\n"
-           "• Шаблоны: готовые типовые графы с подтверждением замены\n"
+           "  - Кнопки под заголовком: Добавить, Дублировать, Удалить; «Показ.» [глаз]: публичные в инспекторе\n"
+           "  - Перетаскивание на холст [DnD]: Get [чтение]; с Shift — Set [запись]\n"
+           "• Панель «Граф»: логика из нод; кнопки: +Нода, Отменить, Повторить, Показать всё, Упорядочить, Комментарий, Копировать/Вставить\n"
+           "• Шаблоны: готовые типовые графы с подтверждением замены; Откатить: возврат к сохранённому файлу\n"
            "• Горячие клавиши: Ctrl+S — сохранить, Ctrl+Z/Y — отмена/повтор, F — уместить, Delete — удалить\n"
-           "• Отладка в Play: подсветка активных нод и счетчик срабатываний\n"
-           "• Панель «Консоль»: сообщения компилятора и предупреждения схемы",
-           "Visual Scripts [.vscript]:\n"
-           "• Top bar: Save [Ctrl+S] and window help\n"
-           "• Variables panel: named object data [number, bool, vector, string]\n"
-           "  - Buttons under header: Add, Duplicate, Delete selected row\n"
-           "  - \"Show\" [eye]: public variables configurable in inspector\n"
-           "  - Drag onto canvas [DnD]: Get node; drag with Shift: Set node\n"
-           "• Graph panel: logic from events, actions and math nodes\n"
-           "  - Graph buttons: +Node, Undo, Redo, Frame all, Arrange, Comment, Copy/Paste graph\n"
-           "  - LMB/box — select; RMB/wheel — navigate; F — frame all; Delete — remove\n"
-           "  - Tab / \"+ Node\" — catalog of engine and project nodes\n"
-           "• Templates: predefined graphs with replacement confirmation\n"
+           "• Отладка в Play: подсветка активных нод и счетчик срабатываний; Консоль: сообщения компилятора",
+           "Visual Scripts [.vscript]:\n• Top bar: Save [Ctrl+S] and window help\n"
+           "• Variables panel: named object data; buttons: Add, Duplicate, Delete; eye: public; DnD onto canvas\n"
+           "• Graph panel: logic from nodes; buttons: +Node, Undo, Redo, Frame all, Arrange, Comment, Copy/Paste\n"
+           "• Templates: predefined graphs with replacement confirmation; Revert: restore saved file\n"
            "• Hotkeys: Ctrl+S — save, Ctrl+Z/Y — undo/redo, F — frame, Delete — remove\n"
-           "• Play debugging: highlight on active nodes and fire count\n"
-           "• Console panel: compiler errors and schema warnings"),
-        QString());
+           "• Play debugging: highlight on active nodes and fire count; Console: compiler messages"), QString());
     tools->addWidget(help);
 
     auto* central = new QWidget(this);
@@ -157,16 +166,14 @@ void ScriptEditorWindow::BuildUi()
     splitter->setHandleWidth(3);
     splitter->addWidget(variablesPanel_);
     splitter->addWidget(graph_);
-    splitter->setStretchFactor(0, 0);
-    splitter->setStretchFactor(1, 1);
+    splitter->setStretchFactor(0, 0); splitter->setStretchFactor(1, 1);
     splitter->setSizes({280, 720});
     variablesPanel_->setMinimumWidth(260);
     layout->addWidget(splitter, 1);
 
     auto* console = new QWidget(central);
     auto* consoleLayout = new QVBoxLayout(console);
-    consoleLayout->setContentsMargins(0, 0, 0, 0);
-    consoleLayout->setSpacing(0);
+    consoleLayout->setContentsMargins(0, 0, 0, 0); consoleLayout->setSpacing(0);
     consoleLayout->addWidget(EditorWindowSetup::MakePanelHeader(Tr("Консоль", "Console"), console));
 
     problemList_ = new QListWidget(console);
@@ -201,14 +208,13 @@ void ScriptEditorWindow::BuildUi()
     });
     statusBar()->addPermanentWidget(traceLabel_);
     statusBar()->addPermanentWidget(traceObjects_);
-    traceLabel_->hide();
-    traceObjects_->hide();
+    traceLabel_->hide(); traceObjects_->hide();
     traceTimer_ = new QTimer(this);
     traceTimer_->setInterval(200);
     connect(traceTimer_, &QTimer::timeout, this, [this] { PollTrace(); });
 
-    graph_->structureChanged = [this] { saveTimer_->start(); };
-    graph_->layoutChanged = [this] { WriteFile(); };
+    graph_->structureChanged = [this] { ShowProblems(); };
+    graph_->layoutChanged = [this] {};
     graph_->variablesChanged = [this] { RefreshVariables(); };
     statusBar()->showMessage(Tr("Загрузка каталога нод…", "Loading the node catalog…"));
 }
@@ -244,38 +250,35 @@ void ScriptEditorWindow::LoadFile(const QString& catalog)
 {
     QString error;
     if (catalog.isEmpty())
-        return SetReadOnly(Tr("Игровой модуль проекта не поддерживает визуальные скрипты. Обновите Game.dll проекта: создайте проект "
-                              "в новой версии движка или обновите копию проекта.",
+        return SetReadOnly(Tr("Игровой модуль проекта не поддерживает визуальные скрипты. Обновите Game.dll проекта.",
                               "The project's game module does not support visual scripts. Update the project's Game.dll."));
     if (!schema_->LoadCatalog(catalog, &error)) return SetReadOnly(error);
 
     GraphDocument document;
     const QString contentRoot = QString::fromUtf8(host_->host().contentRoot);
     if (!EditorCore::GraphFileIo::Exists(ProjectRoot(), contentRoot, PhysicalPath()))
-        return SetReadOnly(Tr("Файл %1 не найден: его переименовали или удалили. Назначьте объекту скрипт заново.",
-                              "%1 was not found: it was renamed or deleted. Assign the script to the object again.").arg(script_));
+        return SetReadOnly(Tr("Файл %1 не найден: его переименовали или удалили.", "%1 was not found: it was renamed or deleted.").arg(script_));
     QByteArray data;
     if (!EditorCore::GraphFileIo::Read(ProjectRoot(), contentRoot, PhysicalPath(), data) || !document.ImportFromJson(QString::fromUtf8(data)))
         return SetReadOnly(Tr("Файл %1 не читается как граф.", "Cannot read %1 as a graph.").arg(script_));
     if (document.FileFormat() != GraphDocument::Format::V1 || document.Schema() != schema_->Id())
     {
-        // Чужой граф называется по реестру схем: «это граф „Материал“».
-        const auto& registry = EditorCore::GraphSchemaRegistry::Instance();
+        const auto& reg = EditorCore::GraphSchemaRegistry::Instance();
         const QString kind = document.FileFormat() == GraphDocument::Format::Legacy ? QString() : document.Schema();
-        if (registry.Find(kind))
-            return SetReadOnly(Tr("%1 — граф «%2», а не визуальный скрипт.", "%1 is a \"%2\" graph, not a visual script.")
-                                   .arg(script_, registry.DisplayName(kind)));
+        if (reg.Find(kind))
+            return SetReadOnly(Tr("%1 — граф «%2», а не визуальный скрипт.", "%1 is a \"%2\" graph, not a visual script.").arg(script_, reg.DisplayName(kind)));
         return SetReadOnly(Tr("%1 — не визуальный скрипт.", "%1 is not a visual script.").arg(script_));
     }
 
     graph_->LoadDocument(document);
+    savedContent_ = data;
     ready_ = true;
     if (document.IsNewerFormat() || document.SchemaVersion() > schema_->Version())
         return SetReadOnly(Tr("Файл записан более новой версией редактора: он открыт только для чтения.",
                               "The file was written by a newer editor: it is open read-only."));
     graph_->setEnabled(true);
     variablesPanel_->setEnabled(true);
-    statusBar()->showMessage(Tr("Правки сохраняются сразу; Play берёт файл при запуске.", "Edits are saved at once; Play reads the file when it starts."));
+    statusBar()->showMessage(Tr("Сохранить: Ctrl+S. Двойной щелчок — параметры.", "Save: Ctrl+S. Double-click — properties."));
     Check();
     playTimer_->start();
     traceTimer_->start();
@@ -296,16 +299,55 @@ bool ScriptEditorWindow::WriteFile()
 {
     if (!ready_ || readOnly_) return false;
     QString error;
-    if (EditorCore::GraphFileIo::Write(ProjectRoot(), QString::fromUtf8(host_->host().contentRoot), PhysicalPath(),
-                                       graph_->Document().ExportToJson().toUtf8(), &error)) return true;
+    const QByteArray data = graph_->Document().ExportToJson().toUtf8();
+    if (EditorCore::GraphFileIo::Write(ProjectRoot(), QString::fromUtf8(host_->host().contentRoot), PhysicalPath(), data, &error))
+    {
+        savedContent_ = data;
+        return true;
+    }
     statusBar()->showMessage(Tr("Не удалось записать %1: %2", "Cannot write %1: %2").arg(script_, error));
     return false;
 }
 
 void ScriptEditorWindow::SaveNow()
 {
-    saveTimer_->stop();
+    if (saveTimer_) saveTimer_->stop();
     if (WriteFile()) Check();
+}
+
+bool ScriptEditorWindow::HasUnsavedChanges() const { return graph_ && graph_->Document().ExportToJson().toUtf8() != savedContent_; }
+
+void ScriptEditorWindow::Revert()
+{
+    if (!ready_ || readOnly_ || !HasUnsavedChanges()) return;
+    if (QMessageBox::question(this, Tr("Откатить скрипт", "Revert script"),
+            Tr("Отменить все несохранённые изменения скрипта?", "Revert all unsaved changes to the script?")) == QMessageBox::Yes)
+        ReloadDocument();
+}
+
+void ScriptEditorWindow::ReloadDocument()
+{
+    const QString contentRoot = QString::fromUtf8(host_->host().contentRoot);
+    QByteArray data; EditorCore::GraphDocument doc;
+    if (!EditorCore::GraphFileIo::Read(ProjectRoot(), contentRoot, PhysicalPath(), data) || !doc.ImportFromJson(QString::fromUtf8(data))) return;
+    savedContent_ = data; graph_->LoadDocument(doc); RefreshVariables(); Check();
+}
+
+void ScriptEditorWindow::ApplyTemplate(int kind)
+{
+    if (!ready_ || readOnly_) return;
+    if (!graph_->Document().Nodes().isEmpty() &&
+        QMessageBox::question(this, Tr("Шаблон скрипта", "Script template"),
+            Tr("Заменить текущий граф графом шаблона?", "Replace current graph with template?")) != QMessageBox::Yes)
+        return;
+    const EditorCore::GraphDocument doc = (kind == 0) ? EditorCore::ScriptGraphPresets::BuildEmpty()
+                                        : (kind == 1) ? EditorCore::ScriptGraphPresets::BuildStartPrint()
+                                        : (kind == 2) ? EditorCore::ScriptGraphPresets::BuildTickRotate()
+                                        : EditorCore::GraphDocument{};
+    if (doc.Schema().isEmpty()) return;
+    graph_->ApplyTemplate(doc);
+    RefreshVariables();
+    ShowProblems();
 }
 
 void ScriptEditorWindow::Check()
@@ -322,7 +364,7 @@ void ScriptEditorWindow::Check()
         host->RunOnUi([self, rows, checked] {
             if (!self) return;
             self->checkProblems_.clear();
-            for (const auto& row : rows) self->checkProblems_.append({row.node, {}, row.message, false});
+            for (const auto& r : rows) self->checkProblems_.append({r.node, {}, r.message, false});
             if (!checked) self->checkProblems_.append({0, {}, Tr("Движок не смог проверить скрипт.", "The engine could not check the script."), false});
             ++self->checks_;
             self->ShowProblems();
@@ -333,7 +375,7 @@ void ScriptEditorWindow::Check()
 
 void ScriptEditorWindow::PollPlayProblems()
 {
-    if (host_->PlayState() == EditorQtHost::Edit) return; // после Stop остаются ошибки последнего Play
+    if (host_->PlayState() == EditorQtHost::Edit) return;
     QPointer<ScriptEditorWindow> self(this);
     EditorQtHost* host = host_;
     const std::string script = script_.toStdString();
@@ -349,7 +391,7 @@ void ScriptEditorWindow::PollPlayProblems()
         host->RunOnUi([self, rows = collected.rows] {
             if (!self) return;
             self->playProblems_.clear();
-            for (const auto& row : rows) self->playProblems_.append({row.node, row.object, row.message, true});
+            for (const auto& r : rows) self->playProblems_.append({r.node, r.object, r.message, true});
             self->ShowProblems();
         });
     };
@@ -367,7 +409,6 @@ void ScriptEditorWindow::PollTrace()
     const bool playing = host_->PlayState() != EditorQtHost::Edit;
     if (!playing || !host_->GraphTraceApi())
     {
-        // После Stop нода не «работает»: рамки снимаются, выбор объекта прячется.
         graph_->SetNodeStatuses({});
         traceLabel_->hide();
         traceObjects_->hide();
@@ -387,18 +428,16 @@ void ScriptEditorWindow::PollTrace()
         struct Collected { QVector<Object> objects; QVector<EngineGraphTraceNode> nodes; QVector<Value> values; } collected;
         if (const EngineGraphTraceApi* api = host->GraphTraceApi())
         {
-            api->listObjects(api->context, script.c_str(), [](void* user, const EngineGraphTraceObject* object) {
-                static_cast<Collected*>(user)->objects.push_back({object->objectId, QString::fromUtf8(object->objectName), object->failed != 0});
+            api->listObjects(api->context, script.c_str(), [](void* user, const EngineGraphTraceObject* o) {
+                static_cast<Collected*>(user)->objects.push_back({o->objectId, QString::fromUtf8(o->objectName), o->failed != 0});
             }, &collected);
-            // Выбранного объекта больше нет — показывается первый.
             quint64 id = 0;
-            for (const auto& object : collected.objects)
-                if (object.id == wanted) id = wanted;
-            api->read(api->context, script.c_str(), id, [](void* user, const EngineGraphTraceNode* node) {
-                static_cast<Collected*>(user)->nodes.push_back(*node);
+            for (const auto& o : collected.objects) if (o.id == wanted) id = wanted;
+            api->read(api->context, script.c_str(), id, [](void* user, const EngineGraphTraceNode* n) {
+                static_cast<Collected*>(user)->nodes.push_back(*n);
             }, &collected);
-            api->readValues(api->context, script.c_str(), id, [](void* user, const EngineGraphTraceValue* value) {
-                static_cast<Collected*>(user)->values.push_back({value->node, QString::fromUtf8(value->pin), QString::fromUtf8(value->text)});
+            api->readValues(api->context, script.c_str(), id, [](void* user, const EngineGraphTraceValue* v) {
+                static_cast<Collected*>(user)->values.push_back({v->node, QString::fromUtf8(v->pin), QString::fromUtf8(v->text)});
             }, &collected);
         }
         host->RunOnUi([self, collected] {
@@ -406,27 +445,27 @@ void ScriptEditorWindow::PollTrace()
             self->tracePending_ = false;
             if (self->host_->PlayState() == EditorQtHost::Edit) return self->PollTrace();
             QComboBox* combo = self->traceObjects_;
-            const quint64 current = combo->currentIndex() >= 0 ? combo->currentData().toULongLong() : 0;
+            const quint64 cur = combo->currentIndex() >= 0 ? combo->currentData().toULongLong() : 0;
             combo->blockSignals(true);
             combo->clear();
-            for (const auto& object : collected.objects)
-                combo->addItem(object.failed ? Tr("%1 (остановлен)", "%1 (stopped)").arg(object.name) : object.name, object.id);
-            int index = combo->findData(self->tracedObject_ ? self->tracedObject_ : current);
-            combo->setCurrentIndex(index >= 0 ? index : 0);
+            for (const auto& o : collected.objects)
+                combo->addItem(o.failed ? Tr("%1 (остановлен)", "%1 (stopped)").arg(o.name) : o.name, o.id);
+            int idx = combo->findData(self->tracedObject_ ? self->tracedObject_ : cur);
+            combo->setCurrentIndex(idx >= 0 ? idx : 0);
             combo->blockSignals(false);
             self->traceLabel_->setVisible(!collected.objects.isEmpty());
             combo->setVisible(!collected.objects.isEmpty());
 
             QHash<int, GraphNodeStatus> statuses;
-            for (const auto& node : collected.nodes)
+            for (const auto& n : collected.nodes)
             {
-                GraphNodeStatus status;
-                status.state = node.state == EngineGraphNodeFailed ? GraphNodeState::Failed
-                             : node.framesAgo <= ActiveFrames ? GraphNodeState::Active : GraphNodeState::Done;
-                if (node.count) status.badge = QStringLiteral("\u00d7%1").arg(node.count);
-                statuses.insert(node.node, status);
+                GraphNodeStatus s;
+                s.state = n.state == EngineGraphNodeFailed ? GraphNodeState::Failed
+                        : n.framesAgo <= ActiveFrames ? GraphNodeState::Active : GraphNodeState::Done;
+                if (n.count) s.badge = QStringLiteral("\u00d7%1").arg(n.count);
+                statuses.insert(n.node, s);
             }
-            for (const auto& value : collected.values) statuses[value.node].values.insert(value.pin, value.text);
+            for (const auto& v : collected.values) statuses[v.node].values.insert(v.pin, v.text);
             self->graph_->SetNodeStatuses(statuses);
         });
     };
@@ -437,12 +476,12 @@ QHash<int, QString> ScriptEditorWindow::Problems() const
 {
     QHash<int, QString> problems;
     for (const auto* list : {&checkProblems_, &playProblems_})
-        for (const auto& problem : *list)
-        {
-            if (!problem.node) continue;
-            const QString text = problem.object.isEmpty() ? problem.message : QStringLiteral("Play, %1: %2").arg(problem.object, problem.message);
-            problems[problem.node] = problems.value(problem.node).isEmpty() ? text : problems.value(problem.node) + QLatin1Char('\n') + text;
-        }
+        for (const auto& p : *list)
+            if (p.node)
+            {
+                const QString t = p.object.isEmpty() ? p.message : QStringLiteral("Play, %1: %2").arg(p.object, p.message);
+                problems[p.node] = problems.value(p.node).isEmpty() ? t : problems.value(p.node) + QLatin1Char('\n') + t;
+            }
     return problems;
 }
 
@@ -451,12 +490,12 @@ void ScriptEditorWindow::ShowProblems()
     warnings_ = schema_->Warnings(graph_->Document());
     problemList_->clear();
     for (const auto* list : {&checkProblems_, &playProblems_})
-        for (const auto& problem : *list)
+        for (const auto& p : *list)
         {
-            QString where = problem.node ? Tr("нода %1", "node %1").arg(problem.node) : Tr("файл", "file");
-            if (problem.runtime || !problem.object.isEmpty()) where = QStringLiteral("Play · %1 · %2").arg(problem.object, where);
-            auto* item = new QListWidgetItem(QStringLiteral("%1: %2").arg(where, problem.message), problemList_);
-            item->setData(Qt::UserRole, problem.node);
+            QString where = p.node ? Tr("нода %1", "node %1").arg(p.node) : Tr("файл", "file");
+            if (p.runtime || !p.object.isEmpty()) where = QStringLiteral("Play · %1 · %2").arg(p.object, where);
+            auto* item = new QListWidgetItem(QStringLiteral("%1: %2").arg(where, p.message), problemList_);
+            item->setData(Qt::UserRole, p.node);
         }
     QList<int> warned = warnings_.keys();
     std::sort(warned.begin(), warned.end());

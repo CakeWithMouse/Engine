@@ -44,6 +44,10 @@ public:
 
     // Записать файл и проверить его движком сразу, не дожидаясь паузы в правках.
     void SaveNow();
+    void Revert();
+    void ApplyTemplate(int kind);
+    bool HasUnsavedChanges() const;
+    void ReloadDocument();
     // Память: добавить ключ (имя свободное) и записать её целиком из таблицы.
     void AddVariable();
 
@@ -75,6 +79,7 @@ private:
     QTimer* saveTimer_ = nullptr;
     QHash<int, QString> problems_, warnings_;
     QString status_, hint_;
+    QByteArray savedContent_;
     bool ready_ = false, readOnly_ = false, refreshing_ = false;
     int checks_ = 0;
     int writeRetries_ = 0;

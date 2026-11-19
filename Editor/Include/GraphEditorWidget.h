@@ -64,6 +64,8 @@ public:
 
     // Загрузка: история начинается заново, ошибки нод сбрасываются.
     void SetDocument(const EditorCore::GraphDocument& document);
+    // Применение шаблона: одна точка отмены (Undo восстанавливает прежний граф).
+    void ApplyTemplate(const EditorCore::GraphDocument& document);
     const EditorCore::GraphDocument& Document() const { return document_; }
 
     // Свободные имена и свойства по умолчанию подставляет схема; возвращает id ноды.

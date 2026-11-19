@@ -3,6 +3,7 @@
 #include "EditorLocale.h"
 #include "EditorWindowSetup.h"
 #include "FsmGraphWidget.h"
+#include "FsmGraphPresets.h"
 #include "Graph/GraphSchemaRegistry.h"
 #include "Graph/GraphFileIo.h"
 #include "VariablePanelWidget.h"
@@ -19,6 +20,8 @@
 #include <QJsonObject>
 #include <QLabel>
 #include <QListWidget>
+#include <QMenu>
+#include <QMessageBox>
 #include <QPointer>
 #include <QPushButton>
 #include <QRegularExpression>
@@ -27,6 +30,7 @@
 #include <QTableWidget>
 #include <QTimer>
 #include <QToolBar>
+#include <QToolButton>
 #include <QVBoxLayout>
 #include <algorithm>
 #include <tuple>
@@ -58,26 +62,43 @@ void AiMachineEditorWindow::BuildUi()
     auto* tools = addToolBar(Tr("Автомат ИИ", "AI State Machine"));
     tools->setMovable(false);
 
-    auto* save = new QPushButton(IconProvider::SaveIcon(), QString(), tools);
-    save->setObjectName(QStringLiteral("FsmSave"));
-    save->setProperty("toolbarBtn", true);
-    save->setFixedSize(EditorWindowSetup::kToolbarBtnWidth, EditorWindowSetup::kToolbarBtnHeight);
-    save->setIconSize(QSize(EditorWindowSetup::kToolbarIconSize, EditorWindowSetup::kToolbarIconSize));
-    save->setToolTip(Tr("Сохранить [Ctrl+S]", "Save [Ctrl+S]"));
+    auto makeBtn = [tools](const QIcon& icon, const QString& name, const QString& tip) {
+        auto* b = new QPushButton(icon, QString(), tools);
+        b->setObjectName(name);
+        b->setProperty("toolbarBtn", true);
+        b->setFixedSize(EditorWindowSetup::kToolbarBtnWidth, EditorWindowSetup::kToolbarBtnHeight);
+        b->setIconSize(QSize(EditorWindowSetup::kToolbarIconSize, EditorWindowSetup::kToolbarIconSize));
+        b->setToolTip(tip);
+        tools->addWidget(b);
+        return b;
+    };
+    auto* save = makeBtn(IconProvider::SaveIcon(), QStringLiteral("FsmSave"), Tr("Сохранить [Ctrl+S]", "Save [Ctrl+S]"));
     connect(save, &QPushButton::clicked, this, [this] { SaveNow(); });
-    tools->addWidget(save);
 
-    auto* newMachine = new QPushButton(IconProvider::RobotIcon(), QString(), tools);
-    newMachine->setObjectName(QStringLiteral("FsmNewMachine"));
-    newMachine->setProperty("toolbarBtn", true);
-    newMachine->setFixedSize(EditorWindowSetup::kToolbarBtnWidth, EditorWindowSetup::kToolbarBtnHeight);
-    newMachine->setIconSize(QSize(EditorWindowSetup::kToolbarIconSize, EditorWindowSetup::kToolbarIconSize));
-    newMachine->setToolTip(Tr("Новый автомат: создать .fsm в той же папке", "New machine: create a .fsm in the same folder"));
+    auto* revert = makeBtn(IconProvider::RevertIcon(), QStringLiteral("FsmRevert"), Tr("Откатить все изменения", "Revert all changes"));
+    connect(revert, &QPushButton::clicked, this, [this] { Revert(); });
+
+    auto* templates = new QToolButton(tools);
+    templates->setObjectName(QStringLiteral("FsmTemplates"));
+    templates->setProperty("toolbarBtn", true);
+    templates->setIcon(IconProvider::TemplateIcon());
+    templates->setFixedSize(EditorWindowSetup::kToolbarBtnWidth, EditorWindowSetup::kToolbarBtnHeight);
+    templates->setIconSize(QSize(EditorWindowSetup::kToolbarIconSize, EditorWindowSetup::kToolbarIconSize));
+    templates->setToolTip(Tr("Шаблоны автомата", "State machine templates"));
+    templates->setPopupMode(QToolButton::InstantPopup);
+    auto* tMenu = new QMenu(templates);
+    tMenu->setObjectName(QStringLiteral("FsmTemplateMenu"));
+    tMenu->addAction(Tr("Idle → Patrol", "Idle → Patrol"), this, [this] { ApplyTemplate(0); });
+    tMenu->addAction(Tr("Idle → Chase цели", "Idle → Chase target"), this, [this] { ApplyTemplate(1); });
+    tMenu->addAction(Tr("Idle → Attack", "Idle → Attack"), this, [this] { ApplyTemplate(2); });
+    templates->setMenu(tMenu);
+    tools->addWidget(templates);
+
+    auto* newMachine = makeBtn(IconProvider::RobotIcon(), QStringLiteral("FsmNewMachine"), Tr("Новый автомат: создать .fsm в той же папке", "New machine: create a .fsm in the same folder"));
     connect(newMachine, &QPushButton::clicked, this, [this] {
         CommandRegistry::Instance().Execute(QStringLiteral("Assets.CreateAiMachine"),
             {{QStringLiteral("directory"), QFileInfo(PhysicalPath()).absolutePath()}});
     });
-    tools->addWidget(newMachine);
 
     auto* help = new InfoButton(this);
     help->setObjectName(QStringLiteral("FsmHelp"));
@@ -85,39 +106,21 @@ void AiMachineEditorWindow::BuildUi()
     help->setProperty("toolbarBtn", true);
     help->setFixedSize(EditorWindowSetup::kToolbarBtnWidth, EditorWindowSetup::kToolbarBtnHeight);
     help->setIconSize(QSize(EditorWindowSetup::kToolbarIconSize, EditorWindowSetup::kToolbarIconSize));
-    help->SetInfoText(
-        Tr("Редактор автомата состояний ИИ", "AI State Machine Editor"),
-        Tr("Конечный автомат ИИ [.fsm]:\n"
-           "• Верхняя строка: Сохранить [Ctrl+S], Создать новый автомат и справка окна\n"
-           "• Панель «Память и настройки»:\n"
-           "  - Кнопки под заголовком: Добавить, Дублировать, Удалить ключ по выделенной строке\n"
-           "  - Ключи памяти: переменные автомата [объект, вектор, число, логический, строка]\n"
-           "  - «Показ.» [глаз]: публичные ключи, видимые в инспекторе объекта сцены\n"
-           "  - Настройки персонажа: цель восприятия, где видели, интервал решений\n"
-           "• Панель «Граф»: состояния [ноды] и переходы [связи]\n"
-           "  - Кнопки графа: +Нода, Отменить, Повторить, Показать всё, Упорядочить, Комментарий, Копировать/Вставить граф\n"
-           "  - Двойной клик по состоянию: редактирование задач, условий входа и служб\n"
-           "  - Двойной клик по переходу: триггеры [завершено, событие, тик], условия и задержка\n"
-           "  - Tab / «+ Нода» — добавление состояний и комментариев\n"
-           "• Шаблоны: типовые автоматы с подтверждением замены\n"
+    help->SetInfoText(Tr("Редактор автомата состояний ИИ", "AI State Machine Editor"),
+        Tr("Конечный автомат ИИ [.fsm]:\n• Верхняя строка: Сохранить [Ctrl+S], Создать новый автомат и справка окна\n"
+           "• Панель «Память и настройки»: Добавить, Дублировать, Удалить; глаз: публичные; настройки персонажа\n"
+           "• Панель «Граф»: состояния [ноды] и переходы [связи]; 2×клик — редактирование свойств\n"
+           "  - Кнопки графа: +Нода, Отменить, Повторить, Показать всё, Упорядочить, Комментарий, Копировать/Вставить\n"
+           "• Шаблоны: типовые автоматы с подтверждением замены; Откатить: возврат к сохранённому файлу\n"
            "• Горячие клавиши: Ctrl+S — сохранить, Ctrl+Z/Y — отмена/повтор, F — уместить, Delete — удалить\n"
            "• Панель «Консоль»: ошибки компиляции автомата и проверки движком",
-           "AI State Machine [.fsm]:\n"
-           "• Top bar: Save [Ctrl+S], Create new machine and window help\n"
-           "• Memory and settings panel:\n"
-           "  - Buttons under header: Add, Duplicate, Delete selected key\n"
-           "  - Memory keys: machine variables [object, vector, number, bool, string]\n"
-           "  - \"Show\" [eye]: public keys visible in object inspector\n"
-           "  - Character settings: perceived target, last seen, think interval\n"
-           "• Graph panel: states [nodes] and transitions [links]\n"
-           "  - Graph buttons: +Node, Undo, Redo, Frame all, Arrange, Comment, Copy/Paste graph\n"
-           "  - Double click state: edit tasks, enter conditions and services\n"
-           "  - Double click transition: triggers [completed, event, tick], conditions, delay\n"
-           "  - Tab / \"+ Node\" — add states and comments\n"
-           "• Templates: predefined state machines with replacement confirmation\n"
+           "AI State Machine [.fsm]:\n• Top bar: Save [Ctrl+S], Create new machine and window help\n"
+           "• Memory and settings: Add, Duplicate, Delete; eye: public; character settings\n"
+           "• Graph panel: states [nodes] and transitions [links]; double click — edit properties\n"
+           "  - Graph buttons: +Node, Undo, Redo, Frame all, Arrange, Comment, Copy/Paste\n"
+           "• Templates: predefined state machines; Revert: restore saved file\n"
            "• Hotkeys: Ctrl+S — save, Ctrl+Z/Y — undo/redo, F — frame, Delete — remove\n"
-           "• Console panel: machine compilation and engine validation errors"),
-        QString());
+           "• Console panel: machine compilation and engine validation errors"), QString());
     tools->addWidget(help);
 
     auto* central = new QWidget(this);
@@ -246,8 +249,8 @@ void AiMachineEditorWindow::BuildUi()
     saveTimer_->setSingleShot(true);
     saveTimer_->setInterval(300);
     connect(saveTimer_, &QTimer::timeout, this, [this] { SaveNow(); });
-    graph_->changed = [this] { saveTimer_->start(); };
-    graph_->layoutChanged = [this] { if (!WriteFile()) saveTimer_->start(); };
+    graph_->changed = [this] { ShowProblems(); };
+    graph_->layoutChanged = [this] {};
     graph_->panelsChanged = [this] { RefreshPanels(); };
     statusBar()->showMessage(Tr("Загрузка каталога блоков…", "Loading the block catalog…"));
 }
@@ -303,14 +306,15 @@ void AiMachineEditorWindow::LoadFile(const QString& catalog)
         return SetReadOnly(Tr("%1 — не автомат ИИ.", "%1 is not an AI state machine.").arg(machine_));
     }
     graph_->LoadDocument(document);
+    savedContent_ = data;
     ready_ = true;
     if (document.IsNewerFormat() || document.SchemaVersion() > schema_->Version())
         return SetReadOnly(Tr("Файл записан более новой версией редактора: он открыт только для чтения.",
                               "The file was written by a newer editor: it is open read-only."));
     graph_->setEnabled(true);
     memoryPanel_->setEnabled(true);
-    hint_ = Tr("Правки сохраняются сразу; Play читает файл при запуске. Двойной щелчок — свойства состояния или перехода.",
-               "Edits are saved at once; Play reads the file when it starts. Double-click — state or transition properties.");
+    hint_ = Tr("Сохранить: Ctrl+S. Двойной щелчок — свойства состояния или перехода.",
+               "Save: Ctrl+S. Double-click — state or transition properties.");
     statusBar()->showMessage(hint_);
     Check();
 }
@@ -330,9 +334,10 @@ bool AiMachineEditorWindow::WriteFile()
 {
     if (!ready_ || readOnly_) return false;
     QString error;
-    if (EditorCore::GraphFileIo::Write(ProjectRoot(), QString::fromUtf8(host_->host().contentRoot), PhysicalPath(),
-                                       graph_->Document().ExportToJson().toUtf8(), &error))
+    const QByteArray data = graph_->Document().ExportToJson().toUtf8();
+    if (EditorCore::GraphFileIo::Write(ProjectRoot(), QString::fromUtf8(host_->host().contentRoot), PhysicalPath(), data, &error))
     {
+        savedContent_ = data;
         statusBar()->showMessage(hint_); // прежняя неудачная попытка больше не важна
         return true;
     }
@@ -354,6 +359,41 @@ void AiMachineEditorWindow::SaveNow()
         QTimer::singleShot(50, this, [this] { SaveNow(); });
     else
         writeRetries_ = 0;
+}
+
+bool AiMachineEditorWindow::HasUnsavedChanges() const { return graph_ && graph_->Document().ExportToJson().toUtf8() != savedContent_; }
+
+void AiMachineEditorWindow::Revert()
+{
+    if (!ready_ || readOnly_ || !HasUnsavedChanges()) return;
+    if (QMessageBox::question(this, Tr("Откатить автомат", "Revert machine"),
+            Tr("Отменить все несохранённые изменения автомата?", "Revert all unsaved changes to the state machine?")) == QMessageBox::Yes)
+        ReloadDocument();
+}
+
+void AiMachineEditorWindow::ReloadDocument()
+{
+    const QString contentRoot = QString::fromUtf8(host_->host().contentRoot);
+    QByteArray data; EditorCore::GraphDocument doc;
+    if (!EditorCore::GraphFileIo::Read(ProjectRoot(), contentRoot, PhysicalPath(), data) || !doc.ImportFromJson(QString::fromUtf8(data))) return;
+    savedContent_ = data; graph_->LoadDocument(doc); RefreshPanels(); Check();
+}
+
+void AiMachineEditorWindow::ApplyTemplate(int kind)
+{
+    if (!ready_ || readOnly_) return;
+    if (!graph_->Document().Nodes().isEmpty() &&
+        QMessageBox::question(this, Tr("Шаблон автомата", "Machine template"),
+            Tr("Заменить текущий граф графом шаблона?", "Replace current graph with template?")) != QMessageBox::Yes)
+        return;
+    const EditorCore::GraphDocument doc = (kind == 0) ? EditorCore::FsmGraphPresets::BuildIdlePatrol()
+                                        : (kind == 1) ? EditorCore::FsmGraphPresets::BuildIdleChase()
+                                        : (kind == 2) ? EditorCore::FsmGraphPresets::BuildIdleAttack()
+                                        : EditorCore::GraphDocument{};
+    if (doc.Schema().isEmpty()) return;
+    graph_->ApplyTemplate(doc);
+    RefreshPanels();
+    ShowProblems();
 }
 
 void AiMachineEditorWindow::Check()

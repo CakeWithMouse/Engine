@@ -44,6 +44,10 @@ public:
 
     // Записать файл и проверить его движком сразу, не дожидаясь паузы в правках.
     void SaveNow();
+    void Revert();
+    void ApplyTemplate(int kind);
+    bool HasUnsavedChanges() const;
+    void ReloadDocument();
 
     // Объект Play, чьё выполнение показано на нодах (id edit-сцены; 0 — первый с этим скриптом).
     quint64 TracedObject() const { return tracedObject_; }
@@ -91,6 +95,7 @@ private:
     QVector<Problem> checkProblems_, playProblems_;
     QHash<int, QString> warnings_;
     QString status_;
+    QByteArray savedContent_;
     bool ready_ = false, readOnly_ = false;
     int checks_ = 0;
 };

@@ -869,17 +869,16 @@ void GraphEditorWidget::CopyWholeGraph()
         Notice(Tr("В графе нет нод для копирования.", "The graph has no nodes to copy."));
 }
 
-void GraphEditorWidget::AddToolbarWidget(QWidget* widget)
+void GraphEditorWidget::AddToolbarWidget(QWidget* widget) { toolbar_->insertWidget(toolbarIndex_++, widget); }
+
+void GraphEditorWidget::ApplyTemplate(const GraphDocument& document)
 {
-    toolbar_->insertWidget(toolbarIndex_++, widget);
+    Checkpoint(); ReplaceDocument(document); NotifyStructure(); UpdateHistoryButtons();
 }
 
 void GraphEditorWidget::SetDocument(const GraphDocument& document)
 {
-    history_.Clear();
-    problems_.clear();
-    ReplaceDocument(document);
-    UpdateHistoryButtons();
+    history_.Clear(); problems_.clear(); ReplaceDocument(document); UpdateHistoryButtons();
 }
 
 void GraphEditorWidget::ReplaceDocument(const GraphDocument& document)
