@@ -14,12 +14,12 @@
 namespace EditorWindowSetup
 {
 
-// Стандартные размеры кнопок тулбара окна и панельных шапок (Итерация 5)
+// Стандартные размеры кнопок тулбара окна и панельных шапок (Итерация 6: единый сплюснутый размер 34x26)
 constexpr int kToolbarBtnWidth = 34;
 constexpr int kToolbarBtnHeight = 26;
-constexpr int kToolbarIconSize = 18;
+constexpr int kToolbarIconSize = 16;
 
-constexpr int kPanelBtnWidth = 26;
+constexpr int kPanelBtnWidth = 34;
 constexpr int kPanelBtnHeight = 26;
 constexpr int kPanelIconSize = 16;
 

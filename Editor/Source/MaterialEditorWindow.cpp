@@ -317,6 +317,7 @@ void MaterialEditorWindow::BuildUi()
 {
     auto* tools = addToolBar(QStringLiteral("Материал"));
     tools->setMovable(false);
+    if (tools->layout()) tools->layout()->setSpacing(4);
     auto* save = tools->addAction(IconProvider::SaveIcon(), QString(), this, [this] { Save(); });
     save->setObjectName(QStringLiteral("MaterialSave"));
     save->setShortcut(QKeySequence::Save);

@@ -6,6 +6,7 @@
 #include "EditorLocale.h"
 #include "EditorTheme.h"
 #include "IconProvider.h"
+#include "EditorWindowSetup.h"
 #include "MaterialEvents.h"
 
 #include <QMenu>
@@ -32,8 +33,10 @@ void MaterialEditorWindow::BuildGraphTools(QToolBar* tools)
 {
     templates_ = new QToolButton(this);
     templates_->setObjectName(QStringLiteral("MaterialTemplates"));
+    templates_->setProperty("toolbarBtn", true);
     templates_->setIcon(IconProvider::TemplateIcon());
-    templates_->setIconSize(QSize(16, 16));
+    templates_->setFixedSize(EditorWindowSetup::kToolbarBtnWidth, EditorWindowSetup::kToolbarBtnHeight);
+    templates_->setIconSize(QSize(EditorWindowSetup::kToolbarIconSize, EditorWindowSetup::kToolbarIconSize));
     templates_->setToolTip(Tr("Шаблоны материала: Simple, ORM, базовые эффекты",
                               "Material templates: Simple, ORM, base effects"));
     templates_->setPopupMode(QToolButton::InstantPopup);

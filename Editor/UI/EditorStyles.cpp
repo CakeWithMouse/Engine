@@ -46,6 +46,11 @@ QToolBar {
     spacing: 4px;
     padding: 3px 6px;
 }
+QToolBar::separator {
+    width: 1px;
+    background-color: %6;
+    margin: 3px 4px;
+}
 QToolButton {
     background-color: %8;
     border: 1px solid %6;
@@ -61,13 +66,11 @@ QToolButton:pressed, QToolButton:checked {
     background-color: %11;
     border-color: %2;
 }
-QPushButton[toolbarBtn="true"], QToolButton[toolbarBtn="true"] {
+QPushButton[toolbarBtn="true"], QToolButton[toolbarBtn="true"],
+QPushButton[panelBtn="true"], QToolButton[panelBtn="true"],
+QToolBar QToolButton {
     min-width: 34px; max-width: 34px; min-height: 26px; max-height: 26px;
     padding: 3px 6px; margin: 0px;
-}
-QPushButton[panelBtn="true"], QToolButton[panelBtn="true"] {
-    min-width: 26px; max-width: 26px; min-height: 26px; max-height: 26px;
-    padding: 2px; margin: 0px;
 }
 QPushButton[panelTextBtn="true"], QToolButton[panelTextBtn="true"] {
     min-height: 26px; max-height: 26px;
@@ -123,6 +126,13 @@ QTreeView, QTreeWidget, QListView, QListWidget, QPlainTextEdit, QTextEdit {
 QDialog QListWidget, QDialog QTreeWidget {
     background-color: %3;
     border: 1px solid %6;
+}
+QTabWidget::pane {
+    background-color: %3;
+    border: 1px solid %6;
+}
+GraphEditorWidget {
+    background-color: %3;
 }
 QDialog QTabWidget::pane {
     background-color: %3;

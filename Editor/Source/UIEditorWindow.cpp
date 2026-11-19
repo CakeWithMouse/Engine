@@ -76,6 +76,7 @@ UIEditorWindow::UIEditorWindow(EditorQtHost* host, const QString& file, QWidget*
     tools->setObjectName("UIToolBar");
     tools->setIconSize(QSize(16, 16));
     tools->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    if (tools->layout()) tools->layout()->setSpacing(4);
 
     saveAction_ = tools->addAction(IconProvider::SaveIcon(), Tr("Сохранить", "Save"), this, [this] { Save(); });
     saveAction_->setShortcut(QKeySequence::Save);
