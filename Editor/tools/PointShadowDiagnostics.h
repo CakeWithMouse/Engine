@@ -167,7 +167,7 @@ inline QJsonObject Run(const QJsonObject& in) {
     std::vector<PointLightComponent*> lamps;
     const bool multi=in.contains("lights");
     const auto lights=multi?in["lights"].toArray():QJsonArray{QJsonObject{}};
-    Check(!lights.empty()&&lights.size()<=4,"lights must contain 1..4 states");
+    Check(!lights.empty()&&lights.size()<=5,"lights must contain 1..5 states");
     for(auto state:lights) {
         Check(state.isObject(),"light must be object");
         auto light=std::make_unique<PointLightComponent>(glm::vec3(0,4,0),glm::vec3(1,.85f,.65f),intensity,radius);

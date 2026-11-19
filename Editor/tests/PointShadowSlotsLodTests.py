@@ -1,4 +1,4 @@
-"""Two shadow cubes, slot reuse and animated LOD transitions on the real D3D11 renderer."""
+"""Four shadow cubes, slot reuse and animated LOD transitions on the real D3D11 renderer."""
 import argparse
 import copy
 import hashlib
@@ -38,13 +38,15 @@ def suite(tool, output, model):
 
     base = [dict(position=[-3, 4, -2], color=[1, .45, .2], intensity=.7, radius=30, enabled=True, shadows=True),
             dict(position=[3, 4, 2], color=[.25, .5, 1], intensity=.7, radius=30, enabled=True, shadows=True),
-            dict(position=[0, 5, 4], color=[.3, 1, .35], intensity=.7, radius=30, enabled=True, shadows=True)]
+            dict(position=[0, 5, 4], color=[.3, 1, .35], intensity=.7, radius=30, enabled=True, shadows=True),
+            dict(position=[-4, 4, 3], color=[1, .8, .3], intensity=.7, radius=30, enabled=True, shadows=True),
+            dict(position=[4, 5, -3], color=[.8, .3, 1], intensity=.7, radius=30, enabled=True, shadows=True)]
     for rendering in (0, 1):
         for caster in ('mesh', 'skeletal', 'crowd'):
             states = []
             changes = [[], [(0, 'shadows', False)], [], [(1, 'enabled', False)],
                        [(0, 'shadows', False), (1, 'shadows', False)],
-                       [(i, 'shadows', False) for i in range(3)], [], [(0, 'intensity', 0)],
+                       [(i, 'shadows', False) for i in range(5)], [], [(0, 'intensity', 0)],
                        [(0, 'intensity', 0), (1, 'intensity', 0)], [(0, 'radius', 1)], [],
                        [(0, 'position', [4, 4, -2]), (1, 'position', [-4, 4, 2])], []]
             for change in changes:
@@ -63,10 +65,10 @@ def suite(tool, output, model):
             def verify_slots(data, check, states=states):
                 seen = {}
                 for index, (frame, state) in enumerate(zip(data, states)):
-                    selected = [i for i, l in enumerate(state) if l['enabled'] and l['shadows'] and l['intensity'] > 0 and l['radius'] > 1.5][:2]
+                    selected = [i for i, l in enumerate(state) if l['enabled'] and l['shadows'] and l['intensity'] > 0 and l['radius'] > 1.5][:4]
                     check(frame['count'] == len(selected), f'frame {index}: count {frame["count"]} != {len(selected)}')
                     actual = [l['slot'] for l in frame['lights']]
-                    expected = [selected.index(i) if i in selected else -1 for i in range(3)]
+                    expected = [selected.index(i) if i in selected else -1 for i in range(5)]
                     check(actual == expected, f'frame {index}: slots {actual} != {expected}')
                     for slot, owner in enumerate(selected):
                         if slot >= len(frame['cubes']):
@@ -158,9 +160,9 @@ def suite(tool, output, model):
                 def verify_joint(data, check, caster=caster, states=frames):
                     seen_lods = set()
                     for index, (frame, state) in enumerate(zip(data, states)):
-                        selected = [i for i, l in enumerate(state['lights']) if l['enabled'] and l['shadows']][:2]
-                        check(frame['count'] == 2, f'frame {index}: missing cube during joint motion')
-                        check([l['slot'] for l in frame['lights']] == [selected.index(i) if i in selected else -1 for i in range(3)],
+                        selected = [i for i, l in enumerate(state['lights']) if l['enabled'] and l['shadows']][:4]
+                        check(frame['count'] == 4, f'frame {index}: missing cube during joint motion')
+                        check([l['slot'] for l in frame['lights']] == [selected.index(i) if i in selected else -1 for i in range(5)],
                               f'frame {index}: wrong slots during joint motion')
                         for slot, owner in enumerate(selected):
                             cube = frame['cubes'][slot]
