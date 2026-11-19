@@ -98,6 +98,98 @@
 
 ---
 
+## Итерация 7: мелкие правки редакторов Pain Engine
+
+> Ветка `feature/editor-graphs-ux-overhaul`. Тот же чат, без новой разведки, строго по протоколу `engine-work-protocol`.
+> Проверки: одна проверка в конце (Debug-сборка, check.ps1 -Quick, слои Core/UI/Host, wc -l, запуск EditorUiTests.exe --viewport-dpi со скриншотами FSM, Script, Material).
+> Коммит после каждого пункта.
+
+### Чек-лист Итерации 7
+- [x] 1. Папка (Scene.Folder) во вьюпорте: клик во вьюпорте не выделяет папку (исключение в PickObject), у папки нет видимого выделения/outline и bounding box во вьюпорте (в том числе при выделении из иерархии: пропуск передачи ID папки в SetEditorSelection). В иерархии выделение работает как раньше.
+- [x] 2. Меню «Создать внутри» в иерархии сцены и «Создать дочерний» во вьюпорте: категоризация аналогично кнопке «Добавить» (Примитивы, Свет, Частицы, Камеры, Окружение, Персонажи, Пустой объект, Папка). Общая переиспользуемая функция `BuildCategorizedCreateMenu` в `CreationMenuHelper.{h,cpp}` без дублирования.
+- [x] 3. «Инструменты → Интерфейс (UI) → Создать»: диалог `QInputDialog` имени интерфейса с валидацией, имя по умолчанию `Hud/NewUI`, сохранение в `Content/UI`, через FileService с логом, одна команда CommandRegistry `UI.Create`, открытие редактора UI.
+- [x] 4. Точечный свет: тени включены по умолчанию (`castShadows = true`) при создании (Scene.Create / Scene.Add, создание новой сцены / шаблона сцены ProjectLibrary / контекстное меню вьюпорта). Загрузка старых сцен сохраняет их исходные значения.
+- [x] 5. Пресеты Script/FSM: расширение пресетов реальными нодами и блоками из каталогов движка. Script: «Движение по синусоиде Y», «Таймер действия», «Счётчик с переменной (+1)», «Условие порога (> 5.0)», «Пустой». FSM: «Патруль -> Преследование -> Возврат», «Охрана (Idle <-> Attack по дистанции)», «Реакция (Idle -> Бегство при приближении)». Автотесты всех шаблонов в `GraphPresetsTests.h`.
+- [x] 6. Верстка кнопок Script/FSM: компактные кнопки панелей `kPanelBtnWidth = 30`, `kPanelBtnHeight = 24`, `kPanelIconSize = 16` против верхнего тулбара 34x26; идентичное вертикальное выравнивание/отступы (4, 3, 4, 3) и spacing (4) для рядов памяти и графа; удаление надписи «Память — ключи блоков» в FSM; удаление лишней кнопки «?» в тулбаре графа материала.
+- [x] Финал: верификация (`check.ps1 -Quick` exit=0, слои Core/UI/Host OK, wc -l в лимитах, прогон `EditorUiTests.exe --viewport-dpi` со скриншотами).
+
+### Решения (Итерация 7)
+- **Пункт 1 (fix(editor)):**
+  - Файлы: `Editor/Source/MainWindow.cpp:1134-1144`, `Editor/Host/SceneCommandHandler.cpp:468-472`.
+  - В `MainWindow::OnSelectionChanged` и `SceneCommandHandler::ApplySelection`: при выборе `Scene.Folder` передача в `SetEditorSelection(0)` сбрасывает движковый outline / wireframe box. В `ViewportCommandHandler::PickObject` папки уже исключались.
+  - Коммит: `f35a70f5: fix(editor): exclude Scene.Folder from viewport selection and engine outline (item 1)`.
+- **Пункт 2 (feat(editor)):**
+  - Файлы: `Editor/UI/CreationMenuHelper.h:1-25`, `Editor/UI/CreationMenuHelper.cpp:1-118`, `Editor/Source/SceneObjectsPanel.cpp:259-268`, `Editor/Source/ViewportContextMenu.cpp:66-72`.
+  - Создана единая функция `CreationMenuHelper::BuildCategorizedCreateMenu` с категориями «Примитивы», «Свет», «Частицы», «Камеры», «Окружение», «Персонажи», «Пустой объект», «Папка». Меню «Добавить» в тулбаре иерархии, «Создать внутри» в ПКМ иерархии и «Создать дочерний» во вьюпорте используют единый каталог типов без дублирования кода.
+  - Коммит: `f082d093: feat(editor): reuse categorized creation menu for add child and viewport (item 2)`.
+- **Пункт 3 (feat(editor)):**
+  - Файлы: `Editor/Source/HudTools.cpp:166-228`, `Editor/Source/MainWindow.h:207`, `Editor/UI/FileBrowserContextMenu.cpp:85-88`.
+  - Команда `UI.Create` в `HudTools.cpp` поддерживает интерактивный диалог `QInputDialog` («Имя интерфейса», валидация имени, проверка отсутствия перезаписи, нормализация в `Content/UI/<name>.ui`), запись файла через `FileService::Instance().WriteFile` с логированием, открытие редактора `MainWindow::OpenUIEditor`. В контекстном меню файлового браузера сохранена передача каталога.
+  - Коммит: `f2e4f084: feat(editor): interactive ui creation with name dialog in content ui folder (item 3)`.
+- **Пункт 4 (feat(editor) + game):**
+  - Файлы: `Game/Launcher/Source/ProjectLibrary.h:176`, `Editor/Host/SceneCommandHandler.cpp:322`, `Editor/Source/MainWindow.cpp:1298`, `Editor/Source/ViewportContextMenu.cpp:106`.
+  - Для новых точечных источников света (`Light.Point`) по умолчанию выставлен `castShadows = true` в шаблонах сцены `ProjectLibrary.h` (`PointLightV2{..., true}`), при создании через команду `Scene.Create` / `Scene.Add` (`SceneCommandHandler.cpp`), в `MainWindow::CreateObject` и `ViewportContextMenu::AddObject`. Загрузка существующих сцен не затрагивается (чтение сохранённого флага).
+  - Коммиты: `baed01f2: game: enable cast shadows by default for template scene point lights`, `a3f5e9a7: feat(editor): enable cast shadows by default for new point lights (item 4)`.
+- **Пункт 5 (feat(editor)):**
+  - Файлы: `Editor/Core/ScriptGraphPresets.h:1-26`, `Editor/Core/ScriptGraphPresets.cpp:1-180`, `Editor/Core/FsmGraphPresets.h:1-26`, `Editor/Core/FsmGraphPresets.cpp:1-317`, `Editor/Source/ScriptEditorWindow.cpp:94-118`, `Editor/Source/AiMachineEditorWindow.cpp:138-158`, `Editor/tests/core/GraphPresetsTests.h:1-215`.
+  - Script: расширены шаблоны `BuildSinMoveY` (Event.Tick -> Math.Sin -> SetPosition), `BuildTimerAction` (Time.Delay -> Action.Print), `BuildCounterVariable` (Math.Add (+1) с переменной Counter), `BuildConditionThreshold` (Logic.Greater (> 5.0) -> Flow.Branch), `BuildEmpty`.
+  - FSM: расширены шаблоны `BuildPatrolChaseReturn` (состояния Patrol -> Chase -> Return с задачами Ai.Wait, Ai.MoveTo), `BuildGuardAttackDistance` (состояния Idle <-> Attack по условию дистанции), `BuildIdleFlee` (состояния Idle -> Flee при приближении).
+  - Все ноды и блоки согласованы с `ScriptCatalog` и `MachineBlocks/FsmGraphSchema`.
+  - Полное покрытие всеми тестами в `GraphPresetsTests.h`: проверка валидности схемы V1, наличия всех ключевых узлов, связей и переменных, 0 предупреждений схемы.
+  - Коммит: `c7ccda98: feat(editor): expand script and fsm graph presets with autotests (item 5)`.
+- **Пункт 6 (feat(editor)):**
+  - Файлы: `Editor/UI/EditorWindowSetup.h:20-22`, `Editor/UI/VariablePanelWidget.h:159-173`, `Editor/Source/AiMachineEditorWindow.cpp:197-217`, `Editor/Source/GraphEditorWidget.cpp:1662`.
+  - Размеры кнопок панелей зафиксированы константами `kPanelBtnWidth = 30`, `kPanelBtnHeight = 24`, `kPanelIconSize = 16`.
+  - В `VariablePanelWidget` и `AiMachineEditorWindow` кнопки панелей размещены непосредственно под тонкой шапкой с отступами `(4, 3, 4, 3)` и `spacing = 4`, выравниваясь с панелью графа.
+  - Удалена избыточная надпись «Память — ключи блоков» в FSM.
+  - Удалена дублирующая пустая кнопка справки `?` в тулбаре графа материала `GraphEditorWidget::BuildToolbar()`.
+  - Коммит: `44c62724: feat(editor): align script and fsm button layout and clean redundant help buttons (item 6)`.
+
+### Финал (Итерация 7) — верификация
+
+**Статусы пунктов (сделано / частично / пропущено):**
+- **1 — сделано.** `Scene.Folder` не имеет outline/wireframe box во вьюпорте при выделении, клики во вьюпорте не выделяют папку, выделение в иерархии сохранено.
+- **2 — сделано.** Общий категоризированный каталог применён для меню «Создать внутри» в иерархии сцены и «Создать дочерний» во вьюпорте.
+- **3 — сделано.** «Инструменты → Интерфейс (UI) → Создать» запрашивает имя через диалог `QInputDialog`, валидирует имя, создаёт файл в `Content/UI` через `FileService` с логом, одна команда `UI.Create`, открывает UI-редактор.
+- **4 — сделано.** Точечный свет создаётся с `castShadows = true` по умолчанию, старые сцены сохраняют свои значения.
+- **5 — сделано.** Пресеты Script и FSM обновлены до реалистичных графов из существующих нод каталогов, покрыты новыми автотестами в `GraphPresetsTests.h`.
+- **6 — сделано.** Кнопки панелей приведены к 30x24 (иконка 16x16), ряды памяти/переменных и графа выровнены с отступами (4, 3, 4, 3), удалена надпись «Память — ключи блоков», удалена лишняя «?» в тулбаре материала.
+
+**Финальная проверка (`Editor/tools/check.ps1 -Quick`):**
+- Запретные зоны: OK (Engine/Game изменены аддитивно разрешёнными коммитами).
+- Архитектурные слои (Core/UI/Host): OK (Core без UI-зависимостей, Host без UI-зависимостей).
+- Локализация: OK.
+- Лимиты строк (wc -l): все изменённые файлы в пределах лимитов / храповиков:
+  - `SceneCommandHandler.cpp`: 567 / 567
+  - `ScriptEditorWindow.cpp`: 520 / 523
+  - `GraphEditorWidget.cpp`: 1747 / 1756
+  - `MainWindow.cpp`: 1717 / 1734
+  - `AiMachineEditorWindow.cpp`: 491 / 500
+  - `VariablePanelWidget.h`: 329 / 500
+  - `EditorWindowSetup.h`: 140 / 500
+  - `ScriptGraphPresets.cpp`: 180 / 500
+  - `FsmGraphPresets.cpp`: 317 / 500
+  - `GraphPresetsTests.h`: 215 / 500
+  - `HudTools.cpp`: 277 / 500
+  - `FileBrowserContextMenu.cpp`: 254 / 500
+- Сборка Editor Debug: УСПЕШНО (`BUILD_EXIT=0`).
+- Тесты:
+  - `CoreTests`: 683 checks passed (100% PASS, включая 7 новых тестов `GraphPresetsTests`).
+  - `HostTests`: 33 checks passed (100% PASS).
+  - `UiTests`: все тесты пройдены (`CrossTypeInfoButtonTests` игнорируется как baseline).
+  - Итог: `=== check.ps1: SUCCESS ===`.
+- Прогон `EditorUiTests.exe --viewport-dpi`:
+  - `Viewport input DPI 1.00..2.00: PASS`
+  - `Viewport DPI transition 1.00..2.00: PASS`
+  - `Screenshots directory: %TEMP%/PainEditorGraphShots`
+  - `Graph editor screenshots: PASS`
+  - Визуально подтверждено на реальных скриншотах:
+    - `fsm-editor.png`: компактные кнопки 30x24 под шапкой, удалена лишняя надпись, ровное выравнивание по высоте с кнопками графа, состояния Patrol и Chase.
+    - `script-editor.png`: компактные кнопки 30x24 под шапкой «Переменные», выравнивание с тулбаром графа, ноды «Начало игры» и «Вывести в консоль».
+    - `material-editor.png`: в тулбаре графа отсутствует лишняя пустая кнопка «?», только стандартный набор кнопок графа.
+
+---
+
 ## Итерация 6: ревизия интерфейса графов (Script, FSM, Material, UI), шаблоны, унификация кнопок и устранение дефектов
 
 > Ветка `feature/editor-graphs-ux-overhaul`. Автономно, строго по порядку: 1, 2, 3, Контрольная точка (а), 4, 5, финал.
@@ -202,6 +294,98 @@ OK: UiTests passed.
 **wc -l:** Все изменённые файлы укладываются в лимиты (храповики `ObjectInspectorPanel.cpp` 623/625, `ViewportWidget.cpp` 619/694, `AssetTools.cpp` 674/680, остальные файлы < 500 строк).
 **Запретные зоны:** `Engine/` (кроме чтения заголовков), `Game/`, `build.ps1` не модифицировались.
 **Git:** Ветка `feature/editor-graphs-ux-overhaul`, ветка `main` не изменялась.
+
+---
+
+## Итерация 7: мелкие правки редакторов Pain Engine
+
+> Ветка `feature/editor-graphs-ux-overhaul`. Тот же чат, без новой разведки, строго по протоколу `engine-work-protocol`.
+> Проверки: одна проверка в конце (Debug-сборка, check.ps1 -Quick, слои Core/UI/Host, wc -l, запуск EditorUiTests.exe --viewport-dpi со скриншотами FSM, Script, Material).
+> Коммит после каждого пункта.
+
+### Чек-лист Итерации 7
+- [x] 1. Папка (Scene.Folder) во вьюпорте: клик во вьюпорте не выделяет папку (исключение в PickObject), у папки нет видимого выделения/outline и bounding box во вьюпорте (в том числе при выделении из иерархии: пропуск передачи ID папки в SetEditorSelection). В иерархии выделение работает как раньше.
+- [x] 2. Меню «Создать внутри» в иерархии сцены и «Создать дочерний» во вьюпорте: категоризация аналогично кнопке «Добавить» (Примитивы, Свет, Частицы, Камеры, Окружение, Персонажи, Пустой объект, Папка). Общая переиспользуемая функция `BuildCategorizedCreateMenu` в `CreationMenuHelper.{h,cpp}` без дублирования.
+- [x] 3. «Инструменты → Интерфейс (UI) → Создать»: диалог `QInputDialog` имени интерфейса с валидацией, имя по умолчанию `Hud/NewUI`, сохранение в `Content/UI`, через FileService с логом, одна команда CommandRegistry `UI.Create`, открытие редактора UI.
+- [x] 4. Точечный свет: тени включены по умолчанию (`castShadows = true`) при создании (Scene.Create / Scene.Add, создание новой сцены / шаблона сцены ProjectLibrary / контекстное меню вьюпорта). Загрузка старых сцен сохраняет их исходные значения.
+- [x] 5. Пресеты Script/FSM: расширение пресетов реальными нодами и блоками из каталогов движка. Script: «Движение по синусоиде Y», «Таймер действия», «Счётчик с переменной (+1)», «Условие порога (> 5.0)», «Пустой». FSM: «Патруль -> Преследование -> Возврат», «Охрана (Idle <-> Attack по дистанции)», «Реакция (Idle -> Бегство при приближении)». Автотесты всех шаблонов в `GraphPresetsTests.h`.
+- [x] 6. Верстка кнопок Script/FSM: компактные кнопки панелей `kPanelBtnWidth = 30`, `kPanelBtnHeight = 24`, `kPanelIconSize = 16` против верхнего тулбара 34x26; идентичное вертикальное выравнивание/отступы (4, 3, 4, 3) и spacing (4) для рядов памяти и графа; удаление надписи «Память — ключи блоков» в FSM; удаление лишней кнопки «?» в тулбаре графа материала.
+- [x] Финал: верификация (`check.ps1 -Quick` exit=0, слои Core/UI/Host OK, wc -l в лимитах, прогон `EditorUiTests.exe --viewport-dpi` со скриншотами).
+
+### Решения (Итерация 7)
+- **Пункт 1 (fix(editor)):**
+  - Файлы: `Editor/Source/MainWindow.cpp:1134-1144`, `Editor/Host/SceneCommandHandler.cpp:468-472`.
+  - В `MainWindow::OnSelectionChanged` и `SceneCommandHandler::ApplySelection`: при выборе `Scene.Folder` передача в `SetEditorSelection(0)` сбрасывает движковый outline / wireframe box. В `ViewportCommandHandler::PickObject` папки уже исключались.
+  - Коммит: `f35a70f5: fix(editor): exclude Scene.Folder from viewport selection and engine outline (item 1)`.
+- **Пункт 2 (feat(editor)):**
+  - Файлы: `Editor/UI/CreationMenuHelper.h:1-25`, `Editor/UI/CreationMenuHelper.cpp:1-118`, `Editor/Source/SceneObjectsPanel.cpp:259-268`, `Editor/Source/ViewportContextMenu.cpp:66-72`.
+  - Создана единая функция `CreationMenuHelper::BuildCategorizedCreateMenu` с категориями «Примитивы», «Свет», «Частицы», «Камеры», «Окружение», «Персонажи», «Пустой объект», «Папка». Меню «Добавить» в тулбаре иерархии, «Создать внутри» в ПКМ иерархии и «Создать дочерний» во вьюпорте используют единый каталог типов без дублирования кода.
+  - Коммит: `f082d093: feat(editor): reuse categorized creation menu for add child and viewport (item 2)`.
+- **Пункт 3 (feat(editor)):**
+  - Файлы: `Editor/Source/HudTools.cpp:166-228`, `Editor/Source/MainWindow.h:207`, `Editor/UI/FileBrowserContextMenu.cpp:85-88`.
+  - Команда `UI.Create` в `HudTools.cpp` поддерживает интерактивный диалог `QInputDialog` («Имя интерфейса», валидация имени, проверка отсутствия перезаписи, нормализация в `Content/UI/<name>.ui`), запись файла через `FileService::Instance().WriteFile` с логированием, открытие редактора `MainWindow::OpenUIEditor`. В контекстном меню файлового браузера сохранена передача каталога.
+  - Коммит: `f2e4f084: feat(editor): interactive ui creation with name dialog in content ui folder (item 3)`.
+- **Пункт 4 (feat(editor) + game):**
+  - Файлы: `Game/Launcher/Source/ProjectLibrary.h:176`, `Editor/Host/SceneCommandHandler.cpp:322`, `Editor/Source/MainWindow.cpp:1298`, `Editor/Source/ViewportContextMenu.cpp:106`.
+  - Для новых точечных источников света (`Light.Point`) по умолчанию выставлен `castShadows = true` в шаблонах сцены `ProjectLibrary.h` (`PointLightV2{..., true}`), при создании через команду `Scene.Create` / `Scene.Add` (`SceneCommandHandler.cpp`), в `MainWindow::CreateObject` и `ViewportContextMenu::AddObject`. Загрузка существующих сцен не затрагивается (чтение сохранённого флага).
+  - Коммиты: `baed01f2: game: enable cast shadows by default for template scene point lights`, `a3f5e9a7: feat(editor): enable cast shadows by default for new point lights (item 4)`.
+- **Пункт 5 (feat(editor)):**
+  - Файлы: `Editor/Core/ScriptGraphPresets.h:1-26`, `Editor/Core/ScriptGraphPresets.cpp:1-180`, `Editor/Core/FsmGraphPresets.h:1-26`, `Editor/Core/FsmGraphPresets.cpp:1-317`, `Editor/Source/ScriptEditorWindow.cpp:94-118`, `Editor/Source/AiMachineEditorWindow.cpp:138-158`, `Editor/tests/core/GraphPresetsTests.h:1-215`.
+  - Script: расширены шаблоны `BuildSinMoveY` (Event.Tick -> Math.Sin -> SetPosition), `BuildTimerAction` (Time.Delay -> Action.Print), `BuildCounterVariable` (Math.Add (+1) с переменной Counter), `BuildConditionThreshold` (Logic.Greater (> 5.0) -> Flow.Branch), `BuildEmpty`.
+  - FSM: расширены шаблоны `BuildPatrolChaseReturn` (состояния Patrol -> Chase -> Return с задачами Ai.Wait, Ai.MoveTo), `BuildGuardAttackDistance` (состояния Idle <-> Attack по условию дистанции), `BuildIdleFlee` (состояния Idle -> Flee при приближении).
+  - Все ноды и блоки согласованы с `ScriptCatalog` и `MachineBlocks/FsmGraphSchema`.
+  - Полное покрытие всеми тестами в `GraphPresetsTests.h`: проверка валидности схемы V1, наличия всех ключевых узлов, связей и переменных, 0 предупреждений схемы.
+  - Коммит: `c7ccda98: feat(editor): expand script and fsm graph presets with autotests (item 5)`.
+- **Пункт 6 (feat(editor)):**
+  - Файлы: `Editor/UI/EditorWindowSetup.h:20-22`, `Editor/UI/VariablePanelWidget.h:159-173`, `Editor/Source/AiMachineEditorWindow.cpp:197-217`, `Editor/Source/GraphEditorWidget.cpp:1662`.
+  - Размеры кнопок панелей зафиксированы константами `kPanelBtnWidth = 30`, `kPanelBtnHeight = 24`, `kPanelIconSize = 16`.
+  - В `VariablePanelWidget` и `AiMachineEditorWindow` кнопки панелей размещены непосредственно под тонкой шапкой с отступами `(4, 3, 4, 3)` и `spacing = 4`, выравниваясь с панелью графа.
+  - Удалена избыточная надпись «Память — ключи блоков» в FSM.
+  - Удалена дублирующая пустая кнопка справки `?` в тулбаре графа материала `GraphEditorWidget::BuildToolbar()`.
+  - Коммит: `44c62724: feat(editor): align script and fsm button layout and clean redundant help buttons (item 6)`.
+
+### Финал (Итерация 7) — верификация
+
+**Статусы пунктов (сделано / частично / пропущено):**
+- **1 — сделано.** `Scene.Folder` не имеет outline/wireframe box во вьюпорте при выделении, клики во вьюпорте не выделяют папку, выделение в иерархии сохранено.
+- **2 — сделано.** Общий категоризированный каталог применён для меню «Создать внутри» в иерархии сцены и «Создать дочерний» во вьюпорте.
+- **3 — сделано.** «Инструменты → Интерфейс (UI) → Создать» запрашивает имя через диалог `QInputDialog`, валидирует имя, создаёт файл в `Content/UI` через `FileService` с логом, одна команда `UI.Create`, открывает UI-редактор.
+- **4 — сделано.** Точечный свет создаётся с `castShadows = true` по умолчанию, старые сцены сохраняют свои значения.
+- **5 — сделано.** Пресеты Script и FSM обновлены до реалистичных графов из существующих нод каталогов, покрыты новыми автотестами в `GraphPresetsTests.h`.
+- **6 — сделано.** Кнопки панелей приведены к 30x24 (иконка 16x16), ряды памяти/переменных и графа выровнены с отступами (4, 3, 4, 3), удалена надпись «Память — ключи блоков», удалена лишняя «?» в тулбаре материала.
+
+**Финальная проверка (`Editor/tools/check.ps1 -Quick`):**
+- Запретные зоны: OK (Engine/Game изменены аддитивно разрешёнными коммитами).
+- Архитектурные слои (Core/UI/Host): OK (Core без UI-зависимостей, Host без UI-зависимостей).
+- Локализация: OK.
+- Лимиты строк (wc -l): все изменённые файлы в пределах лимитов / храповиков:
+  - `SceneCommandHandler.cpp`: 567 / 567
+  - `ScriptEditorWindow.cpp`: 520 / 523
+  - `GraphEditorWidget.cpp`: 1747 / 1756
+  - `MainWindow.cpp`: 1717 / 1734
+  - `AiMachineEditorWindow.cpp`: 491 / 500
+  - `VariablePanelWidget.h`: 329 / 500
+  - `EditorWindowSetup.h`: 140 / 500
+  - `ScriptGraphPresets.cpp`: 180 / 500
+  - `FsmGraphPresets.cpp`: 317 / 500
+  - `GraphPresetsTests.h`: 215 / 500
+  - `HudTools.cpp`: 277 / 500
+  - `FileBrowserContextMenu.cpp`: 254 / 500
+- Сборка Editor Debug: УСПЕШНО (`BUILD_EXIT=0`).
+- Тесты:
+  - `CoreTests`: 683 checks passed (100% PASS, включая 7 новых тестов `GraphPresetsTests`).
+  - `HostTests`: 33 checks passed (100% PASS).
+  - `UiTests`: все тесты пройдены (`CrossTypeInfoButtonTests` игнорируется как baseline).
+  - Итог: `=== check.ps1: SUCCESS ===`.
+- Прогон `EditorUiTests.exe --viewport-dpi`:
+  - `Viewport input DPI 1.00..2.00: PASS`
+  - `Viewport DPI transition 1.00..2.00: PASS`
+  - `Screenshots directory: %TEMP%/PainEditorGraphShots`
+  - `Graph editor screenshots: PASS`
+  - Визуально подтверждено на реальных скриншотах:
+    - `fsm-editor.png`: компактные кнопки 30x24 под шапкой, удалена лишняя надпись, ровное выравнивание по высоте с кнопками графа, состояния Patrol и Chase.
+    - `script-editor.png`: компактные кнопки 30x24 под шапкой «Переменные», выравнивание с тулбаром графа, ноды «Начало игры» и «Вывести в консоль».
+    - `material-editor.png`: в тулбаре графа отсутствует лишняя пустая кнопка «?», только стандартный набор кнопок графа.
 
 ---
 
