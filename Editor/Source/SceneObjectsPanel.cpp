@@ -352,6 +352,8 @@ void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
             std::find(view.selectedIds.begin(), view.selectedIds.end(), (*it)->data(0, Qt::UserRole).toULongLong()) != view.selectedIds.end()
         );
     }
+    // Без сброса current item дерево рисует слабую подсветку последнего объекта даже при пустом выделении.
+    if (view.selectedIds.empty()) hierarchy_->setCurrentItem(nullptr);
 
     if (searchEdit_ && !searchEdit_->text().isEmpty())
     {

@@ -139,7 +139,8 @@ void ViewportCommandHandler::Handle(const EditorCommand& cmd,
                 selectedId = id;
             else
                 selectedId = 0;
-            if (ctx.publishScene) ctx.publishScene();
+            // Публикация только в очереди команд после PickSelection: иначе движок
+            // успевает подтвердить старое выделение до применения результата пика.
         }
         break;
 
