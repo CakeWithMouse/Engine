@@ -58,7 +58,7 @@ inline std::filesystem::path Create(const std::filesystem::path& directory, cons
         };
         auto light = [&](uint64_t id, const char* label, Json position, Json color) {
             auto value = object(id, "Light.Point", label, position, {1,1,1});
-            value["pointLight"] = {{"color",color},{"intensity",2.0},{"radius",10.0},{"enabled",true}};
+            value["pointLight"] = {{"color",color},{"intensity",2.0},{"radius",10.0},{"enabled",true},{"castShadows",true}};
             return value;
         };
         Write(root / "Content/Scenes/Main.scene.json", {{"version",1},{"name","Main"},{"objects",Json::array({
