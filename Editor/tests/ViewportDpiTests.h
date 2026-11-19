@@ -3,8 +3,7 @@
 #include "ViewportWidget.h"
 #include "ScriptEditorWindow.h"
 #include "AiMachineEditorWindow.h"
-#include "VariablePanelWidget.h"
-#include "FsmBlockListEditor.h"
+#include "EditorTheme.h"
 #include <QApplication>
 #include <QElapsedTimer>
 #include <QMouseEvent>
@@ -19,11 +18,6 @@
 #include <QJsonArray>
 #include <QTimer>
 #include <QDialog>
-#include <QFormLayout>
-#include <QComboBox>
-#include <QTabWidget>
-#include <QDialogButtonBox>
-#include <QPushButton>
 #include <stdexcept>
 #include <cstdio>
 
@@ -267,190 +261,117 @@ inline void Run()
         "ordinary resize still updates physical dimensions");
     std::printf("Viewport resize fallback and logical resize: PASS\n");
 
-    // Capture Checkpoint (a) screenshots: Script, FSM, FSM dialog
+    // Checkpoint (a) screenshots: real Script/FSM windows loaded through the real catalog/file paths.
     {
+        EditorTheme::Apply(*qApp); // the capture must look like the real editor, not the bare Qt palette
         QTemporaryDir temp;
-        QDir tempDir(temp.path());
-        tempDir.mkpath(QStringLiteral("Content/Scripts"));
-        tempDir.mkpath(QStringLiteral("Content/AI"));
+        QDir dir(temp.path());
+        dir.mkpath(QStringLiteral("Content/Scripts"));
+        dir.mkpath(QStringLiteral("Content/AI"));
+        auto writeFile = [&dir](const QString& rel, const QJsonObject& json) {
+            QFile file(dir.filePath(rel));
+            Check(file.open(QIODevice::WriteOnly), "capture fixture file opens");
+            file.write(QJsonDocument(json).toJson());
+        };
+        writeFile(QStringLiteral("Content/Scripts/PlayerLogic.vscript"), QJsonObject{
+            {QStringLiteral("format"), QStringLiteral("ITMOEngine.Graph")}, {QStringLiteral("version"), 1},
+            {QStringLiteral("schema"), QStringLiteral("code")}, {QStringLiteral("schemaVersion"), 1},
+            {QStringLiteral("nodes"), QJsonArray{
+                QJsonObject{{QStringLiteral("id"), 1}, {QStringLiteral("type"), QStringLiteral("Event.BeginPlay")}, {QStringLiteral("x"), 80}, {QStringLiteral("y"), 120}},
+                QJsonObject{{QStringLiteral("id"), 2}, {QStringLiteral("type"), QStringLiteral("Action.Print")}, {QStringLiteral("x"), 400}, {QStringLiteral("y"), 120}}}},
+            {QStringLiteral("connections"), QJsonArray{
+                QJsonObject{{QStringLiteral("fromNode"), 1}, {QStringLiteral("fromPin"), QStringLiteral("then")}, {QStringLiteral("toNode"), 2}, {QStringLiteral("toPin"), QStringLiteral("exec")}}}},
+            {QStringLiteral("variables"), QJsonArray{
+                QJsonObject{{QStringLiteral("name"), QStringLiteral("Speed")}, {QStringLiteral("type"), QStringLiteral("float")}, {QStringLiteral("value"), 10.0}, {QStringLiteral("public"), true}},
+                QJsonObject{{QStringLiteral("name"), QStringLiteral("IsActive")}, {QStringLiteral("type"), QStringLiteral("bool")}, {QStringLiteral("value"), true}, {QStringLiteral("public"), false}}}}});
+        writeFile(QStringLiteral("Content/AI/Guard.fsm"), QJsonObject{
+            {QStringLiteral("format"), QStringLiteral("ITMOEngine.Graph")}, {QStringLiteral("version"), 1},
+            {QStringLiteral("schema"), QStringLiteral("ai.fsm")}, {QStringLiteral("schemaVersion"), 1},
+            {QStringLiteral("nodes"), QJsonArray{
+                QJsonObject{{QStringLiteral("id"), 1}, {QStringLiteral("type"), QStringLiteral("Fsm.State")}, {QStringLiteral("x"), 100}, {QStringLiteral("y"), 100},
+                    {QStringLiteral("properties"), QJsonObject{{QStringLiteral("name"), QStringLiteral("Patrol")},
+                        {QStringLiteral("tasks"), QJsonArray{
+                            QJsonObject{{QStringLiteral("type"), QStringLiteral("Ai.Wait")}, {QStringLiteral("seconds"), 2.0}},
+                            QJsonObject{{QStringLiteral("type"), QStringLiteral("Ai.MoveTo")}, {QStringLiteral("target"), QStringLiteral("Target")}}}}}}},
+                QJsonObject{{QStringLiteral("id"), 2}, {QStringLiteral("type"), QStringLiteral("Fsm.State")}, {QStringLiteral("x"), 420}, {QStringLiteral("y"), 100},
+                    {QStringLiteral("properties"), QJsonObject{{QStringLiteral("name"), QStringLiteral("Chase")}}}}}},
+            {QStringLiteral("connections"), QJsonArray{
+                QJsonObject{{QStringLiteral("fromNode"), 1}, {QStringLiteral("fromPin"), QStringLiteral("out")}, {QStringLiteral("toNode"), 2}, {QStringLiteral("toPin"), QStringLiteral("in")}}}},
+            {QStringLiteral("variables"), QJsonArray{
+                QJsonObject{{QStringLiteral("name"), QStringLiteral("Target")}, {QStringLiteral("type"), QStringLiteral("object")}, {QStringLiteral("public"), true}},
+                QJsonObject{{QStringLiteral("name"), QStringLiteral("LastSeen")}, {QStringLiteral("type"), QStringLiteral("vec3")}, {QStringLiteral("value"), QJsonArray{0, 0, 0}}, {QStringLiteral("public"), true}},
+                QJsonObject{{QStringLiteral("name"), QStringLiteral("AlertLevel")}, {QStringLiteral("type"), QStringLiteral("float")}, {QStringLiteral("value"), 0.0}, {QStringLiteral("public"), false}}}}});
 
+        const std::string content = dir.filePath(QStringLiteral("Content")).toStdString();
+        const std::string project = dir.filePath(QStringLiteral("Project.json")).toStdString();
         EngineModuleHost emh{};
-        const std::string contentStr = tempDir.filePath(QStringLiteral("Content")).toStdString();
-        emh.contentRoot = contentStr.c_str();
-        const std::string projectStr = tempDir.filePath(QStringLiteral("Project.json")).toStdString();
-        emh.projectFile = projectStr.c_str();
-
+        emh.contentRoot = content.c_str();
+        emh.projectFile = project.c_str();
         Host captureHost(emh);
+        // Catalogs in the engine's describe() format (a subset of ScriptCatalog.cpp / Ai::MachineCatalogJson).
+        static const char* const scriptCatalog = R"json({"format":"ITMOEngine.Graph","schema":"code","schemaVersion":1,"nodes":[
+            {"type":"Event.BeginPlay","group":"Events","name":{"ru":"Начало игры","en":"Begin play"},"hint":{"ru":"","en":""},"event":true,"pins":[{"name":"then","input":false,"type":"exec"}],"properties":[]},
+            {"type":"Event.Tick","group":"Events","name":{"ru":"Каждый кадр","en":"Every frame"},"hint":{"ru":"","en":""},"event":true,"pins":[{"name":"then","input":false,"type":"exec"},{"name":"DeltaTime","input":false,"type":"float"}],"properties":[]},
+            {"type":"Action.Print","group":"Actions","name":{"ru":"Вывести в консоль","en":"Print"},"hint":{"ru":"","en":""},"event":false,"pins":[{"name":"exec","input":true,"type":"exec"},{"name":"Text","input":true,"type":"any"},{"name":"then","input":false,"type":"exec"}],"properties":[]},
+            {"type":"Const.Float","group":"Constants","name":{"ru":"Число","en":"Number"},"hint":{"ru":"","en":""},"event":false,"pins":[{"name":"Value","input":false,"type":"float"}],"properties":[{"name":"value","kind":"float"}]}]})json";
+        static const char* const fsmCatalog = R"json({"format":"ITMOEngine.Graph","schema":"ai.fsm","schemaVersion":1,
+            "triggers":["completed","succeeded","failed","event","tick"],"blocks":[
+            {"type":"Ai.Wait","kind":"task","nameRu":"Ждать","nameEn":"Wait","hintRu":"Ждёт секунды","hintEn":"Waits","engine":true,
+             "params":[{"name":"seconds","type":"float","labelRu":"Секунды","labelEn":"Seconds","required":false,"default":1.0,"min":0.0}]},
+            {"type":"Ai.MoveTo","kind":"task","nameRu":"Идти к","nameEn":"Move to","hintRu":"Идёт к цели","hintEn":"Goes to target","engine":true,
+             "params":[{"name":"target","type":"key:place","labelRu":"Куда","labelEn":"Where","required":true},
+                       {"name":"radius","type":"float","labelRu":"Радиус","labelEn":"Radius","required":false,"default":1.0,"min":0.0}]},
+            {"type":"Ai.CanSee","kind":"condition","nameRu":"Видит","nameEn":"Can see","hintRu":"","hintEn":"","engine":true,
+             "params":[{"name":"target","type":"key:object","labelRu":"Кого","labelEn":"Whom","required":true}]},
+            {"type":"Ai.Listen","kind":"service","nameRu":"Слушать","nameEn":"Listen","hintRu":"","hintEn":"","engine":true,"params":[]}]})json";
+        EngineScriptApi scriptApi{};
+        scriptApi.version = 1;
+        scriptApi.describe = [](void*, EngineScriptTextVisitor visitor, void* user) -> uint32_t { visitor(user, scriptCatalog); return EngineSceneOk; };
+        scriptApi.check = [](void*, const char*, EngineScriptProblemVisitor, void*) -> uint32_t { return EngineSceneOk; };
+        scriptApi.set = [](void*, uint64_t, const char*, char*, uint32_t) -> uint32_t { return EngineSceneOk; };
+        captureHost.SetScriptApi(scriptApi);
+        EngineAiMachineApi aiApi{};
+        aiApi.version = 1;
+        aiApi.describe = [](void*, EngineAiTextVisitor visitor, void* user) -> uint32_t { visitor(user, fsmCatalog); return EngineSceneOk; };
+        aiApi.check = [](void*, const char*, EngineAiProblemVisitor, void*) -> uint32_t { return EngineSceneOk; };
+        captureHost.SetAiMachineApi(aiApi);
 
-        const QString scriptRel = QStringLiteral("/Game/Scripts/PlayerLogic.vscript");
-        const QString scriptFile = tempDir.filePath(QStringLiteral("Content/Scripts/PlayerLogic.vscript"));
-        QJsonObject scriptJson;
-        scriptJson[QStringLiteral("format")] = QStringLiteral("ITMOEngine.Graph");
-        scriptJson[QStringLiteral("version")] = 1;
-        scriptJson[QStringLiteral("schema")] = QStringLiteral("code.graph");
-        scriptJson[QStringLiteral("schemaVersion")] = 1;
-        scriptJson[QStringLiteral("nodes")] = QJsonArray{
-            QJsonObject{{QStringLiteral("id"), 1}, {QStringLiteral("type"), QStringLiteral("Event.BeginPlay")}, {QStringLiteral("x"), 80}, {QStringLiteral("y"), 120}},
-            QJsonObject{{QStringLiteral("id"), 2}, {QStringLiteral("type"), QStringLiteral("Action.Print")}, {QStringLiteral("x"), 380}, {QStringLiteral("y"), 120}}
-        };
-        scriptJson[QStringLiteral("connections")] = QJsonArray{
-            QJsonObject{{QStringLiteral("fromNode"), 1}, {QStringLiteral("fromPin"), QStringLiteral("then")}, {QStringLiteral("toNode"), 2}, {QStringLiteral("toPin"), QStringLiteral("exec")}}
-        };
-        scriptJson[QStringLiteral("variables")] = QJsonArray{
-            QJsonObject{{QStringLiteral("name"), QStringLiteral("Speed")}, {QStringLiteral("type"), QStringLiteral("float")}, {QStringLiteral("value"), 10.0}, {QStringLiteral("public"), true}},
-            QJsonObject{{QStringLiteral("name"), QStringLiteral("IsActive")}, {QStringLiteral("type"), QStringLiteral("bool")}, {QStringLiteral("value"), true}, {QStringLiteral("public"), false}}
-        };
-        {
-            QFile sf(scriptFile);
-            if (sf.open(QIODevice::WriteOnly)) sf.write(QJsonDocument(scriptJson).toJson());
-        }
-
-        const QString fsmRel = QStringLiteral("/Game/AI/Guard.fsm");
-        const QString fsmFile = tempDir.filePath(QStringLiteral("Content/AI/Guard.fsm"));
-        QJsonObject fsmJson;
-        fsmJson[QStringLiteral("format")] = QStringLiteral("ITMOEngine.Graph");
-        fsmJson[QStringLiteral("version")] = 1;
-        fsmJson[QStringLiteral("schema")] = QStringLiteral("ai.fsm");
-        fsmJson[QStringLiteral("schemaVersion")] = 1;
-        fsmJson[QStringLiteral("nodes")] = QJsonArray{
-            QJsonObject{{QStringLiteral("id"), 1}, {QStringLiteral("type"), QStringLiteral("Fsm.State")}, {QStringLiteral("x"), 100}, {QStringLiteral("y"), 100}, {QStringLiteral("properties"), QJsonObject{{QStringLiteral("name"), QStringLiteral("Patrol")}}}},
-            QJsonObject{{QStringLiteral("id"), 2}, {QStringLiteral("type"), QStringLiteral("Fsm.State")}, {QStringLiteral("x"), 380}, {QStringLiteral("y"), 100}, {QStringLiteral("properties"), QJsonObject{{QStringLiteral("name"), QStringLiteral("Chase")}}}}
-        };
-        fsmJson[QStringLiteral("connections")] = QJsonArray{
-            QJsonObject{{QStringLiteral("fromNode"), 1}, {QStringLiteral("fromPin"), QStringLiteral("out")}, {QStringLiteral("toNode"), 2}, {QStringLiteral("toPin"), QStringLiteral("in")}}
-        };
-        fsmJson[QStringLiteral("variables")] = QJsonArray{
-            QJsonObject{{QStringLiteral("name"), QStringLiteral("Target")}, {QStringLiteral("type"), QStringLiteral("object")}, {QStringLiteral("public"), true}},
-            QJsonObject{{QStringLiteral("name"), QStringLiteral("LastSeen")}, {QStringLiteral("type"), QStringLiteral("vec3")}, {QStringLiteral("value"), QJsonArray{0, 0, 0}}, {QStringLiteral("public"), true}},
-            QJsonObject{{QStringLiteral("name"), QStringLiteral("AlertLevel")}, {QStringLiteral("type"), QStringLiteral("float")}, {QStringLiteral("value"), 0.0}, {QStringLiteral("public"), false}}
-        };
-        {
-            QFile ff(fsmFile);
-            if (ff.open(QIODevice::WriteOnly)) ff.write(QJsonDocument(fsmJson).toJson());
-        }
-
-        const QString outDir = QStringLiteral("C:/Users/Yuri/.gemini/antigravity/brain/9bbdd1a5-7857-4c8f-a6ad-41c952ea9566");
+        const QString outDir = QDir::tempPath() + QStringLiteral("/PainEditorGraphShots");
         QDir().mkpath(outDir);
+        std::printf("Screenshots directory: %s\n", outDir.toUtf8().constData());
 
-        auto* scriptWin = new ScriptEditorWindow(&captureHost, scriptRel);
-        scriptWin->resize(1200, 760);
+        auto* scriptWin = new ScriptEditorWindow(&captureHost, QStringLiteral("/Game/Scripts/PlayerLogic.vscript"));
         scriptWin->show();
-        if (auto* table = scriptWin->findChild<QTableWidget*>(QStringLiteral("ScriptVariables")))
-        {
-            table->setRowCount(2);
-            table->setCellWidget(0, 0, new QLineEdit(QStringLiteral("Speed")));
-            auto* combo0 = new QComboBox; combo0->addItem(QStringLiteral("число [float]"));
-            table->setCellWidget(0, 1, combo0);
-            table->setCellWidget(0, 2, new QLineEdit(QStringLiteral("10.0")));
-            auto* box0 = new QWidget;
-            auto* bl0 = new QHBoxLayout(box0);
-            bl0->setContentsMargins(0, 0, 0, 0); bl0->setSpacing(4);
-            auto* eye0 = new QPushButton(IconProvider::GetIcon(QStringLiteral("eye")), QString()); eye0->setFixedSize(24, 24);
-            auto* del0 = new QPushButton(IconProvider::GetIcon(QStringLiteral("trash")), QString()); del0->setFixedSize(24, 24);
-            bl0->addWidget(eye0); bl0->addWidget(del0);
-            table->setCellWidget(0, 3, box0);
-
-            table->setCellWidget(1, 0, new QLineEdit(QStringLiteral("IsActive")));
-            auto* combo1 = new QComboBox; combo1->addItem(QStringLiteral("логический [bool]"));
-            table->setCellWidget(1, 1, combo1);
-            table->setCellWidget(1, 2, new QLineEdit(QStringLiteral("true")));
-            auto* box1 = new QWidget;
-            auto* bl1 = new QHBoxLayout(box1);
-            bl1->setContentsMargins(0, 0, 0, 0); bl1->setSpacing(4);
-            auto* eye1 = new QPushButton(IconProvider::GetIcon(QStringLiteral("eye-off")), QString()); eye1->setFixedSize(24, 24);
-            auto* del1 = new QPushButton(IconProvider::GetIcon(QStringLiteral("trash")), QString()); del1->setFixedSize(24, 24);
-            bl1->addWidget(eye1); bl1->addWidget(del1);
-            table->setCellWidget(1, 3, box1);
-        }
-        for (int i = 0; i < 20; ++i) { QCoreApplication::processEvents(); QThread::msleep(10); }
-        scriptWin->grab().save(outDir + QStringLiteral("/script-editor.png"));
-        std::printf("Saved screenshot: script-editor.png\n");
+        Wait(250);
+        Check(scriptWin->IsReady() && !scriptWin->IsReadOnly(), "capture script window is editable");
+        Check(scriptWin->grab().save(outDir + QStringLiteral("/script-editor.png")), "save script window screenshot");
         scriptWin->close();
-        delete scriptWin;
+        Wait(50);
 
-        auto* fsmWin = new AiMachineEditorWindow(&captureHost, fsmRel);
-        fsmWin->resize(1200, 760);
+        auto* fsmWin = new AiMachineEditorWindow(&captureHost, QStringLiteral("/Game/AI/Guard.fsm"));
         fsmWin->show();
-        if (auto* table = fsmWin->findChild<QTableWidget*>(QStringLiteral("FsmVariables")))
-        {
-            table->setRowCount(2);
-            table->setCellWidget(0, 0, new QLineEdit(QStringLiteral("Target")));
-            auto* combo0 = new QComboBox; combo0->addItem(QStringLiteral("объект [object]"));
-            table->setCellWidget(0, 1, combo0);
-            table->setCellWidget(0, 2, new QLineEdit(QString()));
-            auto* box0 = new QWidget;
-            auto* bl0 = new QHBoxLayout(box0);
-            bl0->setContentsMargins(0, 0, 0, 0); bl0->setSpacing(4);
-            auto* eye0 = new QPushButton(IconProvider::GetIcon(QStringLiteral("eye")), QString()); eye0->setFixedSize(24, 24);
-            auto* del0 = new QPushButton(IconProvider::GetIcon(QStringLiteral("trash")), QString()); del0->setFixedSize(24, 24);
-            bl0->addWidget(eye0); bl0->addWidget(del0);
-            table->setCellWidget(0, 3, box0);
-
-            table->setCellWidget(1, 0, new QLineEdit(QStringLiteral("LastSeen")));
-            auto* combo1 = new QComboBox; combo1->addItem(QStringLiteral("вектор [vec3]"));
-            table->setCellWidget(1, 1, combo1);
-            table->setCellWidget(1, 2, new QLineEdit(QStringLiteral("0; 0; 0")));
-            auto* box1 = new QWidget;
-            auto* bl1 = new QHBoxLayout(box1);
-            bl1->setContentsMargins(0, 0, 0, 0); bl1->setSpacing(4);
-            auto* eye1 = new QPushButton(IconProvider::GetIcon(QStringLiteral("eye")), QString()); eye1->setFixedSize(24, 24);
-            auto* del1 = new QPushButton(IconProvider::GetIcon(QStringLiteral("trash")), QString()); del1->setFixedSize(24, 24);
-            bl1->addWidget(eye1); bl1->addWidget(del1);
-            table->setCellWidget(1, 3, box1);
-        }
-        for (int i = 0; i < 20; ++i) { QCoreApplication::processEvents(); QThread::msleep(10); }
-        fsmWin->grab().save(outDir + QStringLiteral("/fsm-editor.png"));
-        std::printf("Saved screenshot: fsm-editor.png\n");
-
+        Wait(250);
+        Check(fsmWin->IsReady() && !fsmWin->IsReadOnly(), "capture FSM window is editable");
+        Check(fsmWin->grab().save(outDir + QStringLiteral("/fsm-editor.png")), "save FSM window screenshot");
+        bool dialogSaved = false;
+        QTimer::singleShot(250, fsmWin, [&] {
+            auto* dialog = qobject_cast<QDialog*>(QApplication::activeModalWidget());
+            Check(dialog && dialog->objectName() == QStringLiteral("FsmStateDialog"), "the real state dialog is open");
+            dialogSaved = dialog->grab().save(outDir + QStringLiteral("/fsm-state-dialog.png"));
+            dialog->reject();
+        });
+        // The user path: double-click the state node on the canvas.
+        auto* view = fsmWin->Graph()->View();
+        const QPointF nodePos = fsmWin->Graph()->Document().FindNode(1)->pos + QPointF(30, 10);
+        const QPoint viewPos = view->mapFromScene(nodePos);
+        QMouseEvent dbl(QEvent::MouseButtonDblClick, viewPos, view->viewport()->mapToGlobal(viewPos),
+                        Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
+        QApplication::sendEvent(view->viewport(), &dbl);
+        Wait(400);
+        Check(dialogSaved, "save FSM state dialog screenshot");
         fsmWin->close();
-        delete fsmWin;
-
-        // Capture FSM State Dialog
-        {
-            QDialog dialog;
-            dialog.setObjectName(QStringLiteral("FsmStateDialog"));
-            dialog.setWindowTitle(QStringLiteral("Состояние «Patrol»"));
-            dialog.resize(520, 560);
-            auto* layout = new QVBoxLayout(&dialog);
-            layout->setContentsMargins(14, 14, 14, 14);
-            layout->setSpacing(10);
-            auto* form = new QFormLayout;
-            form->setSpacing(8);
-            auto* name = new QLineEdit(QStringLiteral("Patrol"), &dialog);
-            name->setObjectName(QStringLiteral("FsmStateName"));
-            form->addRow(QStringLiteral("Имя"), name);
-            auto* parent = new QComboBox(&dialog);
-            parent->setObjectName(QStringLiteral("FsmStateParent"));
-            parent->addItem(QStringLiteral("— корень —"), 0);
-            form->addRow(QStringLiteral("Внутри состояния"), parent);
-            layout->addLayout(form);
-
-            auto* tabs = new QTabWidget(&dialog);
-            tabs->setObjectName(QStringLiteral("FsmStateTabs"));
-            EditorCore::FsmGraphSchema schema;
-            auto* tasks = new FsmBlockListEditor(schema, QStringLiteral("task"), QStringLiteral("FsmTasks"), &dialog);
-            auto* enterIf = new FsmBlockListEditor(schema, QStringLiteral("condition"), QStringLiteral("FsmEnterIf"), &dialog);
-            auto* services = new FsmBlockListEditor(schema, QStringLiteral("service"), QStringLiteral("FsmServices"), &dialog);
-            tabs->addTab(tasks, QStringLiteral("Задачи"));
-            tabs->addTab(enterIf, QStringLiteral("Условия входа"));
-            tabs->addTab(services, QStringLiteral("Службы"));
-            layout->addWidget(tabs, 1);
-
-            auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
-            buttons->button(QDialogButtonBox::Ok)->setIcon(IconProvider::GetIcon(QStringLiteral("check")));
-            buttons->button(QDialogButtonBox::Cancel)->setIcon(IconProvider::GetIcon(QStringLiteral("x")));
-            auto* bottomBox = new QHBoxLayout;
-            bottomBox->setContentsMargins(0, 0, 12, 12);
-            bottomBox->addStretch(1);
-            bottomBox->addWidget(buttons);
-            layout->addLayout(bottomBox);
-
-            dialog.show();
-            for (int i = 0; i < 20; ++i) { QCoreApplication::processEvents(); QThread::msleep(10); }
-            dialog.grab().save(outDir + QStringLiteral("/fsm-state-dialog.png"));
-            std::printf("Saved screenshot: fsm-state-dialog.png\n");
-            dialog.close();
-        }
+        Wait(50);
+        std::printf("Graph editor screenshots: PASS\n");
     }
 }
 } // namespace ViewportDpiTests

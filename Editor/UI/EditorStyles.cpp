@@ -69,6 +69,10 @@ QPushButton[panelBtn="true"], QToolButton[panelBtn="true"] {
     min-width: 26px; max-width: 26px; min-height: 26px; max-height: 26px;
     padding: 2px; margin: 0px;
 }
+QPushButton[panelTextBtn="true"], QToolButton[panelTextBtn="true"] {
+    min-height: 26px; max-height: 26px;
+    padding: 2px 8px; margin: 0px;
+}
 QToolButton#InfoButton, QToolButton#CardInfoButton, QToolButton#AiLegendInfoButton, QToolButton#CameraGuideInfo, QToolButton[isInfoButton="true"] {
     background-color: transparent;
     border: 1px solid transparent;

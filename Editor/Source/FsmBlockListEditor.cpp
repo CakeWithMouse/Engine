@@ -61,7 +61,7 @@ FsmBlockListEditor::FsmBlockListEditor(const FsmGraphSchema& schema, const QStri
     add_->setIcon(IconProvider::PlusIcon());
     add_->setIconSize(QSize(EditorWindowSetup::kPanelIconSize, EditorWindowSetup::kPanelIconSize));
     add_->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    add_->setProperty("panelBtn", true);
+    add_->setProperty("panelTextBtn", true);
     add_->setFixedHeight(EditorWindowSetup::kPanelBtnHeight);
     add_->setToolTip(Tr("Добавить блок", "Add block"));
     add_->setPopupMode(QToolButton::InstantPopup);
@@ -90,7 +90,7 @@ FsmBlockListEditor::FsmBlockListEditor(const FsmGraphSchema& schema, const QStri
     remove_->setText(Tr("Удалить", "Remove"));
     remove_->setIcon(IconProvider::TrashIcon());
     remove_->setIconSize(QSize(EditorWindowSetup::kPanelIconSize, EditorWindowSetup::kPanelIconSize));
-    remove_->setProperty("panelBtn", true);
+    remove_->setProperty("panelTextBtn", true);
     remove_->setFixedHeight(EditorWindowSetup::kPanelBtnHeight);
     remove_->setToolTip(Tr("Удалить выбранный блок", "Remove selected block"));
     connect(remove_, &QPushButton::clicked, this, [this] {
@@ -119,6 +119,13 @@ FsmBlockListEditor::FsmBlockListEditor(const FsmGraphSchema& schema, const QStri
     down_->setFixedSize(EditorWindowSetup::kPanelBtnWidth, EditorWindowSetup::kPanelBtnHeight);
     down_->setToolTip(Tr("Ниже: позже по порядку", "Down: later in order"));
     connect(down_, &QPushButton::clicked, this, [this] { Move(1); });
+
+    // QSS ограничивает высоту; ширина пары выравнивается по большей кнопке, чтобы текст не обрезался.
+    add_->ensurePolished();
+    remove_->ensurePolished();
+    const int textBtnWidth = std::max(add_->sizeHint().width(), remove_->sizeHint().width());
+    add_->setFixedWidth(textBtnWidth);
+    remove_->setFixedWidth(textBtnWidth);
 
     buttons->addWidget(add_);
     buttons->addWidget(remove_);

@@ -180,13 +180,11 @@ void AiMachineEditorWindow::BuildUi()
 
     panelLayout->addSpacing(12);
     auto* memoryLabel = new QLabel(Tr("Память — ключи блоков", "Memory — block keys"), memoryPanel_);
-    memoryLabel->setObjectName(QStringLiteral("CardSectionLabel"));
     panelLayout->addWidget(memoryLabel);
     panelLayout->addWidget(variablesPanel_, 1);
 
     panelLayout->addSpacing(12);
     auto* settingsLabel = new QLabel(Tr("Настройки персонажа", "Character settings"), memoryPanel_);
-    settingsLabel->setObjectName(QStringLiteral("CardSectionLabel"));
     panelLayout->addWidget(settingsLabel);
     auto* settings = new QFormLayout;
     settings->setContentsMargins(0, 0, 0, 0);
