@@ -32,9 +32,20 @@ public:
           typeLabel_(std::move(typeLabel))
     {
         auto* layout = new QVBoxLayout(this);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->setSpacing(0);
+
+        if (!panelTitle.isEmpty())
+        {
+            auto* headerLabel = EditorWindowSetup::MakePanelHeader(panelTitle, this);
+            layout->addWidget(headerLabel);
+        }
+
+        auto* bodyWidget = new QWidget(this);
+        auto* bodyLayout = new QVBoxLayout(bodyWidget);
         const int m = panelTitle.isEmpty() ? 0 : 10;
-        layout->setContentsMargins(m, m, m, m);
-        layout->setSpacing(8);
+        bodyLayout->setContentsMargins(m, panelTitle.isEmpty() ? 0 : 8, m, m);
+        bodyLayout->setSpacing(8);
 
         const QColor iconColor = EditorTheme::Instance().Palette().textSecondary;
         addBtn_ = new QPushButton(IconProvider::PlusIcon(iconColor), QString(), this);
@@ -63,36 +74,15 @@ public:
 
         if (!panelTitle.isEmpty())
         {
-            auto* headerWidget = new QWidget(this);
-            auto* headerBox = new QHBoxLayout(headerWidget);
-            headerBox->setContentsMargins(0, 0, 0, 0);
-            headerBox->setSpacing(4);
-            headerBox->addWidget(EditorWindowSetup::MakePanelHeader(panelTitle, headerWidget));
-            headerBox->addStretch(1);
-            headerBox->addWidget(addBtn_);
-            headerBox->addWidget(dupBtn_);
-            headerBox->addWidget(removeBtn_);
-            auto* help = new InfoButton(
-                Tr("Переменные скрипта", "Script Variables"),
-                Tr("Управление переменными:\n"
-                   "• Что такое переменная: хранит именованное значение для логики скрипта\n"
-                   "• Типы данных: число [float], логический [bool], вектор [vec3], строка [string]\n"
-                   "• Иконка глаза «Показ.» — публичная переменная, видна и настраивается в инспекторе\n"
-                   "• Перетаскивание в граф [DnD]: перетащите строку на холст для ноды Get [чтение]; перетаскивание с клавишей Shift создаёт ноду Set [запись]\n"
-                   "• Корзина в строке — быстрое удаление переменной",
-                   "Variable management:\n"
-                   "• What is a variable: stores a named value used by script logic\n"
-                   "• Data types: number [float], boolean [bool], vector [vec3], string\n"
-                   "• Eye icon \"Show\" — public variable, visible and editable in inspector\n"
-                   "• Drag into graph [DnD]: drag row onto canvas for Get node; drag with Shift for Set node\n"
-                   "• Trash icon in row — quick delete variable"),
-                headerWidget);
-            help->setObjectName(prefix_ + QStringLiteral("VariablesHelp"));
-            help->setProperty("panelBtn", true);
-            help->setFixedSize(EditorWindowSetup::kPanelBtnWidth, EditorWindowSetup::kPanelBtnHeight);
-            help->setIconSize(QSize(EditorWindowSetup::kPanelIconSize, EditorWindowSetup::kPanelIconSize));
-            headerBox->addWidget(help);
-            layout->addWidget(headerWidget);
+            auto* btnRow = new QWidget(bodyWidget);
+            auto* btnBox = new QHBoxLayout(btnRow);
+            btnBox->setContentsMargins(0, 0, 0, 0);
+            btnBox->setSpacing(4);
+            btnBox->addWidget(addBtn_);
+            btnBox->addWidget(dupBtn_);
+            btnBox->addWidget(removeBtn_);
+            btnBox->addStretch(1);
+            bodyLayout->addWidget(btnRow);
         }
 
         table_->setColumnCount(4);
@@ -110,15 +100,22 @@ public:
         QFontMetrics fm = table_->fontMetrics();
         const QString showTitle = Tr("Показ.", "Show");
         const int headerTextWidth = table_->horizontalHeader()->fontMetrics().horizontalAdvance(showTitle);
-        const int buttonsWidth = 24 + 24 + 4;
-        const int showColWidth = std::max(headerTextWidth + 12, buttonsWidth);
-        const int typeWidth = std::max(58, fm.horizontalAdvance(Tr("Тип", "Type")) + 20);
-        table_->setColumnWidth(1, typeWidth);
-        table_->horizontalHeader()->resizeSection(1, typeWidth);
+        const int showColWidth = std::max(headerTextWidth + 12, 34);
+
+        int maxTypeWidth = fm.horizontalAdvance(Tr("Тип", "Type")) + 24;
+        for (const QString& t : types_)
+        {
+            const QString label = typeLabel_ ? typeLabel_(t) : t;
+            const int w = fm.horizontalAdvance(label) + 32;
+            if (w > maxTypeWidth) maxTypeWidth = w;
+        }
+        table_->setColumnWidth(1, maxTypeWidth);
+        table_->horizontalHeader()->resizeSection(1, maxTypeWidth);
         table_->setColumnWidth(3, showColWidth);
         table_->horizontalHeader()->resizeSection(3, showColWidth);
 
-        layout->addWidget(table_, 1);
+        bodyLayout->addWidget(table_, 1);
+        layout->addWidget(bodyWidget, 1);
     }
 
     QPushButton* AddButton() const { return addBtn_; }
@@ -171,6 +168,8 @@ public:
             actionsLayout->setContentsMargins(2, 0, 2, 0);
             actionsLayout->setSpacing(2);
 
+            actionsLayout->setAlignment(Qt::AlignCenter);
+
             auto* eyeBtn = new QPushButton(IconProvider::EyeIcon(isPub), QString(), actions);
             eyeBtn->setObjectName(QStringLiteral("%1VariableEye_%2").arg(prefix_).arg(row));
             eyeBtn->setFixedSize(24, 20);
@@ -186,14 +185,6 @@ public:
                 OnRowEdited(row);
             });
             actionsLayout->addWidget(eyeBtn);
-
-            auto* trashBtn = new QPushButton(IconProvider::TrashIcon(), QString(), actions);
-            trashBtn->setObjectName(QStringLiteral("%1VariableTrash_%2").arg(prefix_).arg(row));
-            trashBtn->setFixedSize(24, 20);
-            trashBtn->setIconSize(QSize(14, 14));
-            trashBtn->setToolTip(Tr("Удалить строку", "Delete row"));
-            connect(trashBtn, &QPushButton::clicked, this, [this, row] { RemoveVariable(row); });
-            actionsLayout->addWidget(trashBtn);
             table_->setCellWidget(row, 3, actions);
         }
         refreshing_ = false;

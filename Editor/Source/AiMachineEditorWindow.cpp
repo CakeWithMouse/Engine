@@ -90,24 +90,32 @@ void AiMachineEditorWindow::BuildUi()
         Tr("Конечный автомат ИИ [.fsm]:\n"
            "• Верхняя строка: Сохранить [Ctrl+S], Создать новый автомат и справка окна\n"
            "• Панель «Память и настройки»:\n"
+           "  - Кнопки под заголовком: Добавить, Дублировать, Удалить ключ по выделенной строке\n"
            "  - Ключи памяти: переменные автомата [объект, вектор, число, логический, строка]\n"
-           "  - «Показ.»: публичные ключи, видимые в инспекторе объекта сцены\n"
+           "  - «Показ.» [глаз]: публичные ключи, видимые в инспекторе объекта сцены\n"
            "  - Настройки персонажа: цель восприятия, где видели, интервал решений\n"
            "• Панель «Граф»: состояния [ноды] и переходы [связи]\n"
+           "  - Кнопки графа: +Нода, Отменить, Повторить, Показать всё, Упорядочить, Комментарий, Копировать/Вставить граф\n"
            "  - Двойной клик по состоянию: редактирование задач, условий входа и служб\n"
            "  - Двойной клик по переходу: триггеры [завершено, событие, тик], условия и задержка\n"
            "  - Tab / «+ Нода» — добавление состояний и комментариев\n"
+           "• Шаблоны: типовые автоматы с подтверждением замены\n"
+           "• Горячие клавиши: Ctrl+S — сохранить, Ctrl+Z/Y — отмена/повтор, F — уместить, Delete — удалить\n"
            "• Панель «Консоль»: ошибки компиляции автомата и проверки движком",
            "AI State Machine [.fsm]:\n"
            "• Top bar: Save [Ctrl+S], Create new machine and window help\n"
            "• Memory and settings panel:\n"
+           "  - Buttons under header: Add, Duplicate, Delete selected key\n"
            "  - Memory keys: machine variables [object, vector, number, bool, string]\n"
-           "  - \"Show\": public keys visible in object inspector\n"
+           "  - \"Show\" [eye]: public keys visible in object inspector\n"
            "  - Character settings: perceived target, last seen, think interval\n"
            "• Graph panel: states [nodes] and transitions [links]\n"
+           "  - Graph buttons: +Node, Undo, Redo, Frame all, Arrange, Comment, Copy/Paste graph\n"
            "  - Double click state: edit tasks, enter conditions and services\n"
            "  - Double click transition: triggers [completed, event, tick], conditions, delay\n"
            "  - Tab / \"+ Node\" — add states and comments\n"
+           "• Templates: predefined state machines with replacement confirmation\n"
+           "• Hotkeys: Ctrl+S — save, Ctrl+Z/Y — undo/redo, F — frame, Delete — remove\n"
            "• Console panel: machine compilation and engine validation errors"),
         QString());
     tools->addWidget(help);
@@ -129,75 +137,55 @@ void AiMachineEditorWindow::BuildUi()
 
     memoryPanel_ = new QWidget(central);
     auto* panelLayout = new QVBoxLayout(memoryPanel_);
-    panelLayout->setContentsMargins(10, 10, 10, 10);
-    panelLayout->setSpacing(8);
+    panelLayout->setContentsMargins(0, 0, 0, 0);
+    panelLayout->setSpacing(0);
+    panelLayout->addWidget(EditorWindowSetup::MakePanelHeader(Tr("Память и настройки", "Memory and settings"), memoryPanel_));
 
-    variables_ = new QTableWidget(memoryPanel_);
+    auto* body = new QWidget(memoryPanel_);
+    auto* bodyLayout = new QVBoxLayout(body);
+    bodyLayout->setContentsMargins(10, 8, 10, 10);
+    bodyLayout->setSpacing(8);
+
+    variables_ = new QTableWidget(body);
     variables_->setObjectName(QStringLiteral("FsmVariables"));
     variablesPanel_ = new VariablePanelWidget(variables_, QStringLiteral("Fsm"),
         FsmGraphSchema::VariableTypes(), Tr("Ключ", "Key"), Tr("Начальное", "Initial"),
-        [](const QString& t) { return FsmGraphSchema::TypeLabel(t); }, QString(), memoryPanel_);
+        [](const QString& t) { return FsmGraphSchema::TypeLabel(t); }, QString(), body);
     variablesPanel_->onVariablesChanged = [this](const QJsonArray& list, const QHash<QString, QString>& renames) {
         if (!ready_ || readOnly_) return;
         graph_->SetVariables(list, renames);
     };
 
-    auto* headerWidget = new QWidget(memoryPanel_);
-    auto* headerLayout = new QHBoxLayout(headerWidget);
-    headerLayout->setContentsMargins(0, 0, 0, 0);
-    headerLayout->setSpacing(4);
-    headerLayout->addWidget(EditorWindowSetup::MakePanelHeader(Tr("Память и настройки", "Memory and settings"), headerWidget));
-    headerLayout->addStretch(1);
-    headerLayout->addWidget(variablesPanel_->AddButton());
-    headerLayout->addWidget(variablesPanel_->DuplicateButton());
-    headerLayout->addWidget(variablesPanel_->RemoveButton());
+    auto* btnRow = new QWidget(body);
+    auto* btnLayout = new QHBoxLayout(btnRow);
+    btnLayout->setContentsMargins(0, 0, 0, 0);
+    btnLayout->setSpacing(4);
+    btnLayout->addWidget(variablesPanel_->AddButton());
+    btnLayout->addWidget(variablesPanel_->DuplicateButton());
+    btnLayout->addWidget(variablesPanel_->RemoveButton());
+    btnLayout->addStretch(1);
+    bodyLayout->addWidget(btnRow);
 
-    auto* helpMem = new InfoButton(
-        Tr("Память и настройки автомата ИИ", "AI Machine Memory and Settings"),
-        Tr("Память автомата:\n"
-           "• Ключи памяти хранят состояние и цели персонажа\n"
-           "• Иконка глаза «Показ.» — публичный ключ, виден в инспекторе\n"
-           "• Корзина в строке — быстрое удаление ключа\n\n"
-           "Настройки персонажа:\n"
-           "• «Цель восприятия» — зрение персонажа записывает найденную цель\n"
-           "• «Где видели» — координаты последней точки видимости\n"
-           "• «Интервал решений» — секунды между пересчётами логики автомата",
-           "AI State Machine memory:\n"
-           "• Memory keys store character state and targets\n"
-           "• Eye icon \"Show\" — public key, visible in object inspector\n"
-           "• Trash icon in row — quick delete key\n\n"
-           "Character settings:\n"
-           "• \"Perceived target\" — vision writes detected target here\n"
-           "• \"Last seen at\" — coordinates where target was last seen\n"
-           "• \"Think interval\" — seconds between state machine decisions"),
-        headerWidget);
-    helpMem->setObjectName(QStringLiteral("FsmMemoryHelp"));
-    helpMem->setProperty("panelBtn", true);
-    helpMem->setFixedSize(EditorWindowSetup::kPanelBtnWidth, EditorWindowSetup::kPanelBtnHeight);
-    helpMem->setIconSize(QSize(EditorWindowSetup::kPanelIconSize, EditorWindowSetup::kPanelIconSize));
-    headerLayout->addWidget(helpMem);
-    panelLayout->addWidget(headerWidget);
+    bodyLayout->addSpacing(4);
+    auto* memoryLabel = new QLabel(Tr("Память — ключи блоков", "Memory — block keys"), body);
+    bodyLayout->addWidget(memoryLabel);
+    bodyLayout->addWidget(variablesPanel_, 1);
 
-    panelLayout->addSpacing(12);
-    auto* memoryLabel = new QLabel(Tr("Память — ключи блоков", "Memory — block keys"), memoryPanel_);
-    panelLayout->addWidget(memoryLabel);
-    panelLayout->addWidget(variablesPanel_, 1);
-
-    panelLayout->addSpacing(12);
-    auto* settingsLabel = new QLabel(Tr("Настройки персонажа", "Character settings"), memoryPanel_);
-    panelLayout->addWidget(settingsLabel);
+    bodyLayout->addSpacing(8);
+    auto* settingsLabel = new QLabel(Tr("Настройки персонажа", "Character settings"), body);
+    bodyLayout->addWidget(settingsLabel);
     auto* settings = new QFormLayout;
     settings->setContentsMargins(0, 0, 0, 0);
     settings->setHorizontalSpacing(8);
     settings->setVerticalSpacing(8);
-    targetKey_ = new QComboBox(memoryPanel_);
+    targetKey_ = new QComboBox(body);
     targetKey_->setObjectName(QStringLiteral("FsmTargetKey"));
     targetKey_->setToolTip(Tr("Ключ типа «Объект»: восприятие пишет сюда лучшую видимую цель (нужно зрение у персонажа).",
                               "An Object key: perception writes the best visible target here (the character needs sight)."));
-    lastSeenKey_ = new QComboBox(memoryPanel_);
+    lastSeenKey_ = new QComboBox(body);
     lastSeenKey_->setObjectName(QStringLiteral("FsmLastSeenKey"));
     lastSeenKey_->setToolTip(Tr("Ключ типа «Вектор»: где цель видели последний раз.", "A Vector key: where the target was last seen."));
-    thinkInterval_ = new QDoubleSpinBox(memoryPanel_);
+    thinkInterval_ = new QDoubleSpinBox(body);
     thinkInterval_->setObjectName(QStringLiteral("FsmThinkInterval"));
     thinkInterval_->setRange(-0.01, 60);
     thinkInterval_->setDecimals(2);
@@ -205,9 +193,8 @@ void AiMachineEditorWindow::BuildUi()
     thinkInterval_->setSpecialValueText(Tr("как у персонажа", "the character's"));
     thinkInterval_->setToolTip(Tr("Секунды между решениями; 0 — каждый кадр.", "Seconds between thinks; 0 — every frame."));
     thinkInterval_->setKeyboardTracking(false);
-    auto* memoryPanel = memoryPanel_;
-    auto iconLabel = [memoryPanel](const QString& icon, const QString& text) {
-        auto* row = new QWidget(memoryPanel);
+    auto iconLabel = [body](const QString& icon, const QString& text) {
+        auto* row = new QWidget(body);
         auto* box = new QHBoxLayout(row);
         box->setContentsMargins(0, 0, 0, 0);
         box->setSpacing(6);
@@ -220,7 +207,8 @@ void AiMachineEditorWindow::BuildUi()
     settings->addRow(iconLabel(QStringLiteral("focus-2"), Tr("Цель восприятия", "Perceived target")), targetKey_);
     settings->addRow(iconLabel(QStringLiteral("eye"), Tr("Где видели", "Last seen at")), lastSeenKey_);
     settings->addRow(iconLabel(QStringLiteral("refresh"), Tr("Интервал решений, с", "Think interval, s")), thinkInterval_);
-    panelLayout->addLayout(settings);
+    bodyLayout->addLayout(settings);
+    panelLayout->addWidget(body, 1);
     connect(targetKey_, &QComboBox::activated, this, [this] { EditSettings(); });
     connect(lastSeenKey_, &QComboBox::activated, this, [this] { EditSettings(); });
     connect(thinkInterval_, &QDoubleSpinBox::valueChanged, this, [this] { EditSettings(); });
@@ -240,24 +228,7 @@ void AiMachineEditorWindow::BuildUi()
     auto* consoleLayout = new QVBoxLayout(console);
     consoleLayout->setContentsMargins(0, 0, 0, 0);
     consoleLayout->setSpacing(0);
-    auto* consoleHeader = new QWidget(console);
-    auto* consoleHeaderLayout = new QHBoxLayout(consoleHeader);
-    consoleHeaderLayout->setContentsMargins(0, 0, 4, 0);
-    consoleHeaderLayout->setSpacing(4);
-    consoleHeaderLayout->addWidget(EditorWindowSetup::MakePanelHeader(Tr("Консоль", "Console"), consoleHeader), 1);
-    auto* clearConsole = new QPushButton(IconProvider::TrashIcon(EditorTheme::Instance().Palette().textSecondary), QString(), consoleHeader);
-    clearConsole->setObjectName(QStringLiteral("FsmClearConsole"));
-    clearConsole->setProperty("panelBtn", true);
-    clearConsole->setFixedSize(EditorWindowSetup::kPanelBtnWidth, EditorWindowSetup::kPanelBtnHeight);
-    clearConsole->setIconSize(QSize(EditorWindowSetup::kPanelIconSize, EditorWindowSetup::kPanelIconSize));
-    clearConsole->setToolTip(Tr("Очистить сообщения", "Clear messages"));
-    connect(clearConsole, &QPushButton::clicked, this, [this] {
-        problems_.clear();
-        warnings_.clear();
-        ShowProblems();
-    });
-    consoleHeaderLayout->addWidget(clearConsole);
-    consoleLayout->addWidget(consoleHeader);
+    consoleLayout->addWidget(EditorWindowSetup::MakePanelHeader(Tr("Консоль", "Console"), console));
 
     problemList_ = new QListWidget(console);
     problemList_->setObjectName(QStringLiteral("FsmProblems"));

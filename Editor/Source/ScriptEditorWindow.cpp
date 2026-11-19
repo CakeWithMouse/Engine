@@ -98,22 +98,30 @@ void ScriptEditorWindow::BuildUi()
         Tr("Визуальные скрипты [.vscript]:\n"
            "• Верхняя строка: Сохранить [Ctrl+S] и справка окна\n"
            "• Панель «Переменные»: именованные данные объекта [число, логический, вектор, строка]\n"
-           "  - Перетаскивание на холст: нода чтения [Get]; с зажатым Shift — нода записи [Set]\n"
-           "  - «Показ.»: публичные переменные, доступные для настройки в инспекторе\n"
+           "  - Кнопки под заголовком: Добавить, Дублировать, Удалить по выделенной строке\n"
+           "  - «Показ.» [глаз]: публичные переменные, доступные для настройки в инспекторе\n"
+           "  - Перетаскивание на холст [DnD]: нода чтения [Get]; с зажатым Shift — нода записи [Set]\n"
            "• Панель «Граф»: логика из нод событий, действий и математики\n"
-           "  - ЛКМ/рамка — выделение; ПКМ/колесо — навигация; F — уместить граф\n"
+           "  - Кнопки графа: +Нода, Отменить, Повторить, Показать всё, Упорядочить, Комментарий, Копировать/Вставить граф\n"
+           "  - ЛКМ/рамка — выделение; ПКМ/колесо — навигация; F — уместить граф; Delete — удалить\n"
            "  - Tab / «+ Нода» — каталог доступных нод движка и проекта\n"
-           "• Отладка в Play: зелёная рамка вокруг активных нод и счетчик срабатываний\n"
+           "• Шаблоны: готовые типовые графы с подтверждением замены\n"
+           "• Горячие клавиши: Ctrl+S — сохранить, Ctrl+Z/Y — отмена/повтор, F — уместить, Delete — удалить\n"
+           "• Отладка в Play: подсветка активных нод и счетчик срабатываний\n"
            "• Панель «Консоль»: сообщения компилятора и предупреждения схемы",
            "Visual Scripts [.vscript]:\n"
            "• Top bar: Save [Ctrl+S] and window help\n"
            "• Variables panel: named object data [number, bool, vector, string]\n"
-           "  - Drag onto canvas: Get node; drag with Shift: Set node\n"
-           "  - \"Show\": public variables configurable in inspector\n"
+           "  - Buttons under header: Add, Duplicate, Delete selected row\n"
+           "  - \"Show\" [eye]: public variables configurable in inspector\n"
+           "  - Drag onto canvas [DnD]: Get node; drag with Shift: Set node\n"
            "• Graph panel: logic from events, actions and math nodes\n"
-           "  - LMB/box — select; RMB/wheel — navigate; F — frame all\n"
+           "  - Graph buttons: +Node, Undo, Redo, Frame all, Arrange, Comment, Copy/Paste graph\n"
+           "  - LMB/box — select; RMB/wheel — navigate; F — frame all; Delete — remove\n"
            "  - Tab / \"+ Node\" — catalog of engine and project nodes\n"
-           "• Play debugging: green highlight on active nodes and fire count\n"
+           "• Templates: predefined graphs with replacement confirmation\n"
+           "• Hotkeys: Ctrl+S — save, Ctrl+Z/Y — undo/redo, F — frame, Delete — remove\n"
+           "• Play debugging: highlight on active nodes and fire count\n"
            "• Console panel: compiler errors and schema warnings"),
         QString());
     tools->addWidget(help);
@@ -159,25 +167,7 @@ void ScriptEditorWindow::BuildUi()
     auto* consoleLayout = new QVBoxLayout(console);
     consoleLayout->setContentsMargins(0, 0, 0, 0);
     consoleLayout->setSpacing(0);
-    auto* consoleHeader = new QWidget(console);
-    auto* consoleHeaderLayout = new QHBoxLayout(consoleHeader);
-    consoleHeaderLayout->setContentsMargins(0, 0, 4, 0);
-    consoleHeaderLayout->setSpacing(4);
-    consoleHeaderLayout->addWidget(EditorWindowSetup::MakePanelHeader(Tr("Консоль", "Console"), consoleHeader), 1);
-    auto* clearConsole = new QPushButton(IconProvider::TrashIcon(EditorTheme::Instance().Palette().textSecondary), QString(), consoleHeader);
-    clearConsole->setObjectName(QStringLiteral("ScriptClearConsole"));
-    clearConsole->setProperty("panelBtn", true);
-    clearConsole->setFixedSize(EditorWindowSetup::kPanelBtnWidth, EditorWindowSetup::kPanelBtnHeight);
-    clearConsole->setIconSize(QSize(EditorWindowSetup::kPanelIconSize, EditorWindowSetup::kPanelIconSize));
-    clearConsole->setToolTip(Tr("Очистить сообщения", "Clear messages"));
-    connect(clearConsole, &QPushButton::clicked, this, [this] {
-        checkProblems_.clear();
-        playProblems_.clear();
-        warnings_.clear();
-        ShowProblems();
-    });
-    consoleHeaderLayout->addWidget(clearConsole);
-    consoleLayout->addWidget(consoleHeader);
+    consoleLayout->addWidget(EditorWindowSetup::MakePanelHeader(Tr("Консоль", "Console"), console));
 
     problemList_ = new QListWidget(console);
     problemList_->setObjectName(QStringLiteral("ScriptProblems"));

@@ -745,13 +745,8 @@ void GraphEditorWidget::BuildToolbar()
     const QString prefix = schema_.ObjectPrefix();
     const bool panelHeader = !headerTitle_.isEmpty();
     toolbar_ = new QHBoxLayout;
-    toolbar_->setContentsMargins(panelHeader ? 0 : 4, panelHeader ? 0 : 3, panelHeader ? 4 : 4, panelHeader ? 0 : 3);
+    toolbar_->setContentsMargins(4, 3, 4, 3);
     toolbar_->setSpacing(4);
-    if (panelHeader) {
-        headerLabel_ = EditorWindowSetup::MakePanelHeader(headerTitle_, this);
-        toolbar_->addWidget(headerLabel_);
-        toolbar_->addStretch(1);
-    }
     auto setupBtn = [panelHeader](QAbstractButton* btn) {
         if (panelHeader) {
             btn->setProperty("panelBtn", true);
@@ -805,11 +800,13 @@ void GraphEditorWidget::BuildToolbar()
     RefreshToolbarIcons();
     toolbarIndex_ = toolbar_->count();
     auto* overflow = new GraphToolbarOverflow(toolbar_, this);
-    auto* help = MakeGraphHelpButton(this);
-    help->setObjectName(prefix + QStringLiteral("Help"));
-    setupBtn(help);
-    toolbar_->addWidget(help);
-    if (!panelHeader) toolbar_->addStretch(1);
+    if (!panelHeader) {
+        auto* help = MakeGraphHelpButton(this);
+        help->setObjectName(prefix + QStringLiteral("Help"));
+        setupBtn(help);
+        toolbar_->addWidget(help);
+    }
+    toolbar_->addStretch(1);
     overflow->AddButton(comment, Tr("Комментарий", "Comment"));
     overflow->AddButton(arrange, Tr("Упорядочить", "Arrange"));
     overflow->AddButton(frame, Tr("Показать всё", "Frame all"));
@@ -822,6 +819,10 @@ void GraphEditorWidget::BuildUi()
     auto* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
+    if (!headerTitle_.isEmpty()) {
+        headerLabel_ = EditorWindowSetup::MakePanelHeader(headerTitle_, this);
+        layout->addWidget(headerLabel_);
+    }
     BuildToolbar();
     layout->addLayout(toolbar_);
 
