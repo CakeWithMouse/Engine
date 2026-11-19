@@ -27,6 +27,7 @@ namespace
 
     inline uint32_t GetBillboardIcon(const IEditorHost::SceneObject& obj, const ThemePalette& pal, uint32_t& outColor)
     {
+        if (obj.type == "Scene.Folder") return 0;
         if (obj.hasPointLight || obj.type == "Light.Point" || obj.name.find("Light") != std::string::npos)
         {
             outColor = TintFromColor(pal.iconPointLight);
@@ -242,7 +243,8 @@ void ViewportOverlayHelper::UpdateOverlays(
             lines.insert(lines.end(),guide.begin(),guide.end());
         }
 
-    if (gizmoEnabled && selectedObj && hasCamera)
+    const bool isFolder = selectedObj && selectedObj->type == "Scene.Folder";
+    if (gizmoEnabled && selectedObj && !isFolder && hasCamera)
     {
         if (selectedObj->hasPointLight && selectedObj->pointLight.radius > 0.01f)
         {
@@ -294,7 +296,7 @@ void ViewportOverlayHelper::UpdateOverlays(
     host->SetOverlayBillboards(billboards);
 
     std::vector<EngineOverlayTriangle> triangles;
-    if (gizmoEnabled && selectedObj && hasCamera && host->HasScene())
+    if (gizmoEnabled && selectedObj && !isFolder && hasCamera && host->HasScene())
     {
         GizmoMath::GizmoMode mode = (gizmoMode == 0) ? GizmoMath::GizmoMode::Translate :
                                     (gizmoMode == 1) ? GizmoMath::GizmoMode::Rotate :

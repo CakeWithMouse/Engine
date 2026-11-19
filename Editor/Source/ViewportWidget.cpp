@@ -272,7 +272,7 @@ bool ViewportWidget::SelectedWorldTransform(uint64_t& id, EngineSceneTransform& 
     if (!attached_ || !host_->HasScene()) return false;
     const auto view = host_->ReadSnapshot();
     const auto found = std::find_if(view.objects.begin(), view.objects.end(), [&](const auto& o) { return o.id == view.selected; });
-    if (found == view.objects.end()) return false;
+    if (found == view.objects.end() || found->type == "Scene.Folder") return false;
     id = found->id;
     local = found->transform;
 

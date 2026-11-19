@@ -441,7 +441,6 @@ void ObjectInspectorPanel::Refresh(
 
     noSelectionLabel_->hide();
     cardGeneral_->show();
-    cardTransform_->show();
     if (selectionChanged) {
         cardGeometry_->Clear();
         cardMaterial_->Clear();
@@ -587,17 +586,16 @@ void ObjectInspectorPanel::Refresh(
         if (canReplaceWholeInspector)
         {
             objectName_->setText(QString::fromStdString(object.name));
-
-            const auto& transform = object.transform;
-            const QQuaternion rotation(
-                transform.rotation[3], transform.rotation[0], transform.rotation[1], transform.rotation[2]);
-
-            const auto euler = rotation.toEulerAngles();
-            const double pos[3] = {transform.position[0], transform.position[1], transform.position[2]};
-            const double rotDeg[3] = {euler.x(), euler.y(), euler.z()};
-            const double scale[3] = {transform.scale[0], transform.scale[1], transform.scale[2]};
-
-            cardTransform_->SetValues(pos, rotDeg, scale, canReplaceField);
+            cardTransform_->setVisible(!isFolder);
+            if (!isFolder) {
+                const auto& transform = object.transform;
+                const QQuaternion rotation(transform.rotation[3], transform.rotation[0], transform.rotation[1], transform.rotation[2]);
+                const auto euler = rotation.toEulerAngles();
+                const double pos[3] = {transform.position[0], transform.position[1], transform.position[2]};
+                const double rotDeg[3] = {euler.x(), euler.y(), euler.z()};
+                const double scale[3] = {transform.scale[0], transform.scale[1], transform.scale[2]};
+                cardTransform_->SetValues(pos, rotDeg, scale, canReplaceField);
+            }
         }
 
         break;

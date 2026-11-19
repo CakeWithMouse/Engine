@@ -18,6 +18,16 @@ inline bool IsCamera(const IEditorHost::SceneObject &o) {
 }
 inline glm::mat4 World(const IEditorHost::SceneObject &o,
                        const IEditorHost::Snapshot &scene, size_t depth = 0) {
+  if (o.type == "Scene.Folder") {
+    if (o.parent && depth < scene.objects.size()) {
+      for (const auto &parent : scene.objects) {
+        if (parent.id == o.parent) {
+          return World(parent, scene, depth + 1);
+        }
+      }
+    }
+    return glm::mat4(1.0f);
+  }
   const auto &t = o.transform;
   glm::quat q(t.rotation[3], t.rotation[0], t.rotation[1], t.rotation[2]);
   q = glm::length(q) > 1e-6f ? glm::normalize(q) : glm::quat(1, 0, 0, 0);

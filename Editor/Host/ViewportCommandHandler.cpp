@@ -1,5 +1,6 @@
 #include "ViewportCommandHandler.h"
 #include <stdexcept>
+#include <string_view>
 
 ViewportCommandHandler::ViewportCommandHandler() = default;
 
@@ -136,7 +137,20 @@ void ViewportCommandHandler::Handle(const EditorCommand& cmd,
         {
             uint64_t id = 0;
             if (ctx.scene.pickObject(ctx.scene.context, cmd.right, cmd.up, &id) == EngineSceneOk)
+            {
+                if (id != 0 && ctx.scene.readActiveScene)
+                {
+                    struct FolderCheckContext { uint64_t targetId; bool isFolder; } fcc{id, false};
+                    EngineSceneInfo sinfo{};
+                    ctx.scene.readActiveScene(ctx.scene.context, &sinfo, [](void* user, const EngineSceneObjectInfo* obj) {
+                        auto* fcc = static_cast<FolderCheckContext*>(user);
+                        if (obj && obj->id == fcc->targetId && obj->typeName && std::string_view(obj->typeName) == "Scene.Folder")
+                            fcc->isFolder = true;
+                    }, &fcc);
+                    if (fcc.isFolder) id = 0;
+                }
                 selectedId = id;
+            }
             else
                 selectedId = 0;
             // Публикация только в очереди команд после PickSelection: иначе движок
