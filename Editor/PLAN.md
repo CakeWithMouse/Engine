@@ -113,6 +113,113 @@ OK: UiTests passed.
 
 ---
 
+## Итерация 6: ревизия интерфейса графов (Script, FSM, Material, UI), шаблоны, унификация кнопок и устранение дефектов
+
+> Ветка `feature/editor-graphs-ux-overhaul`. Автономно, строго по порядку: 1, 2, 3, Контрольная точка (а), 4, 5, финал.
+> Проверки: контрольная точка (а) после п. 3 (Debug-сборка + скриншоты окон Script, FSM, Material, UI-editor, диалога FSM); (б) финал (Debug-сборка, check.ps1 -Quick, слои Core/UI/Host, wc -l, запретные зоны).
+> Коммит после каждого пункта.
+
+### Чек-лист Итерации 6
+- [x] 1. Ревизия шапок панелей и кнопок окон «Скрипт» и «Автомат ИИ» (тонкая шапка во всю ширину, кнопки под шапкой с прижатием влево, удаление дублирующих «?» и корзин в строках, колонка «Тип» по fontMetrics, единая справка окна, удаление кнопки очистки консоли)
+- [x] 2. Кнопка «Откатить» и меню «Шаблоны…» в окнах «Скрипт» и «Автомат ИИ» (ScriptRevert / ScriptTemplates, FsmRevert / FsmTemplates с QMenu, Core-пресеты ScriptGraphPresets и FsmGraphPresets, single undo checkpoint, автотесты в GraphPresetsTests.h)
+- [x] 3. Унификация стилей кнопок и тем тулбаров редакторов (kToolbarBtnWidth=34, kToolbarBtnHeight=26, kToolbarIconSize=16, kPanelBtnWidth=34, kPanelBtnHeight=26, kPanelIconSize=16, padding 3px 6px, QToolBar separator styling, единый тёмный фон тулбаров и вкладок GraphEditorWidget и Material)
+- [x] Контрольная точка (а): сборка EditorUiTests + захват 5 реальных скриншотов в `%TEMP%/PainEditorGraphShots`: `script-editor.png`, `fsm-editor.png`, `fsm-state-dialog.png`, `material-editor.png`, `ui-editor.png` (все DPI-проверки PASS, `Graph editor screenshots: PASS`)
+- [x] 4. Баг: параметры материала по умолчанию (BaseColor, Specular, Tint, Gloss) не сохранялись в .mat (Core-метод `MaterialGraphTransform::ExtractDefaultParams`, запись дефолтов в `SavePublicParams` и `CreateMaterial`, надежное сопоставление путей в `MaterialCard::eventsSub_`, Core-автотест `TestExtractDefaultParams` в `MaterialTransformTests.h`)
+- [x] 5. Баг: Scene.Folder имел гизмо, драг и трансформ (отключение гизмо и драга в `SelectedWorldTransform`, пропуск линий/треугольников оверлея и билборда в `ViewportOverlayHelper`, скрытие `cardTransform_` в инспекторе, `CameraGuide::World` identity/parent для папок, игнорирование папок при клике во вьюпорте в `ViewportCommandHandler`)
+- [x] Финал: полная верификация (Debug сборка, check.ps1 -Quick, слои Core/UI/Host, wc -l, запретные зоны)
+
+### Решения (Итерация 6)
+- **Пункт 1 (feat(editor)):**
+  - `Editor/UI/VariablePanelWidget.h`: заголовок панели вынесен наверх в виде тонкой полосы во всю ширину панели (`MakePanelHeader`); ряд кнопок управления (`add`, `duplicate`, `remove`) размещён строго под полосой шапки с прижатием влево (`addStretch(1)`); удалена локальная кнопка справки `VariablesHelp`; удалена кнопка корзины в каждой строке (оставлена только кнопка «глаз», колонка «Показ.» зафиксирована в 34px); ширина колонки «Тип» динамически рассчитывается через `fontMetrics().horizontalAdvance()` по всем типам данных.
+  - `Editor/Source/GraphEditorWidget.cpp`: заголовок `headerLabel_` вынесен в верхнюю строку компоновщика во всю ширину; ряд кнопок графа (`+Node`, `Undo`, `Redo`, `Frame`, `Arrange`, `Comment`, `CopyGraph`, `PasteGraph`) размещён под заголовком с выравниванием влево; удалена дублирующая кнопка «?» в шапке панели при `panelHeader == true`.
+  - `Editor/Source/ScriptEditorWindow.cpp`: удалена кнопка `clearConsole` из шапки консоли (оставлена тонкая полоса во всю ширину и плейсхолдер при пустом выводе); текст единой справки окна (`ScriptHelp`) дополнен описанием работы с переменными и графом.
+  - `Editor/Source/AiMachineEditorWindow.cpp`: заголовок «Память и настройки» вынесен в тонкую полосу шапки во всю ширину; ряд кнопок (`add`, `duplicate`, `remove`) размещён под шапкой с прижатием влево; удалены локальные кнопки `FsmMemoryHelp` и `clearConsole`; обновлена единая справка окна (`FsmHelp`).
+  - Коммит: `56401b09: feat(editor): rework Script and FSM panel headers and button layout (item 1)`.
+
+- **Пункт 2 (feat(editor)):**
+  - Добавлены Core-генераторы шаблонов: `Editor/Core/ScriptGraphPresets.{h,cpp}` (`BuildEmpty()`, `BuildStartPrint()`, `BuildTickRotate()`) и `Editor/Core/FsmGraphPresets.{h,cpp}` (`BuildIdlePatrol()`, `BuildIdleChase()`, `BuildIdleAttack()`). Все шаблоны используют схему и формат V1.
+  - В `Editor/Include/GraphEditorWidget.h` и `.cpp` добавлен метод `ApplyTemplate(const GraphDocument&)` с созданием точки Undo (`Checkpoint()`), заменой документа (`ReplaceDocument()`), уведомлением структуры (`NotifyStructure()`) и обновлением кнопок истории (один шаг Undo).
+  - В `Editor/Source/ScriptEditorWindow.cpp` и `AiMachineEditorWindow.cpp`: добавлены кнопки тулбара `ScriptRevert` / `FsmRevert` («Откатить») и `ScriptTemplates` / `FsmTemplates` («Шаблоны…») с выпадающим `QMenu` (`ScriptTemplateMenu` / `FsmTemplateMenu`); реализованы `Revert()`, `ReloadDocument()`, `HasUnsavedChanges()`, `ApplyTemplate(int)`. Отключён автоматический 300мс таймер сохранения при правках, чтобы состояние на диске оставалось нетронутым до явного Save.
+  - Регистрация в проектах `EditorModule.vcxproj` и `CoreTests.vcxproj`.
+  - В `Editor/tests/core/GraphPresetsTests.h` добавлены Core-автотесты шаблонов скриптов и FSM (проверка нод, связей, переменных и отсутствия ошибок схемы); подключены в `CoreTests.cpp`.
+  - Коммит: `170ede3d: feat(editor): add revert and templates for Script and FSM editors (item 2)`.
+
+- **Пункт 3 (feat(editor)):**
+  - В `Editor/UI/EditorWindowSetup.h` унифицированы константы геометрии: `kToolbarBtnWidth = 34`, `kToolbarBtnHeight = 26`, `kToolbarIconSize = 16`, `kPanelBtnWidth = 34`, `kPanelBtnHeight = 26`, `kPanelIconSize = 16`.
+  - В `Editor/UI/EditorStyles.cpp` унифицирован QSS для тулбаров и панелей: селекторы `QPushButton[toolbarBtn="true"], QToolButton[toolbarBtn="true"], QPushButton[panelBtn="true"], QToolButton[panelBtn="true"], QToolBar QToolButton` получили фиксированные размеры 34x26 и padding 3px 6px. Добавлена стилизация `QToolBar::separator`.
+  - Устранён светло-серый фон панелей и вкладок: добавлены стили `QTabWidget::pane { background-color: %3; border: 1px solid %6; }` и `GraphEditorWidget { background-color: %3; }`.
+  - В `MaterialEditorWindow.cpp`, `MaterialEditorWindow_Graph.cpp` и `UIEditorWindow.cpp` установлен `spacing = 4` для всех панелей инструментов.
+  - Коммит: `b5693d4f: feat(editor): unify button styles and toolbar themes across all editors (item 3)`.
+
+- **Контрольная точка (а), факты:**
+  - В `Editor/tests/ViewportDpiTests.h` расширен тестовый блок захвата: генерируются все 5 требуемых скриншотов (`script-editor.png`, `fsm-editor.png`, `fsm-state-dialog.png`, `material-editor.png`, `ui-editor.png`) в директорию `%TEMP%/PainEditorGraphShots`.
+  - Запуск `EditorUiTests.exe --viewport-dpi` завершился успешно (`Graph editor screenshots: PASS`, все DPI-проверки PASS). Все 5 изображений подтверждены на диске.
+  - Коммит: `7e87cf22: test(editor): update screenshot capture and graph preset unit tests`.
+
+- **Пункт 4 (fix(editor)):**
+  - Диагноз: в `MaterialEditorWindow_Graph.cpp:SavePublicParams()` параметры графа по умолчанию (`BaseColor`, `Specular` и др.) не записывались в секцию `params` файла `.mat` до их явного ручного изменения в окне, из-за чего `MaterialCard` в инспекторе не показывала элементы управления материалом (`paramsObj.isEmpty()`). Также при создании материала через `AssetTools.cpp:CreateMaterial()` в `.mat` файл не записывались дефолтные параметры шаблона шейдера `MaterialSurfaceTemplate` (`Tint`, `Gloss`).
+  - Исправление:
+    1. В Core `EditorCore::MaterialGraphTransform` добавлен метод `ExtractDefaultParams(const GraphDocument& model)`, извлекающий параметры (`ScalarParam`, `ColorParam`, `Vector2Param`, `Vector3Param`) из графа в `QJsonObject`.
+    2. В `MaterialEditorWindow_Graph.cpp:SavePublicParams()` обеспечена запись параметров по умолчанию из графа и `state_.parameters` в объект `obj["params"]` и массив `obj["publicParams"]` файла `.mat`, с последующим гарантированным вызовом `EditorCore::MaterialEvents::Instance().NotifyChanged(material_)`.
+    3. В `AssetTools.cpp:CreateMaterial()` добавлена запись начальных параметров `Tint: [1, 1, 1, 1]` и `Gloss: 0.5` в `params` и `publicParams`.
+    4. В `Editor/UI/MaterialCard.h` подписчик `eventsSub_` усилен поддержкой нормализации путей (`/Game/`, `Content/`, `\` vs `/`) и абсолютных путей через `QFileInfo`, гарантируя надёжное обновление параметров карточки без перевыбора объекта.
+    5. В `Editor/tests/core/MaterialTransformTests.h` добавлен Core-автотест `TestExtractDefaultParams()`, проверяющий извлечение дефолтных параметров для мастер-ноды графа и векторных параметров.
+  - Коммит: `39b545fe: fix(editor): write default material graph parameters to mat file (item 4)`.
+
+- **Пункт 5 (fix(editor)):**
+  - Диагноз: объекты типа `Scene.Folder` (организационные папки в иерархии сцены) отображали вьюпорт-гизмо, поддерживали интерактивный драг трансформации, отображали карточку трансформации в инспекторе и могли быть выбраны кликом во вьюпорте, хотя папка является логическим контейнером и не имеет собственной 3D-геометрии/позиции.
+  - Исправление:
+    1. В `Editor/Source/ViewportWidget.cpp`: в `SelectedWorldTransform()` добавлен возврат `false` при `found->type == "Scene.Folder"`, предотвращая появление гизмо-ручек, ховер и начало драга.
+    2. В `Editor/UI/ViewportOverlayHelper.cpp`: в `UpdateOverlays` отключена генерация линий и треугольников гизмо при `selectedObj->type == "Scene.Folder"`; в `GetBillboardIcon` возвращается 0 для папок.
+    3. В `Editor/Source/ObjectInspectorPanel.cpp`: карточка `cardTransform_` скрывается при выборе папки (`cardTransform_->setVisible(!isFolder)`), значения координат не устанавливаются.
+    4. В `Editor/UI/CameraGuide.h`: в функции `World()` для `Scene.Folder` возвращается единичная матрица либо мировая трансформация родителя (папка не смещает дочерние объекты).
+    5. В `Editor/Host/ViewportCommandHandler.cpp`: при обработке `EditorCommand::PickObject` проверяется `obj->typeName`: если выбранный объект является `Scene.Folder`, выбор сбрасывается в 0 (папка не выделяется кликом во вьюпорте).
+  - Коммит: `1a8e977c: fix(editor): prevent Scene.Folder from having gizmo, drag, and transform (item 5)`.
+
+### Финал (Итерация 6) — верификация
+
+**Статусы пунктов (сделано / частично / пропущено):**
+- **1 — сделано.** Шапки панелей Script и FSM вынесены в тонкие полосы во всю ширину, кнопки управления размещены под ними с выравниванием влево, дублирующие «?» и корзины удалены, колонка «Тип» адаптирована по ширине текста, кнопка очистки консоли удалена.
+- **2 — сделано.** Кнопки «Откатить» и «Шаблоны…» добавлены в Script и FSM редакторы, Core-генераторы шаблонов покрыты автотестами в `GraphPresetsTests.h`, откат восстанавливает файл с диска, правки не сохраняются автоматически на диск до явного Save.
+- **3 — сделано.** Размеры 34x26 и иконки 16x16 унифицированы во всех редакторах, стиль сепараторов и вкладок обновлён, светлый фон панелей тулбаров в `GraphEditorWidget` и `MaterialEditorWindow` заменён на тёмный фон темы.
+- **Контрольная точка (а) — сделано.** Захват всех 5 поверхностей (`script-editor.png`, `fsm-editor.png`, `fsm-state-dialog.png`, `material-editor.png`, `ui-editor.png`) выполнен и проверен в `%TEMP%/PainEditorGraphShots`.
+- **4 — сделано.** Дефолтные параметры материала записываются в `.mat` при сохранении графа и создании материала, инспектор `MaterialCard` надёжно получает уведомления и отображает параметры, Core-автотест `TestExtractDefaultParams` включён в suite.
+- **5 — сделано.** `Scene.Folder` не имеет гизмо, не может перетаскиваться во вьюпорте, не выбирается кликом во вьюпорте, не смещает дочерние объекты и не показывает карточку трансформации в инспекторе.
+- Пропущенных пунктов нет.
+
+**Финальная проверка (`Editor/tools/check.ps1 -Quick`):**
+```
+=== PainEngine Editor check.ps1 [Mode: Quick] ===
+Engine version: 2026.11.11.0
+--- 1. Checking forbidden zones ---
+OK: Forbidden zones clean.
+--- 2. Checking architectural layers (Core/UI/Host) ---
+OK: Architectural layers check passed.
+--- 2b. Checking localization: Cyrillic literals outside Tr() ---
+OK: Localization check passed.
+--- 3. Checking line counts of modified files ---
+--- 4. Building Editor ---
+Running Editor Debug Build (Timeout: 180s)...
+OK: Build succeeded.
+--- 5. Running tests ---
+Running CoreTests Execution...
+Running CoreTests...
+CoreTests: 676 checks passed.
+HostTests: 33 checks passed.
+ContentBrowser type tests: 77 checks passed.
+UiSmokeTests: 477 checks passed (143 Cyrillic strings in RU mode).
+OK: UiTests passed.
+=== check.ps1: SUCCESS ===
+```
+
+**Слои Core/UI/Host:** Core не содержит запрещённых типов виджетов и диалогов; Core не зависит от UI/Host; Host не зависит от UI классов.
+**Локализация:** Все пользовательские строки оформлены через `Tr()`.
+**wc -l:** Все изменённые файлы укладываются в лимиты (храповики `ObjectInspectorPanel.cpp` 623/625, `ViewportWidget.cpp` 619/694, `AssetTools.cpp` 674/680, остальные файлы < 500 строк).
+**Запретные зоны:** `Engine/` (кроме чтения заголовков), `Game/`, `build.ps1` не модифицировались.
+**Git:** Ветка `feature/editor-graphs-ux-overhaul`, ветка `main` не изменялась.
+
+---
+
 ## Итерация 5: редизайн окон «Скрипт» и «Автомат ИИ» (FSM), хоткеи, контекстное меню, баги сцены и света (ТЗ Юрия)
 
 > Ветка `feature/editor-graphs-ux-overhaul`. Автономно, строго по порядку: 1 (с точкой а), 4.2, 4.1, 2, 3, 5, финал.
