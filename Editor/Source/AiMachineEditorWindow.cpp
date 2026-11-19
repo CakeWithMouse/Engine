@@ -144,34 +144,30 @@ void AiMachineEditorWindow::BuildUi()
     panelLayout->setSpacing(0);
     panelLayout->addWidget(EditorWindowSetup::MakePanelHeader(Tr("Память и настройки", "Memory and settings"), memoryPanel_));
 
-    auto* body = new QWidget(memoryPanel_);
-    auto* bodyLayout = new QVBoxLayout(body);
-    bodyLayout->setContentsMargins(10, 8, 10, 10);
-    bodyLayout->setSpacing(8);
-
-    variables_ = new QTableWidget(body);
+    variables_ = new QTableWidget(memoryPanel_);
     variables_->setObjectName(QStringLiteral("FsmVariables"));
     variablesPanel_ = new VariablePanelWidget(variables_, QStringLiteral("Fsm"),
         FsmGraphSchema::VariableTypes(), Tr("Ключ", "Key"), Tr("Начальное", "Initial"),
-        [](const QString& t) { return FsmGraphSchema::TypeLabel(t); }, QString(), body);
+        [](const QString& t) { return FsmGraphSchema::TypeLabel(t); }, QString(), memoryPanel_);
     variablesPanel_->onVariablesChanged = [this](const QJsonArray& list, const QHash<QString, QString>& renames) {
         if (!ready_ || readOnly_) return;
         graph_->SetVariables(list, renames);
     };
 
-    auto* btnRow = new QWidget(body);
+    auto* btnRow = new QWidget(memoryPanel_);
     auto* btnLayout = new QHBoxLayout(btnRow);
-    btnLayout->setContentsMargins(0, 0, 0, 0);
+    btnLayout->setContentsMargins(4, 3, 4, 3);
     btnLayout->setSpacing(4);
     btnLayout->addWidget(variablesPanel_->AddButton());
     btnLayout->addWidget(variablesPanel_->DuplicateButton());
     btnLayout->addWidget(variablesPanel_->RemoveButton());
     btnLayout->addStretch(1);
-    bodyLayout->addWidget(btnRow);
+    panelLayout->addWidget(btnRow);
 
-    bodyLayout->addSpacing(4);
-    auto* memoryLabel = new QLabel(Tr("Память — ключи блоков", "Memory — block keys"), body);
-    bodyLayout->addWidget(memoryLabel);
+    auto* body = new QWidget(memoryPanel_);
+    auto* bodyLayout = new QVBoxLayout(body);
+    bodyLayout->setContentsMargins(10, 0, 10, 10);
+    bodyLayout->setSpacing(8);
     bodyLayout->addWidget(variablesPanel_, 1);
 
     bodyLayout->addSpacing(8);

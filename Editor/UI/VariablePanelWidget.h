@@ -35,18 +35,6 @@ public:
         layout->setContentsMargins(0, 0, 0, 0);
         layout->setSpacing(0);
 
-        if (!panelTitle.isEmpty())
-        {
-            auto* headerLabel = EditorWindowSetup::MakePanelHeader(panelTitle, this);
-            layout->addWidget(headerLabel);
-        }
-
-        auto* bodyWidget = new QWidget(this);
-        auto* bodyLayout = new QVBoxLayout(bodyWidget);
-        const int m = panelTitle.isEmpty() ? 0 : 10;
-        bodyLayout->setContentsMargins(m, panelTitle.isEmpty() ? 0 : 8, m, m);
-        bodyLayout->setSpacing(8);
-
         const QColor iconColor = EditorTheme::Instance().Palette().textSecondary;
         addBtn_ = new QPushButton(IconProvider::PlusIcon(iconColor), QString(), this);
         addBtn_->setObjectName(prefix_ + QStringLiteral("AddVariable"));
@@ -74,16 +62,27 @@ public:
 
         if (!panelTitle.isEmpty())
         {
-            auto* btnRow = new QWidget(bodyWidget);
+            auto* headerLabel = EditorWindowSetup::MakePanelHeader(panelTitle, this);
+            layout->addWidget(headerLabel);
+
+            auto* btnRow = new QWidget(this);
             auto* btnBox = new QHBoxLayout(btnRow);
-            btnBox->setContentsMargins(0, 0, 0, 0);
+            btnBox->setContentsMargins(4, 3, 4, 3);
             btnBox->setSpacing(4);
             btnBox->addWidget(addBtn_);
             btnBox->addWidget(dupBtn_);
             btnBox->addWidget(removeBtn_);
             btnBox->addStretch(1);
-            bodyLayout->addWidget(btnRow);
+            layout->addWidget(btnRow);
         }
+
+        auto* bodyWidget = new QWidget(this);
+        auto* bodyLayout = new QVBoxLayout(bodyWidget);
+        const int m = panelTitle.isEmpty() ? 0 : 10;
+        bodyLayout->setContentsMargins(m, 0, m, m);
+        bodyLayout->setSpacing(8);
+        bodyLayout->addWidget(table_, 1);
+        layout->addWidget(bodyWidget, 1);
 
         table_->setColumnCount(4);
         table_->setHorizontalHeaderLabels({nameColTitle_, Tr("Тип", "Type"), valColTitle_, Tr("Показ.", "Show")});

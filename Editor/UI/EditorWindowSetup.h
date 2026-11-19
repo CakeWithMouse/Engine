@@ -14,13 +14,13 @@
 namespace EditorWindowSetup
 {
 
-// Стандартные размеры кнопок тулбара окна и панельных шапок (Итерация 6: единый сплюснутый размер 34x26)
+// Стандартные размеры кнопок тулбара окна и панельных шапок (единый размер 34x26 для верхнего тулбара, 30x24 для панелей)
 constexpr int kToolbarBtnWidth = 34;
 constexpr int kToolbarBtnHeight = 26;
 constexpr int kToolbarIconSize = 16;
 
-constexpr int kPanelBtnWidth = 34;
-constexpr int kPanelBtnHeight = 26;
+constexpr int kPanelBtnWidth = 30;
+constexpr int kPanelBtnHeight = 24;
 constexpr int kPanelIconSize = 16;
 
 class MinimizeWatcher : public QObject

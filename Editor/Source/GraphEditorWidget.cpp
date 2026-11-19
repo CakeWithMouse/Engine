@@ -800,12 +800,6 @@ void GraphEditorWidget::BuildToolbar()
     RefreshToolbarIcons();
     toolbarIndex_ = toolbar_->count();
     auto* overflow = new GraphToolbarOverflow(toolbar_, this);
-    if (!panelHeader) {
-        auto* help = MakeGraphHelpButton(this);
-        help->setObjectName(prefix + QStringLiteral("Help"));
-        setupBtn(help);
-        toolbar_->addWidget(help);
-    }
     toolbar_->addStretch(1);
     overflow->AddButton(comment, Tr("Комментарий", "Comment"));
     overflow->AddButton(arrange, Tr("Упорядочить", "Arrange"));
